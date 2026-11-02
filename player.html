@@ -80,7 +80,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 <div class="panel"><h2>More than a username.</h2><p class="sub">Your CHOME Player account is the foundation for the features we're building across the studio.</p>
 <div class="features">
 <div class="feature"><div class="feature-icon">🪪</div><div><strong>Your player identity</strong><span>A unique username and personal profile.</span></div></div>
-<div class="feature"><div class="feature-icon">☁️</div><div><strong>Cloud progress — coming next</strong><span>Save your game progress and continue on another device.</span></div></div>
+<div class="feature"><div class="feature-icon">☁️</div><div><strong>Cloud progress</strong><span>Fruit Fancy progress saves to your account and can be restored on another device.</span></div></div>
 <div class="feature"><div class="feature-icon">🏆</div><div><strong>Global leaderboards — coming next</strong><span>Compete with players across the CHOME universe.</span></div></div>
 <div class="feature"><div class="feature-icon">🎮</div><div><strong>Guest play stays open</strong><span>No account is required to browse the studio or play Fruit Fancy.</span></div></div>
 </div></div>
@@ -98,6 +98,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 let currentUser = null;
 let currentProfile = null;
+const returnToGame = new URLSearchParams(window.location.search).get('returnTo') === 'fruit-fancy.html';
+function continueToGame() { if (returnToGame) window.location.replace('fruit-fancy.html'); }
 
 $('year').textContent = new Date().getFullYear();
 
@@ -199,6 +201,7 @@ async function loadProfile(user) {
   if (error) {
     message('profileMessage', 'Your account is signed in, but the profile could not be loaded: ' + friendlyError(error));
     showProfile();
+    continueToGame();
     return;
   }
   currentProfile = data;
@@ -209,6 +212,7 @@ async function loadProfile(user) {
   $('bio').value = data.bio || '';
   renderAvatar(data.avatar_url, data.display_name || data.username);
   showProfile();
+  continueToGame();
 }
 $('profileForm').addEventListener('submit', async event => {
   event.preventDefault();
