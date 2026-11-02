@@ -111,7 +111,6 @@ $('profileForm').addEventListener('submit',async event=>{
  busy(button,false,'SAVE PROFILE');
  if(error){message(friendly(error));return}
  $('profileDisplayHeading').textContent=data.display_name||data.username;$('profileHandle').textContent='@'+data.username;
- $('headerPlayerHandle').textContent='@'+data.username;
  renderAvatar(data.avatar_url,data.display_name||data.username);$('avatarFile').value='';
  message('Your player profile has been updated.');
 });
