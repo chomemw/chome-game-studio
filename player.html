@@ -54,7 +54,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 <button class="primary" id="loginButton" type="submit">SIGN IN TO CHOME</button>
 </form>
 <form id="signupForm" style="display:none">
-<label class="field"><span>Player username</span><input id="username" type="text" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" autocomplete="username" placeholder="Choose a unique username" required></label>
+<label class="field"><span>Player username (3–20 letters, numbers or underscores; no spaces)</span><input id="username" type="text" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" title="Use 3–20 characters: letters A–Z, numbers 0–9, or underscores (_). Do not use spaces." autocomplete="username" placeholder="Example: Chome_26" required></label>
 <label class="field"><span>Display name</span><input id="displayName" type="text" maxlength="40" placeholder="How players will see you" required></label>
 <label class="field"><span>Email address</span><input id="signupEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
 <label class="field"><span>Password</span><input id="signupPassword" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters" required></label>
@@ -68,7 +68,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 <p class="sub">Your player identity is ready. Update your details whenever you like.</p>
 <form id="profileForm">
 <label class="field"><span>Display name</span><input id="editDisplayName" maxlength="40" required></label>
-<label class="field"><span>Username</span><input id="editUsername" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" required></label>
+<label class="field"><span>Username (letters, numbers or underscores only)</span><input id="editUsername" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" title="Use 3–20 characters: letters A–Z, numbers 0–9, or underscores (_). Do not use spaces." required></label>
 <label class="field"><span>About you</span><textarea id="bio" maxlength="160" placeholder="Tell other players a little about yourself"></textarea></label>
 <label class="file-label">UPLOAD PROFILE PICTURE (MAX 2 MB)<input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
 <button class="primary" id="saveProfile" type="submit" style="margin-top:14px">SAVE PROFILE</button>
