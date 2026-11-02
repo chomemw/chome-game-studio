@@ -43,20 +43,20 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 <main>
 <div class="eyebrow">Your gaming identity starts here</div>
 <h1>WELCOME TO THE<br>PLAYER UNIVERSE.</h1>
-<p class="intro">Create your CHOME Player account with a phone number and password. No email address or SMS code is needed to register. You can still jump straight into a game as a guest.</p>
+<p class="intro">Create your CHOME Player account with your email address and password. You can still jump straight into a game as a guest.</p>
 <div class="layout">
 <section class="panel" id="authView">
 <h2>Join the player community</h2><p class="sub">One account for your CHOME gaming identity.</p>
 <div class="tabs"><button id="loginTab" class="active" type="button">SIGN IN</button><button id="signupTab" type="button">CREATE ACCOUNT</button></div>
 <form id="loginForm">
-<label class="field"><span>Phone number or existing email</span><input id="loginIdentifier" type="text" autocomplete="username" placeholder="+265 991 234 567 or email address" required></label>
+<label class="field"><span>Email address</span><input id="loginIdentifier" type="email" autocomplete="username" placeholder="you@example.com" required></label>
 <label class="field"><span>Password</span><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required></label>
 <button class="primary" id="loginButton" type="submit">SIGN IN TO CHOME</button>
 </form>
 <form id="signupForm" style="display:none">
 <label class="field"><span>Player username</span><input id="username" type="text" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" autocomplete="username" placeholder="Choose a unique username" required></label>
 <label class="field"><span>Display name</span><input id="displayName" type="text" maxlength="40" placeholder="How players will see you" required></label>
-<label class="field"><span>Phone number</span><div class="phone-row"><select id="signupCountry" aria-label="Country calling code" required><option value="+265" selected>Malawi (+265)</option><option value="+255">Tanzania (+255)</option><option value="+27">South Africa (+27)</option><option value="+263">Zimbabwe (+263)</option><option value="+267">Botswana (+267)</option><option value="+258">Mozambique (+258)</option><option value="+260">Zambia (+260)</option><option value="+254">Kenya (+254)</option><option value="+256">Uganda (+256)</option><option value="+234">Nigeria (+234)</option><option value="+233">Ghana (+233)</option><option value="+1">United States/Canada (+1)</option><option value="+44">United Kingdom (+44)</option><option value="+91">India (+91)</option></select><input id="signupPhone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="991 234 567" required></div></label>
+<label class="field"><span>Email address</span><input id="signupEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
 <label class="field"><span>Password</span><input id="signupPassword" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters" required></label>
 <button class="primary" id="signupButton" type="submit">CREATE MY PLAYER ACCOUNT</button>
 </form>
@@ -109,8 +109,8 @@ function message(id, text, show = true) {
 function friendlyError(error) {
   const raw = error?.message || 'Something went wrong. Please try again.';
   if (/duplicate key|unique constraint|profiles_username_lower_unique_idx/i.test(raw)) return 'That username is already taken. Please choose another one.';
-  if (/invalid login credentials/i.test(raw)) return 'Phone number/email or password is incorrect.';
-  if (/phone not confirmed/i.test(raw)) return 'Phone confirmation is still enabled in the player authentication settings. It must be switched off for registration without SMS.';
+  if (/invalid login credentials/i.test(raw)) return 'Email address or password is incorrect.';
+  if (/email not confirmed/i.test(raw)) return 'Please confirm your email address using the link we sent you before signing in.';
   if (/password should be at least/i.test(raw)) return 'Your password must contain at least 8 characters.';
   return raw;
 }
@@ -141,10 +141,7 @@ $('loginForm').addEventListener('submit', async event => {
   event.preventDefault();
   const button = $('loginButton');
   setBusy(button, true, 'SIGN IN TO CHOME');
-  const identifier = $('loginIdentifier').value.trim();
-  const credentials = identifier.includes('@')
-    ? { email: identifier, password: $('loginPassword').value }
-    : { phone: identifier.replace(/[\s()-]/g, '').startsWith('+') ? identifier.replace(/[\s()-]/g, '') : '+' + identifier.replace(/\D/g, ''), password: $('loginPassword').value };
+  const credentials = { email: $('loginIdentifier').value.trim().toLowerCase(), password: $('loginPassword').value };
   const { error } = await supabase.auth.signInWithPassword(credentials);
   setBusy(button, false, 'SIGN IN TO CHOME');
   if (error) message('authMessage', friendlyError(error));
@@ -158,17 +155,17 @@ $('signupForm').addEventListener('submit', async event => {
     message('authMessage', 'Use 3–20 characters: letters, numbers or underscores.');
     return;
   }
-  const localPhone = $('signupPhone').value.replace(/\D/g, '').replace(/^0+/, '');
-  if (localPhone.length < 6 || localPhone.length > 14) {
-    message('authMessage', 'Enter a valid phone number without the country code.');
+  const email = $('signupEmail').value.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    message('authMessage', 'Enter a valid email address.');
     return;
   }
-  const phone = $('signupCountry').value + localPhone;
   setBusy(button, true, 'CREATE MY PLAYER ACCOUNT');
   const { data, error } = await supabase.auth.signUp({
-    phone,
+    email,
     password: $('signupPassword').value,
     options: {
+      emailRedirectTo: 'https://chomemw.github.io/chome-game-studio/player.html',
       data: { username, display_name: $('displayName').value.trim() }
     }
   });
@@ -180,7 +177,7 @@ $('signupForm').addEventListener('submit', async event => {
   if (data.session) {
     message('authMessage', 'Your CHOME Player account has been created. Welcome to the player universe!');
   } else {
-    message('authMessage', 'Your account details were submitted. If you cannot sign in yet, phone confirmation may still be enabled in the Supabase Phone provider settings.');
+    message('authMessage', 'Your account was created. Check your email inbox (and Spam folder) for the confirmation link, then return here to sign in.');
   }
 });
 
