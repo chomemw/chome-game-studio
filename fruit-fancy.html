@@ -40,6 +40,7 @@ button{touch-action:manipulation}
 </div>
 <div class="w-full bg-black/30 rounded-full h-3 border border-white/20 p-0.5 overflow-hidden"><div id="progressBar" class="bg-gradient-to-r from-yellow-400 to-green-400 h-full rounded-full w-0 transition-all"></div></div>
 <div id="cloudSaveStatus" class="w-full text-center text-xs text-white/80 py-1" aria-live="polite"><span id="cloudSaveMessage">Guest play</span><span id="cloudSaveGuestSuffix"> · <a id="cloudSaveLink" href="player.html" class="underline text-yellow-200 font-bold">Sign in</a> to sync progress across devices</span></div>
+<div id="leaderboardStatus" class="w-full text-center text-xs text-white/80 pb-1" aria-live="polite"><span id="leaderboardMessage">Sign in and pass a level to join the rankings.</span> · <a href="leaderboards.html" class="underline text-yellow-200 font-bold">View leaderboard</a></div>
 </header>
 <main class="relative w-full max-w-md aspect-square my-auto flex items-center justify-center">
 <div id="boardContainer" class="relative w-full h-full game-board rounded-3xl p-2 sm:p-3 border-2 border-white/30 overflow-hidden">
@@ -59,8 +60,24 @@ const supabase = createClient("https://zbumbbzvrjqjgroxzixg.supabase.co", "sb_pu
 const N=6,FRUITS=[['apple','🍎','#ff4d4d'],['banana','🍌','#ffeb3b'],['grape','🍇','#ab47bc'],['orange','🍊','#ffa726'],['strawberry','🍓','#e91e63'],['watermelon','🍉','#66bb6a'],['cherry','🍒','#d81b60']].map(([type,emoji,color])=>({type,emoji,color}));
 const LEVELS=[{target:400,moves:18,ice:0,bombs:0},{target:700,moves:20,ice:3,bombs:0},{target:1100,moves:22,ice:4,bombs:2},{target:1600,moves:20,ice:6,bombs:3},{target:2200,moves:24,ice:8,bombs:4}];
 let level=0,score=0,target=400,moves=18,board=[],path=[],dragging=false,busy=false,sound=true,audio=null,particles=[];
-let currentPlayer=null,saveChain=Promise.resolve(),initialized=false;
+let currentPlayer=null,saveChain=Promise.resolve(),initialized=false,scoreSubmittedForRun=false;
 function setCloudStatus(text){const el=document.getElementById("cloudSaveMessage");if(el)el.textContent=text;const suffix=document.getElementById("cloudSaveGuestSuffix");if(suffix)suffix.style.display=currentPlayer?"none":"inline";}
+function setLeaderboardStatus(text){const el=document.getElementById("leaderboardMessage");if(el)el.textContent=text;}
+async function submitLevelScore(){
+ if(scoreSubmittedForRun)return;
+ if(!currentPlayer){setLeaderboardStatus("Sign in and pass a level to join the rankings.");return;}
+ scoreSubmittedForRun=true;
+ setLeaderboardStatus("Submitting your level score…");
+ try{
+  const {error}=await supabase.rpc("record_game_score",{p_game_id:"fruit-fancy",p_level:level+1,p_score:score});
+  if(error)throw error;
+  setLeaderboardStatus("✓ Level score submitted. Check your ranking above.");
+ }catch(error){
+  console.error("Fruit Fancy leaderboard submission failed:",error);
+  scoreSubmittedForRun=false;
+  setLeaderboardStatus("Score submission failed. It will retry after your next completed run.");
+ }
+}
 function gameSnapshot(){return {version:1,level,score,target,moves,sound,board:board.map(row=>row.map(cell=>({fruit:cell.fruit.type,ice:!!cell.ice,bomb:!!cell.bomb})))};}
 async function saveGame(){
  if(!currentPlayer||!board.length)return;
@@ -96,15 +113,15 @@ async function loadSavedGame(user){
 async function refreshPlayerSession(){
  const {data,error}=await supabase.auth.getSession();if(error){console.error(error);return;}
  const next=data.session?.user||null;
- if(next?.id!==currentPlayer?.id){currentPlayer=next;if(next)await loadSavedGame(next);else setCloudStatus("Guest play · sign in to sync progress across devices");}
- else if(next)setCloudStatus("✓ Cloud saves enabled · signed in");
+ if(next?.id!==currentPlayer?.id){currentPlayer=next;if(next){setLeaderboardStatus("Pass a level to submit your score.");await loadSavedGame(next);}else{setLeaderboardStatus("Sign in and pass a level to join the rankings.");setCloudStatus("Guest play · sign in to sync progress across devices");}}
+ else if(next){setCloudStatus("✓ Cloud saves enabled · signed in");setLeaderboardStatus("Pass a level to submit your score.");}
 }
 const $=id=>document.getElementById(id),grid=$('grid'),line=$('lineCanvas'),fx=$('fxCanvas'),lc=line.getContext('2d'),fc=fx.getContext('2d');
 function fruit(){return FRUITS[Math.floor(Math.random()*FRUITS.length)]}
 function audioInit(){if(!audio)audio=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume()}
 function tone(type,p=1){if(!sound)return;try{audioInit();let o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime;o.connect(g);g.connect(audio.destination);o.type=type==='blast'?'sawtooth':type==='bomb'?'square':'triangle';let start=type==='bomb'?120:type==='blast'?150:380;o.frequency.setValueAtTime(start,t);o.frequency.exponentialRampToValueAtTime(type==='bomb'?30:type==='blast'?600:Math.max(650,500*p),t+(type==='blast'?.4:.18));g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.start(t);o.stop(t+.26)}catch(e){}}
 function resize(){let r=$('boardContainer').getBoundingClientRect();[line,fx].forEach(c=>{c.width=Math.round(r.width*devicePixelRatio);c.height=Math.round(r.height*devicePixelRatio);c.style.width=r.width+'px';c.style.height=r.height+'px';c.getContext('2d').setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)})}
-function start(i=level,shouldSave=true){level=(i+LEVELS.length)%LEVELS.length;let cfg=LEVELS[level];score=0;target=cfg.target;moves=cfg.moves;path=[];busy=false;dragging=false;makeBoard(cfg.ice,cfg.bombs);$('modalOverlay').classList.remove('show');update();if(shouldSave)saveGame()}
+function start(i=level,shouldSave=true){level=(i+LEVELS.length)%LEVELS.length;let cfg=LEVELS[level];score=0;target=cfg.target;moves=cfg.moves;path=[];busy=false;dragging=false;scoreSubmittedForRun=false;makeBoard(cfg.ice,cfg.bombs);$('modalOverlay').classList.remove('show');update();if(shouldSave)saveGame()}
 function makeBoard(ice,bombs){board=Array.from({length:N},(_,r)=>Array.from({length:N},(_,c)=>({fruit:fruit(),ice:false,bomb:false})));let place=(key,count)=>{let n=0;while(n<count){let r=Math.random()*N|0,c=Math.random()*N|0;if(!board[r][c][key]&&!(key==='bomb'&&board[r][c].ice)){board[r][c][key]=true;n++}}};place('ice',ice);place('bomb',bombs);render()}
 function render(){grid.innerHTML='';board.forEach((row,r)=>row.forEach((cell,c)=>{let el=document.createElement('div');el.className='tile';el.dataset.r=r;el.dataset.c=c;let icon=document.createElement('span');icon.className='fruit-icon';icon.textContent=cell.bomb?'💣':cell.fruit.emoji;el.append(icon);if(cell.ice){let ice=document.createElement('div');ice.className='ice-layer';ice.innerHTML='<i class="fas fa-snowflake animate-pulse"></i>';el.append(ice)}grid.append(el)}))}
 function update(){$('levelText').textContent=level+1;$('scoreText').textContent=score.toLocaleString();$('targetText').textContent=target.toLocaleString();$('movesText').textContent=moves;$('progressBar').style.width=Math.min(100,score/target*100)+'%'}
@@ -120,7 +137,7 @@ function burst(x,y,color){for(let i=0;i<9;i++){let a=Math.random()*Math.PI*2,s=1
 function combo(txt){let e=document.createElement('div');e.className='combo-popup text-3xl sm:text-4xl font-black text-yellow-300 drop-shadow-lg';e.textContent=txt;$('comboContainer').append(e);setTimeout(()=>e.remove(),1200)}
 async function process(){busy=true;moves--;let length=path.length,blast=length>=7,points=length*10+(blast?100:0);score+=points;tone(blast?'blast':'pop',1);if(blast)combo('JUICY BLENDER BLAST! 🍹');else if(length>=5)combo('FRUITTASTIC! 🌟');let root=$('boardContainer').getBoundingClientRect(),remove=new Set(path.map(p=>p.r+','+p.c));path.forEach(p=>{let cell=board[p.r][p.c],el=grid.querySelector('[data-r="'+p.r+'"][data-c="'+p.c+'"]'),r=el.getBoundingClientRect(),x=r.left+r.width/2-root.left,y=r.top+r.height/2-root.top;popup(x,y,'+'+Math.round(points/length));burst(x,y,cell.fruit.color);if(cell.bomb){tone('bomb');for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){let rr=p.r+dr,cc=p.c+dc;if(rr>=0&&rr<N&&cc>=0&&cc<N)remove.add(rr+','+cc)}}[[p.r-1,p.c],[p.r+1,p.c],[p.r,p.c-1],[p.r,p.c+1]].forEach(([r,c])=>{if(r>=0&&r<N&&c>=0&&c<N&&board[r][c].ice)board[r][c].ice=false})});grid.querySelectorAll('.tile').forEach(t=>t.classList.remove('selected'));path=[];update();await new Promise(r=>setTimeout(r,280));gravity(remove);await new Promise(r=>setTimeout(r,180));busy=false;update();endCheck();saveGame()}
 function gravity(remove){remove.forEach(s=>{let [r,c]=s.split(',').map(Number);board[r][c]=null});for(let c=0;c<N;c++){let dest=N-1;for(let r=N-1;r>=0;r--)if(board[r][c]){board[dest][c]=board[r][c];if(dest!==r)board[r][c]=null;dest--}for(let r=dest;r>=0;r--)board[r][c]={fruit:fruit(),ice:false,bomb:Math.random()<.08}}render()}
-function endCheck(){if(score>=target){tone('win');show('🏆','LEVEL PASSED!','Super fruit blender powers achieved!','Next Level')}else if(moves<=0){tone('fail');show('💔','OUT OF MOVES!','Don’t give up, try blending again!','Try Again')}}
+function endCheck(){if(score>=target){tone('win');submitLevelScore();show('🏆','LEVEL PASSED!','Super fruit blender powers achieved!','Next Level')}else if(moves<=0){tone('fail');show('💔','OUT OF MOVES!','Don’t give up, try blending again!','Try Again')}}
 function show(icon,title,desc,btn){$('modalIcon').textContent=icon;$('modalTitle').textContent=title;$('modalDesc').textContent=desc;$('modalFinalScore').textContent=score.toLocaleString();$('modalMovesLeft').textContent=moves;$('modalActionBtn').textContent=btn;$('modalOverlay').classList.add('show')}
 grid.addEventListener('pointerdown',down);window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
 $('soundBtn').addEventListener('click',()=>{sound=!sound;$('soundBtn').innerHTML=sound?'<i class="fas fa-volume-up"></i>':'<i class="fas fa-volume-mute text-red-300"></i>'});
