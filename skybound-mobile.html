@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#101b20">
+<title>Skybound: Island One — CHOME Game Studio</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101b20;color:#f5f2e9;touch-action:none}canvas{display:block;width:100%;height:100%;touch-action:none}#game{position:fixed;inset:0}#hud{position:fixed;inset:0;pointer-events:none}.glass{background:linear-gradient(135deg,#10252bd9,#102027b8);border:1px solid #ffffff26;box-shadow:0 12px 40px #0005;backdrop-filter:blur(12px);border-radius:15px}.brand{position:absolute;top:calc(14px + env(safe-area-inset-top));left:14px;padding:10px 13px;font-size:10px;letter-spacing:.2em;font-weight:900;color:#d9e8d8}.brand b{display:block;font-size:15px;letter-spacing:.12em;color:#fff;margin-top:3px}.mission{position:absolute;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(340px,48vw);padding:12px 15px}.eyebrow{font-size:9px;letter-spacing:.19em;color:#b9d5bd;font-weight:900}.mission h2{font-size:14px;margin:5px 0 4px}.mission p{font-size:11px;color:#c4d0c8;margin:0;line-height:1.4}.progress{height:4px;background:#ffffff25;border-radius:9px;margin-top:10px;overflow:hidden}.progress i{display:block;height:100%;width:0;background:#c3d99a;transition:width .3s}.status{position:absolute;right:14px;top:calc(14px + env(safe-area-inset-top));padding:10px 12px;min-width:108px;text-align:right}.status strong{display:block;font-size:12px}.status small{font-size:9px;color:#b8c9bf}.hint{position:absolute;left:50%;top:24%;transform:translateX(-50%);padding:9px 14px;font-size:11px;white-space:nowrap;color:#f1f0dc;opacity:0;transition:opacity .2s}.hint.show{opacity:1}.controls{position:absolute;inset:auto 0 calc(20px + env(safe-area-inset-bottom));height:150px;pointer-events:none}.stick{position:absolute;left:22px;bottom:0;width:118px;height:118px;border-radius:50%;background:#d8e6d51c;border:1px solid #ffffff50;pointer-events:auto;touch-action:none}.stick:after{content:"";position:absolute;inset:30px;border:1px solid #ffffff22;border-radius:50%}.knob{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px;border-radius:50%;background:#dce8d6c9;border:1px solid #fff;box-shadow:0 5px 20px #0006;pointer-events:none}.actions{position:absolute;right:20px;bottom:0;display:flex;align-items:end;gap:11px;pointer-events:auto}.action{width:62px;height:62px;border-radius:50%;border:1px solid #ffffff70;background:#1a3038d9;color:#fff;font-size:10px;font-weight:900;letter-spacing:.04em;box-shadow:0 7px 22px #0006;touch-action:manipulation}.action.primary{width:72px;height:72px;background:#c2d59b;color:#1a2b28;border:0}.action:active{transform:scale(.94)}#interact{display:none}#interact.visible{display:block}.center-toast{position:absolute;left:50%;bottom:calc(184px + env(safe-area-inset-bottom));transform:translateX(-50%);padding:10px 15px;font-size:11px;white-space:nowrap;opacity:0;transition:opacity .2s}.center-toast.show{opacity:1}.screen{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(135deg,#101b20eF,#162d2deF);z-index:5;padding:22px}.panel{width:min(520px,100%);padding:26px}.panel h1{font-size:clamp(28px,7vw,44px);letter-spacing:-.06em;margin:7px 0 8px}.panel p{color:#c0cdc5;font-size:13px;line-height:1.65}.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}.choice{padding:12px;border:1px solid #ffffff2b;border-radius:13px;background:#ffffff0b;color:#fff;text-align:left}.choice.selected{border-color:#c3d99a;background:#c3d99a1c}.portrait{height:118px;display:grid;place-items:center;background:linear-gradient(145deg,#284a48,#182a31);border-radius:9px;margin-bottom:10px;font-size:56px}.choice strong{display:block;font-size:13px}.choice small{display:block;color:#b7c6bc;font-size:10px;margin-top:4px}.start{width:100%;padding:15px;border:0;border-radius:11px;background:#c3d99a;color:#172622;font-weight:950;letter-spacing:.12em}.tiny{font-size:10px!important;color:#8fa59a!important;margin-top:14px}.objective{display:inline-block;padding:5px 8px;border-radius:7px;background:#c3d99a1b;color:#d6e7c4;font-size:10px;margin-top:8px}#mapdot{position:absolute;right:18px;top:105px;width:56px;height:56px;border-radius:50%;border:1px solid #ffffff45;background:#16323a;display:grid;place-items:center;font-size:21px;opacity:.9}#mapdot span{font-size:8px;display:block;text-align:center;color:#c5d8c7}#pause{position:absolute;left:16px;bottom:calc(158px + env(safe-area-inset-bottom));pointer-events:auto;border:1px solid #ffffff45;border-radius:9px;background:#12262bbd;color:white;padding:8px 11px;font-size:10px}#message{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);width:min(330px,82vw);padding:18px;text-align:center;display:none;pointer-events:auto}#message.show{display:block}#message h3{margin:0 0 7px}#message p{font-size:12px;line-height:1.5;color:#c3d0c8}#message button{border:0;border-radius:8px;background:#c3d99a;color:#172622;padding:10px 16px;font-weight:900}
+@media(max-width:600px){.brand{font-size:8px;padding:8px}.brand b{font-size:12px}.mission{top:calc(72px + env(safe-area-inset-top));left:14px;transform:none;width:min(270px,65vw)}.status{top:calc(14px + env(safe-area-inset-top));min-width:82px}.status strong{font-size:10px}.status small{font-size:8px}.mission h2{font-size:12px}.mission p{font-size:10px}.stick{width:108px;height:108px;left:17px}.knob{width:44px;height:44px;margin:-22px}.action{width:54px;height:54px}.action.primary{width:64px;height:64px}.actions{right:14px;gap:8px}.controls{height:130px}.center-toast{bottom:calc(155px + env(safe-area-inset-bottom))}#mapdot{top:152px;right:14px;width:48px;height:48px}}
+@media(orientation:landscape) and (max-height:500px){.controls{height:110px}.stick{width:92px;height:92px}.knob{width:40px;height:40px;margin:-20px}.action{width:48px;height:48px}.action.primary{width:56px;height:56px}.mission{top:12px;left:50%;transform:translateX(-50%)}.brand{top:12px}.status{top:12px}.center-toast{bottom:125px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud">
+ <div class="brand glass">CHOME GAME STUDIO<b>SKYBOUND</b></div>
+ <div class="mission glass"><div class="eyebrow">CHAPTER 01 · THE ARRIVAL</div><h2 id="missionTitle">Find your belongings</h2><p id="missionText">Search the shoreline for the supplies washed ashore.</p><div class="progress"><i id="progress"></i></div></div>
+ <div class="status glass"><strong id="health">♥ 100</strong><small id="stamina">STAMINA 100</small></div>
+ <div id="mapdot">⌖<span>ISLAND</span></div>
+ <div class="hint glass" id="hint">Something is nearby</div>
+ <div class="center-toast glass" id="toast">Mission updated</div>
+ <button id="pause">Ⅱ PAUSE</button>
+ <div class="controls">
+  <div class="stick" id="stick"><div class="knob" id="knob"></div></div>
+  <div class="actions">
+   <button class="action" id="interact">INTERACT</button>
+   <button class="action" id="jump">JUMP</button>
+   <button class="action primary" id="run">RUN</button>
+  </div>
+ </div>
+ <div class="glass" id="message"><h3 id="messageTitle">A new clue</h3><p id="messageText"></p><button id="messageClose">CONTINUE</button></div>
+</div>
+<div class="screen" id="select">
+ <div class="panel glass">
+  <div class="eyebrow">A CHOME GAME STUDIO ORIGINAL</div>
+  <h1>SKYBOUND:<br>ISLAND ONE</h1>
+  <p>A storm has left you stranded on an unfamiliar island. Find the survivors, uncover the trail and discover what lies beyond the forest.</p>
+  <div class="eyebrow">CHOOSE YOUR EXPLORER</div>
+  <div class="choices">
+   <button class="choice selected" data-gender="male"><div class="portrait">🧑🏽‍🦱</div><strong>Male explorer</strong><small>Field jacket · Trail gear</small></button>
+   <button class="choice" data-gender="female"><div class="portrait">👩🏽‍🦱</div><strong>Female explorer</strong><small>Field jacket · Trail gear</small></button>
+  </div>
+  <button class="start" id="start">BEGIN ADVENTURE</button>
+  <p class="tiny">Mobile prototype · Touch controls · Progress saved on this device</p>
+ </div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+const root=document.getElementById('game');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x9db9b2);scene.fog=new THREE.Fog(0x9db9b2,28,105);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,180);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;root.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xdcebe5,0x4b5947,2.0));
+const sun=new THREE.DirectionalLight(0xffe1b5,2.7);sun.position.set(-25,38,18);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-42;sun.shadow.camera.right=42;sun.shadow.camera.top=42;sun.shadow.camera.bottom=-42;scene.add(sun);
+const mat=(color,rough=.85)=>new THREE.MeshStandardMaterial({color,roughness:rough});
+const sand=mat(0xc9b88e),grass=mat(0x718c63),darkGrass=mat(0x49664d),rock=mat(0x68756d),wood=mat(0x72553a),roof=mat(0x67584a),leafMats=[mat(0x496d4d),mat(0x5d8056),mat(0x77915d)],waterMat=new THREE.MeshStandardMaterial({color:0x4c9c9c,roughness:.25,metalness:.08,transparent:true,opacity:.86});
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(170,170,1,1),sand);ground.rotation.x=-Math.PI/2;ground.position.y=-.18;ground.receiveShadow=true;scene.add(ground);
+const island=new THREE.Mesh(new THREE.CircleGeometry(58,80),grass);island.rotation.x=-Math.PI/2;island.position.y=-.12;island.receiveShadow=true;scene.add(island);
+const water=new THREE.Mesh(new THREE.PlaneGeometry(240,240),waterMat);water.rotation.x=-Math.PI/2;water.position.y=-.34;scene.add(water);
+const pathMat=mat(0xb9a77e);const path=new THREE.Mesh(new THREE.PlaneGeometry(9,60),pathMat);path.rotation.x=-Math.PI/2;path.position.set(0,-.095,-8);scene.add(path);
+function box(w,h,d,m,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
+function tree(x,z,s=1){const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.16*s,.28*s,2.7*s,7),wood);trunk.position.set(x,1.25*s,z);trunk.castShadow=true;scene.add(trunk);for(let i=0;i<3;i++){const crown=new THREE.Mesh(new THREE.IcosahedronGeometry((1.05-i*.12)*s,1),leafMats[(i+Math.abs(Math.round(x+z)))%3]);crown.position.set(x+(i-1)*.24*s,2.5*s+i*.42*s,z);crown.castShadow=true;crown.receiveShadow=true;scene.add(crown)}}
+function rockProp(x,z,s=1){const o=new THREE.Mesh(new THREE.DodecahedronGeometry(s,0),rock);o.position.set(x,s*.45,z);o.scale.set(1,.7,.85);o.castShadow=true;scene.add(o)}
+function house(x,z){box(5,2.8,4,wood,x,1.4,z);const r=new THREE.Mesh(new THREE.ConeGeometry(3.8,1.7,4),roof);r.rotation.y=Math.PI/4;r.position.set(x,3.5,z);r.scale.z=.8;r.castShadow=true;scene.add(r);box(.9,1.6,.12,mat(0x352a21),x,0.85,z-2.06);box(1,.9,.12,mat(0x8fb0a0),x-1.45,1.7,z-2.07)}
+house(-12,-16);house(-20,-10);house(12,-18);house(20,-11);
+for(let i=0;i<45;i++){let a=i*2.399,r=23+(i%7)*3.4,x=Math.cos(a)*r,z=Math.sin(a)*r-5;if(Math.abs(x)<7&&z>-32&&z<10)continue;tree(x,z,.75+(i%4)*.13)}
+for(let i=0;i<20;i++){const x=Math.sin(i*12.8)*31,z=Math.cos(i*7.2)*30-7;rockProp(x,z,.45+(i%4)*.18)}
+// Shoreline driftwood and a wrecked boat
+const boat=box(4,.45,1.4,wood,7,.1,19);boat.rotation.y=-.35;box(.18,2.4,.18,wood,7,1.1,19);
+const plank=box(2.2,.16,.22,roof,9,.25,20);plank.rotation.y=.3;
+// Village path, campfire and crates
+const fireBase=new THREE.Mesh(new THREE.CylinderGeometry(.8,.95,.25,10),rock);fireBase.position.set(-5,.05,-16);scene.add(fireBase);
+for(let i=0;i<5;i++){const log=box(.15,.16,1.3,wood,-5,.25,-16);log.rotation.y=i*Math.PI/2.5}
+for(let i=0;i<4;i++)box(.8,.8,.8,wood,-3+i*1.1,.4,15+(i%2)*.5);
+function human(shirt,pants,hairColor){const g=new THREE.Group();const skin=mat(0x8e6248),shirtM=mat(shirt),pantsM=mat(pants),hair=mat(hairColor),boot=mat(0x332d27);const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.34,.65,4,8),shirtM);torso.position.y=1.45;torso.castShadow=true;g.add(torso);const head=new THREE.Mesh(new THREE.SphereGeometry(.25,12,10),skin);head.position.y=2.12;head.castShadow=true;g.add(head);const cap=new THREE.Mesh(new THREE.SphereGeometry(.255,12,8,0,Math.PI*2,0,Math.PI/2),hair);cap.position.y=2.27;g.add(cap);const limbs=[];for(let side of [-1,1]){const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.55,3,7),shirtM);arm.position.set(side*.43,1.48,0);arm.rotation.z=side*-.13;g.add(arm);const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.13,.62,3,7),pantsM);leg.position.set(side*.19,.55,0);g.add(leg);const shoe=new THREE.Mesh(new THREE.BoxGeometry(.25,.13,.38),boot);shoe.position.set(side*.19,.16,-.07);g.add(shoe);limbs.push(arm,leg)}const pack=box(.42,.55,.22,mat(0x9b6840),0,1.48,.32);pack.parent=g;pack.position.set(0,1.48,.32);g.add(pack);g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});g.userData.limbs=limbs;return g}
+let gender='male';let player=human(0x526f69,0x3a4140,0x30251e);scene.add(player);player.position.set(0,0,23);
+const npc=human(0x9b9b70,0x4a5147,0x30251e);npc.position.set(-5,0,-17);npc.rotation.y=Math.PI;scene.add(npc);
+const supplies=[];function pickup(x,z,color){const group=new THREE.Group();const orb=new THREE.Mesh(new THREE.IcosahedronGeometry(.28,1),new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.32}));orb.position.y=.55;group.add(orb);const ring=new THREE.Mesh(new THREE.TorusGeometry(.43,.035,6,20),mat(0xe5d9a6));ring.rotation.x=Math.PI/2;ring.position.y=.15;group.add(ring);group.position.set(x,0,z);scene.add(group);supplies.push({group,got:false})}
+pickup(10,16,0xe4b86b);pickup(-10,9,0x9fc5a0);pickup(3,1,0xd4d9bd);
+const keys={};addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true});addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+let moveX=0,moveY=0,runHeld=false,jumpQueued=false,interactQueued=false,started=false,paused=false,mission=0,found=0,velocityY=0,stamina=100,health=100,heading=0,cameraYaw=0,cameraPitch=.18,lastTime=0;
+const stick=document.getElementById('stick'),knob=document.getElementById('knob');let stickPointer=null;
+function stickMove(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,len=Math.hypot(dx,dy),max=39,scale=len>max?max/len:1;moveX=dx*scale/max;moveY=dy*scale/max;knob.style.transform='translate('+dx*scale+'px,'+dy*scale+'px)'}
+stick.addEventListener('pointerdown',e=>{stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);stickMove(e)});stick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer)stickMove(e)});function releaseStick(e){if(e.pointerId===stickPointer){stickPointer=null;moveX=moveY=0;knob.style.transform='translate(0,0)'}}stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);
+document.getElementById('run').addEventListener('pointerdown',()=>runHeld=true);['pointerup','pointercancel','pointerleave'].forEach(ev=>document.getElementById('run').addEventListener(ev,()=>runHeld=false));document.getElementById('jump').addEventListener('click',()=>{jumpQueued=true});document.getElementById('interact').addEventListener('click',()=>{interactQueued=true});
+let lookPointer=null,lastLookX=0,lastLookY=0;renderer.domElement.addEventListener('pointerdown',e=>{if(e.clientX<innerWidth*.38)return;lookPointer=e.pointerId;lastLookX=e.clientX;lastLookY=e.clientY;renderer.domElement.setPointerCapture(e.pointerId)});renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerId!==lookPointer)return;const dx=e.clientX-lastLookX,dy=e.clientY-lastLookY;cameraYaw-=dx*.004;cameraPitch=Math.max(-.02,Math.min(.65,cameraPitch+dy*.0025));lastLookX=e.clientX;lastLookY=e.clientY});renderer.domElement.addEventListener('pointerup',e=>{if(e.pointerId===lookPointer)lookPointer=null});
+function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2300)}
+function setMission(n){mission=n;const titles=['Find your belongings','Reach the coastal village','Speak with the survivor','Follow the forest trail'];const texts=['Search the shoreline for the supplies washed ashore.','Follow the trail inland to reach the survivors.','Find the villager beside the campfire and talk to him.','The next chapter will take you deeper into the island.'];document.getElementById('missionTitle').textContent=titles[n]||'Chapter complete';document.getElementById('missionText').textContent=texts[n]||'You have completed the opening chapter.';document.getElementById('progress').style.width=(n===0?found/3*100:n===1?100:n===2?100:100)+'%';if(n>0)showToast('Mission updated')}
+function popup(title,text){document.getElementById('messageTitle').textContent=title;document.getElementById('messageText').textContent=text;document.getElementById('message').classList.add('show');paused=true}
+document.getElementById('messageClose').onclick=()=>{document.getElementById('message').classList.remove('show');paused=false};
+document.getElementById('pause').onclick=()=>{paused=!paused;showToast(paused?'Game paused':'Adventure resumed')};
+document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{document.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');gender=b.dataset.gender});
+document.getElementById('start').onclick=()=>{document.getElementById('select').style.display='none';scene.remove(player);player=gender==='female'?human(0x657e76,0x39433f,0x211c1a):human(0x526f69,0x3a4140,0x30251e);scene.add(player);player.position.set(0,0,23);started=true;popup('The shoreline','The storm has passed, but your supplies are scattered along the beach. Find all three glowing supply markers.')};
+function nearestSupply(){let best=null,dist=99;for(const s of supplies)if(!s.got){const d=player.position.distanceTo(s.group.position);if(d<dist){dist=d;best=s}}return dist<2.3?best:null}
+function animate(t){requestAnimationFrame(animate);const dt=Math.min((t-lastTime)/1000||.016,.04);lastTime=t;const elapsed=t*.001;
+for(const s of supplies)if(!s.got){s.group.children[0].rotation.y=elapsed*1.5;s.group.children[0].position.y=.55+Math.sin(elapsed*2.5)*.09;s.group.rotation.y=elapsed*.35}
+if(started&&!paused){let ix=moveX+(keys.d?1:0)-(keys.a?1:0),iy=moveY+(keys.s?1:0)-(keys.w?1:0);const len=Math.hypot(ix,iy);if(len>1){ix/=len;iy/=len}const moving=len>.08;const sprint=(runHeld||keys.shift)&&stamina>2&&moving;const speed=sprint?7.2:4.1;if(sprint)stamina=Math.max(0,stamina-25*dt);else stamina=Math.min(100,stamina+15*dt);document.getElementById('stamina').textContent='STAMINA '+Math.round(stamina);
+const forward=new THREE.Vector3(Math.sin(cameraYaw),0,-Math.cos(cameraYaw)),right=new THREE.Vector3(Math.cos(cameraYaw),0,Math.sin(cameraYaw));const dir=forward.multiplyScalar(-iy).add(right.multiplyScalar(ix));if(moving){dir.normalize();player.position.addScaledVector(dir,speed*dt);heading=Math.atan2(dir.x,dir.z);player.rotation.y=THREE.MathUtils.dampAngle(player.rotation.y,heading,10,dt);const swing=Math.sin(elapsed*(sprint?13:8))*.42;player.userData.limbs.forEach((l,i)=>{l.rotation.x=(i%2===0?1:-1)*swing})}else player.userData.limbs.forEach(l=>l.rotation.x=THREE.MathUtils.damp(l.rotation.x,0,8,dt));
+player.position.x=THREE.MathUtils.clamp(player.position.x,-48,48);player.position.z=THREE.MathUtils.clamp(player.position.z,-42,43);
+if(jumpQueued&&player.position.y<=.01){velocityY=6.2}jumpQueued=false;velocityY-=16*dt;player.position.y=Math.max(0,player.position.y+velocityY*dt);if(player.position.y===0)velocityY=0;
+const target=new THREE.Vector3(player.position.x,player.position.y+1.55,player.position.z);const behind=new THREE.Vector3(Math.sin(cameraYaw)*5.1,2.1+cameraPitch*3,Math.cos(cameraYaw)*5.1);const desired=target.clone().add(behind);camera.position.lerp(desired,1-Math.exp(-7*dt));camera.lookAt(target);
+const near=nearestSupply();const nearNpc=player.position.distanceTo(npc.position)<3.3;const interact=document.getElementById('interact');interact.classList.toggle('visible',!!near||nearNpc);document.getElementById('hint').classList.toggle('show',!!near||nearNpc);document.getElementById('hint').textContent=near?'SUPPLY FOUND NEARBY':nearNpc?'A SURVIVOR IS NEARBY':'';
+if(interactQueued){if(near&&mission===0){near.got=true;near.group.visible=false;found++;document.getElementById('progress').style.width=(found/3*100)+'%';showToast('Supplies recovered · '+found+'/3');if(found===3){setMission(1);popup('Supplies recovered','You found everything washed ashore. Follow the path inland to the coastal village.')}}else if(nearNpc&&mission>=1){if(mission===1){setMission(2);popup('A survivor','“You made it! I saw a light deeper in the forest last night. Speak with me again when you are ready to follow the trail.”')}else if(mission===2){setMission(3);popup('A new trail','The villager marks a route toward the forest. The next chapter will open this path.')}else popup('Survivor','“Stay alert. This island holds more secrets than we understand.”')}interactQueued=false}
+if(mission===1&&player.position.distanceTo(new THREE.Vector3(-12,0,-16))<5){setMission(2)}
+}
+renderer.render(scene,camera)}
+camera.position.set(0,3,29);camera.lookAt(0,1,23);requestAnimationFrame(animate);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.6))});
+</script>
+</body>
+</html>
