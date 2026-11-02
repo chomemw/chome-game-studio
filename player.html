@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090d18">
+<title>CHOME Player | CHOME Game Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#090d18;--panel:#111a2c;--line:#ffffff1c;--muted:#9aa7bd;--purple:#8b6cff;--white:#f7f7fb}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#34265f 0,transparent 48%),var(--bg);color:var(--white);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:inherit;text-decoration:none}button,input,textarea{font:inherit}.shell{width:min(1060px,calc(100% - 32px));margin:auto}
+header{height:78px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;font-weight:950;letter-spacing:.12em}.mark{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:var(--purple);font-size:19px}
+.header-link{font-size:12px;color:#d9d1ff;font-weight:850;letter-spacing:.08em}
+main{padding:54px 0 76px}.eyebrow{color:#b9aaff;font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase}
+h1{font-size:clamp(36px,6vw,58px);letter-spacing:-.07em;line-height:1;margin:12px 0}.intro{color:var(--muted);line-height:1.7;font-size:14px;max-width:560px}
+.layout{display:grid;grid-template-columns:1fr minmax(320px,.82fr);gap:26px;align-items:start;margin-top:32px}
+.panel{background:linear-gradient(145deg,#151f35,#101827);border:1px solid var(--line);border-radius:22px;padding:26px;box-shadow:0 25px 70px #0004}
+.panel h2{font-size:21px;letter-spacing:-.04em;margin:0 0 8px}.sub{font-size:12px;color:var(--muted);line-height:1.65;margin:0 0 22px}
+.tabs{display:flex;background:#090d18;border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px;margin-bottom:20px}
+.tabs button{flex:1;border:0;background:transparent;color:#9aa7bd;padding:11px;border-radius:9px;font-size:12px;font-weight:850;cursor:pointer}
+.tabs button.active{background:var(--purple);color:white}
+.field{display:block;margin:14px 0}.field span{display:block;font-size:11px;font-weight:800;color:#cbd2e1;margin-bottom:7px}
+.field input,.field textarea{width:100%;background:#090f1d;border:1px solid #ffffff22;border-radius:11px;color:white;padding:13px 14px;outline:none}
+.field input:focus,.field textarea:focus{border-color:#a895ff;box-shadow:0 0 0 3px #8b6cff22}.field textarea{min-height:86px;resize:vertical}
+.primary,.secondary{width:100%;border:0;border-radius:11px;padding:14px 16px;font-size:12px;font-weight:900;letter-spacing:.05em;cursor:pointer}
+.primary{background:var(--purple);color:white;box-shadow:0 10px 26px #8b6cff35}.secondary{background:#ffffff10;color:#e6e2ff;border:1px solid var(--line)}
+.primary:disabled{opacity:.6;cursor:wait}
+.message{display:none;margin-top:15px;padding:12px 13px;border-radius:10px;background:#201d38;border:1px solid #9b87ff44;color:#e5ddff;font-size:12px;line-height:1.55;overflow-wrap:anywhere}.message.show{display:block}
+.guest{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:17px;color:#c9c2e7;font-size:12px;font-weight:800}
+.features{display:grid;gap:12px}.feature{display:flex;gap:13px;padding:15px;border:1px solid var(--line);border-radius:14px;background:#ffffff05}.feature-icon{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:11px;background:#8b6cff24;font-size:17px}.feature strong{display:block;font-size:12px;margin:1px 0 5px}.feature span{display:block;color:var(--muted);font-size:11px;line-height:1.55}
+#profileView{display:none}.profile-head{display:flex;align-items:center;gap:16px;margin-bottom:22px}.avatar{width:76px;height:76px;border-radius:22px;background:#302858;border:1px solid #b5a5ff55;display:grid;place-items:center;font-size:32px;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.profile-head h2{margin:0 0 5px}.handle{color:#b9aaff;font-size:12px}.profile-actions{display:flex;gap:10px;margin-top:16px}.profile-actions button{flex:1}
+.file-label{display:block;padding:12px;border:1px dashed #ffffff40;border-radius:11px;color:#d9d1ff;font-size:11px;text-align:center;cursor:pointer}.file-label input{display:none}
+footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:11px;display:flex;justify-content:space-between;gap:14px}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.side{order:2}main{padding-top:38px}.panel{padding:21px}}@media(max-width:420px){.profile-actions{flex-direction:column}header{height:70px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header><a class="brand" href="index.html"><span class="mark">C</span><span>CHOME <span style="color:#a895ff">PLAYER</span></span></a><a class="header-link" href="index.html">← BACK TO STUDIO</a></header>
+<main>
+<div class="eyebrow">Your gaming identity starts here</div>
+<h1>WELCOME TO THE<br>PLAYER UNIVERSE.</h1>
+<p class="intro">Create your CHOME Player account, choose your player name and make this studio your home. You can still jump straight into a game as a guest.</p>
+<div class="layout">
+<section class="panel" id="authView">
+<h2>Join the player community</h2><p class="sub">One account for your CHOME gaming identity.</p>
+<div class="tabs"><button id="loginTab" class="active" type="button">SIGN IN</button><button id="signupTab" type="button">CREATE ACCOUNT</button></div>
+<form id="loginForm">
+<label class="field"><span>Email address</span><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+<label class="field"><span>Password</span><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required></label>
+<button class="primary" id="loginButton" type="submit">SIGN IN TO CHOME</button>
+</form>
+<form id="signupForm" style="display:none">
+<label class="field"><span>Player username</span><input id="username" type="text" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" autocomplete="username" placeholder="Choose a unique username" required></label>
+<label class="field"><span>Display name</span><input id="displayName" type="text" maxlength="40" placeholder="How players will see you" required></label>
+<label class="field"><span>Email address</span><input id="signupEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+<label class="field"><span>Password</span><input id="signupPassword" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters" required></label>
+<button class="primary" id="signupButton" type="submit">CREATE MY PLAYER ACCOUNT</button>
+</form>
+<div class="message" id="authMessage" role="status" aria-live="polite"></div>
+<a class="guest" href="fruit-fancy.html">🎮 &nbsp; PLAY FRUIT FANCY AS A GUEST</a>
+</section>
+<section class="panel" id="profileView">
+<div class="profile-head"><div class="avatar" id="avatarPreview">🎮</div><div><div class="eyebrow">PLAYER PROFILE</div><h2 id="profileDisplayHeading">Your player name</h2><div class="handle" id="profileHandle">@player</div></div></div>
+<p class="sub">Your player identity is ready. Update your details whenever you like.</p>
+<form id="profileForm">
+<label class="field"><span>Display name</span><input id="editDisplayName" maxlength="40" required></label>
+<label class="field"><span>Username</span><input id="editUsername" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" required></label>
+<label class="field"><span>About you</span><textarea id="bio" maxlength="160" placeholder="Tell other players a little about yourself"></textarea></label>
+<label class="file-label">UPLOAD PROFILE PICTURE (MAX 2 MB)<input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
+<button class="primary" id="saveProfile" type="submit" style="margin-top:14px">SAVE PROFILE</button>
+</form>
+<div class="message" id="profileMessage" role="status" aria-live="polite"></div>
+<div class="profile-actions"><a class="secondary" style="display:grid;place-items:center" href="fruit-fancy.html">PLAY FRUIT FANCY</a><button class="secondary" id="logoutButton" type="button">SIGN OUT</button></div>
+</section>
+<aside class="side">
+<div class="panel"><h2>More than a username.</h2><p class="sub">Your CHOME Player account is the foundation for the features we're building across the studio.</p>
+<div class="features">
+<div class="feature"><div class="feature-icon">🪪</div><div><strong>Your player identity</strong><span>A unique username and personal profile.</span></div></div>
+<div class="feature"><div class="feature-icon">☁️</div><div><strong>Cloud progress — coming next</strong><span>Save your game progress and continue on another device.</span></div></div>
+<div class="feature"><div class="feature-icon">🏆</div><div><strong>Global leaderboards — coming next</strong><span>Compete with players across the CHOME universe.</span></div></div>
+<div class="feature"><div class="feature-icon">🎮</div><div><strong>Guest play stays open</strong><span>No account is required to browse the studio or play Fruit Fancy.</span></div></div>
+</div></div>
+</aside>
+</div>
+</main>
+<footer><span>© <span id="year"></span> CHOME GAME STUDIO</span><span>WORLDS WORTH EXPLORING.</span></footer>
+</div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://zbumbbzvrjqjgroxzixg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+let currentUser = null;
+let currentProfile = null;
+
+$('year').textContent = new Date().getFullYear();
+
+function message(id, text, show = true) {
+  const el = $(id);
+  el.textContent = text;
+  el.classList.toggle('show', show);
+}
+function friendlyError(error) {
+  const raw = error?.message || 'Something went wrong. Please try again.';
+  if (/duplicate key|unique constraint|profiles_username_lower_unique_idx/i.test(raw)) return 'That username is already taken. Please choose another one.';
+  if (/invalid login credentials/i.test(raw)) return 'Email or password is incorrect.';
+  if (/email not confirmed/i.test(raw)) return 'Please verify your email using the link we sent you before signing in.';
+  if (/password should be at least/i.test(raw)) return 'Your password must contain at least 8 characters.';
+  return raw;
+}
+function setBusy(button, busy, label) {
+  button.disabled = busy;
+  button.textContent = busy ? 'PLEASE WAIT…' : label;
+}
+function showAuth() {
+  $('authView').style.display = 'block';
+  $('profileView').style.display = 'none';
+}
+function showProfile() {
+  $('authView').style.display = 'none';
+  $('profileView').style.display = 'block';
+}
+function setTab(tab) {
+  const signup = tab === 'signup';
+  $('loginTab').classList.toggle('active', !signup);
+  $('signupTab').classList.toggle('active', signup);
+  $('loginForm').style.display = signup ? 'none' : 'block';
+  $('signupForm').style.display = signup ? 'block' : 'none';
+  message('authMessage', '', false);
+}
+$('loginTab').addEventListener('click', () => setTab('login'));
+$('signupTab').addEventListener('click', () => setTab('signup'));
+
+$('loginForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const button = $('loginButton');
+  setBusy(button, true, 'SIGN IN TO CHOME');
+  const { error } = await supabase.auth.signInWithPassword({
+    email: $('loginEmail').value.trim(),
+    password: $('loginPassword').value
+  });
+  setBusy(button, false, 'SIGN IN TO CHOME');
+  if (error) message('authMessage', friendlyError(error));
+});
+
+$('signupForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const button = $('signupButton');
+  const username = $('username').value.trim();
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) {
+    message('authMessage', 'Use 3–20 characters: letters, numbers or underscores.');
+    return;
+  }
+  setBusy(button, true, 'CREATE MY PLAYER ACCOUNT');
+  const { data, error } = await supabase.auth.signUp({
+    email: $('signupEmail').value.trim(),
+    password: $('signupPassword').value,
+    options: {
+      data: { username, display_name: $('displayName').value.trim() },
+      emailRedirectTo: window.location.origin + window.location.pathname
+    }
+  });
+  setBusy(button, false, 'CREATE MY PLAYER ACCOUNT');
+  if (error) {
+    message('authMessage', friendlyError(error));
+    return;
+  }
+  if (data.session) {
+    message('authMessage', 'Your CHOME Player account has been created.');
+  } else {
+    message('authMessage', 'Account created. Check your email inbox (and Spam folder) to verify your address, then return here to sign in.');
+  }
+});
+
+function renderAvatar(url, displayName) {
+  const box = $('avatarPreview');
+  box.innerHTML = '';
+  if (url) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = 'Player avatar';
+    box.append(img);
+  } else {
+    box.textContent = (displayName || '🎮').trim().charAt(0).toUpperCase() || '🎮';
+  }
+}
+async function loadProfile(user) {
+  currentUser = user;
+  const { data, error } = await supabase.from('profiles').select('id,username,display_name,avatar_url,bio').eq('id', user.id).single();
+  if (error) {
+    message('profileMessage', 'Your account is signed in, but the profile could not be loaded: ' + friendlyError(error));
+    showProfile();
+    return;
+  }
+  currentProfile = data;
+  $('profileDisplayHeading').textContent = data.display_name || data.username;
+  $('profileHandle').textContent = '@' + data.username;
+  $('editDisplayName').value = data.display_name || '';
+  $('editUsername').value = data.username || '';
+  $('bio').value = data.bio || '';
+  renderAvatar(data.avatar_url, data.display_name || data.username);
+  showProfile();
+}
+$('profileForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!currentUser) return;
+  const button = $('saveProfile');
+  setBusy(button, true, 'SAVE PROFILE');
+  const updates = {
+    username: $('editUsername').value.trim(),
+    display_name: $('editDisplayName').value.trim(),
+    bio: $('bio').value.trim()
+  };
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(updates.username)) {
+    setBusy(button, false, 'SAVE PROFILE');
+    message('profileMessage', 'Username must be 3–20 letters, numbers or underscores.');
+    return;
+  }
+  const file = $('avatarFile').files[0];
+  if (file) {
+    if (!['image/png','image/jpeg','image/webp'].includes(file.type) || file.size > 2 * 1024 * 1024) {
+      setBusy(button, false, 'SAVE PROFILE');
+      message('profileMessage', 'Choose a PNG, JPG or WebP image no larger than 2 MB.');
+      return;
+    }
+    const extension = file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1];
+    const path = currentUser.id + '/' + crypto.randomUUID() + '.' + extension;
+    const { error: uploadError } = await supabase.storage.from('chome-avatars').upload(path, file, { contentType: file.type, upsert: false });
+    if (uploadError) {
+      setBusy(button, false, 'SAVE PROFILE');
+      message('profileMessage', friendlyError(uploadError));
+      return;
+    }
+    updates.avatar_url = supabase.storage.from('chome-avatars').getPublicUrl(path).data.publicUrl;
+  }
+  const { data, error } = await supabase.from('profiles').update(updates).eq('id', currentUser.id).select('id,username,display_name,avatar_url,bio').single();
+  setBusy(button, false, 'SAVE PROFILE');
+  if (error) {
+    message('profileMessage', friendlyError(error));
+    return;
+  }
+  currentProfile = data;
+  $('profileDisplayHeading').textContent = data.display_name;
+  $('profileHandle').textContent = '@' + data.username;
+  renderAvatar(data.avatar_url, data.display_name);
+  $('avatarFile').value = '';
+  message('profileMessage', 'Your player profile has been updated.');
+});
+$('logoutButton').addEventListener('click', async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) message('profileMessage', friendlyError(error));
+  else {
+    currentUser = null;
+    currentProfile = null;
+    showAuth();
+    setTab('login');
+    message('authMessage', 'You have signed out.');
+  }
+});
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (session?.user) {
+    queueMicrotask(() => loadProfile(session.user));
+  } else {
+    currentUser = null;
+    currentProfile = null;
+    showAuth();
+  }
+});
+const { data: { session } } = await supabase.auth.getSession();
+if (session?.user) await loadProfile(session.user);
+else showAuth();
+</script>
+</body>
+</html>
