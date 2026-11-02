@@ -1,115 +1,23 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090d18">
-<title>Sign In | CHOME Game Studio</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090d18"><title>Sign In | CHOME Game Studio</title>
 <style>
-:root{color-scheme:dark;--bg:#090d18;--line:#ffffff1c;--muted:#9aa7bd;--purple:#8b6cff;--white:#f7f7fb}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#34265f 0,transparent 48%),var(--bg);color:var(--white);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-a{color:inherit;text-decoration:none}button,input{font:inherit}.shell{width:min(1060px,calc(100% - 32px));margin:auto}
-header{height:78px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:11px;font-weight:950;letter-spacing:.12em}.mark{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:var(--purple);font-size:19px}
-.header-link{font-size:12px;color:#d9d1ff;font-weight:850;letter-spacing:.08em}
-main{min-height:calc(100vh - 135px);display:grid;place-items:center;padding:48px 0}.auth-wrap{width:min(100%,470px)}.eyebrow{color:#b9aaff;font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase}
-h1{font-size:clamp(38px,7vw,56px);letter-spacing:-.07em;line-height:1;margin:12px 0}.intro{color:var(--muted);line-height:1.7;font-size:14px;margin:0 0 25px}
-.panel{background:linear-gradient(145deg,#151f35,#101827);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:0 25px 70px #0005}
-.panel h2{font-size:21px;letter-spacing:-.04em;margin:0 0 8px}.sub{font-size:12px;color:var(--muted);line-height:1.65;margin:0 0 22px}
-.field{display:block;margin:16px 0}.field span{display:block;font-size:11px;font-weight:800;color:#cbd2e1;margin-bottom:7px}
-.field input{width:100%;background:#090f1d;border:1px solid #ffffff22;border-radius:11px;color:white;padding:14px;outline:none}
-.field input:focus{border-color:#a895ff;box-shadow:0 0 0 3px #8b6cff22}
-.primary{width:100%;border:0;border-radius:11px;padding:15px 16px;font-size:12px;font-weight:900;letter-spacing:.05em;cursor:pointer;background:var(--purple);color:white;box-shadow:0 10px 26px #8b6cff35}.primary:disabled{opacity:.6;cursor:wait}
-.message{display:none;margin-top:15px;padding:12px 13px;border-radius:10px;background:#201d38;border:1px solid #9b87ff44;color:#e5ddff;font-size:12px;line-height:1.55;overflow-wrap:anywhere}.message.show{display:block}
-.switch{margin:20px 0 0;text-align:center;color:#b8c1d2;font-size:12px}.switch a{color:#c8baff;font-weight:900;text-decoration:underline;text-underline-offset:3px}
-#signupForm{display:none}.guest{display:flex;justify-content:center;gap:8px;margin-top:20px;color:#c9c2e7;font-size:12px;font-weight:800}
-footer{border-top:1px solid var(--line);padding:22px 0;color:#77839b;font-size:11px;display:flex;justify-content:space-between;gap:14px}
-@media(max-width:520px){header{height:70px}.panel{padding:22px}main{padding:30px 0}}
-</style>
-</head>
-<body>
-<div class="shell">
+:root{color-scheme:dark;--bg:#090d18;--line:#ffffff1c;--muted:#9aa7bd;--purple:#8b6cff;--white:#f7f7fb}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#34265f 0,transparent 48%),var(--bg);color:var(--white);font-family:Inter,ui-sans-serif,system-ui,sans-serif}a{color:inherit;text-decoration:none}button,input{font:inherit}.shell{width:min(1060px,calc(100% - 32px));margin:auto}header{height:78px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:11px;font-weight:950;letter-spacing:.12em}.mark{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:var(--purple);font-size:19px}.header-link{font-size:12px;color:#d9d1ff;font-weight:850;letter-spacing:.08em}main{min-height:calc(100vh - 135px);display:grid;place-items:center;padding:42px 0}.auth-wrap{width:min(100%,470px)}.eyebrow{color:#b9aaff;font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase}h1{font-size:clamp(38px,7vw,56px);letter-spacing:-.07em;line-height:1;margin:12px 0}.intro{color:var(--muted);line-height:1.7;font-size:14px;margin:0 0 25px}.panel{background:linear-gradient(145deg,#151f35,#101827);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:0 25px 70px #0005}.panel h2{font-size:21px;letter-spacing:-.04em;margin:0 0 8px}.sub{font-size:12px;color:var(--muted);line-height:1.65;margin:0 0 22px}.field{display:block;margin:16px 0}.field span{display:block;font-size:11px;font-weight:800;color:#cbd2e1;margin-bottom:7px}.field input{width:100%;background:#090f1d;border:1px solid #ffffff22;border-radius:11px;color:white;padding:14px;outline:none}.field input:focus{border-color:#a895ff;box-shadow:0 0 0 3px #8b6cff22}.primary{width:100%;border:0;border-radius:11px;padding:15px 16px;font-size:12px;font-weight:900;letter-spacing:.05em;cursor:pointer;background:var(--purple);color:white}.primary:disabled{opacity:.6;cursor:wait}.message{display:none;margin-top:15px;padding:12px;border-radius:10px;background:#201d38;border:1px solid #9b87ff44;color:#e5ddff;font-size:12px;line-height:1.55}.message.show{display:block}.switch{margin:20px 0 0;text-align:center;color:#b8c1d2;font-size:12px}.switch a{color:#c8baff;font-weight:900;text-decoration:underline;text-underline-offset:3px}#signupView{display:none}.guest{display:flex;justify-content:center;margin-top:20px;color:#c9c2e7;font-size:12px;font-weight:800}footer{border-top:1px solid var(--line);padding:22px 0;color:#77839b;font-size:11px;display:flex;justify-content:space-between;gap:14px}@media(max-width:520px){header{height:70px}.panel{padding:22px}}
+</style></head><body><div class="shell">
 <header><a class="brand" href="index.html"><span class="mark">C</span><span>CHOME <span style="color:#a895ff">PLAYER</span></span></a><a class="header-link" href="index.html">← BACK TO STUDIO</a></header>
-<main>
-<div class="auth-wrap">
-<div class="eyebrow">Your gaming identity starts here</div>
-<h1 id="pageHeading">WELCOME BACK.</h1>
-<p class="intro" id="pageIntro">Sign in to your CHOME Player account to open your player dashboard, manage your profile and continue your games.</p>
-<section class="panel" id="authPanel">
-<div id="loginView">
-<h2>Sign in to CHOME</h2><p class="sub">Use your registered email address and password.</p>
-<form id="loginForm">
-<label class="field"><span>Email address</span><input id="loginEmail" type="email" autocomplete="username" placeholder="you@example.com" required></label>
-<label class="field"><span>Password</span><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required></label>
-<button class="primary" id="loginButton" type="submit">SIGN IN</button>
-</form>
-<p class="switch">Don't have an account? <a href="#" id="showSignup">Sign up here</a></p>
-</div>
-<div id="signupView" style="display:none">
-<h2>Create your player account</h2><p class="sub">One account for your CHOME gaming identity.</p>
-<form id="signupForm">
-<label class="field"><span>Player username (3–20 letters, numbers or underscores)</span><input id="username" type="text" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" title="Use 3–20 characters: letters, numbers or underscores. No spaces." autocomplete="username" placeholder="Example: Chome_26" required></label>
-<label class="field"><span>Display name</span><input id="displayName" type="text" maxlength="40" placeholder="How players will see you" required></label>
-<label class="field"><span>Email address</span><input id="signupEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
-<label class="field"><span>Password (at least 8 characters)</span><input id="signupPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Create a password" required></label>
-<button class="primary" id="signupButton" type="submit">CREATE MY ACCOUNT</button>
-</form>
-<p class="switch">Already have an account? <a href="#" id="showLogin">Sign in here</a></p>
-</div>
-<div class="message" id="authMessage" role="status" aria-live="polite"></div>
-</section>
-<a class="guest" href="fruit-fancy.html">🎮 &nbsp; PLAY FRUIT FANCY AS A GUEST</a>
-</div>
-</main>
-<footer><span>© <span id="year"></span> CHOME GAME STUDIO</span><span>WORLDS WORTH EXPLORING.</span></footer>
-</div>
+<main><div class="auth-wrap"><div class="eyebrow">Your gaming identity starts here</div><h1 id="pageHeading">WELCOME BACK.</h1><p class="intro" id="pageIntro">Sign in to your CHOME Player account to open your player dashboard, manage your profile and continue your games.</p>
+<section class="panel"><div id="loginView"><h2>Sign in to CHOME</h2><p class="sub">Use your registered email address and password.</p><form id="loginForm"><label class="field"><span>Email address</span><input id="loginEmail" type="email" autocomplete="username" placeholder="you@example.com" required></label><label class="field"><span>Password</span><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required></label><button class="primary" id="loginButton">SIGN IN</button></form><p class="switch">Don't have an account? <a href="#" id="showSignup">Sign up here</a></p></div>
+<div id="signupView"><h2>Create your player account</h2><p class="sub">One account for your CHOME gaming identity.</p><form id="signupForm"><label class="field"><span>Player username (3–20 letters, numbers or underscores)</span><input id="username" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" autocomplete="username" placeholder="Example: Chome_26" required></label><label class="field"><span>Display name</span><input id="displayName" maxlength="40" placeholder="How players will see you" required></label><label class="field"><span>Email address</span><input id="signupEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label><label class="field"><span>Password (at least 8 characters)</span><input id="signupPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Create a password" required></label><button class="primary" id="signupButton">CREATE MY ACCOUNT</button></form><p class="switch">Already have an account? <a href="#" id="showLogin">Sign in here</a></p></div><div class="message" id="authMessage" role="status" aria-live="polite"></div></section>
+<a class="guest" href="fruit-fancy.html">🎮 &nbsp; PLAY FRUIT FANCY AS A GUEST</a></div></main>
+<footer><span>© <span id="year"></span> CHOME GAME STUDIO</span><span>WORLDS WORTH EXPLORING.</span></footer></div>
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
-const $=id=>document.getElementById(id);
-$('year').textContent=new Date().getFullYear();
-function message(text,show=true){$('authMessage').textContent=text;$('authMessage').classList.toggle('show',show)}
-function busy(button,on,label){button.disabled=on;button.textContent=on?'PLEASE WAIT…':label}
-function mode(signup){
- $('loginView').style.display=signup?'none':'block';
- $('signupView').style.display=signup?'block':'none';
- $('pageHeading').textContent=signup?'CREATE YOUR PLAYER IDENTITY.':'WELCOME BACK.';
- $('pageIntro').textContent=signup?'Create one account to carry your CHOME gaming identity across the studio.':'Sign in to your CHOME Player account to open your player dashboard, manage your profile and continue your games.';
- message('',false);
-}
-$('showSignup').addEventListener('click',e=>{e.preventDefault();mode(true)});
-$('showLogin').addEventListener('click',e=>{e.preventDefault();mode(false)});
-function friendly(error){
- const raw=error?.message||'Something went wrong. Please try again.';
- if(/already registered|user already exists/i.test(raw))return 'An account with this email already exists. Please sign in instead.';
- if(/invalid login credentials/i.test(raw))return 'Email address or password is incorrect.';
- if(/email not confirmed/i.test(raw))return 'Please confirm your email address using the link we sent before signing in.';
- if(/password should be at least/i.test(raw))return 'Your password must contain at least 8 characters.';
- if(/duplicate key|unique constraint|profiles_username_lower_unique_idx/i.test(raw))return 'That username is already taken. Please choose another one.';
- return raw;
-}
-$('loginForm').addEventListener('submit',async e=>{
- e.preventDefault();const button=$('loginButton');busy(button,true,'SIGN IN');
- const {error}=await supabase.auth.signInWithPassword({email:$('loginEmail').value.trim().toLowerCase(),password:$('loginPassword').value});
- busy(button,false,'SIGN IN');
- if(error)message(friendly(error));else window.location.replace('dashboard.html');
-});
-$('signupForm').addEventListener('submit',async e=>{
- e.preventDefault();const button=$('signupButton');
- const username=$('username').value.trim(),email=$('signupEmail').value.trim().toLowerCase();
- if(!/^[A-Za-z0-9_]{3,20}$/.test(username)){message('Use 3–20 characters: letters, numbers or underscores.');return}
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){message('Enter a valid email address.');return}
- busy(button,true,'CREATE MY ACCOUNT');
- const {data,error}=await supabase.auth.signUp({email,password:$('signupPassword').value,options:{emailRedirectTo:'https://chomemw.github.io/chome-game-studio/dashboard.html',data:{username,display_name:$('displayName').value.trim()}}});
- busy(button,false,'CREATE MY ACCOUNT');
- if(error){message(friendly(error));return}
- if(data.session)window.location.replace('dashboard.html');
- else message('Your account has been created. Check your email inbox (and Spam folder) for the confirmation link. After confirming, return here and sign in.');
-});
-const {data:{session}}=await supabase.auth.getSession();
-if(session?.user)window.location.replace('dashboard.html');
-const notice=new URLSearchParams(location.search).get('notice');
-if(notice==='signin')message('Please sign in to open your player dashboard.');
-</script>
-</body>
-</html>
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');const $=id=>document.getElementById(id);$('year').textContent=new Date().getFullYear();
+function message(t,show=true){$('authMessage').textContent=t;$('authMessage').classList.toggle('show',show)}
+function busy(b,on,label){b.disabled=on;b.textContent=on?'PLEASE WAIT…':label}
+function mode(signup){$('loginView').style.display=signup?'none':'block';$('signupView').style.display=signup?'block':'none';$('pageHeading').textContent=signup?'CREATE YOUR PLAYER IDENTITY.':'WELCOME BACK.';$('pageIntro').textContent=signup?'Create one account to carry your CHOME gaming identity across the studio.':'Sign in to your CHOME Player account to open your player dashboard, manage your profile and continue your games.';message('',false)}
+function friendly(e){const r=e?.message||'Something went wrong. Please try again.';if(/already registered|user already exists/i.test(r))return 'An account with this email already exists. Please sign in instead.';if(/invalid login credentials/i.test(r))return 'Email address or password is incorrect.';if(/email not confirmed/i.test(r))return 'Please confirm your email address using the link we sent before signing in.';if(/password should be at least/i.test(r))return 'Your password must contain at least 8 characters.';if(/duplicate key|unique constraint|profiles_username_lower_unique_idx/i.test(r))return 'That username is already taken. Please choose another one.';return r}
+$('showSignup').onclick=e=>{e.preventDefault();mode(true)};$('showLogin').onclick=e=>{e.preventDefault();mode(false)};
+$('loginForm').onsubmit=async e=>{e.preventDefault();const b=$('loginButton');busy(b,true,'SIGN IN');const {error}=await supabase.auth.signInWithPassword({email:$('loginEmail').value.trim().toLowerCase(),password:$('loginPassword').value});busy(b,false,'SIGN IN');if(error)message(friendly(error));else window.location.replace('dashboard.html')};
+$('signupForm').onsubmit=async e=>{e.preventDefault();const b=$('signupButton'),username=$('username').value.trim(),email=$('signupEmail').value.trim().toLowerCase();if(!/^[A-Za-z0-9_]{3,20}$/.test(username)){message('Use 3–20 characters: letters, numbers or underscores.');return}busy(b,true,'CREATE MY ACCOUNT');const {data,error}=await supabase.auth.signUp({email,password:$('signupPassword').value,options:{emailRedirectTo:'https://chomemw.github.io/chome-game-studio/dashboard.html',data:{username,display_name:$('displayName').value.trim()}}});busy(b,false,'CREATE MY ACCOUNT');if(error){message(friendly(error));return}if(data.session)window.location.replace('dashboard.html');else message('Your account has been created. Check your email inbox (and Spam folder) for the confirmation link. After confirming, return here and sign in.')};
+const {data:{session}}=await supabase.auth.getSession();if(session?.user)window.location.replace('dashboard.html');if(new URLSearchParams(location.search).get('notice')==='signin')message('Please sign in to open your player dashboard.');
+</script></body></html>
