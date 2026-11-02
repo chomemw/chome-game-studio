@@ -83,7 +83,8 @@ function renderAvatar(url,name){
  else {const initial=(name||'🎮').trim().charAt(0).toUpperCase()||'🎮';box.textContent=initial;mini.textContent=initial}
 }
 async function loadProfile(user){
- currentUser=user;.select('id,username,display_name,avatar_url,bio').eq('id',user.id).single();
+ currentUser=user;$('accountEmail').textContent=user.email||'Not available';
+ const {data,error}=await supabase.from('profiles').select('id,username,display_name,avatar_url,bio').eq('id',user.id).single();
  if(error){message('You are signed in, but your player profile could not be loaded: '+friendly(error));return}
  $('profileDisplayHeading').textContent=data.display_name||data.username;
  $('profileHandle').textContent='@'+data.username;
