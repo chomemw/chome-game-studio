@@ -39,7 +39,7 @@ button{touch-action:manipulation}
 <div><span class="block text-xs uppercase text-cyan-200">Moves</span><b id="movesText" class="text-2xl text-cyan-300">18</b></div>
 </div>
 <div class="w-full bg-black/30 rounded-full h-3 border border-white/20 p-0.5 overflow-hidden"><div id="progressBar" class="bg-gradient-to-r from-yellow-400 to-green-400 h-full rounded-full w-0 transition-all"></div></div>
-<div id="cloudSaveStatus" class="w-full text-center text-xs text-white/80 py-1" aria-live="polite">Guest play · <a href="player.html" class="underline text-yellow-200 font-bold">Sign in</a> to sync progress across devices</div>
+<div id="cloudSaveStatus" class="w-full text-center text-xs text-white/80 py-1" aria-live="polite"><span id="cloudSaveMessage">Guest play</span><span id="cloudSaveGuestSuffix"> · <a id="cloudSaveLink" href="player.html" class="underline text-yellow-200 font-bold">Sign in</a> to sync progress across devices</span></div>
 </header>
 <main class="relative w-full max-w-md aspect-square my-auto flex items-center justify-center">
 <div id="boardContainer" class="relative w-full h-full game-board rounded-3xl p-2 sm:p-3 border-2 border-white/30 overflow-hidden">
@@ -60,8 +60,7 @@ const N=6,FRUITS=[['apple','🍎','#ff4d4d'],['banana','🍌','#ffeb3b'],['grape
 const LEVELS=[{target:400,moves:18,ice:0,bombs:0},{target:700,moves:20,ice:3,bombs:0},{target:1100,moves:22,ice:4,bombs:2},{target:1600,moves:20,ice:6,bombs:3},{target:2200,moves:24,ice:8,bombs:4}];
 let level=0,score=0,target=400,moves=18,board=[],path=[],dragging=false,busy=false,sound=true,audio=null,particles=[];
 let currentPlayer=null,saveChain=Promise.resolve(),initialized=false;
-const saveStatus=$("cloudSaveStatus");
-function setCloudStatus(text){if(saveStatus)saveStatus.textContent=text;}
+function setCloudStatus(text){const el=document.getElementById("cloudSaveMessage");if(el)el.textContent=text;const suffix=document.getElementById("cloudSaveGuestSuffix");if(suffix)suffix.style.display=currentPlayer?"none":"inline";}
 function gameSnapshot(){return {version:1,level,score,target,moves,sound,board:board.map(row=>row.map(cell=>({fruit:cell.fruit.type,ice:!!cell.ice,bomb:!!cell.bomb})))};}
 async function saveGame(){
  if(!currentPlayer||!board.length)return;
