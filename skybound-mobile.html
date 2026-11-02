@@ -1,144 +1,306 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tears of the Kingdom: Sky Sandbox 3D</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
-    <style>
-        * { user-select:none; -webkit-user-select:none; touch-action:manipulation; box-sizing:border-box; }
-        body { font-family:'Rajdhani',sans-serif; background:#050a12; color:#fff; overflow:hidden; margin:0; padding:0; }
-        .font-cinzel { font-family:'Cinzel',serif; }
-        .hud-glass { background:rgba(8,16,28,.75); backdrop-filter:blur(10px); border:1px solid rgba(56,189,248,.25); box-shadow:0 8px 32px rgba(0,0,0,.6); }
-        .ability-btn { background:rgba(15,23,42,.8); border:2px solid rgba(56,189,248,.4); border-radius:9999px; display:flex; align-items:center; justify-content:center; transition:all .15s ease-out; box-shadow:0 4px 15px rgba(0,0,0,.5); }
-        .ability-btn.active { border-color:#38bdf8; background:rgba(56,189,248,.35); box-shadow:0 0 20px rgba(56,189,248,.8); transform:scale(1.1); }
-        .ability-btn:active { transform:scale(.92); }
-        #joystick-base { width:110px; height:110px; border-radius:50%; background:rgba(255,255,255,.08); border:2px solid rgba(56,189,248,.3); position:relative; touch-action:none; }
-        #joystick-stick { width:44px; height:44px; border-radius:50%; background:radial-gradient(circle,#38bdf8,#0284c7); position:absolute; top:33px; left:33px; box-shadow:0 0 15px rgba(56,189,248,.8); pointer-events:none; }
-        .reticle-fuse { border-color:#22c55e!important; box-shadow:0 0 15px #22c55e!important; }
-        .reticle-recall { border-color:#eab308!important; box-shadow:0 0 15px #eab308!important; }
-        .reticle-ascend { border-color:#38bdf8!important; box-shadow:0 0 15px #38bdf8!important; }
-        @keyframes pulseGlow { 0%,100%{opacity:.4} 50%{opacity:.9} }
-        .animate-glow { animation:pulseGlow 2s infinite ease-in-out; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1a1a2e">
+<title>Fruit Slicer Arcade | CHOME Game Studio</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:20px 12px;background:#090d18;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;justify-content:center;align-items:flex-start}
+#game-container{text-align:center;background:#1a1a2e;color:#fff;padding:20px;border-radius:12px;width:min(600px,100%);margin:0 auto}
+#game-container h2{margin-top:0;color:#ff6b6b}
+.scorebar{display:flex;justify-content:space-around;margin-bottom:10px;font-size:18px;font-weight:bold}
+#score{color:#4cd137}#lives{color:#e84118}
+.canvas-wrap{position:relative;display:block;width:100%;max-width:500px;margin:0 auto}
+#fruitCanvas{display:block;width:100%;height:auto;aspect-ratio:5/4;background:linear-gradient(to bottom,#0f0c29,#302b63,#24243e);border-radius:8px;cursor:crosshair;touch-action:none;box-shadow:0 8px 16px rgba(0,0,0,.5)}
+.overlay{position:absolute;inset:0;width:100%;height:100%;border-radius:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:16px}
+#start-screen{background:rgba(0,0,0,.85)}
+#game-over-screen{background:rgba(0,0,0,.9);display:none}
+.overlay h1{margin:0 0 10px}
+#start-screen h1{color:#ff9ff3}
+#game-over-screen h1{color:#e84118;margin-bottom:5px}
+.overlay p{color:#dcdde1;margin:0 0 20px;font-size:14px;max-width:360px}
+#game-over-screen p{font-size:20px;margin-bottom:15px}
+#final-score{color:#4cd137;font-weight:bold}
+.game-btn{color:white;border:0;padding:12px 30px;font-size:18px;font-weight:bold;border-radius:25px;cursor:pointer}
+#start-btn{background:#4cd137;box-shadow:0 4px 15px rgba(76,209,55,.4)}
+#restart-btn{background:#ff6b6b}
+@media(max-width:420px){body{padding:10px 8px}#game-container{padding:12px 8px}.scorebar{font-size:16px}.overlay h1{font-size:25px}.overlay p{font-size:12px}}
+</style>
 </head>
-<body class="w-screen h-screen relative overflow-hidden bg-slate-950">
-    <div id="canvas-container" class="w-full h-full absolute inset-0"></div>
-    <div id="reticle" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 border-2 border-white/60 rounded-full pointer-events-none transition-all z-10 flex items-center justify-center"><div class="w-1.5 h-1.5 bg-white rounded-full"></div></div>
-    <div id="hud" class="absolute inset-0 p-4 md:p-6 pointer-events-none flex flex-col justify-between z-10">
-        <div class="flex justify-between items-start w-full">
-            <div class="flex flex-col gap-2 pointer-events-auto">
-                <div class="hud-glass px-4 py-2 rounded-2xl flex items-center gap-2">
-                    <div class="flex gap-1 text-red-500 text-lg drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" id="heart-container"><i class="fa-solid fa-heart"></i><i class="fa-solid fa-heart"></i><i class="fa-solid fa-heart"></i><i class="fa-solid fa-heart"></i></div>
-                </div>
-                <div class="hud-glass px-3 py-1.5 rounded-xl w-36">
-                    <div class="text-[10px] text-cyan-300 font-bold tracking-wider mb-1">STAMINA / BATTERY</div>
-                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-cyan-500/30"><div id="stamina-fill" class="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 w-full transition-all"></div></div>
-                </div>
-            </div>
-            <div class="hud-glass px-5 py-3 rounded-2xl text-right border border-cyan-500/40">
-                <div class="text-xs font-bold text-amber-400 tracking-widest uppercase">Zonai Quest</div>
-                <div class="text-xl font-cinzel font-bold text-cyan-200">Orbs: <span id="orb-count" class="text-amber-300">0</span> / 4</div>
-                <div class="text-[11px] text-slate-300 mt-0.5" id="quest-desc">Find Shrines & Activate Relics</div>
-            </div>
-        </div>
-        <div class="self-center hud-glass px-4 py-2 rounded-full flex gap-3 pointer-events-auto border border-cyan-500/40">
-            <button id="ab-ultra" class="ability-btn active w-10 h-10 text-emerald-400" title="Ultrahand (Weld Objects)"><i class="fa-solid fa-hand text-lg"></i></button>
-            <button id="ab-recall" class="ability-btn w-10 h-10 text-amber-400" title="Recall (Reverse Time)"><i class="fa-solid fa-rotate-left text-lg"></i></button>
-            <button id="ab-ascend" class="ability-btn w-10 h-10 text-cyan-400" title="Ascend (Phase Ceiling)"><i class="fa-solid fa-arrow-up-from-ground-water text-lg"></i></button>
-            <button id="ab-weapon" class="ability-btn w-10 h-10 text-red-400" title="Strike / Weapon Attack"><i class="fa-solid fa-wand-magic-sparkles text-lg"></i></button>
-        </div>
-        <div class="flex justify-between items-end w-full">
-            <div class="pointer-events-auto md:hidden ml-2 mb-2"><div id="joystick-base"><div id="joystick-stick"></div></div></div>
-            <div id="ability-hint" class="hud-glass px-4 py-2 rounded-xl text-center text-xs text-cyan-200 max-w-xs self-end mb-2 hidden md:block"><span class="font-bold text-emerald-400">ULTRAHAND ACTIVE:</span> Aim reticle at objects and click <kbd class="px-1.5 py-0.5 bg-slate-800 rounded">E</kbd> to grab/weld together!</div>
-            <div class="pointer-events-auto flex flex-col gap-2 mr-2 md:hidden"><button id="btn-jump" class="ability-btn w-14 h-14 text-white text-xs font-bold">JUMP</button><button id="btn-action" class="ability-btn w-14 h-14 bg-cyan-600/60 text-white text-xs font-bold border-cyan-400">ACT</button></div>
-        </div>
+<body>
+<div id="game-container">
+  <h2>🍉 Fruit Slicer Arcade 🍎</h2>
+  <div class="scorebar">
+    <div>Score: <span id="score">0</span></div>
+    <div>Lives: <span id="lives">❤️❤️❤️</span></div>
+  </div>
+  <div class="canvas-wrap">
+    <canvas id="fruitCanvas" width="500" height="400"></canvas>
+    <div id="start-screen" class="overlay">
+      <h1>Ready to Slice?</h1>
+      <p>Drag your mouse or finger rapidly across the fruits to slice them. Avoid the black bombs!</p>
+      <button id="start-btn" class="game-btn">START GAME</button>
     </div>
-    <div id="toast" class="absolute top-20 left-1/2 -translate-x-1/2 hud-glass px-6 py-3 rounded-2xl text-center z-20 opacity-0 transition-opacity pointer-events-none border border-cyan-400"><h2 id="toast-title" class="font-cinzel text-xl text-amber-400 font-bold">SHRINE DISCOVERED</h2><p id="toast-body" class="text-xs text-slate-200 mt-1">Light of Blessing obtained!</p></div>
-    <div id="menu-modal" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md z-30 flex items-center justify-center p-4">
-        <div class="w-full max-w-xl hud-glass rounded-3xl p-6 md:p-8 flex flex-col gap-5 text-center border border-cyan-500/50">
-            <div><span class="text-xs font-bold text-amber-400 uppercase tracking-widest">3D Physics Sandbox Adventure</span><h1 class="text-3xl md:text-5xl font-cinzel font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-emerald-300 to-amber-300 mt-1">TEARS OF THE SKY</h1><p class="text-xs text-slate-300 mt-1">Master Zonai abilities to build vehicles, reverse time, phase through ceilings, and solve shrines!</p></div>
-            <div class="grid grid-cols-2 gap-3 text-left bg-slate-900/80 p-4 rounded-2xl border border-white/10 text-xs">
-                <div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">1</span><b>Ultrahand (E):</b> Grab & Weld items</div>
-                <div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">2</span><b>Recall (R):</b> Rewind object time</div>
-                <div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">3</span><b>Ascend (F):</b> Shoot up ceilings</div>
-                <div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center font-bold">4</span><b>Controls:</b> WASD + Mouse / Touch</div>
-            </div>
-            <button id="btn-start" class="w-full py-4 rounded-2xl font-cinzel font-bold text-lg text-slate-950 bg-gradient-to-r from-cyan-400 via-emerald-400 to-amber-400 hover:brightness-110 shadow-[0_0_25px_rgba(56,189,248,0.5)] active:scale-95 transition">ENTER THE SKY REALM</button>
-        </div>
+    <div id="game-over-screen" class="overlay">
+      <h1>Game Over!</h1>
+      <p>Final Score: <span id="final-score">0</span></p>
+      <button id="restart-btn" class="game-btn">PLAY AGAIN</button>
     </div>
-    <script>
-        class AudioSynth {
-            constructor(){this.ctx=null}
-            init(){if(!this.ctx)this.ctx=new(window.AudioContext||window.webkitAudioContext)()}
-            playTone(freq,type='sine',duration=.2,gainVal=.3){this.init();const now=this.ctx.currentTime,osc=this.ctx.createOscillator(),gain=this.ctx.createGain();osc.type=type;osc.frequency.setValueAtTime(freq,now);gain.gain.setValueAtTime(gainVal,now);gain.gain.exponentialRampToValueAtTime(.001,now+duration);osc.connect(gain);gain.connect(this.ctx.destination);osc.start();osc.stop(now+duration)}
-            playUltrahand(){this.playTone(440,'sine',.1,.4);setTimeout(()=>this.playTone(660,'triangle',.2,.3),80)}
-            playRecall(){this.playTone(880,'sine',.15,.3);setTimeout(()=>this.playTone(440,'sine',.3,.3),100)}
-            playAscend(){this.playTone(300,'sawtooth',.1,.2);setTimeout(()=>this.playTone(900,'sine',.4,.4),100)}
-            playOrb(){this.playTone(523.25,'triangle',.2,.4);setTimeout(()=>this.playTone(659.25,'triangle',.2,.4),150);setTimeout(()=>this.playTone(783.99,'triangle',.4,.5),300)}
+  </div>
+  <p style="color:#aab3c7;font-size:12px;margin:12px 0 0">Swipe across fruit to score points. Don't let fruit fall!</p>
+</div>
+<script>
+(function() {
+  const canvas = document.getElementById('fruitCanvas');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const livesEl = document.getElementById('lives');
+  const startScreen = document.getElementById('start-screen');
+  const gameOverScreen = document.getElementById('game-over-screen');
+  const startBtn = document.getElementById('start-btn');
+  const restartBtn = document.getElementById('restart-btn');
+  const finalScoreEl = document.getElementById('final-score');
+
+  let score = 0;
+  let lives = 3;
+  let gameRunning = false;
+  let fruits = [];
+  let particles = [];
+  let bladeTrail = [];
+  let spawnTimer = 0;
+
+  const fruitTypes = [
+    { name: '🍉', color: '#ff4757', radius: 30 },
+    { name: '🍎', color: '#ff6b81', radius: 26 },
+    { name: '🍊', color: '#ffa502', radius: 25 },
+    { name: '🍌', color: '#eccc68', radius: 28 },
+    { name: '🥝', color: '#7bed9f', radius: 22 },
+    { name: '💣', color: '#2f3640', radius: 25, isBomb: true }
+  ];
+
+  function startGame() {
+    score = 0;
+    lives = 3;
+    fruits = [];
+    particles = [];
+    bladeTrail = [];
+    spawnTimer = 0;
+    scoreEl.textContent = score;
+    updateLivesDisplay();
+    startScreen.style.display = 'none';
+    gameOverScreen.style.display = 'none';
+    gameRunning = true;
+    lastTime = performance.now();
+    requestAnimationFrame(gameLoop);
+  }
+
+  function gameOver() {
+    gameRunning = false;
+    finalScoreEl.textContent = score;
+    gameOverScreen.style.display = 'flex';
+  }
+
+  function updateLivesDisplay() {
+    livesEl.textContent = '❤️'.repeat(Math.max(0, lives));
+  }
+
+  let isDragging = false;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height)
+    };
+  }
+
+  canvas.addEventListener('mousedown', (e) => {
+    if (!gameRunning) return;
+    isDragging = true;
+    bladeTrail = [getPos(e)];
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!isDragging || !gameRunning) return;
+    const pos = getPos(e);
+    bladeTrail.push(pos);
+    if (bladeTrail.length > 8) bladeTrail.shift();
+    checkSlice(pos);
+  });
+
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+    bladeTrail = [];
+  });
+
+  canvas.addEventListener('touchstart', (e) => {
+    if (!gameRunning) return;
+    isDragging = true;
+    bladeTrail = [getPos(e)];
+    e.preventDefault();
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (e) => {
+    if (!isDragging || !gameRunning) return;
+    const pos = getPos(e);
+    bladeTrail.push(pos);
+    if (bladeTrail.length > 8) bladeTrail.shift();
+    checkSlice(pos);
+    e.preventDefault();
+  }, { passive: false });
+
+  window.addEventListener('touchend', () => {
+    isDragging = false;
+    bladeTrail = [];
+  });
+
+  function checkSlice(pos) {
+    fruits.forEach(f => {
+      if (!f.sliced) {
+        const dist = Math.hypot(f.x - pos.x, f.y - pos.y);
+        if (dist < f.radius + 10) {
+          f.sliced = true;
+          if (f.isBomb) {
+            lives = 0;
+            updateLivesDisplay();
+            gameOver();
+          } else {
+            score += 10;
+            scoreEl.textContent = score;
+            createSplash(f.x, f.y, f.color);
+          }
         }
-        const audio=new AudioSynth();
-        class SkyGameEngine {
-            constructor(){
-                this.container=document.getElementById('canvas-container');this.activeAbility='ultra';this.orbsCollected=0;this.stamina=100;this.keys={};this.joyVector={x:0,y:0};this.mouse=new THREE.Vector2();this.raycaster=new THREE.Raycaster();this.heldBody=null;this.heldMesh=null;this.weldedGroups=[];this.recallableObjects=[];this.lastTime=performance.now();this.initThree();this.initCannon();this.createSkyWorld();this.createPlayer();this.bindEvents()
-            }
-            initThree(){
-                this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0x0c192c);this.scene.fog=new THREE.FogExp2(0x0c192c,.012);this.camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,.1,500);this.renderer=new THREE.WebGLRenderer({antialias:true});this.renderer.setSize(window.innerWidth,window.innerHeight);this.renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));this.renderer.shadowMap.enabled=true;this.container.appendChild(this.renderer.domElement);this.scene.add(new THREE.AmbientLight(0xdbeafe,.7));const sun=new THREE.DirectionalLight(0xfef08a,1.4);sun.position.set(40,80,40);sun.castShadow=true;sun.shadow.mapSize.width=2048;sun.shadow.mapSize.height=2048;this.scene.add(sun)
-            }
-            initCannon(){this.world=new CANNON.World();this.world.gravity.set(0,-18,0);this.world.broadphase=new CANNON.NaiveBroadphase();this.world.solver.iterations=10}
-            createPlayer(){
-                const group=new THREE.Group(),bodyGeo=new THREE.CylinderGeometry(.4,.4,1.6,16),bodyMat=new THREE.MeshStandardMaterial({color:0x38bdf8,roughness:.3}),mesh=new THREE.Mesh(bodyGeo,bodyMat);mesh.castShadow=true;group.add(mesh);const head=new THREE.Mesh(new THREE.SphereGeometry(.3,16,16),new THREE.MeshStandardMaterial({color:0xfef08a}));head.position.y=.9;group.add(head);this.playerMesh=group;this.scene.add(this.playerMesh);const shape=new CANNON.Cylinder(.4,.4,1.6,16);this.playerBody=new CANNON.Body({mass:70,shape});this.playerBody.position.set(0,10,0);this.playerBody.fixedRotation=true;this.world.addBody(this.playerBody)
-            }
-            createSkyWorld(){
-                this.physicsObjects=[];this.createIsland(0,0,0,40,4,40,0x1e293b);this.createIsland(0,8,-20,16,2,16,0x0f172a);this.createIsland(45,4,-30,25,3,25,0x1e293b);this.createShrine(0,9,-20,1);this.createShrine(45,5.5,-30,2);this.spawnZonaiObject('LOG',-6,2,5);this.spawnZonaiObject('LOG',-6,3.5,5);this.spawnZonaiObject('FAN',-2,2,6);this.spawnZonaiObject('FAN',2,2,6);this.spawnZonaiObject('WHEEL',-4,2,8);this.spawnZonaiObject('WHEEL',4,2,8);this.spawnZonaiObject('SLATE',0,2,10)
-            }
-            createIsland(x,y,z,w,h,d,color){
-                const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:.8}));mesh.position.set(x,y,z);mesh.receiveShadow=true;this.scene.add(mesh);const body=new CANNON.Body({mass:0,shape:new CANNON.Box(new CANNON.Vec3(w/2,h/2,d/2))});body.position.set(x,y,z);this.world.addBody(body)
-            }
-            createShrine(x,y,z,id){
-                const group=new THREE.Group(),arch=new THREE.Mesh(new THREE.TorusGeometry(2,.4,16,32),new THREE.MeshStandardMaterial({color:0x38bdf8,emissive:0x0284c7,emissiveIntensity:.6}));arch.rotation.x=Math.PI/2;group.add(arch);const orb=new THREE.Mesh(new THREE.SphereGeometry(.8,32,32),new THREE.MeshStandardMaterial({color:0xfef08a,emissive:0xeab308,emissiveIntensity:.9}));orb.position.y=1.5;group.add(orb);group.position.set(x,y,z);this.scene.add(group);orb.userData={isOrb:true,id,parentGroup:group}
-            }
-            spawnZonaiObject(type,x,y,z){
-                let geo,mat,shape,mass=15;
-                if(type==='LOG'){geo=new THREE.CylinderGeometry(.4,.4,4,16);mat=new THREE.MeshStandardMaterial({color:0x78350f,roughness:.7});shape=new CANNON.Cylinder(.4,.4,4,16)}
-                else if(type==='FAN'){geo=new THREE.BoxGeometry(1.2,.6,1.2);mat=new THREE.MeshStandardMaterial({color:0x10b981,roughness:.3});shape=new CANNON.Box(new CANNON.Vec3(.6,.3,.6))}
-                else if(type==='WHEEL'){geo=new THREE.CylinderGeometry(.8,.8,.4,16);mat=new THREE.MeshStandardMaterial({color:0x64748b,roughness:.4});shape=new CANNON.Cylinder(.8,.8,.4,16)}
-                else if(type==='SLATE'){geo=new THREE.BoxGeometry(4,.3,4);mat=new THREE.MeshStandardMaterial({color:0x334155,roughness:.6});shape=new CANNON.Box(new CANNON.Vec3(2,.15,2));mass=25}
-                const mesh=new THREE.Mesh(geo,mat);mesh.castShadow=true;mesh.receiveShadow=true;this.scene.add(mesh);const body=new CANNON.Body({mass,shape});body.position.set(x,y,z);this.world.addBody(body);const item={mesh,body,type,history:[]};this.physicsObjects.push(item);this.recallableObjects.push(item)
-            }
-            bindEvents(){
-                window.addEventListener('resize',()=>this.onResize());window.addEventListener('keydown',e=>{this.keys[e.key.toLowerCase()]=true;if(e.key==='1')this.setAbility('ultra');if(e.key==='2')this.setAbility('recall');if(e.key==='3')this.setAbility('ascend');if(e.key==='4')this.setAbility('weapon');if(e.key.toLowerCase()==='e')this.useActiveAbility();if(e.key.toLowerCase()==='r')this.setAbility('recall');if(e.key.toLowerCase()==='f')this.setAbility('ascend');if(e.code==='Space')this.playerJump()});window.addEventListener('keyup',e=>{this.keys[e.key.toLowerCase()]=false});document.getElementById('ab-ultra').onclick=()=>this.setAbility('ultra');document.getElementById('ab-recall').onclick=()=>this.setAbility('recall');document.getElementById('ab-ascend').onclick=()=>this.setAbility('ascend');document.getElementById('ab-weapon').onclick=()=>this.setAbility('weapon');document.getElementById('btn-start').onclick=()=>{document.getElementById('menu-modal').classList.add('hidden');audio.init()};document.getElementById('btn-jump').onclick=()=>this.playerJump();document.getElementById('btn-action').onclick=()=>this.useActiveAbility();
-                const joyBase=document.getElementById('joystick-base'),joyStick=document.getElementById('joystick-stick');const handleMove=e=>{const touch=e.touches[0],rect=joyBase.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;let dx=touch.clientX-cx,dy=touch.clientY-cy;const dist=Math.hypot(dx,dy),maxDist=40;if(dist>maxDist){dx=dx/dist*maxDist;dy=dy/dist*maxDist}joyStick.style.transform='translate('+dx+'px, '+dy+'px)';this.joyVector.x=dx/maxDist;this.joyVector.y=dy/maxDist};const handleEnd=()=>{joyStick.style.transform='translate(0px, 0px)';this.joyVector={x:0,y:0}};joyBase.addEventListener('touchstart',e=>{e.preventDefault();handleMove(e)},{passive:false});joyBase.addEventListener('touchmove',e=>{e.preventDefault();handleMove(e)},{passive:false});joyBase.addEventListener('touchend',e=>{e.preventDefault();handleEnd()},{passive:false});joyBase.addEventListener('touchcancel',handleEnd)
-            }
-            setAbility(ab){this.activeAbility=ab;document.querySelectorAll('.ability-btn').forEach(b=>b.classList.remove('active'));document.getElementById('ab-'+ab).classList.add('active');const reticle=document.getElementById('reticle');reticle.className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 border-2 rounded-full pointer-events-none transition-all z-10 flex items-center justify-center';if(ab==='ultra')reticle.classList.add('reticle-fuse');if(ab==='recall')reticle.classList.add('reticle-recall');if(ab==='ascend')reticle.classList.add('reticle-ascend')}
-            useActiveAbility(){if(this.activeAbility==='ultra')this.triggerUltrahand();if(this.activeAbility==='recall')this.triggerRecall();if(this.activeAbility==='ascend')this.triggerAscend();if(this.activeAbility==='weapon')this.showToast('WEAPON NOT READY','Combat will be introduced in a later build.')}
-            triggerUltrahand(){
-                if(this.heldBody){this.heldBody=null;this.heldMesh=null;this.showToast('Ultrahand Released','Object dropped into physics simulation.');return}
-                this.raycaster.setFromCamera(new THREE.Vector2(0,0),this.camera);const intersects=this.raycaster.intersectObjects(this.physicsObjects.map(o=>o.mesh));if(intersects.length){const matchedObj=this.physicsObjects.find(o=>o.mesh===intersects[0].object);if(matchedObj){this.heldMesh=matchedObj.mesh;this.heldBody=matchedObj.body;audio.playUltrahand();this.showToast('Ultrahand Attached','Aim reticle and press ACT to glue to nearby objects!');this.physicsObjects.forEach(other=>{if(other.body!==this.heldBody&&other.body.position.distanceTo(this.heldBody.position)<2.5){this.world.addConstraint(new CANNON.LockConstraint(this.heldBody,other.body));this.showToast('WELD SUCCESSFUL!','Objects joined into dynamic Zonai assembly!')}})}}
-            }
-            triggerRecall(){
-                this.raycaster.setFromCamera(new THREE.Vector2(0,0),this.camera);const intersects=this.raycaster.intersectObjects(this.physicsObjects.map(o=>o.mesh));if(intersects.length){const matchedObj=this.physicsObjects.find(o=>o.mesh===intersects[0].object);if(matchedObj&&matchedObj.history.length){audio.playRecall();this.showToast('RECALL ACTIVATED','Rewinding object movement through time...');let rewindIdx=matchedObj.history.length-1;const rewindInterval=setInterval(()=>{if(rewindIdx<0){clearInterval(rewindInterval);return}const snap=matchedObj.history[rewindIdx];matchedObj.body.position.copy(snap.pos);matchedObj.body.quaternion.copy(snap.quat);rewindIdx-=2},30)}}
-            }
-            triggerAscend(){
-                const ray=new THREE.Raycaster(this.playerMesh.position,new THREE.Vector3(0,1,0),0,15),intersects=ray.intersectObjects(this.scene.children,true);if(intersects.length){audio.playAscend();this.showToast('ASCEND!','Phasing upwards through ceiling structure...');this.playerBody.position.y=intersects[0].point.y+2.5;this.playerBody.velocity.set(0,0,0)}else this.showToast('ASCEND FAILED','No valid ceiling surface directly above.')
-            }
-            playerJump(){if(Math.abs(this.playerBody.velocity.y)<.2)this.playerBody.velocity.y=8.5}
-            showToast(title,body){const toast=document.getElementById('toast');document.getElementById('toast-title').textContent=title;document.getElementById('toast-body').textContent=body;toast.style.opacity='1';setTimeout(()=>toast.style.opacity='0',2200)}
-            updatePlayerControls(){
-                let moveX=0,moveZ=0;if(this.keys.w)moveZ-=1;if(this.keys.s)moveZ+=1;if(this.keys.a)moveX-=1;if(this.keys.d)moveX+=1;if(this.joyVector.x!==0||this.joyVector.y!==0){moveX=this.joyVector.x;moveZ=this.joyVector.y}const speed=7;this.playerBody.velocity.x=moveX*speed;this.playerBody.velocity.z=moveZ*speed;this.playerMesh.position.copy(this.playerBody.position);
-                this.scene.traverse(child=>{if(child.userData&&child.userData.isOrb){const dist=this.playerMesh.position.distanceTo(child.parentGroup.position);if(dist<2){this.scene.remove(child.parentGroup);child.userData.isOrb=false;this.orbsCollected++;audio.playOrb();document.getElementById('orb-count').textContent=this.orbsCollected;this.showToast('LIGHT OF BLESSING!','Shrine completed! Teleportation portal unlocked.')}}})
-            }
-            updateHeldObject(){if(this.heldBody&&this.heldMesh){const forward=new THREE.Vector3(0,0,-3.5).applyQuaternion(this.camera.quaternion),targetPos=this.playerMesh.position.clone().add(forward);targetPos.y=Math.max(targetPos.y,1.5);this.heldBody.position.copy(targetPos);this.heldBody.velocity.set(0,0,0)}}
-            recordPhysicsHistory(){this.recallableObjects.forEach(obj=>{obj.history.push({pos:obj.body.position.clone(),quat:obj.body.quaternion.clone()});if(obj.history.length>300)obj.history.shift()})}
-            updateCamera(){const camOffset=new THREE.Vector3(0,4.5,8.5),targetCamPos=this.playerMesh.position.clone().add(camOffset);this.camera.position.lerp(targetCamPos,.1);this.camera.lookAt(this.playerMesh.position.clone().add(new THREE.Vector3(0,1,0)))}
-            onResize(){this.camera.aspect=window.innerWidth/window.innerHeight;this.camera.updateProjectionMatrix();this.renderer.setSize(window.innerWidth,window.innerHeight)}
-            animate(){requestAnimationFrame(()=>this.animate());this.world.step(1/60);this.physicsObjects.forEach(obj=>{obj.mesh.position.copy(obj.body.position);obj.mesh.quaternion.copy(obj.body.quaternion)});this.updatePlayerControls();this.updateHeldObject();this.recordPhysicsHistory();this.updateCamera();this.renderer.render(this.scene,this.camera)}
+      }
+    });
+  }
+
+  function createSplash(x, y, color) {
+    for (let i = 0; i < 15; i++) {
+      particles.push({
+        x: x,
+        y: y,
+        vx: (Math.random() - 0.5) * 8,
+        vy: (Math.random() - 0.5) * 8,
+        radius: Math.random() * 4 + 2,
+        color: color,
+        alpha: 1
+      });
+    }
+  }
+
+  function spawnFruit() {
+    const type = fruitTypes[Math.floor(Math.random() * fruitTypes.length)];
+    const x = Math.random() * (canvas.width - 100) + 50;
+    const y = canvas.height + 30;
+    const vx = (canvas.width / 2 - x) * 0.015 + (Math.random() - 0.5) * 3;
+    const vy = -(Math.random() * 4 + 11);
+
+    fruits.push({
+      x: x,
+      y: y,
+      vx: vx,
+      vy: vy,
+      radius: type.radius,
+      name: type.name,
+      color: type.color,
+      isBomb: type.isBomb || false,
+      sliced: false,
+      rotation: Math.random() * Math.PI,
+      vRot: (Math.random() - 0.5) * 0.1
+    });
+  }
+
+  let lastTime = 0;
+  function gameLoop(time) {
+    if (!gameRunning) return;
+
+    const dt = (time - lastTime) / 1000;
+    lastTime = time;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    spawnTimer += dt;
+    if (spawnTimer > 1.1) {
+      spawnFruit();
+      if (Math.random() > 0.5) spawnFruit();
+      spawnTimer = 0;
+    }
+
+    for (let i = fruits.length - 1; i >= 0; i--) {
+      let f = fruits[i];
+      f.vy += 0.35;
+      f.x += f.vx;
+      f.y += f.vy;
+      f.rotation += f.vRot;
+
+      ctx.save();
+      ctx.translate(f.x, f.y);
+      ctx.rotate(f.rotation);
+      ctx.font = (f.radius * 1.6) + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(f.name, 0, 0);
+      ctx.restore();
+
+      if (!f.sliced && f.y > canvas.height + 50) {
+        if (!f.isBomb) {
+          lives--;
+          updateLivesDisplay();
+          if (lives <= 0) {
+            gameOver();
+            return;
+          }
         }
-        window.addEventListener('load',()=>{const game=new SkyGameEngine();game.animate()});
-    </script>
+        fruits.splice(i, 1);
+      } else if (f.sliced && f.y > canvas.height + 50) {
+        fruits.splice(i, 1);
+      }
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      let p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.2;
+      p.alpha -= 0.02;
+
+      if (p.alpha <= 0) {
+        particles.splice(i, 1);
+      } else {
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    if (bladeTrail.length > 1) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(bladeTrail[0].x, bladeTrail[0].y);
+      for (let i = 1; i < bladeTrail.length; i++) {
+        ctx.lineTo(bladeTrail[i].x, bladeTrail[i].y);
+      }
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  startBtn.addEventListener('click', startGame);
+  restartBtn.addEventListener('click', startGame);
+})();
+</script>
 </body>
 </html>
