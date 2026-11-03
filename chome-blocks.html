@@ -14,6 +14,53 @@ main{padding:17px 0 30px}.intro{text-align:center;margin-bottom:13px}.eyebrow{fo
 .actions{display:flex;gap:9px;margin-top:11px}.action{flex:1;border:1px solid #ffffff45;border-radius:12px;padding:14px 9px;background:#ffffff0b;color:#e9e5ff;font-size:9px;font-weight:900;letter-spacing:.08em;cursor:pointer}.action.primary{background:var(--purple);border-color:var(--purple);color:white}.status{min-height:18px;text-align:center;color:#b9b0e9;font-size:9px;margin:8px 0 0}.reward-strip{margin:13px auto 0;max-width:430px;padding:10px 12px;border:1px solid #e7bd6944;border-radius:12px;background:#3a2c1a55;display:flex;justify-content:space-between;align-items:center;gap:10px}.reward-strip strong{display:block;color:#f4d58e;font-size:9px;letter-spacing:.1em}.reward-strip small{display:block;color:#b7b4bd;font-size:8px;margin-top:3px;line-height:1.4}.reward-balance{white-space:nowrap;font-size:14px;font-weight:950;color:#f6d78e}
 footer{padding:16px 0;border-top:1px solid var(--line);color:#77839b;font-size:9px;display:flex;justify-content:space-between}.overlay{display:none;position:fixed;inset:0;z-index:10;background:#030611dc;backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px}.overlay.open{display:flex}.modal{width:min(360px,100%);padding:24px;border:1px solid #a895ff66;border-radius:20px;background:linear-gradient(145deg,#1c2540,#101827);text-align:center}.modal h2{font-size:25px;margin:8px 0}.modal p{color:var(--muted);font-size:11px;line-height:1.6}.final-score{font-size:34px;font-weight:950;color:var(--gold);margin:12px 0}.modal .action{width:100%}
 @media(max-width:430px){.shell{width:calc(100% - 12px)}.game{max-width:100%}.play-area{grid-template-columns:minmax(0,1fr) 88px;gap:7px}.board{min-height:0;gap:2px}.board-wrap{padding:6px}.control{min-height:58px}.controls{gap:6px}}\n@media(max-width:370px){.play-area{grid-template-columns:minmax(0,1fr) 76px;gap:5px}.next{grid-template-columns:repeat(4,8px);grid-auto-rows:8px}.next i{width:8px;height:8px}.control{min-height:43px}.board{gap:1px}}
+
+/* CHOME Blocks visual polish */
+:root{--bg:#070b15;--panel:#101a2d;--line:#ffffff18;--muted:#a6b2c8;--purple:#987cff;--cyan:#58d8ec;--gold:#f4ce78}
+body{background:radial-gradient(ellipse at 50% -15%,#403078 0,transparent 42%),radial-gradient(ellipse at 100% 45%,#102a40 0,transparent 40%),var(--bg)}
+.shell{width:min(820px,calc(100% - 22px))}
+header{height:68px}
+.brand{font-size:13px;letter-spacing:.14em}
+.mark{width:34px;height:34px;border-radius:11px;box-shadow:0 5px 18px #8b6cff55}
+.back{padding:10px 13px;border:1px solid #a895ff44;border-radius:10px;background:#a895ff12;letter-spacing:.08em}
+main{padding:24px 0 34px}
+.intro{margin-bottom:20px}
+.eyebrow{font-size:10px;letter-spacing:.22em}
+.intro h1{font-size:clamp(32px,7vw,48px);letter-spacing:-.055em;text-shadow:0 5px 28px #8b6cff33}
+.intro p{font-size:12px}
+.game{max-width:600px;padding:14px;border:1px solid #ffffff18;border-radius:22px;background:linear-gradient(145deg,#111d32dd,#0c1424ee);box-shadow:0 24px 70px #0008}
+.topline{gap:9px;margin-bottom:13px}
+.stat{padding:10px 7px;border-radius:13px;background:linear-gradient(180deg,#1a2942,#111a2c)}
+.stat small{font-size:9px;letter-spacing:.14em}
+.stat strong{font-size:21px}
+.play-area{grid-template-columns:minmax(0,1fr) 112px;gap:13px}
+.board-wrap{padding:10px;border-radius:17px;background:linear-gradient(145deg,#1a2943,#0c1423);box-shadow:inset 0 1px #ffffff18,0 12px 32px #0008}
+.board{min-height:520px;gap:3px;background:#0a1220;border-radius:8px;overflow:hidden}
+.cell{border-radius:3px;background:linear-gradient(145deg,#1b2940,#152137);border:1px solid #ffffff0b}
+.cell.filled{border:1px solid #ffffff70;box-shadow:inset 0 2px #ffffff66,inset 0 -3px #0002,0 1px 5px #0006}
+.side{gap:10px}
+.nextbox,.sidecard{padding:11px 8px;border-radius:14px;background:linear-gradient(155deg,#1a2941,#111a2b);box-shadow:inset 0 1px #ffffff12}
+.nextbox small,.sidecard small{font-size:9px;letter-spacing:.13em}
+.next{margin:13px auto 5px}
+.hint{font-size:10px;line-height:1.6}
+.speed-control{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:9px}
+.speed-control strong{font-size:15px;white-space:nowrap}
+.speed-control button{width:25px;height:25px;border:1px solid #a895ff66;border-radius:8px;background:#8b6cff25;color:white;font-size:18px;font-weight:900;line-height:1;cursor:pointer}
+.controls{gap:8px;margin-top:13px}
+.control{min-height:66px;border-radius:15px;background:linear-gradient(180deg,#31496d,#203653);border:1px solid #7890b755;box-shadow:0 5px 0 #0b1423,0 8px 16px #0005}
+.control span{font-size:9px;letter-spacing:.12em}
+.control.rotate{background:linear-gradient(180deg,#9a7bff,#7048df);border:1px solid #c9baff}
+.control.drop{background:linear-gradient(180deg,#0d9dbb,#08728f);border:1px solid #7de9f7}
+.actions{gap:10px;margin-top:15px}
+.action{padding:14px 10px;border-radius:13px;background:#ffffff0c;font-size:10px;letter-spacing:.12em}
+.action.primary{background:linear-gradient(135deg,#9b7dff,#7049df);box-shadow:0 6px 18px #7049df44}
+.status{font-size:10px;min-height:20px;margin-top:12px}
+.reward-strip{margin-top:16px;border-radius:14px;padding:13px 15px}
+footer{font-size:10px}
+.modal{box-shadow:0 24px 80px #000a}
+@media(max-width:430px){.shell{width:calc(100% - 12px)}.game{padding:9px;border-radius:17px}.play-area{grid-template-columns:minmax(0,1fr) 91px;gap:7px}.board{min-height:0;gap:2px}.board-wrap{padding:7px}.side{gap:7px}.nextbox,.sidecard{padding:8px 5px}.control{min-height:59px}.controls{gap:6px}}
+@media(max-width:370px){.play-area{grid-template-columns:minmax(0,1fr) 79px;gap:5px}.speed-control button{width:22px;height:22px}.game{padding:7px}.board{gap:1px}}
+
 </style>
 </head>
 <body><div class="shell">
@@ -21,7 +68,7 @@ footer{padding:16px 0;border-top:1px solid var(--line);color:#77839b;font-size:9
 <main><section class="intro"><div class="eyebrow">A CHOME ORIGINAL FALLING-BLOCK GAME</div><h1>DROP. ROTATE. CLEAR.</h1><p>Guide falling blocks into place. Complete full rows to clear space<br>and keep the stack from reaching the top.</p></section>
 <div class="game">
 <div class="topline"><div class="stat"><small>SCORE</small><strong id="score">0</strong></div><div class="stat best"><small>BEST</small><strong id="best">0</strong></div><div class="stat"><small>LINES</small><strong id="lines">0</strong></div><div class="stat"><small>LEVEL</small><strong id="level">1</strong></div></div>
-<div class="play-area"><div class="board-wrap"><div class="board" id="board" aria-label="Falling block game board"></div></div><aside class="side"><div class="nextbox"><small>NEXT BLOCK</small><div class="next" id="next"></div></div><div class="sidecard"><small>HOW TO PLAY</small><div class="hint">Move blocks sideways. Rotate to fit. Fill a full row to clear it.</div></div><div class="sidecard"><small>FALL SPEED</small><strong id="speed">1×</strong></div></aside></div>
+<div class="play-area"><div class="board-wrap"><div class="board" id="board" aria-label="Falling block game board"></div></div><aside class="side"><div class="nextbox"><small>NEXT BLOCK</small><div class="next" id="next"></div></div><div class="sidecard"><small>HOW TO PLAY</small><div class="hint">Move blocks sideways. Rotate to fit. Fill a full row to clear it.</div></div><div class="sidecard speed-card"><small>FALL SPEED</small><div class="speed-control"><button id="speedDown" type="button" aria-label="Decrease fall speed">−</button><strong id="speed">1.0×</strong><button id="speedUp" type="button" aria-label="Increase fall speed">+</button></div><div class="hint">Adjust the falling pace</div></div></aside></div>
 <div class="controls">
 <button class="control" id="left" aria-label="Move left">◀<span>LEFT</span></button>
 <button class="control" id="down" aria-label="Soft drop">▼<span>DOWN</span></button>
@@ -46,7 +93,7 @@ const TYPES=[
  {name:'J',color:'#6e9cff',cells:[[0,0],[1,0],[1,1],[1,2]]},
  {name:'L',color:'#ffad70',cells:[[0,2],[1,0],[1,1],[1,2]]}
 ];
-let grid,active,nextType,score=0,best=Number(localStorage.getItem(KEY+':best')||0),lines=0,level=1,running=true,paused=false,gameOver=false,last=0,acc=0,raf=0,currentUser=null,saveTimer;
+let grid,active,nextType,score=0,best=Number(localStorage.getItem(KEY+':best')||0),lines=0,level=1,fallSpeed=1,running=true,paused=false,gameOver=false,last=0,acc=0,raf=0,currentUser=null,saveTimer;
 $('year').textContent=new Date().getFullYear();
 function clone(t){return {name:t.name,color:t.color,cells:t.cells.map(([r,c])=>[r,c])}}
 function randomType(){return clone(TYPES[Math.floor(Math.random()*TYPES.length)])}
@@ -55,24 +102,33 @@ function fits(piece,dr=0,dc=0,cells=piece.cells){return cells.every(([r,c])=>{co
 function spawn(){const t=nextType||randomType();nextType=randomType();active={...t,cells:t.cells.map(p=>[...p]),x:Math.floor((W-(Math.max(...t.cells.map(p=>p[1]))+1))/2),y:0};drawNext();render();if(!fits(active)){endGame();return}acc=Math.max(acc,Math.max(90,850-(level-1)*65));$('status').textContent='New block! Falling now — move it, rotate it, and complete a row.';}
 function drawNext(){const root=$('next');root.innerHTML='';const maxR=Math.max(...nextType.cells.map(p=>p[0])),maxC=Math.max(...nextType.cells.map(p=>p[1])),set=new Set(nextType.cells.map(p=>p.join(',')));for(let r=0;r<Math.max(2,maxR+1);r++)for(let c=0;c<Math.max(3,maxC+1);c++){const d=document.createElement('i');if(!set.has(r+','+c))d.className='empty';else d.style.background=nextType.color;root.append(d)}}
 function ghostY(){let y=active.y;while(fits(active,y-active.y+1,0))y++;return y}
+function dropInterval(){return Math.max(90,(850-(level-1)*65)/fallSpeed)}
+function adjustSpeed(change){if(gameOver)return;fallSpeed=Math.max(.5,Math.min(3,Math.round((fallSpeed+change)*4)/4));$('speed').textContent=fallSpeed.toFixed(2).replace(/0$/,'')+'×';$('status').textContent='Fall speed set to '+fallSpeed.toFixed(2).replace(/0$/,'')+'×';}
 function render(){const root=$('board');if(root.children.length!==W*H){root.innerHTML='';for(let i=0;i<W*H;i++){const d=document.createElement('div');d.className='cell';root.append(d)}}const display=grid.map(row=>row.slice());let ghost=null;if(active&&!gameOver){ghost=ghostY()}if(active&&!gameOver){active.cells.forEach(([r,c])=>{const y=active.y+r,x=active.x+c;if(y>=0&&y<H&&x>=0&&x<W)display[y][x]=active.color})}Array.from(root.children).forEach((el,i)=>{const r=Math.floor(i/W),c=i%W;el.className='cell';if(display[r][c]){el.classList.add('filled');el.style.setProperty('--piece-color',display[r][c])}else el.style.removeProperty('--piece-color')});if(active&&!gameOver&&ghost!==null){active.cells.forEach(([r,c])=>{const y=ghost+r,x=active.x+c;if(y>=0&&y<H&&x>=0&&x<W&&!grid[y][x]&&!display[y][x])root.children[y*W+x].classList.add('ghost')})}}
-function updateStats(){$('score').textContent=score.toLocaleString();$('best').textContent=best.toLocaleString();$('lines').textContent=lines;$('level').textContent=level;$('speed').textContent=level+'×'}
+function updateStats(){$('score').textContent=score.toLocaleString();$('best').textContent=best.toLocaleString();$('lines').textContent=lines;$('level').textContent=level;$('speed').textContent=fallSpeed.toFixed(2).replace(/0$/,'')+'×'}
 function tone(freq=440){try{const a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.frequency.value=freq;g.gain.value=.035;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.07);o.onended=()=>a.close()}catch(e){}}
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify({grid,active,nextType,score,best,lines,level,paused:false}))}catch(e){}}
 function cloudSave(){if(!currentUser)return;clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{const save={version:2,grid,active,nextType,score,best,lines,level};const {error}=await supabase.from('game_saves').upsert({user_id:currentUser.id,game_id:'chome-blocks',save_data:save,updated_at:new Date().toISOString()},{onConflict:'user_id,game_id'});if(error)console.warn('CHOME Blocks cloud save:',error)},900)}
 function persist(){saveLocal();cloudSave()}
-function lockPiece(){active.cells.forEach(([r,c])=>{const y=active.y+r,x=active.x+c;if(y>=0&&y<H)grid[y][x]=active.color});let cleared=0;for(let r=H-1;r>=0;){if(grid[r].every(Boolean)){grid.splice(r,1);grid.unshift(Array(W).fill(0));cleared++}else r--}if(cleared){lines+=cleared;score+=[0,100,300,500,800][cleared]||800;level=1+Math.floor(lines/10);tone(680)}else score+=10;if(score>best){best=score;localStorage.setItem(KEY+':best',String(best))}updateStats();active=null;render();spawn();render();persist()}
+function hasSealedCells(){
+ const seen=Array.from({length:H},()=>Array(W).fill(false)),queue=[];
+ for(let c=0;c<W;c++)if(!grid[0][c]){seen[0][c]=true;queue.push([0,c])}
+ for(let i=0;i<queue.length;i++){const [r,c]=queue[i];for(const [dr,dc] of [[1,0],[-1,0],[0,1],[0,-1]]){const nr=r+dr,nc=c+dc;if(nr>=0&&nr<H&&nc>=0&&nc<W&&!grid[nr][nc]&&!seen[nr][nc]){seen[nr][nc]=true;queue.push([nr,nc])}}}
+ for(let r=0;r<H;r++)for(let c=0;c<W;c++)if(!grid[r][c]&&!seen[r][c])return true;
+ return false;
+}
+function lockPiece(){active.cells.forEach(([r,c])=>{const y=active.y+r,x=active.x+c;if(y>=0&&y<H)grid[y][x]=active.color});let cleared=0;for(let r=H-1;r>=0;){if(grid[r].every(Boolean)){grid.splice(r,1);grid.unshift(Array(W).fill(0));cleared++}else r--}if(cleared){lines+=cleared;score+=[0,100,300,500,800][cleared]||800;level=1+Math.floor(lines/10);tone(680)}else score+=10;if(score>best){best=score;localStorage.setItem(KEY+':best',String(best))}updateStats();active=null;render();if(hasSealedCells()){$('status').textContent='FAILED — a gap is sealed and can no longer be filled.';endGame();persist();return}spawn();render();persist()}
 function step(){if(!active||gameOver||paused)return;if(fits(active,1,0)){active.y++}else lockPiece();render()}
 function move(dx){if(!active||gameOver||paused)return;if(fits(active,0,dx)){active.x+=dx;render()}}
 function rotate(){if(!active||gameOver||paused)return;const rotated=rotateCells(active.cells);for(const kick of [0,-1,1,-2,2])if(fits(active,0,kick,rotated)){active.cells=rotated;active.x+=kick;render();tone(520);return}}
 function hardDrop(){if(!active||gameOver||paused)return;let distance=0;while(fits(active,1,0)){active.y++;distance++}score+=distance*2;lockPiece()}
 function endGame(){gameOver=true;running=false;cancelAnimationFrame(raf);$('finalScore').textContent=score.toLocaleString();$('gameOver').classList.add('open');$('status').textContent='Game over. Your best score is '+best.toLocaleString()+'.';persist()}
-function loop(now){if(!running)return;if(!last)last=now;const dt=now-last;last=now;if(!paused&&!gameOver){acc+=dt;const interval=Math.max(90,850-(level-1)*65);if(acc>=interval){acc=0;step()}}raf=requestAnimationFrame(loop)}
-function start(){cancelAnimationFrame(raf);grid=Array.from({length:H},()=>Array(W).fill(0));score=0;lines=0;level=1;paused=false;gameOver=false;running=true;last=0;acc=0;nextType=randomType();$('gameOver').classList.remove('open');$('pause').textContent='PAUSE';spawn();updateStats();render();$('status').textContent='Blocks are falling. Move and rotate them to complete rows.';persist();raf=requestAnimationFrame(loop)}
+function loop(now){if(!running)return;if(!last)last=now;const dt=now-last;last=now;if(!paused&&!gameOver){acc+=dt;const interval=dropInterval();if(acc>=interval){acc=0;step()}}raf=requestAnimationFrame(loop)}
+function start(){cancelAnimationFrame(raf);grid=Array.from({length:H},()=>Array(W).fill(0));score=0;lines=0;level=1;fallSpeed=1;paused=false;gameOver=false;running=true;last=0;acc=0;nextType=randomType();$('gameOver').classList.remove('open');$('pause').textContent='PAUSE';spawn();updateStats();render();$('status').textContent='Blocks are falling. Move and rotate them to complete rows.';persist();raf=requestAnimationFrame(loop)}
 function pauseToggle(){if(gameOver)return;paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';$('status').textContent=paused?'Game paused.':'Back in the game!'}
 function restore(d){if(!d||d.version!==2||!Array.isArray(d.grid)||d.grid.length!==H||!d.grid.every(r=>Array.isArray(r)&&r.length===W))return false;grid=d.grid;score=Number(d.score)||0;best=Math.max(best,Number(d.best)||0);lines=Number(d.lines)||0;level=Number(d.level)||1;nextType=d.nextType?.cells?clone(d.nextType):randomType();active=d.active?.cells?{...clone(d.active),x:Number(d.active.x)||0,y:Number(d.active.y)||0}:null;if(!active)return false;gameOver=false;paused=false;running=true;updateStats();drawNext();render();return true}
 async function wallet(){const {data,error}=await supabase.rpc('get_my_rewards_wallet');if(error){$('choxStatus').textContent=currentUser?'Wallet unavailable right now.':'Sign in to view your shared CHOX wallet.';return}const w=Array.isArray(data)?data[0]:data;if(w){$('choxBalance').textContent=Number(w.points_balance||0).toLocaleString()+' CHOX';$('choxStatus').textContent='Shared wallet connected. CHOME Blocks rewards are not enabled yet.'}}
-$('down').addEventListener('click',()=>{if(active&&!gameOver&&!paused){if(fits(active,1,0)){active.y++;score++;updateStats();render();persist()}else lockPiece()}});$('rotate').addEventListener('click',rotate);$('drop').addEventListener('click',hardDrop);$('pause').addEventListener('click',pauseToggle);$('newGame').addEventListener('click',start);$('playAgain').addEventListener('click',start);
+$('down').addEventListener('click',()=>{if(active&&!gameOver&&!paused){if(fits(active,1,0)){active.y++;score++;updateStats();render();persist()}else lockPiece()}});$('speedDown').addEventListener('click',()=>adjustSpeed(-.25));$('speedUp').addEventListener('click',()=>adjustSpeed(.25));$('rotate').addEventListener('click',rotate);$('drop').addEventListener('click',hardDrop);$('pause').addEventListener('click',pauseToggle);$('newGame').addEventListener('click',start);$('playAgain').addEventListener('click',start);
 let holdTimer=null;function bindHold(id,fn){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);fn();clearInterval(holdTimer);holdTimer=setInterval(fn,115)});['pointerup','pointerleave','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>clearInterval(holdTimer)))}bindHold('left',()=>move(-1));bindHold('right',()=>move(1));
 window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowDown','ArrowUp',' ','p','P'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft')move(-1);else if(e.key==='ArrowRight')move(1);else if(e.key==='ArrowDown')$('down').click();else if(e.key==='ArrowUp'||e.key==='x'||e.key==='X')rotate();else if(e.key===' ')hardDrop();else if(e.key==='p'||e.key==='P')pauseToggle()});
 let touchX=0,touchY=0;const board=$('board');board.addEventListener('touchstart',e=>{const t=e.touches[0];touchX=t.clientX;touchY=t.clientY},{passive:true});board.addEventListener('touchend',e=>{const t=e.changedTouches[0],dx=t.clientX-touchX,dy=t.clientY-touchY;if(Math.abs(dx)>24)move(dx>0?1:-1);if(dy>35)$('down').click();},{passive:true});
