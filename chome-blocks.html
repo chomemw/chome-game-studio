@@ -152,10 +152,16 @@ main{position:relative}
   background:linear-gradient(100deg,rgba(72,49,25,.35),rgba(33,38,48,.55));
 }
 footer{border-color:rgba(164,181,215,.13)}
+
+/* Shared CHOME Game Studio shell */
+.chome-platformbar{box-sizing:border-box;width:min(1180px,calc(100% - 28px));min-height:46px;margin:8px auto 12px;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,.14);border-radius:13px;background:rgba(8,13,27,.78);color:#f7f7fb;font:700 11px/1.2 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.08em;box-shadow:0 8px 24px rgba(0,0,0,.16);backdrop-filter:blur(12px);position:relative;z-index:20}
+.chome-platformbrand{display:inline-flex;align-items:center;gap:9px;color:inherit;text-decoration:none}.chome-platformbrand b{color:#9b88ff}.chome-platformmark{width:27px;height:27px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#8b6cff,#55d6e8);color:#fff;font-size:15px;font-weight:950;letter-spacing:0}.chome-platformlink{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid rgba(255,255,255,.17);border-radius:9px;background:rgba(255,255,255,.07);color:#e9e7ff;text-decoration:none;font-size:10px;letter-spacing:.08em;transition:background .2s,border-color .2s}.chome-platformlink:hover{background:rgba(139,108,255,.2);border-color:#9b88ff}
+@media(max-width:480px){.chome-platformbar{width:calc(100% - 16px);min-height:42px;margin:6px auto 9px;padding:6px 9px}.chome-platformbrand{font-size:10px}.chome-platformlink{padding:7px 9px}}
 </style>
 </head>
-<body><div class="shell">
-<header><a class="brand" href="index.html"><span class="mark">C</span><span>CHOME <span style="color:#a895ff">BLOCKS</span></span></a><a class="back" href="dashboard.html">← DASHBOARD</a></header>
+<body>
+<nav class="chome-platformbar" aria-label="CHOME Game Studio navigation"><a class="chome-platformbrand" href="index.html"><span class="chome-platformmark">C</span><span>CHOME <b>GAME STUDIO</b></span></a><a class="chome-platformlink" href="index.html">⌂ <span>ALL GAMES</span></a></nav><div class="shell">
+<header><a class="brand" href="index.html"><span class="mark">C</span><span>CHOME <span style="color:#a895ff">BLOCKS</span></span></a><a class="back" href="index.html">← DASHBOARD</a></header>
 <main><section class="intro"><div class="eyebrow">A CHOME ORIGINAL FALLING-BLOCK GAME</div><h1>DROP. ROTATE. CLEAR.</h1><p>Guide falling blocks into place. Complete full rows to clear space<br>and keep the stack from reaching the top.</p></section>
 <div class="game">
 <div class="mission"><div class="mission-head"><span id="missionTitle">LEVEL 1 CHALLENGE</span><strong id="missionProgress">0 / 10 LINES</strong></div><div class="mission-track"><div class="mission-fill" id="missionFill"></div></div><div class="mission-note" id="missionNote">Clear 10 lines to reach the next level.</div></div><div class="topline"><div class="stat"><small>SCORE</small><strong id="score">0</strong></div><div class="stat best"><small>BEST</small><strong id="best">0</strong></div><div class="stat"><small>LINES</small><strong id="lines">0</strong></div><div class="stat"><small>LEVEL</small><strong id="level">1</strong></div></div>
