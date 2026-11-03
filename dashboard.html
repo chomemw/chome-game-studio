@@ -54,7 +54,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 </form>
 <div class="message" id="profileMessage" role="status" aria-live="polite"></div>
 </section></div>
-<section class="wallet-section" aria-labelledby="walletHeading"><div class="section-head"><div><div class="eyebrow">One wallet across CHOME</div><h2 id="walletHeading">REWARDS WALLET</h2></div><div class="eyebrow">PLAY · EARN · PROGRESS</div></div><div class="wallet-panel"><div><div class="wallet-label">AVAILABLE POINTS</div><div class="wallet-balance" id="walletPoints">—</div><div class="wallet-value" id="walletValue">Checking your rewards wallet…</div></div><div class="wallet-stats"><div class="wallet-stat"><small>LIFETIME EARNED</small><strong id="walletEarned">—</strong></div><div class="wallet-stat"><small>LIFETIME REDEEMED</small><strong id="walletRedeemed">—</strong></div></div><p class="wallet-note">Current example rate: 10,000 points = $0.50. Points are not redeemable yet; game earning and redemption rules are being connected.</p></div><div class="wallet-status" id="walletStatus" role="status" aria-live="polite"></div></section>
+<section class="wallet-section" aria-labelledby="walletHeading"><div class="section-head"><div><div class="eyebrow">One wallet across CHOME</div><h2 id="walletHeading">REWARDS WALLET</h2></div><div class="eyebrow">PLAY · EARN · PROGRESS</div></div><div class="wallet-panel"><div><div class="wallet-label">CHOX BALANCE</div><div class="wallet-balance" id="walletPoints">—</div><div class="wallet-value" id="walletValue">Your shared CHOX rewards wallet</div></div><div class="wallet-stats"><div class="wallet-stat"><small>LIFETIME CHOX EARNED</small><strong id="walletEarned">—</strong></div><div class="wallet-stat"><small>LIFETIME CHOX REDEEMED</small><strong id="walletRedeemed">—</strong></div></div><p class="wallet-note">CHOX is the CHOME rewards currency. Game earning rules and redemption rates will be announced later.</p></div><div class="wallet-status" id="walletStatus" role="status" aria-live="polite"></div></section>
 <section class="games-section">
 <div class="section-head"><div><div class="eyebrow">Choose your next adventure</div><h2>YOUR GAMES</h2></div><div class="eyebrow">ONE PLAYER ID · MANY WORLDS</div></div>
 <div class="games" id="games">
@@ -128,7 +128,7 @@ async function loadRewardsWallet(){
  if(!wallet){status.textContent='Your rewards wallet is being prepared.';return;}
  const fmt=value=>Number(value||0).toLocaleString(undefined,{maximumFractionDigits:0});
  $('walletPoints').textContent=fmt(wallet.points_balance);
- $('walletValue').textContent='Estimated value: $'+Number(wallet.usd_value||0).toFixed(2);
+ $('walletValue').textContent='Your shared CHOX rewards wallet';
  $('walletEarned').textContent=fmt(wallet.lifetime_earned);
  $('walletRedeemed').textContent=fmt(wallet.lifetime_redeemed);
  status.textContent='Wallet connected · shared across CHOME games.';
