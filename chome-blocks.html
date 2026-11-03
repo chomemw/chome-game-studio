@@ -80,6 +80,24 @@ footer{font-size:10px}
 }
 .cell{background:transparent;border:1px solid #ffffff08}
 .cell.filled{background:var(--piece-color,#8b6cff);border-color:#ffffff85}
+
+/* Make the clay brick texture visible through every empty board cell */
+.board{
+  background:#a95735 !important;
+  background-image:
+    repeating-linear-gradient(0deg,transparent 0 28px,#633725 28px 32px),
+    repeating-linear-gradient(90deg,transparent 0 60px,#633725 60px 64px),
+    repeating-linear-gradient(90deg,transparent 0 28px,#633725 28px 32px) !important;
+  background-size:64px 32px,64px 32px,64px 32px !important;
+  background-position:0 0,0 0,32px 16px !important;
+}
+.board .cell:not(.filled){
+  background:transparent !important;
+  border-color:#ffffff10 !important;
+}
+.board .cell.filled{
+  background:var(--piece-color,#8b6cff) !important;
+}
 </style>
 </head>
 <body><div class="shell">
