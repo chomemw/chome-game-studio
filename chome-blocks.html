@@ -85,8 +85,7 @@ footer{font-size:10px}
 </main><footer><span>© <span id="year"></span> CHOME GAME STUDIO</span><span>PLAY · DROP · REPEAT</span></footer></div>
 <div class="overlay" id="gameOver"><div class="modal"><div class="eyebrow">GAME OVER</div><h2>THE STACK REACHED THE TOP</h2><p>Great run! Start again and see if you can beat your best score.</p><div class="final-score" id="finalScore">0</div><button class="action primary" id="playAgain">PLAY AGAIN</button></div></div>
 <script type="module">
-import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
+let supabase=null;
 const $=id=>document.getElementById(id),W=10,H=20,KEY='chome-blocks-falling-v1';
 const TYPES=[
  {name:'I',color:'#55d6e8',cells:[[0,0],[0,1],[0,2],[0,3]]},
@@ -146,7 +145,14 @@ let touchX=0,touchY=0;const board=$('board');board.addEventListener('touchstart'
 try{const savedSettings=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null');if(savedSettings)settings={...settings,...savedSettings}}catch(e){}updateSettingsUI();if(settings.music)setMusic(true);try{const savedSettings=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null');if(savedSettings)settings={...settings,...savedSettings}}catch(e){}updateSettingsUI();if(settings.music)setMusic(true);
 // Start locally first. Network services must never hold the game screen hostage.
 let restored=false;try{const local=JSON.parse(localStorage.getItem(KEY)||'null');restored=restore(local)}catch(e){}if(!restored)start();else{raf=requestAnimationFrame(loop);$('status').textContent='Your saved game has been restored.'}
-$('choxStatus').textContent='Connecting your account in the background…';
-supabase.auth.getSession().then(async({data,error})=>{if(error)throw error;currentUser=data?.session?.user||null;if(currentUser){loadAchievements().catch(e=>console.warn('Achievement load:',e));wallet().catch(e=>console.warn('Wallet load:',e))}else{$('choxStatus').textContent='Guest play is enabled. Sign in to view your wallet.'}}).catch(e=>{$('choxStatus').textContent='Guest play is enabled. Account services are temporarily unavailable.';console.warn('Background account check:',e)});
-supabase.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user){currentUser=session.user;loadAchievements().catch(e=>console.warn('Achievement load:',e));wallet().catch(e=>console.warn('Wallet load:',e))}if(event==='SIGNED_OUT'){currentUser=null;$('choxStatus').textContent='Signed out · guest play remains available.';$('choxBalance').textContent='— CHOX'}});
+$('choxStatus').textContent='Guest play is ready. Connecting online features in the background…';
+(async()=>{try{
+ const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+ supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
+ const {data,error}=await supabase.auth.getSession();if(error)throw error;
+ currentUser=data?.session?.user||null;
+ if(currentUser){loadAchievements().catch(e=>console.warn('Achievement load:',e));wallet().catch(e=>console.warn('Wallet load:',e))}
+ else $('choxStatus').textContent='Guest play is enabled. Sign in to view your wallet.';
+ supabase.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user){currentUser=session.user;loadAchievements().catch(e=>console.warn('Achievement load:',e));wallet().catch(e=>console.warn('Wallet load:',e))}if(event==='SIGNED_OUT'){currentUser=null;$('choxStatus').textContent='Signed out · guest play remains available.';$('choxBalance').textContent='— CHOX'}});
+ }catch(e){$('choxStatus').textContent='Guest play is ready. Online features are temporarily unavailable.';console.warn('Background online setup:',e)}})();
 </script></body></html>
