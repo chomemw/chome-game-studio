@@ -40,4 +40,42 @@ function tapDrag(e){let el=e.target.closest('.cell');if(!el)return;let r=+el.dat
 $('fullscreenBtn').onclick=async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){$('message').textContent='Full screen is not supported by this browser.'}};$('restart').onclick=()=>start(level);$('shuffle').onclick=()=>shuffleBoard(true);$('sound').onclick=()=>{sound=!sound;$('sound').textContent=sound?'🔊 Sound on':'🔇 Sound off'};$('continue').onclick=()=>{let next=$('result').textContent==='Out of moves'?level:level>=levels?1:level+1;start(next)};
 try{let s=JSON.parse(localStorage.getItem('chome_candy_trail_v1'));if(s&&Number.isInteger(s.level)&&Array.isArray(s.board)&&s.board.length===N&&s.board.every(r=>Array.isArray(r)&&r.length===N&&r.every(v=>Number.isInteger(v)&&v>=0&&v<icons.length))){level=Math.max(1,Math.min(levels,s.level));score=Math.max(0,Number(s.score)||0);moves=Math.max(0,Number(s.moves)||20);board=s.board;timeLeft=Number.isFinite(s.timeLeft)?Math.max(0,Math.min(120,s.timeLeft)):120;render();if(timeLeft>0)startTimer();else start()}else start()}catch(e){start()}
 })();
-</script><script>(function(){const loader=document.getElementById('chomePageLoader');if(!loader)return;let hidden=false;function hide(){if(hidden)return;hidden=true;loader.classList.add('is-hidden');}if(document.readyState==='complete'){setTimeout(hide,180);}else{window.addEventListener('load',()=>setTimeout(hide,180),{once:true});}window.addEventListener('pageshow',hide);document.addEventListener('click',event=>{const link=event.target.closest('a[href]');if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||link.target&&link.target!=='_self'||link.hasAttribute('download'))return;const url=new URL(link.href,location.href);if(url.origin!==location.origin||url.pathname===location.pathname||url.hash&&url.pathname===location.pathname)return;event.preventDefault();document.documentElement.classList.add('chome-leaving');loader.classList.remove('is-hidden');setTimeout(()=>{location.href=url.href;},170);});})();</script></body></html>
+
+let menuPaused=false;window.chomeGameControls={pause(){if(won)return;if(menuPaused){menuPaused=false;startTimer();$('message').textContent='Back in the game!';}else{menuPaused=true;stopTimer();$('message').textContent='Game paused. Press Resume when ready.';}},isPaused(){return menuPaused},restart(){menuPaused=false;start(level)},sound(){sound=!sound;$('sound').textContent=sound?'🔊 Sound on':'🔇 Sound off'},soundLabel(){return sound?'🔊 SOUND ON':'🔇 SOUND OFF'}};
+</script><script>(function(){const loader=document.getElementById('chomePageLoader');if(!loader)return;let hidden=false;function hide(){if(hidden)return;hidden=true;loader.classList.add('is-hidden');}if(document.readyState==='complete'){setTimeout(hide,180);}else{window.addEventListener('load',()=>setTimeout(hide,180),{once:true});}window.addEventListener('pageshow',hide);document.addEventListener('click',event=>{const link=event.target.closest('a[href]');if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||link.target&&link.target!=='_self'||link.hasAttribute('download'))return;const url=new URL(link.href,location.href);if(url.origin!==location.origin||url.pathname===location.pathname||url.hash&&url.pathname===location.pathname)return;event.preventDefault();document.documentElement.classList.add('chome-leaving');loader.classList.remove('is-hidden');setTimeout(()=>{location.href=url.href;},170);});})();</script><style id="chomeGameMenuStyles">
+#chomeGameMenuButton{position:fixed;top:14px;right:14px;z-index:1200;border:1px solid #6674a8;background:rgba(13,20,43,.94);color:#fff;border-radius:14px;padding:10px 14px;font:800 13px system-ui;letter-spacing:.04em;box-shadow:0 8px 28px #0005;backdrop-filter:blur(12px)}
+#chomeGameMenuPanel{position:fixed;top:62px;right:14px;z-index:1201;width:min(270px,calc(100vw - 28px));padding:14px;border:1px solid #6674a8;border-radius:18px;background:rgba(13,20,43,.98);color:#fff;box-shadow:0 18px 55px #0009;display:none;font:14px system-ui}
+#chomeGameMenuPanel.open{display:grid;gap:9px}
+#chomeGameMenuPanel strong{font-size:15px;letter-spacing:.06em}
+#chomeGameMenuPanel button,#chomeGameMenuPanel a{display:block;width:100%;box-sizing:border-box;text-align:center;border:1px solid #53648f;border-radius:11px;padding:11px;background:#202e55;color:#fff;text-decoration:none;font-weight:750}
+#chomeGameMenuPanel button.primary{background:linear-gradient(110deg,#7046d8,#168fa8);border:0}
+#chomeGameMenuPanel button:disabled{opacity:.45}
+#chomeGameMenuNote{color:#aebcdd;font-size:12px;line-height:1.45}
+@media(prefers-reduced-motion:no-preference){#chomeGameMenuPanel{animation:chomeMenuIn .16s ease-out}@keyframes chomeMenuIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}}
+</style>
+<button id="chomeGameMenuButton" type="button" aria-expanded="false" aria-controls="chomeGameMenuPanel">☰ GAME MENU</button>
+<section id="chomeGameMenuPanel" aria-label="Game menu">
+<strong>CHOME GAME MENU</strong>
+<button id="chomeMenuPause" type="button">⏸ PAUSE</button>
+<button id="chomeMenuRestart" class="primary" type="button">↻ RESTART GAME</button>
+<button id="chomeMenuSound" type="button">🔊 SOUND</button>
+<a href="index.html">← BACK TO ALL GAMES</a>
+<div id="chomeGameMenuNote">Your game controls are always within reach.</div>
+</section>
+<script>
+(()=>{const $=id=>document.getElementById(id),button=$('chomeGameMenuButton'),panel=$('chomeGameMenuPanel');if(!button||!panel)return;
+const toggle=open=>{panel.classList.toggle('open',open);button.setAttribute('aria-expanded',String(open));};
+button.addEventListener('click',()=>toggle(!panel.classList.contains('open')));
+document.addEventListener('click',e=>{if(!panel.contains(e.target)&&e.target!==button)toggle(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')toggle(false)});
+const pause=$('chomeMenuPause'),restart=$('chomeMenuRestart'),sound=$('chomeMenuSound');
+const api=window.chomeGameControls||{};
+if(!api.pause){pause.hidden=true;}else{pause.addEventListener('click',()=>{api.pause();pause.textContent=api.isPaused()?'▶ RESUME':'⏸ PAUSE';});}
+if(api.restart)restart.addEventListener('click',()=>{if(confirm('Restart this game from the beginning?')){api.restart();toggle(false);if(api.pauseLabel)pause.textContent=api.pauseLabel();}});
+else restart.hidden=true;
+if(api.sound){sound.addEventListener('click',()=>{api.sound();sound.textContent=api.soundLabel?api.soundLabel():'🔊 SOUND';});if(api.soundLabel)sound.textContent=api.soundLabel();}
+else sound.hidden=true;
+if(api.note)$('chomeGameMenuNote').textContent=api.note;
+})();
+</script>
+</body></html>
