@@ -13,7 +13,7 @@
 .font-nunito{font-family:Nunito,sans-serif}.game-board{box-shadow:0 15px 35px #0004,inset 0 0 15px #ffffff66;background:linear-gradient(135deg,#ffffff40,#ffffff0d);backdrop-filter:blur(12px)}
 #grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(6,minmax(0,1fr));gap:clamp(4px,1.4vw,8px);width:100%;height:100%}
 #timeText{font-variant-numeric:tabular-nums}#timeText.urgent{color:#fecaca;animation:timerPulse .7s infinite alternate}@keyframes timerPulse{to{opacity:.55}}
-.tile{position:relative;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#ffffff1c;border:1px solid #ffffff38;box-shadow:inset 0 1px 5px #fff2;min-width:0;min-height:0;font-size:clamp(23px,7vw,42px);cursor:pointer;transition:transform .13s;touch-action:none}
+.tile{position:relative;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#ffffff1c;border:1px solid #ffffff38;box-shadow:inset 0 1px 5px #fff2;min-width:0;min-height:0;font-size:clamp(28px,8vw,56px);cursor:pointer;transition:transform .13s;touch-action:none}
 .tile.selected{transform:scale(1.13);filter:drop-shadow(0 0 10px #ffeb3b);z-index:3}
 .tile .fruit-icon{pointer-events:none;filter:drop-shadow(0 3px 2px #0005)}
 .ice-layer{position:absolute;inset:0;border-radius:12px;background:linear-gradient(135deg,#c8f0ffbf,#78c8ffd9);border:2px solid #ffffffcc;display:grid;place-items:center;font-size:20px;pointer-events:none}
@@ -32,7 +32,7 @@ button{touch-action:manipulation}
 <header class="w-full max-w-md flex flex-col items-center gap-2 mt-1 z-10">
 <div class="w-full flex justify-between items-center px-2">
 <div class="flex items-center gap-2"><span class="text-3xl sm:text-4xl">🍓</span><h1 class="text-2xl sm:text-3xl font-bold tracking-wider text-yellow-300 drop-shadow">FRUIT FANCY</h1></div>
-<div class="flex gap-2"><button id="soundBtn" aria-label="Toggle sound" class="bg-white/20 p-2.5 rounded-full w-10 h-10 border border-white/30"><i class="fas fa-volume-up"></i></button><button id="refreshBtn" aria-label="Refresh fruits" title="Refresh fruits without restarting the level" class="bg-white/20 p-2.5 rounded-full w-10 h-10 border border-white/30"><i class="fas fa-sync-alt"></i></button></div>
+<div class="flex gap-2"><button id="soundBtn" aria-label="Toggle sound" class="bg-white/20 p-2.5 rounded-full w-10 h-10 border border-white/30"><i class="fas fa-volume-up"></i></button><button id="refreshBtn" aria-label="Refresh fruits" title="Refresh fruits without restarting the level" class="bg-white/20 p-2.5 rounded-full w-10 h-10 border border-white/30"><i class="fas fa-sync-alt"></i></button><button id="fullscreenBtn" aria-label="Toggle full screen" title="Full screen" class="bg-white/20 p-2.5 rounded-full w-10 h-10 border border-white/30"><i class="fas fa-expand"></i></button></div>
 </div>
 <div class="w-full flex justify-start px-2"><a href="dashboard.html" aria-label="Back to player dashboard" class="inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/25 hover:bg-black/40 px-3 py-1.5 text-xs sm:text-sm font-bold text-yellow-100 shadow-sm"><i class="fas fa-arrow-left"></i><span>PLAYER DASHBOARD</span></a></div>
  <div class="w-full grid grid-cols-4 gap-1.5 bg-black/25 backdrop-blur-md p-2.5 rounded-2xl border border-white/20 shadow-lg text-center">
@@ -142,6 +142,7 @@ async function refreshPlayerSession(){
 }
 const $=id=>document.getElementById(id),grid=$('grid'),line=$('lineCanvas'),fx=$('fxCanvas'),lc=line.getContext('2d'),fc=fx.getContext('2d');
 function fruit(){return FRUITS[Math.floor(Math.random()*FRUITS.length)]}
+$('fullscreenBtn').addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){}});
 function audioInit(){if(!audio)audio=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume()}
 function tone(type,p=1){if(!sound)return;try{audioInit();let o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime;o.connect(g);g.connect(audio.destination);o.type=type==='blast'?'sawtooth':type==='bomb'?'square':'triangle';let start=type==='bomb'?120:type==='blast'?150:380;o.frequency.setValueAtTime(start,t);o.frequency.exponentialRampToValueAtTime(type==='bomb'?30:type==='blast'?600:Math.max(650,500*p),t+(type==='blast'?.4:.18));g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.start(t);o.stop(t+.26)}catch(e){}}
 function resize(){let r=$('boardContainer').getBoundingClientRect();[line,fx].forEach(c=>{c.width=Math.round(r.width*devicePixelRatio);c.height=Math.round(r.height*devicePixelRatio);c.style.width=r.width+'px';c.style.height=r.height+'px';c.getContext('2d').setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)})}
