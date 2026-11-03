@@ -115,7 +115,29 @@ $('profileForm').addEventListener('submit',async event=>{
  renderAvatar(data.avatar_url,data.display_name||data.username);$('avatarFile').value='';
  message('Your player profile has been updated.');
 });
-async function loadRewardsWallet(){const status=$('walletStatus');status.textContent='Loading rewards wallet…';const {data,error}=await supabase.rpc('get_my_rewards_wallet');if(error){status.textContent='Your wallet is created, but its balance could not be loaded. Please refresh.';console.error('Rewards wallet:',error);return}const wallet=Array.isArray(data)?data[0]:data;if(!wallet){status.textContent='Your rewards wallet is being prepared.';return}const fmt=value=>Number(value||0).toLocaleString(undefined,{maximumFractionDigits:0});$('walletPoints').textContent=fmt(wallet.points_balance);$('walletValue').textContent='Estimated value: const {error}=await supabase.auth.signOut();if(error)message(friendly(error));else window.location.replace('index.html')}
+async function loadRewardsWallet(){
+ const status=$('walletStatus');
+ status.textContent='Loading rewards wallet…';
+ const {data,error}=await supabase.rpc('get_my_rewards_wallet');
+ if(error){
+  status.textContent='Your wallet is created, but its balance could not be loaded. Please refresh.';
+  console.error('Rewards wallet:',error);
+  return;
+ }
+ const wallet=Array.isArray(data)?data[0]:data;
+ if(!wallet){status.textContent='Your rewards wallet is being prepared.';return;}
+ const fmt=value=>Number(value||0).toLocaleString(undefined,{maximumFractionDigits:0});
+ $('walletPoints').textContent=fmt(wallet.points_balance);
+ $('walletValue').textContent='Estimated value: $'+Number(wallet.usd_value||0).toFixed(2);
+ $('walletEarned').textContent=fmt(wallet.lifetime_earned);
+ $('walletRedeemed').textContent=fmt(wallet.lifetime_redeemed);
+ status.textContent='Wallet connected · shared across CHOME games.';
+}
+async function signOut(){
+ const {error}=await supabase.auth.signOut();
+ if(error)message(friendly(error));
+ else window.location.replace('index.html');
+}
 $('menuSignOut').addEventListener('click',signOut);
 const profileOverlay=$('profileOverlay'),profileShortcut=$('profileShortcut');
 function setProfileOpen(open){profileOverlay.classList.toggle('open',open);profileOverlay.setAttribute('aria-hidden',String(!open));profileShortcut.setAttribute('aria-expanded',String(open));if(open)$('closeProfile').focus();else profileShortcut.focus()}
@@ -133,27 +155,6 @@ supabase.auth.onAuthStateChange((event,session)=>{
 const {data:{session}}=await supabase.auth.getSession();
 if(!session?.user)window.location.replace('player.html?notice=signin');
 else{await loadProfile(session.user);await loadRewardsWallet();}
-</script>
-</body>
-</html>+Number(wallet.usd_value||0).toFixed(2);$('walletEarned').textContent=fmt(wallet.lifetime_earned);$('walletRedeemed').textContent=fmt(wallet.lifetime_redeemed);status.textContent='Wallet connected · shared across CHOME games.'}
-async function signOut(){const {error}=await supabase.auth.signOut();if(error)message(friendly(error));else window.location.replace('index.html')}
-$('menuSignOut').addEventListener('click',signOut);
-const profileOverlay=$('profileOverlay'),profileShortcut=$('profileShortcut');
-function setProfileOpen(open){profileOverlay.classList.toggle('open',open);profileOverlay.setAttribute('aria-hidden',String(!open));profileShortcut.setAttribute('aria-expanded',String(open));if(open)$('closeProfile').focus();else profileShortcut.focus()}
-profileShortcut.addEventListener('click',()=>setProfileOpen(true));
-$('closeProfile').addEventListener('click',()=>setProfileOpen(false));
-profileOverlay.addEventListener('click',event=>{if(event.target===profileOverlay)setProfileOpen(false)});
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&profileOverlay.classList.contains('open'))setProfileOpen(false)});
-const menuToggle=$('menuToggle'),playerMenu=$('playerMenu');
-menuToggle.addEventListener('click',()=>{const open=playerMenu.classList.toggle('open');menuToggle.setAttribute('aria-expanded',String(open))});
-playerMenu.querySelectorAll('a:not(.menu-muted)').forEach(a=>a.addEventListener('click',()=>{playerMenu.classList.remove('open');menuToggle.setAttribute('aria-expanded','false')}));
-document.addEventListener('click',event=>{if(!event.target.closest('.header-actions')){playerMenu.classList.remove('open');menuToggle.setAttribute('aria-expanded','false')}});
-supabase.auth.onAuthStateChange((event,session)=>{
- if(event==='SIGNED_OUT')window.location.replace('index.html');
-});
-const {data:{session}}=await supabase.auth.getSession();
-if(!session?.user)window.location.replace('player.html?notice=signin');
-else await loadProfile(session.user);
 </script>
 </body>
 </html>
