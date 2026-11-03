@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>CHOME 3D — Coffee Shop</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101820;color:#fff;font-family:Inter,system-ui,Arial;overflow:hidden}#game{position:fixed;inset:0}canvas{display:block}
+.hud{position:fixed;z-index:2;left:16px;top:14px;padding:12px 15px;border:1px solid #ffffff24;background:#101820c9;backdrop-filter:blur(12px);border-radius:14px;max-width:min(370px,calc(100vw - 32px));box-shadow:0 8px 30px #0005}.eyebrow{font-size:10px;letter-spacing:2px;color:#f4b35e;font-weight:800}.hud h1{font-size:18px;margin:4px 0}.hud p{font-size:12px;color:#c7d1d9;margin:0;line-height:1.45}
+.task{position:fixed;z-index:2;right:16px;top:14px;width:min(260px,calc(100vw - 32px));padding:13px;background:#101820d9;border:1px solid #ffffff24;border-radius:14px}.task strong{display:block;font-size:12px;color:#f4b35e;margin-bottom:5px}.task span{font-size:13px;line-height:1.4}
+.bottom{position:fixed;z-index:2;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:9px;align-items:center}.action{border:0;border-radius:13px;padding:13px 18px;background:#f3ad54;color:#1d2227;font-weight:900;font-size:14px;box-shadow:0 6px 20px #0005}.action.secondary{background:#ffffffdf;color:#17212a}.action:disabled{opacity:.4}
+.pad{position:fixed;z-index:3;left:18px;bottom:18px;display:grid;grid-template-columns:44px 44px 44px;grid-template-rows:44px 44px;gap:4px}.pad button{border:1px solid #ffffff35;background:#101820b9;color:white;border-radius:10px;font-size:19px;touch-action:none}.pad .up{grid-column:2}.pad .left{grid-column:1;grid-row:2}.pad .down{grid-column:2;grid-row:2}.pad .right{grid-column:3;grid-row:2}
+.toast{position:fixed;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);background:#101820ed;border:1px solid #f3ad54;border-radius:16px;padding:18px 22px;text-align:center;max-width:85vw;display:none}.toast.show{display:block}.toast h2{margin:0 0 7px;font-size:20px}.toast p{margin:0;color:#d4dce2;font-size:13px}
+@media(min-width:760px){.pad{display:none}.bottom{left:auto;right:20px;transform:none}.task{top:100px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="game"></div>
+<div class="hud"><div class="eyebrow">CHOME GAME STUDIO · 3D PLAYABLE DEMO</div><h1>Morning Coffee</h1><p>Explore the café, finish your coffee, then walk to the counter and pay.</p></div>
+<div class="task"><strong>YOUR TASK</strong><span id="taskText">You're seated with your coffee. Tap “Finish coffee” when you're ready.</span></div>
+<div class="pad" aria-label="Movement controls"><button class="up" data-move="forward">▲</button><button class="left" data-move="left">◀</button><button class="down" data-move="back">▼</button><button class="right" data-move="right">▶</button></div>
+<div class="bottom"><button class="action secondary" id="finishBtn">Finish coffee</button><button class="action" id="payBtn" disabled>Pay $4.50</button></div>
+<div class="toast" id="toast"><h2>Payment complete ☕</h2><p>You paid $4.50. Thanks for visiting!</p><br><button class="action" id="againBtn">Play again</button></div>
+<script type="module">
+import * as THREE from 'three';
+const mount=document.querySelector('#game');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x9fc5d2);scene.fog=new THREE.Fog(0x9fc5d2,17,34);
+const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,100);camera.position.set(7,8,11);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;mount.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xd9efff,0x6c5949,2));
+const sun=new THREE.DirectionalLight(0xffe3bd,3.1);sun.position.set(-5,10,7);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun);
+const mat=(color,roughness=.75)=>new THREE.MeshStandardMaterial({color,roughness});
+const wood=mat(0x98613b),darkWood=mat(0x4d3025),cream=mat(0xf1e4cb),wall=mat(0xd9c5a8),green=mat(0x537b60),metal=mat(0x59636b,.35),black=mat(0x22272a),glass=new THREE.MeshStandardMaterial({color:0x9ed9e8,transparent:true,opacity:.22,roughness:.12}),skin=mat(0xc8875d),shirt=mat(0x315d82),pants=mat(0x28313c),white=mat(0xf3f0e8);
+function box(parent,w,h,d,m,x,y,z){let o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
+function cyl(parent,r1,r2,h,m,x,y,z,seg=24){let o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,seg),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o}
+function sphere(parent,r,m,x,y,z){let o=new THREE.Mesh(new THREE.SphereGeometry(r,20,16),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o}
+const floor=box(scene,18,.25,16,mat(0xb88b60),0,-.13,0);floor.receiveShadow=true;
+// café room shell
+box(scene,18,5,.25,wall,0,2.4,-7.85);box(scene,.25,5,16,wall,-8.85,2.4,0);box(scene,.25,5,16,wall,8.85,2.4,0);
+box(scene,18,.25,16,mat(0x4a382e),0,5,0);
+// back windows
+for(let x of [-5.8,-3.8,3.8,5.8]){box(scene,1.45,2.2,.12,glass,x,2.7,-7.68);box(scene,1.55,.08,.16,white,x,2.7,-7.56);box(scene,.08,2.25,.16,white,x,2.7,-7.56)}
+// counter
+box(scene,4.8,1.25,1.15,wood,4.9,.65,-5.55);box(scene,5,.13,1.3,darkWood,4.9,1.34,-5.55);
+box(scene,1.25,.85,.8,metal,4.1,1.8,-5.55);box(scene,.65,.55,.65,black,5.3,1.65,-5.55);cyl(scene,.28,.28,.08,metal,4.1,2.27,-5.55);
+// pastry display
+box(scene,1.1,.55,.8,cream,6.7,1.62,-5.55);box(scene,1.08,.05,.78,glass,6.7,1.95,-5.55);for(let i=0;i<3;i++)sphere(scene,.16,mat(0xc98745),6.4+i*.28,1.78,-5.55);
+// sign
+box(scene,3,.85,.15,darkWood,4.9,3.4,-7.55); 
+// tables and chairs
+function chair(x,z){box(scene,.9,.12,.9,wood,x,.65,z);box(scene,.9,.9,.12,wood,x,1.1,z-.4);for(let dx of [-.34,.34])for(let dz of [-.34,.34])box(scene,.1,.65,.1,darkWood,x+dx,.32,z+dz)}
+function table(x,z){cyl(scene,.8,.8,.13,darkWood,x,1.25,z);cyl(scene,.12,.18,1.15,metal,x,.65,z);for(let a=0;a<4;a++){let ang=a*Math.PI/2;box(scene,.12,.12,.12,metal,x+Math.cos(ang)*.48,.08,z+Math.sin(ang)*.48)}}
+table(-4,-1.5);chair(-5.15,-1.5);chair(-2.85,-1.5);table(0,-2.4);chair(-1.2,-2.4);chair(1.2,-2.4);
+table(-4,3.1);chair(-5.2,3.1);chair(-2.8,3.1);
+// plants
+function plant(x,z){cyl(scene,.28,.36,.45,mat(0x9c6040),x,.22,z);for(let i=0;i<5;i++){let leaf=sphere(scene,.18,green,x+(Math.random()-.5)*.35,.65+Math.random()*.5,z+(Math.random()-.5)*.35);leaf.scale.set(.7,1.5,.7)}}
+plant(-7,-6);plant(7,-6);plant(-7,5);
+// pendant lights
+for(let x of [-4,0,4]){cyl(scene,.035,.035,1,black,x,4.45,-1);cyl(scene,.38,.1,.2,mat(0xe7b86d),x,3.9,-1)}
+// customer character group
+const customer=new THREE.Group();scene.add(customer);
+const torso=box(customer,.62,.9,.36,shirt,0,1.38,0);const head=sphere(customer,.28,skin,0,2.05,0);sphere(customer,.29,mat(0x30251f),0,2.22,-.015); // hair cap
+for(let x of [-.12,.12])sphere(customer,.035,black,x,2.06,-.25);
+box(customer,.18,.08,shirt,0,1.82,-.2);
+const armL=new THREE.Group();armL.position.set(-.36,1.72,0);customer.add(armL);cyl(armL,.105,.09,.58,skin,0,-.28,0);const armR=new THREE.Group();armR.position.set(.36,1.72,0);customer.add(armR);cyl(armR,.105,.09,.58,skin,0,-.28,0);
+for(let x of [-.18,.18]){cyl(customer,.13,.14,.75,pants,x,.48,0)}
+// coffee cup prop in hand, table cup
+const cupGroup=new THREE.Group();customer.add(cupGroup);cyl(cupGroup,.13,.17,.28,white,0,0,0);cyl(cupGroup,.13,.13,.025,mat(0x55301d),0,.15,0);let handle=new THREE.Mesh(new THREE.TorusGeometry(.09,.025,8,16),white);handle.position.set(.16,0,0);cupGroup.add(handle);cupGroup.position.set(-.52,1.42,-.02);
+function coffeeOnTable(x,z){cyl(scene,.13,.16,.28,white,x,1.48,z);cyl(scene,.13,.13,.025,mat(0x4a2818),x,1.63,z);let h=new THREE.Mesh(new THREE.TorusGeometry(.09,.025,8,16),white);h.position.set(x+.16,1.48,z);scene.add(h)}
+coffeeOnTable(-4,-1.5);
+customer.position.set(-4,0,-1.5);customer.rotation.y=.2;
+// cashier behind counter
+const cashier=new THREE.Group();scene.add(cashier);box(cashier,.55,.85,.35,green,0,1.4,0);sphere(cashier,.25,skin,0,2,0);sphere(cashier,.26,mat(0x29201b),0,2.17,0);cashier.position.set(4.9,0,-6.25);
+const keys={};let phase='drinking',move={forward:false,back:false,left:false,right:false};let cupSipped=false;
+const task=document.querySelector('#taskText'),finishBtn=document.querySelector('#finishBtn'),payBtn=document.querySelector('#payBtn'),toast=document.querySelector('#toast');
+function setPhase(p){phase=p;if(p==='ready'){task.textContent='Walk to the counter. Use WASD or the arrow buttons. Get close to the cashier.';finishBtn.disabled=true;payBtn.disabled=true}else if(p==='near'){task.textContent='You are at the counter. Tap “Pay $4.50” to complete your purchase.';payBtn.disabled=false}else if(p==='paid'){task.textContent='Payment complete. You can play again.';payBtn.disabled=true}}
+finishBtn.onclick=()=>{if(phase==='drinking'){cupGroup.visible=false;armL.rotation.z=-.9;setPhase('ready')}};
+payBtn.onclick=()=>{if(phase==='near'){setPhase('paid');toast.classList.add('show')}};
+document.querySelector('#againBtn').onclick=()=>location.reload();
+window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key===' '&&phase==='drinking')finishBtn.click()});
+window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+document.querySelectorAll('[data-move]').forEach(b=>{let k=b.dataset.move;b.addEventListener('pointerdown',e=>{e.preventDefault();move[k]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>move[k]=false))});
+const clock=new THREE.Clock();let walkT=0;
+function animate(){requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);let dx=0,dz=0;if(phase==='ready'){if(keys.w||keys.arrowup||move.forward)dz-=1;if(keys.s||keys.arrowdown||move.back)dz+=1;if(keys.a||keys.arrowleft||move.left)dx-=1;if(keys.d||keys.arrowright||move.right)dx+=1;let len=Math.hypot(dx,dz);if(len){dx/=len;dz/=len;customer.position.x=Math.max(-7,Math.min(7,customer.position.x+dx*2.5*dt));customer.position.z=Math.max(-6.8,Math.min(6,customer.position.z+dz*2.5*dt));customer.rotation.y=Math.atan2(dx,dz);walkT+=dt*9;customer.children.filter(c=>c.geometry?.type==='CylinderGeometry').forEach((c,i)=>{if(i<2)c.rotation.z=Math.sin(walkT+i*Math.PI)*.35})}}
+let dist=Math.hypot(customer.position.x-4.9,customer.position.z+5.8);if(phase==='ready'&&dist<1.55){setPhase('near')}
+let target=new THREE.Vector3(customer.position.x+5,5.7,customer.position.z+7);camera.position.lerp(target,.035);camera.lookAt(customer.position.x,1,customer.position.z);
+renderer.render(scene,camera)}
+animate();
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script>
+</body></html>
