@@ -50,7 +50,7 @@ let grid,active,nextType,score=0,best=Number(localStorage.getItem(KEY+':best')||
 $('year').textContent=new Date().getFullYear();
 function clone(t){return {name:t.name,color:t.color,cells:t.cells.map(([r,c])=>[r,c])}}
 function randomType(){return clone(TYPES[Math.floor(Math.random()*TYPES.length)])}
-function rotateCells(cells){const maxC=Math.max(...cells.map(p=>p[1]));return cells.map(([r,c])=>[c,maxC-r]).map(p=>p)}
+function rotateCells(cells){const maxR=Math.max(...cells.map(p=>p[0]));return cells.map(([r,c])=>[c,maxR-r])}
 function fits(piece,dr=0,dc=0,cells=piece.cells){return cells.every(([r,c])=>{const y=piece.y+r+dr,x=piece.x+c+dc;return x>=0&&x<W&&y>=0&&y<H&&!grid[y][x]})}
 function spawn(){const t=nextType||randomType();nextType=randomType();active={...t,cells:t.cells.map(p=>[...p]),x:Math.floor((W-(Math.max(...t.cells.map(p=>p[1]))+1))/2),y:0};drawNext();render();if(!fits(active)){endGame();return}acc=Math.max(acc,Math.max(90,850-(level-1)*65));$('status').textContent='New block! Falling now — move it, rotate it, and complete a row.';}
 function drawNext(){const root=$('next');root.innerHTML='';const maxR=Math.max(...nextType.cells.map(p=>p[0])),maxC=Math.max(...nextType.cells.map(p=>p[1])),set=new Set(nextType.cells.map(p=>p.join(',')));for(let r=0;r<Math.max(2,maxR+1);r++)for(let c=0;c<Math.max(3,maxC+1);c++){const d=document.createElement('i');if(!set.has(r+','+c))d.className='empty';else d.style.background=nextType.color;root.append(d)}}
