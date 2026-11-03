@@ -71,7 +71,7 @@ function setCloudStatus(text){const el=document.getElementById("cloudSaveMessage
 function setLeaderboardStatus(text){const el=document.getElementById("leaderboardMessage");if(el)el.textContent=text;}
 function setChoxStatus(text){const el=document.getElementById("choxStatus");if(el)el.textContent=text;}
 async function claimChox(stage){
- if(!currentPlayer){setChoxStatus("Sign in to earn CHOX rewards.");return;}
+ if(!currentPlayer){setChoxStatus("Sign in to earn CHOX rewards.");if(stage==="halfway")halfwayClaimedThisRun=false;return;}
  try{
   const {data,error}=await supabase.rpc("claim_fruit_fancy_chox",{p_level:level+1,p_stage:stage,p_extra_time_used:extraTimeUsed,p_score:score});
   if(error)throw error;
@@ -137,7 +137,7 @@ async function loadSavedGame(user){
 async function refreshPlayerSession(){
  const {data,error}=await supabase.auth.getSession();if(error){console.error(error);return;}
  const next=data.session?.user||null;
- if(next?.id!==currentPlayer?.id){currentPlayer=next;if(next){setChoxStatus("Earn CHOX by reaching halfway or clearing a level.");setLeaderboardStatus("Pass a level to submit your score.");await loadSavedGame(next);}else{setChoxStatus("Sign in to earn CHOX rewards.");setLeaderboardStatus("Sign in and pass a level to join the rankings.");setCloudStatus("Guest play · sign in to sync progress across devices");}}
+ if(next?.id!==currentPlayer?.id){currentPlayer=next;if(next){setChoxStatus("Earn CHOX by reaching halfway or clearing a level.");setLeaderboardStatus("Pass a level to submit your score.");await loadSavedGame(next);if(score>=Math.ceil(target/2)&&!halfwayClaimedThisRun){halfwayClaimedThisRun=true;claimChox("halfway");}}else{setChoxStatus("Sign in to earn CHOX rewards.");setLeaderboardStatus("Sign in and pass a level to join the rankings.");setCloudStatus("Guest play · sign in to sync progress across devices");}}
  else if(next){setCloudStatus("✓ Cloud saves enabled · signed in");setChoxStatus("Earn CHOX by reaching halfway or clearing a level.");setLeaderboardStatus("Pass a level to submit your score.");}
 }
 const $=id=>document.getElementById(id),grid=$('grid'),line=$('lineCanvas'),fx=$('fxCanvas'),lc=line.getContext('2d'),fc=fx.getContext('2d');
