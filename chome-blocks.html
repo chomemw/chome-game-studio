@@ -98,6 +98,60 @@ footer{font-size:10px}
 .board .cell.filled{
   background:var(--piece-color,#8b6cff) !important;
 }
+
+/* CHOME Blocks dashboard — polished arcade environment */
+html{
+  min-height:100%;
+  background:#080d18;
+}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(91,73,160,.25),transparent 42%),
+    radial-gradient(ellipse at 0% 55%,rgba(27,91,116,.16),transparent 38%),
+    radial-gradient(ellipse at 100% 82%,rgba(111,64,45,.12),transparent 34%),
+    linear-gradient(135deg,#080d18 0%,#0c1422 48%,#090f1b 100%) !important;
+  position:relative;
+  isolation:isolate;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  opacity:.22;
+  background-image:
+    linear-gradient(rgba(151,171,205,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(151,171,205,.055) 1px,transparent 1px);
+  background-size:38px 38px;
+  mask-image:linear-gradient(to bottom,black,transparent 88%);
+}
+header{
+  border-bottom:1px solid rgba(164,181,215,.15);
+  background:linear-gradient(90deg,rgba(15,24,41,.82),rgba(17,25,43,.58),rgba(15,24,41,.82));
+  backdrop-filter:blur(14px);
+}
+main{position:relative}
+.intro h1{color:#f5f3ff}
+.game{
+  border:1px solid rgba(164,181,215,.19);
+  background:linear-gradient(145deg,rgba(22,33,54,.96),rgba(11,19,33,.97));
+  box-shadow:0 28px 80px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.06);
+}
+.stat,.nextbox,.sidecard,.settings-card,.achievements{
+  border-color:rgba(164,181,215,.16);
+  background:linear-gradient(155deg,rgba(30,44,67,.92),rgba(16,26,43,.96));
+}
+.mission{
+  border-color:rgba(158,132,255,.32);
+  background:linear-gradient(105deg,rgba(61,48,105,.48),rgba(18,52,68,.35));
+}
+.reward-strip{
+  border-color:rgba(231,189,105,.28);
+  background:linear-gradient(100deg,rgba(72,49,25,.35),rgba(33,38,48,.55));
+}
+footer{border-color:rgba(164,181,215,.13)}
 </style>
 </head>
 <body><div class="shell">
