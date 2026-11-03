@@ -14,3 +14,10 @@ The Player Hub provides account registration, sign-in, profiles, avatar uploads,
 ## Current CHOME Blocks scope
 
 The first playable version includes an 8×8 board, 15 original shape patterns, row/column clears, score and best-score tracking, combo bonuses, sound controls, restart, and cloud save support. CHOX earning rules and ranked score submission are not enabled for CHOME Blocks yet; these will be connected after the game's level/reward rules are defined.
+
+
+## CHOME Tycoon
+
+- **CHOME Tycoon** — early playable business-management simulation. Players choose one of eight industries, name a company, select a starting city, and manage prices, employees, equipment, marketing, supplies, branches, customer satisfaction, morale, reputation, revenue, expenses, and cash flow.
+- The current prototype uses a local device save and a capped offline simulation. It is a single-player prototype; account-linked cloud saves, a shared dynamic world economy, advanced industry-specific systems, and CHOX rewards are not enabled yet.
+- Initial game direction: realistic business decisions with accessible controls, a hybrid offline/active simulation, a global selection of starting cities, and balanced difficulty.
