@@ -101,15 +101,93 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 .payout-status.rejected{color:#ffaaaa;background:#a33b3b30}
 @media(max-width:680px){.payout-grid{grid-template-columns:1fr}.payout-panel{padding:17px}}
 
+
+/* Player dashboard layout — inspired by the clear account-centre structure of GRASH FX */
+:root{--chome-sidebar:#0b1221;--chome-panel:#111b2e;--chome-accent:#8b6cff}
+.shell.dashboard-layout{width:100%;max-width:none;min-height:100vh;margin:0;display:grid;grid-template-columns:252px minmax(0,1fr);gap:0}
+.player-sidebar{grid-column:1;grid-row:1/4;position:sticky;top:0;height:100vh;min-height:620px;display:flex;flex-direction:column;padding:25px 16px 18px;background:linear-gradient(180deg,#0d1628,#090f1c);border-right:1px solid #ffffff17;z-index:40}
+.sidebar-brand{display:flex;align-items:center;gap:11px;padding:3px 9px 27px;font-size:13px;font-weight:1000;letter-spacing:.12em}
+.sidebar-brand .mark{width:36px;height:36px;border-radius:12px;font-size:18px;box-shadow:0 7px 22px #8b6cff40}
+.sidebar-brand small{display:block;color:#8390a8;font-size:8px;letter-spacing:.18em;margin-top:4px}
+.sidebar-section-label{padding:16px 11px 9px;color:#71809a;font-size:9px;font-weight:950;letter-spacing:.17em}
+.sidebar-nav{display:grid;gap:6px}
+.sidebar-nav a,.sidebar-bottom a,.sidebar-bottom button{display:flex;align-items:center;gap:13px;width:100%;min-height:46px;padding:11px 13px;border:1px solid transparent;border-radius:12px;background:transparent;color:#aebbd0;text-decoration:none;text-align:left;font-size:12px;font-weight:800;transition:.18s}
+.sidebar-nav a span,.sidebar-bottom a span,.sidebar-bottom button span{width:19px;text-align:center;font-size:16px}
+.sidebar-nav a:hover,.sidebar-bottom a:hover,.sidebar-bottom button:hover{background:#ffffff0a;color:white}
+.sidebar-nav a.active{background:linear-gradient(100deg,#8b6cff2b,#8b6cff0b);border-color:#a895ff38;color:#eeeaff}
+.sidebar-bottom{margin-top:auto;display:grid;gap:5px;padding-top:18px;border-top:1px solid #ffffff17}
+.sidebar-bottom button{cursor:pointer}
+.sidebar-bottom small{padding:16px 12px 0;color:#68758d;font-size:8px;font-weight:900;letter-spacing:.14em}
+.dashboard-content{grid-column:2;min-width:0;display:flex;flex-direction:column}
+.dashboard-topbar{height:82px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 clamp(20px,4vw,54px);border-bottom:1px solid #ffffff17;background:#0b1221d9;position:sticky;top:0;z-index:30;backdrop-filter:blur(16px)}
+.topbar-title{display:grid;gap:4px;margin-right:auto}
+.topbar-title .eyebrow{font-size:8px;letter-spacing:.17em}
+.topbar-title strong{font-size:13px;letter-spacing:.1em}
+.dashboard-topbar .profile-shortcut{justify-self:auto;max-width:260px;padding:7px 12px 7px 7px}
+.profile-chevron{color:#8f9bb1;font-size:15px}
+.sidebar-mobile-toggle{display:none;width:40px;height:40px;border:1px solid #ffffff20;border-radius:11px;background:#151f35;color:white;font-size:18px}
+.dashboard-content main{width:min(1320px,100%);margin:0 auto;padding:36px clamp(20px,4vw,54px) 72px}
+.dashboard-content footer{width:100%;padding:22px clamp(20px,4vw,54px);margin-top:auto}
+.welcome-panel{display:flex;justify-content:space-between;align-items:center;gap:22px;padding:30px 32px;margin-bottom:30px;border:1px solid #a895ff38;border-radius:22px;background:radial-gradient(circle at 88% 15%,#8b6cff35,transparent 33%),linear-gradient(120deg,#1b2340,#111a2c 65%,#101827);box-shadow:0 22px 55px #0003}
+.welcome-panel h1{font-size:clamp(31px,4vw,46px);margin:11px 0 10px;letter-spacing:-.065em}
+.welcome-panel h1 span{color:#c1b3ff}
+.welcome-panel .intro{max-width:680px}
+.welcome-action{flex:none;display:inline-flex;align-items:center;gap:18px;padding:14px 18px;border-radius:12px;background:#8b6cff;color:white;font-size:10px;font-weight:950;letter-spacing:.09em;box-shadow:0 9px 25px #8b6cff3b}
+.welcome-action span{font-size:18px}
+.wallet-section,.payout-section,.games-section{scroll-margin-top:105px}
+.section-head{margin-bottom:18px}
+.section-head h2{font-size:23px}
+.panel,.wallet-panel,.payout-panel{box-shadow:0 16px 45px #0003}
+.profile-overlay{z-index:80}
+.sidebar-scrim{display:none}
+@media(max-width:850px){
+ .shell.dashboard-layout{grid-template-columns:minmax(0,1fr)}
+ .player-sidebar{position:fixed;left:0;top:0;width:min(280px,84vw);height:100dvh;min-height:0;transform:translateX(-105%);transition:transform .22s ease;box-shadow:18px 0 50px #0008}
+ .player-sidebar.open{transform:translateX(0)}
+ .sidebar-scrim.open{display:block;position:fixed;inset:0;background:#020611b8;z-index:35}
+ .dashboard-content{grid-column:1}
+ .sidebar-mobile-toggle{display:grid;place-items:center}
+ .dashboard-topbar{height:72px;padding:0 16px;gap:12px}
+ .dashboard-content main{padding:24px 16px 54px}
+ .dashboard-content footer{padding:19px 16px;flex-wrap:wrap}
+}
+@media(max-width:560px){
+ .topbar-title .eyebrow{font-size:7px}
+ .topbar-title strong{font-size:11px}
+ .dashboard-topbar .profile-shortcut{gap:6px;padding:5px 8px 5px 5px;font-size:9px}
+ .dashboard-topbar .mini-avatar{width:29px;height:29px}
+ .welcome-panel{display:block;padding:22px 20px;margin-bottom:23px}
+ .welcome-panel h1{font-size:33px}
+ .welcome-action{margin-top:18px}
+ .section-head h2{font-size:21px}
+}
+
 </style>
 </head>
 <body>
-<div class="shell">
-<header><button class="profile-shortcut" id="profileShortcut" type="button" aria-label="Open your player profile"><span class="mini-avatar" id="headerAvatar">🎮</span><span class="profile-word">PROFILE</span></button><div class="header-actions"><a class="brand" href="index.html" aria-label="CHOME Game Studio home"><span class="mark">C</span><span>CHOME <span style="color:#a895ff">PLAYER</span></span></a><button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="playerMenu">MENU <span>☰</span></button><nav class="menu-popover" id="playerMenu" aria-label="Player menu"><a href="#top">⌂ <span>Dashboard</span></a><a href="#profile">◎ <span>My Profile & Account</span></a><a href="#payouts">💵 <span>USDT Payouts</span></a><a href="#games">🎮 <span>My Games</span></a><a class="menu-muted" href="#coming-soon" aria-disabled="true">🏆 <span>Achievements · Soon</span></a><a href="leaderboards.html">📊 <span>Leaderboards</span></a><a class="menu-muted" href="#coming-soon" aria-disabled="true">💬 <span>Community · Soon</span></a><div class="menu-divider"></div><a href="index.html">↗ <span>Studio Home</span></a><button id="menuSignOut" type="button">⇥ <span>Sign Out</span></button></nav></div></header>
+<div class="shell dashboard-layout">
+<aside class="player-sidebar" id="playerSidebar" aria-label="Player navigation">
+  <a class="sidebar-brand" href="index.html"><span class="mark">C</span><span>CHOME <small>GAME STUDIO</small></span></a>
+  <div class="sidebar-section-label">PLAYER SPACE</div>
+  <nav class="sidebar-nav">
+    <a class="active" href="#top"><span>⌂</span> Overview</a>
+    <a href="#games"><span>🎮</span> My Games</a>
+    <a href="#walletHeading"><span>◈</span> CHOX Wallet</a>
+    <a href="#payouts"><span>↗</span> Payout Centre</a>
+    <a href="leaderboards.html"><span>🏆</span> Leaderboards</a>
+    <a href="#profile" id="sidebarProfileLink"><span>◎</span> My Profile</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <a href="index.html"><span>↗</span> Studio Home</a>
+    <button id="menuSignOut" type="button"><span>⇥</span> Sign Out</button>
+    <small>WORLDS WORTH EXPLORING.</small>
+  </div>
+</aside>
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+<div class="dashboard-content">
+<header class="dashboard-topbar"><button class="sidebar-mobile-toggle" id="sidebarToggle" type="button" aria-expanded="false" aria-controls="playerSidebar" aria-label="Open navigation">☰</button><div class="topbar-title"><span class="eyebrow">CHOME GAME STUDIO</span><strong>PLAYER SPACE</strong></div><button class="profile-shortcut" id="profileShortcut" type="button" aria-label="Open your player profile"><span class="mini-avatar" id="headerAvatar">🎮</span><span class="profile-word">MY PROFILE</span><span class="profile-chevron">⌄</span></button><div class="header-actions"><nav class="menu-popover" id="playerMenu" aria-label="Player menu"></nav></div></header>
 <main id="top">
-<div class="eyebrow">Your personal gaming space</div>
-<h1>PLAYER DASHBOARD.</h1>
-<p class="intro">Welcome to your CHOME player hub. Manage your identity, jump into your games and keep building your progress across the studio.</p>
+<section class="welcome-panel"><div><div class="eyebrow">YOUR PERSONAL GAMING SPACE</div><h1>Welcome back, <span id="welcomePlayerName">Player</span>.</h1><p class="intro">Your games, achievements and CHOX rewards — all in one place. Pick up where you left off and explore what is waiting for you.</p></div><a class="welcome-action" href="#games">EXPLORE GAMES <span>→</span></a></section>
 <div class="profile-overlay" id="profileOverlay" aria-hidden="true"><section class="panel profile-panel" id="profile" role="dialog" aria-modal="true" aria-labelledby="profileDisplayHeading"><button class="profile-close" id="closeProfile" type="button" aria-label="Close profile">×</button>
 <div class="profile-head"><div class="avatar" id="avatarPreview">🎮</div><div><div class="eyebrow">PLAYER PROFILE</div><h2 id="profileDisplayHeading">Loading profile…</h2><div class="handle" id="profileHandle">@player</div></div></div>
 <p class="sub">Your player identity is shared across CHOME Game Studio.</p><div class="account-meta"><span>ACCOUNT EMAIL</span><strong id="accountEmail">Loading…</strong></div>
@@ -171,6 +249,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 </main>
 <footer><span>© <span id="year"></span> CHOME GAME STUDIO</span><span>WORLDS WORTH EXPLORING.</span></footer>
 </div>
+</div>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
@@ -194,6 +273,7 @@ async function loadProfile(user){
  const {data,error}=await supabase.from('profiles').select('id,username,display_name,avatar_url,bio').eq('id',user.id).single();
  if(error){message('You are signed in, but your player profile could not be loaded: '+friendly(error));return}
  $('profileDisplayHeading').textContent=data.display_name||data.username;
+ $('welcomePlayerName').textContent=(data.display_name||data.username||'Player').split(' ')[0];
  $('profileHandle').textContent='@'+data.username;
  $('editDisplayName').value=data.display_name||'';
  $('editUsername').value=data.username||'';
@@ -307,6 +387,16 @@ profileShortcut.addEventListener('click',()=>setProfileOpen(true));
 $('closeProfile').addEventListener('click',()=>setProfileOpen(false));
 profileOverlay.addEventListener('click',event=>{if(event.target===profileOverlay)setProfileOpen(false)});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&profileOverlay.classList.contains('open'))setProfileOpen(false)});
+
+// Responsive player sidebar navigation
+const sidebar=$('playerSidebar'),sidebarToggle=$('sidebarToggle'),sidebarScrim=$('sidebarScrim');
+function setSidebarOpen(open){sidebar?.classList.toggle('open',open);sidebarScrim?.classList.toggle('open',open);sidebarToggle?.setAttribute('aria-expanded',String(open));}
+sidebarToggle?.addEventListener('click',()=>setSidebarOpen(!sidebar.classList.contains('open')));
+sidebarScrim?.addEventListener('click',()=>setSidebarOpen(false));
+sidebar?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setSidebarOpen(false)));
+document.addEventListener('keydown',event=>{if(event.key==='Escape')setSidebarOpen(false)});
+$('sidebarProfileLink')?.addEventListener('click',event=>{event.preventDefault();setSidebarOpen(false);setProfileOpen(true)});
+
 const menuToggle=$('menuToggle'),playerMenu=$('playerMenu');
 menuToggle.addEventListener('click',()=>{const open=playerMenu.classList.toggle('open');menuToggle.setAttribute('aria-expanded',String(open))});
 playerMenu.querySelectorAll('a:not(.menu-muted)').forEach(a=>a.addEventListener('click',()=>{playerMenu.classList.remove('open');menuToggle.setAttribute('aria-expanded','false')}));
