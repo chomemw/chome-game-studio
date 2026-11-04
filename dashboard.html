@@ -230,14 +230,16 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 <aside class="player-sidebar" id="playerSidebar" aria-label="Player navigation">
   <a class="sidebar-brand" href="index.html"><span class="mark">C</span><span>CHOME <small>GAME STUDIO</small></span></a>
   <div class="sidebar-section-label">PLAYER SPACE</div>
-  <nav class="sidebar-nav">
-    <a class="active" href="#top" id="overviewNavLink"><span>⌂</span> Overview</a>
-    <a href="#games" id="gamesNavLink"><span>🎮</span> My Games</a>
+  <nav class="sidebar-nav" aria-label="Player menu">
+    <a class="active" href="#top" id="overviewNavLink"><span>⌂</span> Dashboard</a>
+    <a href="#games" id="gamesNavLink"><span>🎮</span> Games</a>
     <a href="#walletHeading" id="walletNavLink"><span>◈</span> CHOX Wallet</a>
     <a href="#payouts" id="payoutNavLink"><span>↗</span> Payout Centre</a>
-    <a href="#leaderboards" id="leaderboardNavLink"><span>🏆</span> Leaderboards</a>
-    <a href="#referrals" id="referralNavLink"><span>✦</span> Referral Centre</a>
-    <a href="#profile" id="sidebarProfileLink"><span>◎</span> My Profile</a>
+    <a href="#competitions" id="competitionsNavLink"><span>🏆</span> Competitions</a>
+    <a href="#rewardsCentre" id="rewardsNavLink"><span>✧</span> Rewards Centre</a>
+    <a href="#referrals" id="referralNavLink"><span>✦</span> Referrals</a>
+    <a href="#profile" id="sidebarProfileLink"><span>◎</span> My Account</a>
+    <a href="#helpSupport" id="helpNavLink"><span>❔</span> Help &amp; Support</a>
   </nav>
   <div class="sidebar-bottom">
     <a href="index.html"><span>↗</span> Studio Home</a>
@@ -278,7 +280,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 <div class="message" id="profileMessage" role="status" aria-live="polite"></div>
 </section></div>
 <section class="wallet-section" id="walletSection" hidden aria-labelledby="walletHeading">
- <div class="section-head"><div><div class="eyebrow">Two separate balances · one player account</div><h2 id="walletHeading">CHOX WALLET & GAME POINTS</h2></div><button type="button" id="refreshWallet" class="secondary wallet-refresh">↻ REFRESH BALANCES</button></div>
+ <div class="section-head"><div><div class="eyebrow">Your redeemable rewards balance</div><h2 id="walletHeading">CHOX WALLET</h2></div><button type="button" id="refreshWallet" class="secondary wallet-refresh">↻ REFRESH BALANCES</button></div>
  <div class="dual-wallet-grid">
   <article class="wallet-account-card chox-account-card">
    <div class="wallet-panel">
@@ -297,7 +299,14 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
    <div class="wallet-status" id="walletStatus" role="status" aria-live="polite">Connecting your CHOX wallet…</div>
    <div class="wallet-activity"><div class="wallet-activity-head"><h3>RECENT CHOX ACTIVITY</h3><span>LAST 12 ENTRIES</span></div><div id="walletActivityList"><div class="wallet-empty">Loading CHOX activity…</div></div><button class="activity-toggle" type="button" data-activity="walletActivityList" aria-expanded="false">VIEW ALL ACTIVITY</button></div>
   </article>
-  <article class="wallet-account-card game-points-account-card">
+
+ </div>
+
+</section>
+
+<section class="wallet-section" id="rewardsCentre" hidden aria-labelledby="rewardsHeading">
+ <div class="section-head"><div><div class="eyebrow">Progress, achievements and in-game currency</div><h2 id="rewardsHeading">REWARDS CENTRE</h2></div><button type="button" id="refreshRewardsCentre" class="secondary wallet-refresh">↻ REFRESH REWARDS</button></div>
+ <div class="dual-wallet-grid">  <article class="wallet-account-card game-points-account-card">
    <div class="wallet-panel game-points-panel">
     <div>
      <div class="wallet-topline"><div class="wallet-label">GAME POINTS WALLET</div><span class="points-live">PLAYER PROGRESSION</span></div>
@@ -311,9 +320,8 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
    </div>
    <div class="wallet-status points-status" id="gamePointsStatus" role="status" aria-live="polite">Connecting your Game Points wallet…</div>
    <div class="wallet-activity"><div class="wallet-activity-head"><h3>RECENT GAME POINTS ACTIVITY</h3><span>LAST 12 ENTRIES</span></div><div id="gamePointsActivityList"><div class="wallet-empty">Loading Game Points activity…</div></div><button class="activity-toggle" type="button" data-activity="gamePointsActivityList" aria-expanded="false">VIEW ALL ACTIVITY</button></div>
-  </article>
- </div>
-
+  </article></div>
+ <div class="wallet-activity" style="margin-top:18px"><div class="wallet-activity-head"><h3>MISSIONS &amp; ACHIEVEMENTS</h3><span>MORE REWARDS COMING</span></div><div class="wallet-empty"><span class="wallet-empty-icon">✧</span><span>Your achievements, daily missions and bonus challenges will appear here as they become available.</span></div></div>
 </section>
 <section class="payout-section" id="payouts" hidden aria-labelledby="payoutHeading">
   <div class="section-head"><div><div class="eyebrow">Player cash-out setup</div><h2 id="payoutHeading">USDT PAYOUTS</h2></div><div class="eyebrow">TRON · TRC20</div></div>
@@ -349,7 +357,11 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 </section>
 
 
-<section class="leaderboard-section" id="leaderboardSection" hidden aria-labelledby="leaderboardHeading"><div class="section-head"><div><div class="eyebrow">CHOME PLAYER COMMUNITY</div><h2 id="leaderboardHeading">LEADERBOARDS</h2></div></div><div class="leaderboard-frame-wrap"><iframe class="leaderboard-frame" src="leaderboards.html?embed=1" title="CHOME player leaderboards" loading="lazy"></iframe></div></section>
+<section class="leaderboard-section" id="leaderboardSection" hidden aria-labelledby="leaderboardHeading">
+ <div class="section-head"><div><div class="eyebrow">Play together · climb the rankings</div><h2 id="leaderboardHeading">COMPETITIONS</h2></div><div class="eyebrow">CHOME PLAYER COMMUNITY</div></div>
+ <div class="wallet-empty" style="margin:0 0 18px"><span class="wallet-empty-icon">🏆</span><span>Competition events and prize details will appear here when officially launched. Check the rankings below in the meantime.</span></div>
+ <div class="leaderboard-frame-wrap"><iframe class="leaderboard-frame" src="leaderboards.html?embed=1" title="CHOME player leaderboards" loading="lazy"></iframe></div>
+</section>
 
 <section class="referral-section" id="referrals" hidden aria-labelledby="referralHeading">
  <div class="section-head"><div><div class="eyebrow">Grow the CHOME player community</div><h2 id="referralHeading">REFERRAL CENTRE</h2></div><div class="eyebrow">INVITE · PLAY · EARN</div></div>
@@ -368,6 +380,14 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
   <div class="referral-history"><div class="wallet-activity-head"><h3>YOUR INVITED PLAYERS</h3><span>REFERRAL HISTORY</span></div><div id="referralHistoryList"><div class="wallet-empty"><span class="wallet-empty-icon">✦</span><span>No successful referrals yet. Share your link to invite your first player.</span></div></div></div>
   <div class="referral-status" id="referralStatus" role="status" aria-live="polite">Your personal referral code is being prepared.</div>
   <p class="referral-terms">A referral is rewarded once per new player after email verification and first sign-in. Self-referrals and repeat claims are blocked. Rewards are credited as CHOX, not directly as USDT.</p>
+ </div>
+</section>
+
+<section class="referral-section" id="helpSupport" hidden aria-labelledby="helpHeading">
+ <div class="section-head"><div><div class="eyebrow">We are here to help</div><h2 id="helpHeading">HELP &amp; SUPPORT</h2></div></div>
+ <div class="referral-panel">
+  <div class="referral-share-card" style="margin-bottom:14px"><h3>ACCOUNT &amp; WALLET HELP</h3><p>For account access, missing rewards, Game Points, CHOX balances or payout questions, include your CHOME username and a clear description of the issue.</p></div>
+  <div class="wallet-empty"><span class="wallet-empty-icon">✉</span><span>Direct support contact details will be published here once the official CHOME support channel is ready. Please do not share your password or private wallet recovery phrase with anyone.</span></div>
  </div>
 </section>
 
@@ -594,14 +614,14 @@ profileOverlay.addEventListener('click',event=>{if(event.target===profileOverlay
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&profileOverlay.classList.contains('open'))setProfileOpen(false)});
 
 // Keep payout details inside the dedicated Payout Centre view.
-const overviewNav=$('overviewNavLink'),gamesNav=$('gamesNavLink'),walletNav=$('walletNavLink'),payoutNav=$('payoutNavLink'),leaderboardNav=$('leaderboardNavLink'),referralNav=$('referralNavLink');
-const overviewWelcome=$('overviewWelcome'),walletSection=$('walletSection'),gamesSection=$('gamesSection'),payoutSection=$('payouts'),leaderboardSection=$('leaderboardSection'),referralSection=$('referrals');
+const overviewNav=$('overviewNavLink'),gamesNav=$('gamesNavLink'),walletNav=$('walletNavLink'),payoutNav=$('payoutNavLink'),competitionsNav=$('competitionsNavLink'),rewardsNav=$('rewardsNavLink'),referralNav=$('referralNavLink'),helpNav=$('helpNavLink');
+const overviewWelcome=$('overviewWelcome'),walletSection=$('walletSection'),gamesSection=$('gamesSection'),payoutSection=$('payouts'),leaderboardSection=$('leaderboardSection'),referralSection=$('referrals'),rewardsSection=$('rewardsCentre'),helpSection=$('helpSupport');
 let payoutPanelLoaded=false,referralPanelLoaded=false;
 function showPlayerView(view){
- const payout=view==='payouts',wallet=view==='wallet',games=view==='games',leaderboard=view==='leaderboards',referrals=view==='referrals',overview=view==='overview';
- overviewWelcome.hidden=!overview;$('overviewWalletSummary').hidden=!overview;walletSection.hidden=!wallet;gamesSection.hidden=!(overview||games);payoutSection.hidden=!payout;leaderboardSection.hidden=!leaderboard;referralSection.hidden=!referrals;
- overviewNav?.classList.toggle('active',overview);gamesNav?.classList.toggle('active',games);walletNav?.classList.toggle('active',wallet);payoutNav?.classList.toggle('active',payout);leaderboardNav?.classList.toggle('active',leaderboard);referralNav?.classList.toggle('active',referrals);
- const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':wallet?'CHOX WALLET':games?'MY GAMES':leaderboard?'LEADERBOARDS':referrals?'REFERRAL CENTRE':'PLAYER SPACE';
+ const payout=view==='payouts',wallet=view==='wallet',games=view==='games',competitions=view==='competitions',rewards=view==='rewards',referrals=view==='referrals',help=view==='help',overview=view==='overview';
+ overviewWelcome.hidden=!overview;$('overviewWalletSummary').hidden=!overview;walletSection.hidden=!wallet;gamesSection.hidden=!(overview||games);payoutSection.hidden=!payout;leaderboardSection.hidden=!competitions;referralSection.hidden=!referrals;rewardsSection.hidden=!rewards;helpSection.hidden=!help;
+ overviewNav?.classList.toggle('active',overview);gamesNav?.classList.toggle('active',games);walletNav?.classList.toggle('active',wallet);payoutNav?.classList.toggle('active',payout);competitionsNav?.classList.toggle('active',competitions);rewardsNav?.classList.toggle('active',rewards);referralNav?.classList.toggle('active',referrals);helpNav?.classList.toggle('active',help);
+ const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':wallet?'CHOX WALLET':games?'GAMES':competitions?'COMPETITIONS':rewards?'REWARDS CENTRE':referrals?'REFERRALS':help?'HELP & SUPPORT':'DASHBOARD';
  if((payout||wallet)&&!payoutPanelLoaded){payoutPanelLoaded=true;loadPayoutPanel();}
  if(referrals&&!referralPanelLoaded){referralPanelLoaded=true;loadReferralPanel();}
  window.scrollTo({top:0,behavior:'smooth'});
@@ -611,8 +631,10 @@ overviewNav?.addEventListener('click',event=>{event.preventDefault();showPlayerV
 gamesNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('games')});
 walletNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('wallet')});
 payoutNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('payouts')});
-leaderboardNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('leaderboards')});
+competitionsNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('competitions')});
+rewardsNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('rewards')});
 referralNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('referrals')});
+helpNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('help')});
 
 // Responsive player sidebar navigation
 const sidebar=$('playerSidebar'),sidebarToggle=$('sidebarToggle'),sidebarScrim=$('sidebarScrim');
@@ -630,7 +652,8 @@ const {data:{session}}=await supabase.auth.getSession();
 if(!session?.user)window.location.replace('player.html?notice=signin');
 else{await loadProfile(session.user);const [walletSetup,pointsWalletSetup]=await Promise.all([rewardsRpc('ensure_my_rewards_wallet'),rewardsRpc('ensure_my_game_points_wallet')]);if(walletSetup.error)console.error('CHOX wallet setup:',walletSetup.error);if(pointsWalletSetup.error)console.error('Game Points wallet setup:',pointsWalletSetup.error);await Promise.all([loadRewardsWallet(),loadRewardsActivity(),loadGamePointsWallet(),loadGamePointsActivity()]);const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
 $('overviewOpenWallet')?.addEventListener('click',()=>showPlayerView('wallet'));
-$('overviewOpenPointsWallet')?.addEventListener('click',()=>showPlayerView('wallet'));
+$('overviewOpenPointsWallet')?.addEventListener('click',()=>showPlayerView('rewards'));
+$('refreshRewardsCentre')?.addEventListener('click',()=>refreshRewardsWallet(false));
 $('refreshWallet')?.addEventListener('click',()=>refreshRewardsWallet(false));
 document.querySelectorAll('.activity-toggle').forEach(button=>button.addEventListener('click',()=>toggleActivity(button)));
 // Refresh after returning from a game or restoring this page from the browser cache.
