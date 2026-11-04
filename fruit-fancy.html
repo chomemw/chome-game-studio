@@ -73,7 +73,7 @@ const supabase = createClient("https://zbumbbzvrjqjgroxzixg.supabase.co", "sb_pu
 const N=6,FRUITS=[['apple','🍎','#ff4d4d'],['banana','🍌','#ffeb3b'],['grape','🍇','#ab47bc'],['orange','🍊','#ffa726'],['strawberry','🍓','#e91e63'],['watermelon','🍉','#66bb6a'],['cherry','🍒','#d81b60']].map(([type,emoji,color])=>({type,emoji,color}));
 const LEVELS=[{target:400,ice:0,bombs:0},{target:700,ice:3,bombs:0},{target:1100,ice:4,bombs:2},{target:1600,ice:6,bombs:3},{target:2200,ice:8,bombs:4}];
 let level=0,score=0,target=400,moves=0,board=[],path=[],dragging=false,busy=false,sound=true,audio=null,particles=[],boardScanTimer=null;
-let currentPlayer=null,saveChain=Promise.resolve(),initialized=false,scoreSubmittedForRun=false,activeGameSessionId=null,gameSessionRequest=0,gameRng=null,verifiedMoveLog=[];
+let currentPlayer=null,saveChain=Promise.resolve(),initialized=false,scoreSubmittedForRun=false,activeGameSessionId=null,gameSessionRequest=0,gameRng=null,verifiedMoveLog=[],verifiedSessionPending=false;
 let extraTimeUsed=0,halfwayClaimedThisRun=false,gameMenuPaused=false;
 const LEVEL_DURATION=120;let timeLeft=LEVEL_DURATION,levelDeadline=0,timerId=null;
 function setCloudStatus(text){const el=document.getElementById("cloudSaveMessage");if(el)el.textContent=text;const suffix=document.getElementById("cloudSaveGuestSuffix");if(suffix)suffix.style.display=currentPlayer?"none":"inline";}
@@ -85,19 +85,20 @@ async function claimChox(stage){
 }
 async function beginVerifiedRun(){
  const requestId=++gameSessionRequest;
- activeGameSessionId=null;
+ activeGameSessionId=null;verifiedSessionPending=false;
  if(!currentPlayer)return;
+ verifiedSessionPending=true;
  try{
   const {data,error}=await supabase.functions.invoke("game-session",{body:{action:"start",game_id:"fruit-fancy",level:level+1}});
   if(requestId!==gameSessionRequest)return;
   if(error)throw error;
   if(!data?.ok||!data.session_id)throw new Error(data?.error||"Could not start a verified game session.");
-  activeGameSessionId=data.session_id;
+  activeGameSessionId=data.session_id;verifiedSessionPending=false;
   prepareVerifiedBoard(data.board_seed);
   setLeaderboardStatus("Verified run started. Complete this level to submit your score.");
  }catch(error){
   if(requestId!==gameSessionRequest)return;
-  activeGameSessionId=null;
+  activeGameSessionId=null;verifiedSessionPending=false;
   console.error("Fruit Fancy verified session could not start:",error);
   setLeaderboardStatus("Verified score submission is temporarily unavailable. Your game progress still saves.");
  }
@@ -163,7 +164,7 @@ async function refreshPlayerSession(){
  if(next?.id!==currentPlayer?.id){
   currentPlayer=next;
   gameSessionRequest++;
-  activeGameSessionId=null;
+  activeGameSessionId=null;verifiedSessionPending=false;
   if(next){
    setChoxStatus("CHOX rewards are paused until the full gameplay reward checks are completed.");
    setLeaderboardStatus("Preparing a verified game session…");
@@ -203,14 +204,14 @@ function hasAvailableMove(){for(let r=0;r<N;r++)for(let c=0;c<N;c++){const first
 function findPlayableTriple(){for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(board[r][c].ice||board[r][c].bomb)continue;const chain=[{r,c}],walk=()=>{if(chain.length===3)return true;const last=chain[chain.length-1];for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const nr=last.r+dr,nc=last.c+dc;if(nr<0||nr>=N||nc<0||nc>=N||board[nr][nc].ice||chain.some(p=>p.r===nr&&p.c===nc))continue;chain.push({r:nr,c:nc});if(walk())return true;chain.pop()}return false};if(walk())return chain.slice()}return []}
 function shuffleFruits(force=false){if(!force&&hasAvailableMove())return false;const cells=board.flat().filter(cell=>!cell.ice);for(let attempt=0;attempt<300;attempt++){const fruits=cells.map(cell=>cell.fruit);for(let i=fruits.length-1;i>0;i--){const j=gameRandom()*(i+1)|0;[fruits[i],fruits[j]]=[fruits[j],fruits[i]]}cells.forEach((cell,i)=>cell.fruit=fruits[i]);if(hasAvailableMove()){path=[];render();combo(force?'FRUITS REFRESHED! 🔄':'NO MOVES · AUTOMATIC SHUFFLE! 🔄');return true}}const triple=findPlayableTriple();if(triple.length===3){const chosen=fruit();triple.forEach(p=>board[p.r][p.c].fruit=chosen)}path=[];render();if(!hasAvailableMove())console.error('Fruit Fancy could not create a playable board.');else combo(force?'FRUITS REFRESHED! 🔄':'BOARD SHUFFLED! 🔄');return true}
 function ensurePlayableBoard(){return shuffleFruits(false)}
-function refreshBoard(){if(busy||dragging||timeLeft<=0||(currentPlayer&&!activeGameSessionId)||$('modalOverlay').classList.contains('show'))return;lc.clearRect(0,0,line.width,line.height);if(shuffleFruits(true)){if(currentPlayer)verifiedMoveLog.push({type:"refresh"});update();saveGame()}}
+function refreshBoard(){if(busy||dragging||timeLeft<=0||verifiedSessionPending||$('modalOverlay').classList.contains('show'))return;lc.clearRect(0,0,line.width,line.height);if(shuffleFruits(true)){if(currentPlayer)verifiedMoveLog.push({type:"refresh"});update();saveGame()}}
 function scanBoardAutomatically(){if(!initialized||gameMenuPaused||busy||dragging||timeLeft<=0||$('modalOverlay').classList.contains('show'))return false;if(hasAvailableMove())return false;const shuffled=ensurePlayableBoard();if(shuffled){update();saveGame()}return shuffled}
  function startBoardScanner(){if(boardScanTimer)clearInterval(boardScanTimer);boardScanTimer=setInterval(scanBoardAutomatically,350);scanBoardAutomatically()}
  function tileAt(x,y){let el=document.elementFromPoint(x,y)?.closest('.tile');return el?{r:+el.dataset.r,c:+el.dataset.c}:null}
 function same(a,b){return a.r===b.r&&a.c===b.c}
 function highlight(){grid.querySelectorAll('.tile').forEach(t=>t.classList.remove('selected'));path.forEach(p=>grid.querySelector('[data-r="'+p.r+'"][data-c="'+p.c+'"]')?.classList.add('selected'));drawLine()}
 function drawLine(){lc.clearRect(0,0,line.width,line.height);if(path.length<2)return;let root=$('boardContainer').getBoundingClientRect(),first=board[path[0].r][path[0].c];lc.beginPath();lc.lineWidth=7;lc.lineCap='round';lc.lineJoin='round';lc.strokeStyle=first.fruit.color;lc.shadowColor=first.fruit.color;lc.shadowBlur=12;path.forEach((p,i)=>{let r=grid.querySelector('[data-r="'+p.r+'"][data-c="'+p.c+'"]').getBoundingClientRect(),x=r.left+r.width/2-root.left,y=r.top+r.height/2-root.top;i?lc.lineTo(x,y):lc.moveTo(x,y)});lc.stroke()}
-function down(e){if(gameMenuPaused||busy||timeLeft<=0||(currentPlayer&&!activeGameSessionId))return;if(!hasAvailableMove()){if(ensurePlayableBoard())saveGame();return}let p=tileAt(e.clientX,e.clientY);if(!p||board[p.r][p.c].ice)return;try{grid.setPointerCapture(e.pointerId)}catch(_){}audioInit();dragging=true;path=[p];highlight();tone('select',1)}
+function down(e){if(gameMenuPaused||busy||timeLeft<=0||verifiedSessionPending)return;if(!hasAvailableMove()){if(ensurePlayableBoard())saveGame();return}let p=tileAt(e.clientX,e.clientY);if(!p||board[p.r][p.c].ice)return;try{grid.setPointerCapture(e.pointerId)}catch(_){}audioInit();dragging=true;path=[p];highlight();tone('select',1)}
 function move(e){if(gameMenuPaused||!dragging)return;let p=tileAt(e.clientX,e.clientY);if(!p)return;let last=path[path.length-1];if(path.length>1&&same(p,path[path.length-2])){path.pop();highlight();return}if(path.some(q=>same(q,p)))return;let dr=Math.abs(p.r-last.r),dc=Math.abs(p.c-last.c);if(dr>1||dc>1||(!dr&&!dc))return;let first=board[path[0].r][path[0].c],cell=board[p.r][p.c];if(cell.ice||(!cell.bomb&&cell.fruit.type!==first.fruit.type))return;path.push(p);highlight();tone('select',path.length)}
 function up(){if(gameMenuPaused){dragging=false;path=[];return}if(!dragging)return;dragging=false;lc.clearRect(0,0,line.width,line.height);if(path.length>=3)process();else{path=[];highlight()}}
 function popup(x,y,txt){let e=document.createElement('div');e.className='floating-score';e.style.left=x+'px';e.style.top=y+'px';e.textContent=txt;$('boardContainer').append(e);setTimeout(()=>e.remove(),850)}
