@@ -97,6 +97,7 @@ async function beginVerifiedRun(){
   setLeaderboardStatus("Verified run started. Complete this level to submit your score.");
  }catch(error){
   if(requestId!==gameSessionRequest)return;
+  activeGameSessionId=null;
   console.error("Fruit Fancy verified session could not start:",error);
   setLeaderboardStatus("Verified score submission is temporarily unavailable. Your game progress still saves.");
  }
@@ -133,6 +134,7 @@ async function saveGame(){
  catch(error){console.error("Fruit Fancy cloud save failed:",error);setCloudStatus("Cloud save unavailable · your current game is still playable.");}
 }
 function restoreGame(data){
+ gameRng=null;verifiedMoveLog=[];
  if(!data||data.version!==1||!Number.isInteger(data.level)||data.level<0||data.level>=LEVELS.length||!Array.isArray(data.board)||data.board.length!==N||!data.board.every(row=>Array.isArray(row)&&row.length===N))return false;
  const cfg=LEVELS[data.level],fruitByType=Object.fromEntries(FRUITS.map(f=>[f.type,f]));
  if(!data.board.every(row=>row.every(cell=>cell&&fruitByType[cell.fruit])))return false;
