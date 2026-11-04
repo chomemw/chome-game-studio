@@ -3,82 +3,301 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#080d18">
+<meta name="theme-color" content="#090d18">
 <title>CHOME Blocks | CHOME Game Studio</title>
 <style>
-:root{color-scheme:dark;--bg:#080d18;--panel:#142039;--line:#ffffff20;--muted:#a8b4ca;--purple:#987cff;--cyan:#58d8ec;--gold:#f4ce78}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#40307866,transparent 48%),linear-gradient(135deg,#080d18,#0d1728 55%,#080d18);color:#f7f7fb;font-family:Inter,system-ui,sans-serif}button{font:inherit;cursor:pointer}.shell{width:min(760px,calc(100% - 20px));margin:auto}
-header{height:62px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:950;letter-spacing:.13em}.mark{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--purple),var(--cyan));box-shadow:0 5px 18px #8b6cff55}.back{color:#c7baff;text-decoration:none;padding:9px 12px;border:1px solid #a895ff44;border-radius:10px;background:#a895ff12;font-size:10px;font-weight:900;letter-spacing:.08em}
-main{padding:20px 0 32px}.intro{text-align:center;margin:0 0 17px}.eyebrow{font-size:9px;font-weight:950;letter-spacing:.22em;color:#b9aaff}.intro h1{font-size:clamp(31px,7vw,45px);letter-spacing:-.06em;margin:5px 0}.intro p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
-.game{max-width:560px;margin:auto;padding:13px;border:1px solid #ffffff20;border-radius:21px;background:linear-gradient(145deg,#17243bdd,#0d1728ee);box-shadow:0 25px 70px #0008}
-.wallets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.wallet{padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:#ffffff08}.wallet small{display:block;color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.12em}.wallet strong{display:block;margin-top:4px;font-size:15px}.wallet.chox strong{color:var(--gold)}.wallet.points strong{color:#73dff0}.wallet-note{grid-column:1/-1;color:#aebbd1;font-size:8px;margin-top:-3px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:11px}.stat{padding:8px;border:1px solid var(--line);border-radius:11px;background:#111a2c;text-align:center}.stat small{display:block;color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.12em}.stat strong{display:block;font-size:18px;margin-top:3px}.stat.best strong{color:var(--gold)}
-.mission{padding:10px 12px;border:1px solid #8b78ff55;border-radius:12px;background:linear-gradient(110deg,#28204a88,#12263a88);margin-bottom:11px}.mission-top{display:flex;justify-content:space-between;gap:8px;font-size:9px;font-weight:900;letter-spacing:.1em;color:#d8d0ff}.mission-top strong{color:var(--gold)}.track{height:6px;margin-top:8px;border-radius:99px;background:#ffffff18;overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--cyan));transition:width .2s}
-.board-wrap{padding:9px;border:1px solid #a895ff66;border-radius:16px;background:linear-gradient(145deg,#1a2943,#0c1423);box-shadow:0 12px 32px #0008}.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;aspect-ratio:1;width:100%;touch-action:manipulation}.cell{border-radius:5px;min-width:0;aspect-ratio:1;background:linear-gradient(145deg,#1d2c45,#152137);border:1px solid #ffffff0b;transition:background .12s}.cell.filled{background:var(--tile,#987cff);border:1px solid #ffffff75;box-shadow:inset 0 2px #ffffff66,inset 0 -3px #0003,0 2px 5px #0006}.cell.preview{outline:2px solid #fff;filter:brightness(1.35)}
-.pieces-title{display:flex;justify-content:space-between;align-items:center;margin:14px 2px 8px;color:#cfd7e8;font-size:9px;font-weight:900;letter-spacing:.13em}.pieces{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.piece-slot{min-height:91px;padding:9px 5px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(155deg,#1a2941,#111a2b);display:grid;place-items:center;gap:5px;touch-action:manipulation}.piece-slot.selected{border-color:#b4a2ff;background:#34265c;box-shadow:0 0 0 2px #987cff33}.piece-slot.used{opacity:.25;pointer-events:none}.piece-grid{display:grid;grid-template-columns:repeat(5,12px);grid-auto-rows:12px;gap:3px;justify-content:center}.piece-dot{width:12px;height:12px;border-radius:3px;background:var(--piece)}.piece-dot.empty{opacity:0}.piece-label{font-size:8px;color:#aebbd1;font-weight:800}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.action{border:1px solid #ffffff35;border-radius:12px;padding:12px 9px;background:#ffffff0b;color:#e9e5ff;font-size:9px;font-weight:950;letter-spacing:.1em}.action.primary{background:linear-gradient(135deg,#9b7dff,#7049df);border-color:#9b7dff;color:white}.action:disabled{opacity:.35;cursor:not-allowed}
-.status{min-height:24px;text-align:center;color:#b9b0e9;font-size:9px;line-height:1.5;margin:10px 0 0}.rescue{margin-top:12px;padding:11px;border:1px solid #e7bd6944;border-radius:13px;background:#3a2c1a55}.rescue-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.rescue-head strong{font-size:9px;color:#f4d58e;letter-spacing:.1em}.rescue-head span{font-size:9px;color:#d8c9a8}.rescue p{font-size:8px;color:#b7b4bd;line-height:1.5;margin:6px 0 8px}.rescue button{width:100%;padding:10px;border:1px solid #e7bd69;border-radius:10px;background:#8b622d33;color:#ffe2a4;font-size:9px;font-weight:950;letter-spacing:.08em}.rescue button:disabled{opacity:.35;cursor:not-allowed}
-.help{max-width:560px;margin:12px auto 0;padding:11px 13px;border:1px solid var(--line);border-radius:13px;background:#ffffff06;color:#aebbd1;font-size:9px;line-height:1.6}.help b{color:#e7e1ff}
-.overlay{display:none;position:fixed;inset:0;z-index:50;background:#030611e8;backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px}.overlay.open{display:flex}.modal{width:min(360px,100%);padding:23px;border:1px solid #a895ff66;border-radius:20px;background:linear-gradient(145deg,#1c2540,#101827);text-align:center;box-shadow:0 24px 80px #000a}.modal h2{font-size:23px;margin:5px 0}.modal p{color:var(--muted);font-size:10px;line-height:1.6}.final{font-size:34px;font-weight:950;color:var(--gold);margin:12px 0}
-footer{padding:16px 0;border-top:1px solid var(--line);color:#77839b;font-size:9px;display:flex;justify-content:space-between}
-@media(max-width:430px){.shell{width:calc(100% - 12px)}.game{padding:9px;border-radius:17px}.board-wrap{padding:6px}.board{gap:3px}.cell{border-radius:3px}.piece-slot{min-height:80px}.piece-grid{grid-template-columns:repeat(5,10px);grid-auto-rows:10px}.piece-dot{width:10px;height:10px}}
+:root{color-scheme:dark;--bg:#090d18;--panel:#121d31;--line:#ffffff20;--muted:#9aa7bd;--purple:#8b6cff;--cyan:#55d6e8;--gold:#f3c96b}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -12%,#34265f 0,transparent 48%),var(--bg);color:#f7f7fb;font-family:Inter,system-ui,sans-serif;touch-action:pan-y}button,a{font:inherit}a{color:inherit;text-decoration:none}.shell{width:min(760px,calc(100% - 14px));margin:auto}header{height:62px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:950;letter-spacing:.12em}.mark{width:29px;height:29px;border-radius:9px;display:grid;place-items:center;background:var(--purple)}.back{color:#c7baff;font-size:12px;font-weight:800}
+main{padding:17px 0 30px}.intro{text-align:center;margin-bottom:13px}.eyebrow{font-size:9px;font-weight:950;letter-spacing:.2em;color:#b9aaff}.intro h1{font-size:clamp(29px,7vw,43px);letter-spacing:-.07em;margin:5px 0}.intro p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}.game{max-width:560px;margin:auto}.topline{display:flex;justify-content:space-between;gap:8px;margin-bottom:9px}.stat{flex:1;padding:8px;border:1px solid var(--line);border-radius:11px;background:#111a2c;text-align:center}.stat small{display:block;color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.12em}.stat strong{display:block;font-size:19px;margin-top:2px}.stat.best strong{color:var(--gold)}
+.play-area{display:grid;grid-template-columns:minmax(0,1fr) 104px;gap:12px;align-items:start}.board-wrap{position:relative;padding:9px;border:1px solid #a895ff66;border-radius:15px;background:linear-gradient(145deg,#1a2540,#101827);box-shadow:0 18px 40px #0006}.board{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));grid-template-rows:repeat(20,minmax(0,1fr));gap:3px;aspect-ratio:1/2;width:100%;min-height:500px;touch-action:none}.cell{border-radius:2px;background:#202c43;border:1px solid #ffffff08;min-width:0;min-height:0}.cell.filled{background:var(--piece-color,#8b6cff);border-color:#ffffff70;box-shadow:inset 0 1px #ffffff55}.cell.ghost{opacity:.28;outline:1px dashed #ffffff99}.cell.line-clear{animation:rowClear .2s ease-in-out infinite alternate;filter:brightness(2.2);box-shadow:0 0 12px #fff,0 0 24px #8b6cff}@keyframes rowClear{from{opacity:.45;transform:scale(.88)}to{opacity:1;transform:scale(1.04)}}.side{display:grid;gap:9px}.nextbox,.sidecard{padding:8px;border:1px solid var(--line);border-radius:11px;background:#111a2c;text-align:center}.nextbox small,.sidecard small{display:block;color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.1em}.next{display:grid;grid-template-columns:repeat(4,10px);grid-auto-rows:10px;gap:2px;justify-content:center;margin:10px auto 3px}.next i{width:10px;height:10px;border-radius:2px;background:#8b6cff}.next i.empty{opacity:0}.sidecard strong{display:block;font-size:14px;margin-top:5px}.hint{color:#aab5ca;font-size:9px;line-height:1.5;margin-top:3px}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}.control{border:2px solid #ffffff55;border-radius:13px;background:#263b5c;color:white;min-height:64px;font-size:25px;box-shadow:0 4px 12px #0008;font-weight:900;cursor:pointer;touch-action: manipulation;user-select:none}.control span{display:block;font-size:10px;letter-spacing:.08em;color:#b8c3d7;margin-top:1px}.control.rotate{background:#754de8;border:2px solid #c5b7ff;color:#fff}.control.drop{background:#087f9e;border:2px solid #8cecff}.control:active{transform:scale(.96);filter:brightness(1.25)}
+.actions{display:flex;gap:9px;margin-top:11px}.action{flex:1;border:1px solid #ffffff45;border-radius:12px;padding:14px 9px;background:#ffffff0b;color:#e9e5ff;font-size:9px;font-weight:900;letter-spacing:.08em;cursor:pointer}.action.primary{background:var(--purple);border-color:var(--purple);color:white}.status{min-height:18px;text-align:center;color:#b9b0e9;font-size:9px;margin:8px 0 0}.settings-card{padding:10px 9px;border:1px solid #ffffff20;border-radius:14px;background:linear-gradient(155deg,#1a2941,#111a2b);text-align:left}.settings-card>small{display:block;text-align:center;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.13em;margin-bottom:8px}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:5px 0;color:#cbd5e8;font-size:10px}.setting-toggle{min-width:39px;padding:5px 7px;border:1px solid #ffffff30;border-radius:8px;background:#29364c;color:#aebbd1;font-size:9px;font-weight:900}.setting-toggle.on{background:#45357e;border-color:#a895ff;color:#fff}.mission{margin:0 0 12px;padding:11px 13px;border:1px solid #8b78ff55;border-radius:13px;background:linear-gradient(110deg,#28204a88,#12263a88)}.mission-head{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:9px;font-weight:900;letter-spacing:.1em;color:#d8d0ff}.mission-head strong{color:#f4ce78;font-size:11px}.mission-track{height:7px;margin-top:8px;border-radius:99px;background:#ffffff16;overflow:hidden}.mission-fill{height:100%;width:0;background:linear-gradient(90deg,#8b6cff,#58d8ec);border-radius:99px;transition:width .25s ease}.mission-note{margin-top:6px;color:#aebbd1;font-size:9px}.reward-strip{margin:13px auto 0;max-width:430px;padding:10px 12px;border:1px solid #e7bd6944;border-radius:12px;background:#3a2c1a55;display:flex;justify-content:space-between;align-items:center;gap:10px}.reward-strip strong{display:block;color:#f4d58e;font-size:9px;letter-spacing:.1em}.reward-strip small{display:block;color:#b7b4bd;font-size:8px;margin-top:3px;line-height:1.4}.reward-balance{white-space:nowrap;font-size:14px;font-weight:950;color:#f6d78e}
+footer{padding:16px 0;border-top:1px solid var(--line);color:#77839b;font-size:9px;display:flex;justify-content:space-between}.overlay{display:none;position:fixed;inset:0;z-index:10;background:#030611dc;backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px}.overlay.open{display:flex}.modal{width:min(360px,100%);padding:24px;border:1px solid #a895ff66;border-radius:20px;background:linear-gradient(145deg,#1c2540,#101827);text-align:center}.modal h2{font-size:25px;margin:8px 0}.modal p{color:var(--muted);font-size:11px;line-height:1.6}.final-score{font-size:34px;font-weight:950;color:var(--gold);margin:12px 0}.modal .action{width:100%}.modal .action:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:430px){.shell{width:calc(100% - 12px)}.game{max-width:100%}.play-area{grid-template-columns:minmax(0,1fr) 88px;gap:7px}.board{min-height:0;gap:2px}.board-wrap{padding:6px}.control{min-height:58px}.controls{gap:6px}}
+@media(max-width:370px){.play-area{grid-template-columns:minmax(0,1fr) 76px;gap:5px}.next{grid-template-columns:repeat(4,8px);grid-auto-rows:8px}.next i{width:8px;height:8px}.control{min-height:43px}.board{gap:1px}}
+
+/* CHOME Blocks visual polish */
+:root{--bg:#070b15;--panel:#101a2d;--line:#ffffff18;--muted:#a6b2c8;--purple:#987cff;--cyan:#58d8ec;--gold:#f4ce78}
+body{background:radial-gradient(ellipse at 50% -15%,#403078 0,transparent 42%),radial-gradient(ellipse at 100% 45%,#102a40 0,transparent 40%),var(--bg)}
+.shell{width:min(820px,calc(100% - 22px))}
+header{height:68px}
+.brand{font-size:13px;letter-spacing:.14em}
+.mark{width:34px;height:34px;border-radius:11px;box-shadow:0 5px 18px #8b6cff55}
+.back{padding:10px 13px;border:1px solid #a895ff44;border-radius:10px;background:#a895ff12;letter-spacing:.08em}
+main{padding:24px 0 34px}
+.intro{margin-bottom:20px}
+.eyebrow{font-size:10px;letter-spacing:.22em}
+.intro h1{font-size:clamp(32px,7vw,48px);letter-spacing:-.055em;text-shadow:0 5px 28px #8b6cff33}
+.intro p{font-size:12px}
+.game{max-width:600px;padding:14px;border:1px solid #ffffff18;border-radius:22px;background:linear-gradient(145deg,#111d32dd,#0c1424ee);box-shadow:0 24px 70px #0008}
+.topline{gap:9px;margin-bottom:13px}
+.stat{padding:10px 7px;border-radius:13px;background:linear-gradient(180deg,#1a2942,#111a2c)}
+.stat small{font-size:9px;letter-spacing:.14em}
+.stat strong{font-size:21px}
+.play-area{grid-template-columns:minmax(0,1fr) 112px;gap:13px}
+.board-wrap{padding:10px;border-radius:17px;background:linear-gradient(145deg,#1a2943,#0c1423);box-shadow:inset 0 1px #ffffff18,0 12px 32px #0008}
+.board{min-height:520px;gap:3px;background:#0a1220;border-radius:8px;overflow:hidden}
+.cell{border-radius:3px;background:linear-gradient(145deg,#1b2940,#152137);border:1px solid #ffffff0b}
+.cell.filled{border:1px solid #ffffff70;box-shadow:inset 0 2px #ffffff66,inset 0 -3px #0002,0 1px 5px #0006}
+.side{gap:10px}
+.nextbox,.sidecard{padding:11px 8px;border-radius:14px;background:linear-gradient(155deg,#1a2941,#111a2b);box-shadow:inset 0 1px #ffffff12}
+.nextbox small,.sidecard small{font-size:9px;letter-spacing:.13em}
+.next{margin:13px auto 5px}
+.hint{font-size:10px;line-height:1.6}
+.speed-control{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:9px}
+.speed-control strong{font-size:15px;white-space:nowrap}
+.speed-control button{width:25px;height:25px;border:1px solid #a895ff66;border-radius:8px;background:#8b6cff25;color:white;font-size:18px;font-weight:900;line-height:1;cursor:pointer}
+.controls{gap:8px;margin-top:13px}
+.control{min-height:66px;border-radius:15px;background:linear-gradient(180deg,#31496d,#203653);border:1px solid #7890b755;box-shadow:0 5px 0 #0b1423,0 8px 16px #0005}
+.control span{font-size:9px;letter-spacing:.12em}
+.control.rotate{background:linear-gradient(180deg,#9a7bff,#7048df);border:1px solid #c9baff}
+.control.drop{background:linear-gradient(180deg,#0d9dbb,#08728f);border:1px solid #7de9f7}
+.actions{gap:10px;margin-top:15px}
+.action{padding:14px 10px;border-radius:13px;background:#ffffff0c;font-size:10px;letter-spacing:.12em}
+.action.primary{background:linear-gradient(135deg,#9b7dff,#7049df);box-shadow:0 6px 18px #7049df44}
+.status{font-size:10px;min-height:20px;margin-top:12px}
+.reward-strip{margin-top:16px;border-radius:14px;padding:13px 15px}
+footer{font-size:10px}
+.modal{box-shadow:0 24px 80px #000a}
+@media(max-width:430px){.shell{width:calc(100% - 12px)}.game{padding:9px;border-radius:17px}.play-area{grid-template-columns:minmax(0,1fr) 91px;gap:7px}.board{min-height:0;gap:2px}.board-wrap{padding:7px}.side{gap:7px}.nextbox,.sidecard{padding:8px 5px}.control{min-height:59px}.controls{gap:6px}}
+@media(max-width:370px){.play-area{grid-template-columns:minmax(0,1fr) 79px;gap:5px}.speed-control button{width:22px;height:22px}.game{padding:7px}.board{gap:1px}}
+
+
+.achievements{margin:14px auto 0;max-width:600px;padding:13px;border:1px solid #ffffff20;border-radius:15px;background:linear-gradient(145deg,#17243a,#101827)}.achievements-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.achievements-head strong{font-size:10px;letter-spacing:.12em;color:#f4d58e}.achievements-head span{font-size:9px;color:#aebbd1}.achievement-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.achievement{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid #ffffff12;border-radius:10px;background:#ffffff06;opacity:.55}.achievement.unlocked{opacity:1;border-color:#e7bd6955;background:#3a2c1a44}.achievement-icon{font-size:19px}.achievement b{display:block;font-size:9px;color:#f5f1ff}.achievement small{display:block;font-size:8px;color:#aebbd1;margin-top:2px}@media(max-width:390px){.achievement-list{grid-template-columns:1fr}}
+
+/* CHOME Blocks: warm fired-clay brick playing surface */
+.board{
+  background-color:#a95735;
+  background-image:
+    linear-gradient(90deg, transparent 0 31px, #633725 31px 33px, transparent 33px 63px, #633725 63px 65px),
+    linear-gradient(90deg, transparent 0 15px, #633725 15px 17px, transparent 17px 47px, #633725 47px 49px),
+    linear-gradient(180deg, transparent 0 30px, #633725 30px 32px),
+    repeating-linear-gradient(180deg,#c77a50 0 2px,#a95735 3px 14px,#8e472f 15px 16px,#b96843 17px 29px,#633725 30px 32px);
+  background-size:64px 32px,64px 32px,64px 32px,64px 32px;
+  background-position:0 0,0 16px,0 0,0 0;
+  border:1px solid #d18a62;
+  box-shadow:inset 0 0 22px #49251688;
+}
+.cell{background:transparent;border:1px solid #ffffff08}
+.cell.filled{background:var(--piece-color,#8b6cff);border-color:#ffffff85}
+
+/* Make the clay brick texture visible through every empty board cell */
+.board{
+  background:#a95735 !important;
+  background-image:
+    repeating-linear-gradient(0deg,transparent 0 28px,#633725 28px 32px),
+    repeating-linear-gradient(90deg,transparent 0 60px,#633725 60px 64px),
+    repeating-linear-gradient(90deg,transparent 0 28px,#633725 28px 32px) !important;
+  background-size:64px 32px,64px 32px,64px 32px !important;
+  background-position:0 0,0 0,32px 16px !important;
+}
+.board .cell:not(.filled){
+  background:transparent !important;
+  border-color:#ffffff10 !important;
+}
+.board .cell.filled{
+  background:var(--piece-color,#8b6cff) !important;
+}
+
+/* CHOME Blocks dashboard — polished arcade environment */
+html{
+  min-height:100%;
+  background:#080d18;
+}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(91,73,160,.25),transparent 42%),
+    radial-gradient(ellipse at 0% 55%,rgba(27,91,116,.16),transparent 38%),
+    radial-gradient(ellipse at 100% 82%,rgba(111,64,45,.12),transparent 34%),
+    linear-gradient(135deg,#080d18 0%,#0c1422 48%,#090f1b 100%) !important;
+  position:relative;
+  isolation:isolate;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  opacity:.22;
+  background-image:
+    linear-gradient(rgba(151,171,205,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(151,171,205,.055) 1px,transparent 1px);
+  background-size:38px 38px;
+  mask-image:linear-gradient(to bottom,black,transparent 88%);
+}
+header{
+  border-bottom:1px solid rgba(164,181,215,.15);
+  background:linear-gradient(90deg,rgba(15,24,41,.82),rgba(17,25,43,.58),rgba(15,24,41,.82));
+  backdrop-filter:blur(14px);
+}
+main{position:relative}
+.intro h1{color:#f5f3ff}
+.game{
+  border:1px solid rgba(164,181,215,.19);
+  background:linear-gradient(145deg,rgba(22,33,54,.96),rgba(11,19,33,.97));
+  box-shadow:0 28px 80px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.06);
+}
+.stat,.nextbox,.sidecard,.settings-card,.achievements{
+  border-color:rgba(164,181,215,.16);
+  background:linear-gradient(155deg,rgba(30,44,67,.92),rgba(16,26,43,.96));
+}
+.mission{
+  border-color:rgba(158,132,255,.32);
+  background:linear-gradient(105deg,rgba(61,48,105,.48),rgba(18,52,68,.35));
+}
+.reward-strip{
+  border-color:rgba(231,189,105,.28);
+  background:linear-gradient(100deg,rgba(72,49,25,.35),rgba(33,38,48,.55));
+}
+footer{border-color:rgba(164,181,215,.13)}
+
+/* Shared CHOME Game Studio shell */
+.chome-platformbar{box-sizing:border-box;width:min(1180px,calc(100% - 28px));min-height:46px;margin:8px auto 12px;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,.14);border-radius:13px;background:rgba(8,13,27,.78);color:#f7f7fb;font:700 11px/1.2 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.08em;box-shadow:0 8px 24px rgba(0,0,0,.16);backdrop-filter:blur(12px);position:relative;z-index:20}
+.chome-platformbrand{display:inline-flex;align-items:center;gap:9px;color:inherit;text-decoration:none}.chome-platformbrand b{color:#9b88ff}.chome-platformmark{width:27px;height:27px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#8b6cff,#55d6e8);color:#fff;font-size:15px;font-weight:950;letter-spacing:0}.chome-platformlink{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid rgba(255,255,255,.17);border-radius:9px;background:rgba(255,255,255,.07);color:#e9e7ff;text-decoration:none;font-size:10px;letter-spacing:.08em;transition:background .2s,border-color .2s}.chome-platformlink:hover{background:rgba(139,108,255,.2);border-color:#9b88ff}
+@media(max-width:480px){.chome-platformbar{width:calc(100% - 16px);min-height:42px;margin:6px auto 9px;padding:6px 9px}.chome-platformbrand{font-size:10px}.chome-platformlink{padding:7px 9px}}
+.chome-platformbar{box-sizing:border-box;width:min(1180px,calc(100% - 28px));min-height:46px;margin:8px auto 12px;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,.14);border-radius:13px;background:rgba(8,13,27,.78);color:#f7f7fb;font:700 11px/1.2 Inter,system-ui,sans-serif;letter-spacing:.08em;box-shadow:0 8px 24px rgba(0,0,0,.16);backdrop-filter:blur(12px);position:relative;z-index:20}.chome-platformbrand{display:inline-flex;align-items:center;gap:9px;color:inherit;text-decoration:none}.chome-platformbrand b{color:#9b88ff}.chome-platformmark{width:27px;height:27px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#8b6cff,#55d6e8);color:#fff;font-size:15px;font-weight:950;letter-spacing:0}.chome-platformlink{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid rgba(255,255,255,.17);border-radius:9px;background:rgba(255,255,255,.07);color:#e9e7ff;text-decoration:none;font-size:10px;letter-spacing:.08em}@media(max-width:480px){.chome-platformbar{width:calc(100% - 16px);min-height:42px;margin:6px auto 9px;padding:6px 9px}}
+/* CHOME shared page loading + navigation transition */
+#chomePageLoader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 42%,#222044 0%,#090d18 68%);opacity:1;visibility:visible;transition:opacity .32s ease,visibility .32s ease}#chomePageLoader.is-hidden{opacity:0;visibility:hidden;pointer-events:none}.chome-loader-inner{display:grid;justify-items:center;gap:14px;color:#f7f7fb;font:800 12px/1.3 Inter,system-ui,sans-serif;letter-spacing:.18em}.chome-loader-mark{width:54px;height:54px;display:grid;place-items:center;border-radius:17px;background:linear-gradient(135deg,#8b6cff,#55d6e8);box-shadow:0 10px 40px #8b6cff55;color:#fff;font-size:28px;font-weight:950;letter-spacing:0;animation:chomePulse 1.1s ease-in-out infinite alternate}.chome-loader-track{width:130px;height:3px;overflow:hidden;border-radius:99px;background:#ffffff20}.chome-loader-track:after{content:"";display:block;width:42%;height:100%;border-radius:99px;background:linear-gradient(90deg,#8b6cff,#55d6e8);animation:chomeLoad 1s ease-in-out infinite}@keyframes chomePulse{to{transform:scale(1.07);filter:brightness(1.2)}}@keyframes chomeLoad{from{transform:translateX(-110%)}to{transform:translateX(250%)}}html.chome-leaving body{opacity:.35;transform:translateY(5px);transition:opacity .2s ease,transform .2s ease}html.chome-leaving #chomePageLoader{opacity:1;visibility:visible}@media(prefers-reduced-motion:reduce){#chomePageLoader,.chome-loader-mark,.chome-loader-track:after,html.chome-leaving body{animation:none;transition:none}}
 </style>
 </head>
-<body>
-<div class="shell">
-<header><div class="brand"><span class="mark">C</span> CHOME GAME STUDIO</div><a class="back" href="dashboard.html">← DASHBOARD</a></header>
-<main>
-<section class="intro"><div class="eyebrow">A CHOME ORIGINAL PUZZLE</div><h1>CHOME BLOCKS</h1><p>Place the shapes. Complete rows and columns. Build combos.<br>Keep your board alive for as long as you can.</p></section>
-<section class="game">
-<div class="wallets"><div class="wallet chox"><small>YOUR CHOX</small><strong id="choxBalance">—</strong></div><div class="wallet points"><small>GAME POINTS</small><strong id="pointsBalance">—</strong></div><div class="wallet-note" id="walletStatus">Sign in to sync your wallets. Guest play is available.</div></div>
-<div class="stats"><div class="stat"><small>SCORE</small><strong id="score">0</strong></div><div class="stat best"><small>BEST</small><strong id="best">0</strong></div><div class="stat"><small>COMBO</small><strong id="combo">0×</strong></div></div>
-<div class="mission"><div class="mission-top"><span id="missionTitle">BOARD CHALLENGE</span><strong id="missionProgress">0 / 500</strong></div><div class="track"><div class="fill" id="missionFill"></div></div></div>
-<div class="board-wrap"><div class="board" id="board" role="grid" aria-label="8 by 8 block puzzle board"></div></div>
-<div class="pieces-title"><span>CHOOSE A SHAPE</span><span id="piecesHint">3 SHAPES AVAILABLE</span></div>
-<div class="pieces" id="pieces"></div>
-<div class="controls"><button class="action" id="restart">RESTART BOARD</button><button class="action primary" id="pause">PAUSE</button></div>
-<div class="status" id="status" role="status" aria-live="polite">Select one of the three shapes, then tap an empty board position to place it.</div>
-<div class="rescue"><div class="rescue-head"><strong>🧩 BOARD RESCUE</strong><span id="rescueCount">3 opportunities left</span></div><p>If no available shape can fit, use a rescue to receive three fresh shapes while keeping your current board and score.</p><button id="rescueButton">USE A RESCUE · 3 LEFT</button></div>
-</section>
-<div class="help"><b>How to play:</b> Tap a shape, then tap where its top-left corner should go. Complete a full row or column to clear it. Clear multiple lines together for bigger scores. Three rescue opportunities preserve your same board.</div>
-</main>
-<footer><span>© <span id="year"></span> CHOME GAME STUDIO</span><span>PLAY SMART · BUILD COMBOS</span></footer>
+<body><div id="chomePageLoader" role="status" aria-label="Loading CHOME Game Studio"><div class="chome-loader-inner"><div class="chome-loader-mark">C</div><div>CHOME GAME STUDIO</div><div class="chome-loader-track"></div></div></div><nav class="chome-platformbar" aria-label="CHOME Game Studio navigation"><a class="chome-platformbrand" href="index.html"><span class="chome-platformmark">C</span><span>CHOME <b>GAME STUDIO</b></span></a><a class="chome-platformlink" href="index.html">⌂ <span>ALL GAMES</span></a></nav>
+<nav class="chome-platformbar" aria-label="CHOME Game Studio navigation"><a class="chome-platformbrand" href="index.html"><span class="chome-platformmark">C</span><span>CHOME <b>GAME STUDIO</b></span></a><a class="chome-platformlink" href="index.html">⌂ <span>ALL GAMES</span></a></nav><div class="shell">
+<header><a class="brand" href="index.html"><span class="mark">C</span><span>CHOME <span style="color:#a895ff">BLOCKS</span></span></a><a class="back" href="index.html">← DASHBOARD</a></header>
+<main><section class="intro"><div class="eyebrow">A CHOME ORIGINAL FALLING-BLOCK GAME</div><h1>DROP. ROTATE. CLEAR.</h1><p>Guide falling blocks into place. Complete full rows to clear space<br>and keep the stack from reaching the top.</p></section>
+<div class="game">
+<div class="mission"><div class="mission-head"><span id="missionTitle">LEVEL 1 CHALLENGE</span><strong id="missionProgress">0 / 10 LINES</strong></div><div class="mission-track"><div class="mission-fill" id="missionFill"></div></div><div class="mission-note" id="missionNote">Clear 10 lines to reach the next level.</div></div><div class="topline"><div class="stat"><small>SCORE</small><strong id="score">0</strong></div><div class="stat best"><small>BEST</small><strong id="best">0</strong></div><div class="stat"><small>LINES</small><strong id="lines">0</strong></div><div class="stat"><small>LEVEL</small><strong id="level">1</strong></div></div>
+<div class="play-area"><div class="board-wrap"><div class="board" id="board" aria-label="Falling block game board"></div></div><aside class="side"><div class="nextbox"><small>NEXT BLOCK</small><div class="next" id="next"></div></div><div class="sidecard"><small>HOW TO PLAY</small><div class="hint">Move blocks sideways. Rotate to fit. Fill a full row to clear it.</div></div><div class="sidecard speed-card"><small>FALL SPEED</small><div class="speed-control"><button id="speedDown" type="button" aria-label="Decrease fall speed">−</button><strong id="speed">1.0×</strong><button id="speedUp" type="button" aria-label="Increase fall speed">+</button></div><div class="hint">Adjust the falling pace</div></div><div class="settings-card"><small>GAME SETTINGS</small><div class="setting-row"><span>Sound effects</span><button class="setting-toggle on" id="soundToggle" type="button" aria-pressed="true">ON</button></div><div class="setting-row"><span>Background music</span><button class="setting-toggle" id="musicToggle" type="button" aria-pressed="false">OFF</button></div><div class="setting-row"><span>Vibration</span><button class="setting-toggle on" id="vibrationToggle" type="button" aria-pressed="true">ON</button></div></div></aside></div>
+<div class="controls">
+<button class="control" id="left" aria-label="Move left">◀<span>LEFT</span></button>
+<button class="control" id="down" aria-label="Soft drop">▼<span>DOWN</span></button>
+<button class="control" id="right" aria-label="Move right">▶<span>RIGHT</span></button>
+<button class="control rotate" id="rotate" aria-label="Rotate block">↻<span>ROTATE</span></button>
 </div>
-<div class="overlay" id="gameOver"><div class="modal"><div class="eyebrow">ROUND COMPLETE</div><h2 id="overTitle">NO MORE MOVES</h2><p id="overMessage">Your board is preserved. You can still use a rescue.</p><div class="final" id="finalScore">0</div><button class="action primary" id="modalRestart" style="width:100%">START A NEW BOARD</button></div></div>
+<div class="actions"><button class="action" id="pause">PAUSE</button><button class="action" id="newGame">RESTART</button><button class="action primary" id="drop">HARD DROP</button></div>
+<div class="status" id="status" role="status" aria-live="polite">Blocks are falling. Use the controls to arrange them.</div></div>
+<section class="achievements"><div class="achievements-head"><strong>🏆 ACHIEVEMENTS</strong><span id="achievementCount">0 / 9 unlocked</span></div><div class="achievement-list" id="achievementList"></div></section>
+<div class="reward-strip"><div><strong>YOUR CHOX</strong><small id="choxStatus">Sign in to sync both shared wallets and earn verified rewards.</small></div><div class="reward-balance" id="choxBalance">— CHOX</div></div><div class="reward-strip"><div><strong>GAME POINTS</strong><small>Non-cash game points earned through play.</small></div><div class="reward-balance" id="gamePointsBalance">— GP</div></div>
+</main><footer><span>© <span id="year"></span> CHOME GAME STUDIO</span><span>PLAY · DROP · REPEAT</span></footer></div>
+<div class="overlay" id="gameOver"><div class="modal"><div class="eyebrow">BOARD RESCUE</div><h2 id="gameOverTitle">YOUR BOARD NEEDS HELP</h2><p id="gameOverMessage">Your board is preserved. Use up to three fresh-piece rescue attempts to keep playing.</p><div class="final-score" id="finalScore">0</div><p id="rescueCount" aria-live="polite">3 rescue attempts available</p><button class="action primary" id="rescueButton">🧩 TRY A FRESH BLOCK · 3 LEFT</button><button class="action" id="adContinueButton" disabled title="Rewarded ads are not connected yet">▶ WATCH AD TO CONTINUE · COMING SOON</button><button class="action" id="playAgain">START A NEW GAME</button></div></div>
 <script type="module">
-let supabase=null,currentUser=null,saveTimer=null,paused=false,gameEnded=false,sessionId=null,events=[],rngState=1,linesCleared=0,bestCombo=0,rewardSubmitted=false;
-const $=id=>document.getElementById(id),W=8,H=8,KEY='chome-blocks-placement-v1';
-const COLORS=['#58d8ec','#987cff','#70d6a1','#ffad70','#ff758f','#6e9cff','#f3c96b'];
-const SHAPES=[
- [[0,0]],[[0,0],[0,1]],[[0,0],[1,0]],[[0,0],[0,1],[1,0]],[[0,0],[0,1],[1,1]],[[0,1],[1,0],[1,1]],
- [[0,0],[0,1],[0,2]],[[0,0],[1,0],[2,0]],[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[0,2],[1,0]],[[0,0],[1,0],[2,0],[2,1]],
- [[0,0],[0,1],[0,2],[0,3]],[[0,0],[1,0],[2,0],[3,0]],[[0,1],[1,0],[1,1],[1,2]],[[0,0],[1,0],[1,1],[2,1]],
- [[0,1],[1,0],[1,1],[2,0]],[[0,0],[0,1],[1,1],[1,2]],[[0,1],[0,2],[1,0],[1,1]],
- [[0,0],[0,1],[1,0],[1,1],[2,0]],[[0,0],[0,1],[0,2],[1,0],[1,1]],[[0,0],[1,0],[2,0],[2,1],[2,2]]
+let supabase=null,sessionId=null,events=[],rngState=1,rewardSubmitted=false,verifiedMoves=0;
+const $=id=>document.getElementById(id),W=10,H=20,KEY='chome-blocks-falling-v1';
+const TYPES=[
+ {name:'I',color:'#55d6e8',cells:[[0,0],[0,1],[0,2],[0,3]]},
+ {name:'O',color:'#f3c96b',cells:[[0,0],[0,1],[1,0],[1,1]]},
+ {name:'T',color:'#a895ff',cells:[[0,1],[1,0],[1,1],[1,2]]},
+ {name:'S',color:'#70d6a1',cells:[[0,1],[0,2],[1,0],[1,1]]},
+ {name:'Z',color:'#ff758f',cells:[[0,0],[0,1],[1,1],[1,2]]},
+ {name:'J',color:'#6e9cff',cells:[[0,0],[1,0],[1,1],[1,2]]},
+ {name:'L',color:'#ffad70',cells:[[0,2],[1,0],[1,1],[1,2]]}
 ];
-let grid,hand=[],selected=-1,score=0,best=Number(localStorage.getItem(KEY+':best')||0),combo=0,rescues=3,moveCount=0;
+let grid,active,nextType,score=0,best=Number(localStorage.getItem(KEY+':best')||0),lines=0,level=1,fallSpeed=1,combo=0,locking=false,clearingRows=[],running=true,paused=false,gameOver=false,rescueRemaining=3,last=0,acc=0,raf=0,currentUser=null,saveTimer;
+const SETTINGS_KEY='chome-blocks-settings-v1';let settings={sound:true,music:false,vibration:true},audioContext=null,musicOscillator=null,musicGain=null,musicPending=false;
+$('year').textContent=new Date().getFullYear();
+function clone(t){return {name:t.name,color:t.color,cells:t.cells.map(([r,c])=>[r,c])}}
 function random(){rngState=(rngState+0x6D2B79F5)|0;let t=rngState;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}
-function randShape(){const index=Math.floor(random()*SHAPES.length);return{index,cells:SHAPES[index].map(p=>p.slice()),color:COLORS[index%COLORS.length]}}
-function newHand(){hand=[randShape(),randShape(),randShape()];selected=-1;renderHand()}
-function renderBoard(){const root=$('board');root.innerHTML='';for(let r=0;r<H;r++)for(let c=0;c<W;c++){const d=document.createElement('button');d.type='button';d.className='cell'+(grid[r][c]?' filled':'');if(grid[r][c])d.style.setProperty('--tile',grid[r][c]);d.setAttribute('aria-label','Row '+(r+1)+', column '+(c+1)+(grid[r][c]?', filled':', empty'));d.addEventListener('click',()=>placeAt(r,c));root.appendChild(d)}}
-function renderHand(){const root=$('pieces');root.innerHTML='';hand.forEach((p,i)=>{const b=document.createElement('button');b.type='button';b.className='piece-slot'+(selected===i?' selected':'')+(!p?' used':'');b.disabled=!p||paused||gameEnded;b.addEventListener('click',()=>{selected=i;renderHand();$('status').textContent='Shape selected. Tap an empty position on the board.'});const maxR=p?Math.max(...p.cells.map(x=>x[0])):0,maxC=p?Math.max(...p.cells.map(x=>x[1])):0;const preview=document.createElement('span');preview.className='piece-grid';if(p){for(let r=0;r<Math.max(2,maxR+1);r++)for(let c=0;c<Math.max(3,maxC+1);c++){const dot=document.createElement('i');dot.className='piece-dot'+(p.cells.some(x=>x[0]===r&&x[1]===c)?'':' empty');dot.style.setProperty('--piece',p.color);preview.appendChild(dot)}}b.appendChild(preview);const label=document.createElement('span');label.className='piece-label';label.textContent=p?'SHAPE '+(i+1):'PLACED';b.appendChild(label);root.appendChild(b)});$('piecesHint').textContent=hand.filter(Boolean).length+' SHAPES AVAILABLE'}
-function fits(shape,r,c){return shape.cells.every(([dr,dc])=>r+dr>=0&&r+dr<H&&c+dc>=0&&c+dc<W&&!grid[r+dr][c+dc])}
-function canAnyFit(){return hand.some(p=>p&&Array.from({length:H},(_,r)=>r).some(r=>Array.from({length:W},(_,c)=>c).some(c=>fits(p,r,c))))}
-function updateStats(){$('score').textContent=score.toLocaleString();$('best').textContent=best.toLocaleString();$('combo').textContent=combo+'×';$('missionProgress').textContent=Math.min(score,500).toLocaleString()+' / 500';$('missionFill').style.width=Math.min(100,score/5)+'%';$('missionTitle').textContent=score>=500?'PUZZLE MASTER':'BOARD CHALLENGE';$('rescueCount').textContent=rescues+' opportunit'+(rescues===1?'y':'ies')+' left';$('rescueButton').textContent='USE A RESCUE · '+rescues+' LEFT';$('rescueButton').disabled=rescues<=0||paused||!gameEnded}
-function saveData(){return{version:2,grid,hand,score,best,combo,rescues,moveCount,events,sessionId,rngState,linesCleared,bestCombo,gameEnded,rewardSubmitted}}
-function persist(){const data=saveData();try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}if(currentUser){clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{const {error}=await supabase.from('game_saves').upsert({user_id:currentUser.id,game_id:'chome-blocks',save_data:data,updated_at:new Date().toISOString()},{onConflict:'user_id,game_id'});if(error)console.warn('Cloud save:',error)},700)}}
-function restore(d){if(!d||d.version!==2||!Array.isArray(d.grid)||d.grid.length!==8||!d.grid.every(row=>Array.isArray(row)&&row.length===8)||!Array.isArray(d.hand)||d.hand.length!==3||!Array.isArray(d.events))return false;grid=d.grid;hand=d.hand;score=Number(d.score)||0;best=Math.max(best,Number(d.best)||0);combo=Number(d.combo)||0;rescues=Math.max(0,Math.min(3,Number(d.rescues??3)));moveCount=Number(d.moveCount)||0;events=d.events;sessionId=d.sessionId||null;rngState=Number(d.rngState)||1;linesCleared=Number(d.linesCleared)||0;bestCombo=Number(d.bestCombo)||0;selected=-1;gameEnded=Boolean(d.gameEnded);paused=false;rewardSubmitted=Boolean(d.rewardSubmitted);renderBoard();renderHand();updateStats();if(gameEnded)$('gameOver').classList.add('open');return true}
-async function beginVerifiedRun(){sessionId=null;events=[];if(!currentUser)return;const {data,error}=await supabase.functions.invoke('chome-blocks-rewards',{body:{action:'start'}});if(error||!data?.ok){$('status').textContent=data?.error||'Secure rewards could not start. You can still play for fun.';return}sessionId=data.session_id;rngState=Number(data.board_seed)||1;events=[];newHand();renderHand();persist()}
-async function submitVerifiedRun(){if(rewardSubmitted||!currentUser||!sessionId)return;rewardSubmitted=true;$('status').textContent='Verifying your game with CHOME…';events.push({type:'finish'});persist();const {data,error}=await supabase.functions.invoke('chome-blocks-rewards',{body:{action:'complete',session_id:sessionId,score,moves:moveCount,events}});if(error||!data?.ok){rewardSubmitted=false;events.pop();$('status').textContent=data?.error||'The run could not be verified. No reward was added.';persist();return}const gp=data.rewards?.game_points?.points||0,cx=data.rewards?.chox?.points||0;$('status').textContent='Verified! Earned '+Number(gp).toLocaleString()+' Game Points'+(cx?' and '+cx+' CHOX':'')+'.';showWallet();persist()}
-function placeAt(r,c){if(paused||gameEnded||selected<0||!hand[selected]){if(selected<0)$('status').textContent='Choose a shape first.';return}const shape=hand[selected];if(!fits(shape,r,c)){$('status').textContent='That shape does not fit there. Try another empty position.';return}events.push({type:'place',slot:selected,row:r,col:c});for(const [dr,dc] of shape.cells)grid[r+dr][c+dc]=shape.color;hand[selected]=null;selected=-1;moveCount++;const rows=[],cols=[];for(let rr=0;rr<H;rr++)if(grid[rr].every(Boolean))rows.push(rr);for(let cc=0;cc<W;cc++)if(grid.every(row=>row[cc]))cols.push(cc);const clear=new Set();rows.forEach(rr=>{for(let cc=0;cc<W;cc++)clear.add(rr+','+cc)});cols.forEach(cc=>{for(let rr=0;rr<H;rr++)clear.add(rr+','+cc)});if(clear.size){const count=rows.length+cols.length;combo++;bestCombo=Math.max(bestCombo,combo);linesCleared+=count;score+=shape.cells.length*5+clear.size*10+Math.max(0,count-1)*50*combo;$('status').textContent='GREAT CLEAR! '+rows.length+' row(s), '+cols.length+' column(s) · '+combo+'× combo';for(const key of clear){const [rr,cc]=key.split(',').map(Number);grid[rr][cc]=0}}else{combo=0;score+=shape.cells.length*5;$('status').textContent='Shape placed. Keep building your lines.'}if(score>best){best=score;localStorage.setItem(KEY+':best',String(best))}if(hand.every(p=>!p))newHand();renderBoard();renderHand();updateStats();persist();if(!canAnyFit())endGame()}
-function endGame(){gameEnded=true;$('overTitle').textContent='NO MORE MOVES';$('overMessage').textContent=rescues?'Your board and score are saved. Use a rescue to receive three new shapes, or start fresh.':'You used all three rescues. Your final score is being verified.';$('finalScore').textContent=score.toLocaleString();$('gameOver').classList.add('open');updateStats();persist();if(rescues===0)submitVerifiedRun()}
-function rescue(){if(!gameEnded||rescues<=0)return;rescues--;events.push({type:'rescue'});gameEnded=false;paused=false;newHand();$('gameOver').classList.remove('open');$('status').textContent='RESCUED! Your board and score are unchanged. Here are three fresh shapes.';renderBoard();renderHand();updateStats();persist();if(!canAnyFit()){gameEnded=true;updateStats();if(rescues===0)endGame()}}
-async function start(){grid=Array.from({length:8},()=>Array(8).fill(0));score=0;combo=0;rescues=3;moveCount=0;linesCleared=0;bestCombo=0;events=[];sessionId=null;rewardSubmitted=false;gameEnded=false;paused=false;const seed=(Math.floor(Math.random()*2147483646)+1);rngState=seed;newHand();$('gameOver').classList.remove('open');$('pause').textContent='PAUSE';$('status').textContent='Select one of the three shapes, then tap an empty position on the board to place it.';renderBoard();updateStats();if(currentUser)await beginVerifiedRun();persist()}
-function togglePause(){if(gameEnded)return;paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';$('status').textContent=paused?'Game paused.':'Game resumed.';renderHand();updateStats()}
-function showWallet(){if(!supabase||!currentUser)return;$('walletStatus').textContent='Refreshing your shared CHOME wallets…';Promise.all([supabase.rpc('get_my_rewards_wallet'),supabase.rpc('get_my_game_points_wallet')]).then(([a,b])=>{if(a.error||b.error)throw a.error||b.error;const x=Array.isArray(a.data)?a.data[0]:a.data,y=Array.isArray(b.data)?b.data[0]:b.data;$('choxBalance').textContent=Number(x?.points_balance||0).toLocaleString()+' CHOX';$('pointsBalance').textContent=Number(y?.points_balance||0).toLocaleString();$('walletStatus').textContent='Both shared wallets connected · rewards are verified after a completed run.'}).catch(e=>{$('walletStatus').textContent='Wallets are temporarily unavailable.';console.warn(e)})}
-async function restoreCloud(){if(!currentUser)return false;const {data,error}=await supabase.from('game_saves').select('save_data,updated_at').eq('user_id',currentUser.id).eq('game_id','chome-blocks').maybeSingle();if(error){console.warn('Cloud restore:',error);return false}if(data?.save_data&&restore(data.save_data)){localStorage.setItem(KEY,JSON.stringify(data.save_data));$('status').textContent='Your saved CHOME Blocks board was restored from your account.';if(sessionId&&events.length===0)beginVerifiedRun();return true}return false}
-async function initOnline(){try{const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');const {data,error}=await supabase.auth.getSession();if(error)throw error;currentUser=data?.session?.user||null;if(currentUser){const restored=await restoreCloud();if(!restored){try{const local=JSON.parse(localStorage.getItem(KEY)||'null');if(!restore(local)||!sessionId)await start()}catch(e){await start()}}else if(!sessionId)await start();showWallet()}else $('walletStatus').textContent='Guest play enabled. Sign in to sync your board and earn verified rewards.';supabase.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user){currentUser=session.user;start().then(()=>showWallet())}if(event==='SIGNED_OUT'){currentUser=null;sessionId=null;$('walletStatus').textContent='Signed out · guest play remains available.';$('choxBalance').textContent='—';$('pointsBalance').textContent='—'}})}catch(e){console.warn('Online setup:',e);$('walletStatus').textContent='Guest play is ready. Online rewards are temporarily unavailable.'}}
-$('restart').addEventListener('click',start);$('modalRestart').addEventListener('click',start);$('pause').addEventListener('click',togglePause);$('rescueButton').addEventListener('click',rescue);$('year').textContent=new Date().getFullYear();
-try{const local=JSON.parse(localStorage.getItem(KEY)||'null');if(!restore(local))start()}catch(e){start()}
-initOnline();window.chomeGameControls={pause:togglePause,isPaused:()=>paused,restart:start,sound:()=>{},soundLabel:()=>'🔊 SOUND ON'};
-</script></body></html>
+function randomType(){return clone(TYPES[Math.floor(random()*TYPES.length)])}
+function rotateCells(cells){const maxR=Math.max(...cells.map(p=>p[0]));return cells.map(([r,c])=>[c,maxR-r])}
+function fits(piece,dr=0,dc=0,cells=piece.cells){return cells.every(([r,c])=>{const y=piece.y+r+dr,x=piece.x+c+dc;return x>=0&&x<W&&y>=0&&y<H&&!grid[y][x]})}
+function spawn(){const t=nextType||randomType();nextType=randomType();active={...t,cells:t.cells.map(p=>[...p]),x:Math.floor((W-(Math.max(...t.cells.map(p=>p[1]))+1))/2),y:0,rotation:0};drawNext();render();if(!fits(active)){endGame();return}acc=Math.max(acc,Math.max(90,850-(level-1)*65));$('status').textContent='New block! Falling now — move it, rotate it, and complete a row.';}
+function drawNext(){const root=$('next');root.innerHTML='';const maxR=Math.max(...nextType.cells.map(p=>p[0])),maxC=Math.max(...nextType.cells.map(p=>p[1])),set=new Set(nextType.cells.map(p=>p.join(',')));for(let r=0;r<Math.max(2,maxR+1);r++)for(let c=0;c<Math.max(3,maxC+1);c++){const d=document.createElement('i');if(!set.has(r+','+c))d.className='empty';else d.style.background=nextType.color;root.append(d)}}
+function ghostY(){let y=active.y;while(fits(active,y-active.y+1,0))y++;return y}
+function dropInterval(){return Math.max(90,(850-(level-1)*65)/fallSpeed)}
+function adjustSpeed(change){if(gameOver)return;fallSpeed=Math.max(.5,Math.min(3,Math.round((fallSpeed+change)*4)/4));$('speed').textContent=fallSpeed.toFixed(2).replace(/0$/,'')+'×';$('status').textContent='Fall speed set to '+fallSpeed.toFixed(2).replace(/0$/,'')+'×';}
+function render(){const root=$('board');if(root.children.length!==W*H){root.innerHTML='';for(let i=0;i<W*H;i++){const d=document.createElement('div');d.className='cell';root.append(d)}}const display=grid.map(row=>row.slice());let ghost=null;if(active&&!gameOver){ghost=ghostY()}if(active&&!gameOver){active.cells.forEach(([r,c])=>{const y=active.y+r,x=active.x+c;if(y>=0&&y<H&&x>=0&&x<W)display[y][x]=active.color})}Array.from(root.children).forEach((el,i)=>{const r=Math.floor(i/W),c=i%W;el.className='cell';if(display[r][c]){el.classList.add('filled');el.style.setProperty('--piece-color',display[r][c])}else el.style.removeProperty('--piece-color');if(clearingRows.includes(r))el.classList.add('line-clear')});if(active&&!gameOver&&ghost!==null){active.cells.forEach(([r,c])=>{const y=ghost+r,x=active.x+c;if(y>=0&&y<H&&x>=0&&x<W&&!grid[y][x]&&!display[y][x])root.children[y*W+x].classList.add('ghost')})}}
+function updateStats(){$('score').textContent=score.toLocaleString();$('best').textContent=best.toLocaleString();$('lines').textContent=lines;$('level').textContent=level;$('speed').textContent=fallSpeed.toFixed(2).replace(/0$/,'')+'×';const progress=lines%10;$('missionTitle').textContent='LEVEL '+level+' CHALLENGE';$('missionProgress').textContent=progress+' / 10 LINES';$('missionFill').style.width=(progress*10)+'%';$('missionNote').textContent=(10-progress)+' more line'+(10-progress===1?'':'s')+' to reach level '+(level+1)+'.'}
+
+const ACHIEVEMENTS=[{key:'first_100',icon:'⭐',name:'First Century',desc:'Score 100 points'},{key:'lines_10',icon:'🧱',name:'Line Starter',desc:'Clear 10 lines'},{key:'lines_50',icon:'🏗️',name:'Stack Builder',desc:'Clear 50 lines'},{key:'lines_100',icon:'🏆',name:'Block Master',desc:'Clear 100 lines'},{key:'level_5',icon:'🚀',name:'Rising Up',desc:'Reach level 5'},{key:'level_10',icon:'👑',name:'Level Legend',desc:'Reach level 10'},{key:'double',icon:'✌️',name:'Double Clear',desc:'Clear 2 rows at once'},{key:'triple',icon:'🔥',name:'Triple Clear',desc:'Clear 3 rows at once'},{key:'tetris',icon:'💎',name:'Four-Row Clear',desc:'Clear 4 rows at once'}];
+const ACH_KEY='chome-blocks-achievements-v1';let unlockedAchievements=new Set();
+function renderAchievements(){const root=$('achievementList');if(!root)return;root.innerHTML='';ACHIEVEMENTS.forEach(a=>{const on=unlockedAchievements.has(a.key),item=document.createElement('div');item.className='achievement'+(on?' unlocked':'');item.innerHTML='<span class="achievement-icon">'+a.icon+'</span><span><b>'+a.name+'</b><small>'+a.desc+'</small></span>';root.append(item)});$('achievementCount').textContent=unlockedAchievements.size+' / '+ACHIEVEMENTS.length+' unlocked'}
+async function unlockAchievement(key){if(unlockedAchievements.has(key))return;const a=ACHIEVEMENTS.find(x=>x.key===key);if(!a)return;unlockedAchievements.add(key);try{localStorage.setItem(ACH_KEY,JSON.stringify([...unlockedAchievements]))}catch(e){}renderAchievements();$('status').textContent='🏆 Achievement unlocked: '+a.name+'!';tone(1040);buzz([25,35,25]);if(currentUser){const {error}=await supabase.from('game_achievements').upsert({user_id:currentUser.id,game_id:'chome-blocks',achievement_key:key},{onConflict:'user_id,game_id,achievement_key',ignoreDuplicates:true});if(error)console.warn('Achievement sync:',error)}}
+async function loadAchievements(){try{const local=JSON.parse(localStorage.getItem(ACH_KEY)||'[]');if(Array.isArray(local))local.forEach(k=>unlockedAchievements.add(k))}catch(e){}if(currentUser){const {data,error}=await supabase.from('game_achievements').select('achievement_key').eq('user_id',currentUser.id).eq('game_id','chome-blocks');if(!error&&data)data.forEach(row=>unlockedAchievements.add(row.achievement_key));else if(error)console.warn('Achievement load:',error)}try{localStorage.setItem(ACH_KEY,JSON.stringify([...unlockedAchievements]))}catch(e){}renderAchievements()}
+function checkAchievements(cleared=0){if(score>=100)unlockAchievement('first_100');if(lines>=10)unlockAchievement('lines_10');if(lines>=50)unlockAchievement('lines_50');if(lines>=100)unlockAchievement('lines_100');if(level>=5)unlockAchievement('level_5');if(level>=10)unlockAchievement('level_10');if(cleared===2)unlockAchievement('double');if(cleared===3)unlockAchievement('triple');if(cleared>=4)unlockAchievement('tetris')}
+function getAudioContext(){try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)return null;if(!audioContext)audioContext=new AudioCtx();return audioContext}catch(e){return null}}function tone(freq=440){if(!settings.sound)return;const ctx=getAudioContext();if(!ctx)return;const play=()=>{try{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=freq;g.gain.setValueAtTime(.0001,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.035,ctx.currentTime+.012);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.11);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.12)}catch(e){}};if(ctx.state==='suspended')ctx.resume().then(play).catch(()=>{});else play()}
+function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings))}catch(e){}}
+function updateSettingsUI(){[['sound','soundToggle'],['music','musicToggle'],['vibration','vibrationToggle']].forEach(([key,id])=>{const b=$(id);b.textContent=settings[key]?'ON':'OFF';b.classList.toggle('on',settings[key]);b.setAttribute('aria-pressed',String(settings[key]))})}
+function buzz(pattern=12){if(settings.vibration&&navigator.vibrate)navigator.vibrate(pattern)}
+function startMusic(){const ctx=getAudioContext();if(!ctx||!settings.music)return;if(ctx.state==='suspended'){musicPending=true;ctx.resume().then(()=>{if(settings.music)startMusicNow(ctx)}).catch(()=>{});return}startMusicNow(ctx)}function startMusicNow(ctx){if(!settings.music||musicOscillator)return;try{musicOscillator=ctx.createOscillator();musicGain=ctx.createGain();musicOscillator.type='sine';musicOscillator.frequency.value=110;musicGain.gain.setValueAtTime(.0001,ctx.currentTime);musicGain.gain.linearRampToValueAtTime(.012,ctx.currentTime+.35);musicOscillator.connect(musicGain);musicGain.connect(ctx.destination);musicOscillator.start();musicPending=false}catch(e){musicOscillator=null;musicGain=null}}function unlockAudio(){const ctx=getAudioContext();if(!ctx)return;if(ctx.state==='suspended')ctx.resume().then(()=>{if(settings.music)startMusicNow(ctx)}).catch(()=>{});else if(settings.music)startMusicNow(ctx)}function setMusic(enabled){settings.music=enabled;if(enabled)startMusic();else{musicPending=false;if(musicOscillator){try{musicOscillator.stop();musicOscillator.disconnect();musicGain.disconnect()}catch(e){}musicOscillator=null;musicGain=null}}saveSettings();updateSettingsUI();$('status').textContent=settings.music?'Background music enabled.':'Background music disabled.'}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify({version:3,grid,active,nextType,score,best,lines,level,fallSpeed,rescueRemaining,paused:false,sessionId,events,rngState,verifiedMoves,rewardSubmitted,gameOver}))}catch(e){}}
+function cloudSave(){if(!currentUser)return;clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{const save={version:3,grid,active,nextType,score,best,lines,level,fallSpeed,rescueRemaining,sessionId,events,rngState,verifiedMoves,rewardSubmitted,gameOver};const {error}=await supabase.from('game_saves').upsert({user_id:currentUser.id,game_id:'chome-blocks',save_data:save,updated_at:new Date().toISOString()},{onConflict:'user_id,game_id'});if(error)console.warn('CHOME Blocks cloud save:',error)},900)}
+function persist(){saveLocal();cloudSave()}
+function hasSealedCells(){
+ const seen=Array.from({length:H},()=>Array(W).fill(false)),queue=[];
+ for(let c=0;c<W;c++)if(!grid[0][c]){seen[0][c]=true;queue.push([0,c])}
+ for(let i=0;i<queue.length;i++){const [r,c]=queue[i];for(const [dr,dc] of [[1,0],[-1,0],[0,1],[0,-1]]){const nr=r+dr,nc=c+dc;if(nr>=0&&nr<H&&nc>=0&&nc<W&&!grid[nr][nc]&&!seen[nr][nc]){seen[nr][nc]=true;queue.push([nr,nc])}}}
+ for(let r=0;r<H;r++)for(let c=0;c<W;c++)if(!grid[r][c]&&!seen[r][c])return true;
+ return false;
+}
+function finishLock(cleared){if(cleared){lines+=cleared;combo++;const base=([0,100,300,500,800][cleared]||800);const bonus=Math.max(0,combo-1)*50*cleared;score+=base+bonus;const previousLevel=level;level=1+Math.floor(lines/10);if(level>previousLevel){$('status').textContent='LEVEL '+level+' UNLOCKED! The blocks are getting faster.';tone(980)}else $('status').textContent=combo>1?'COMBO x'+combo+'! +'+(base+bonus).toLocaleString()+' points':'ROW CLEAR! +'+base.toLocaleString()+' points'}else{combo=0;score+=10;$('status').textContent='Block locked. Keep building your stack.'}if(score>best){best=score;localStorage.setItem(KEY+':best',String(best))}updateStats();checkAchievements(cleared);active=null;locking=false;clearingRows=[];render();if(hasSealedCells()){endGame('SEALED GAP DETECTED');persist();return}spawn();render();persist()}function lockPiece(){if(locking||!active)return;locking=true;events.push({type:'lock',piece:TYPES.findIndex(t=>t.name===active.name),rotation:active.rotation||0,x:active.x,y:active.y});verifiedMoves++;active.cells.forEach(([r,c])=>{const y=active.y+r,x=active.x+c;if(y>=0&&y<H)grid[y][x]=active.color});const rows=[];for(let r=0;r<H;r++)if(grid[r].every(Boolean))rows.push(r);if(rows.length){clearingRows=rows;render();tone(rows.length>1?820:680);setTimeout(()=>{rows.sort((a,b)=>b-a).forEach(r=>{grid.splice(r,1);grid.unshift(Array(W).fill(0))});finishLock(rows.length)},190)}else finishLock(0)}
+function step(){if(!active||gameOver||paused||locking)return;if(fits(active,1,0)){active.y++}else lockPiece();render()}
+function move(dx){if(!active||gameOver||paused||locking)return;if(fits(active,0,dx)){active.x+=dx;render();buzz(5)}}
+function rotate(){if(!active||gameOver||paused||locking)return;const rotated=rotateCells(active.cells);for(const kick of [0,-1,1,-2,2])if(fits(active,0,kick,rotated)){active.cells=rotated;active.x+=kick;active.rotation=((active.rotation||0)+1)%4;render();tone(520);buzz(10);return}}
+function hardDrop(){if(!active||gameOver||paused||locking)return;let distance=0;while(fits(active,1,0)){active.y++;distance++}buzz(22);lockPiece()}
+function updateRescueUI(){const count=$('rescueCount'),button=$('rescueButton'),ad=$('adContinueButton');if(count)count.textContent=rescueRemaining+' rescue attempt'+(rescueRemaining===1?'':'s')+' remaining';if(button){button.disabled=rescueRemaining<=0;button.textContent=rescueRemaining>0?'🧩 TRY A FRESH BLOCK · '+rescueRemaining+' LEFT':'RESCUES USED';button.hidden=rescueRemaining<=0}if(ad)ad.hidden=rescueRemaining>0;}
+function endGame(reason='THE STACK REACHED THE TOP'){gameOver=true;running=false;cancelAnimationFrame(raf);$('finalScore').textContent=score.toLocaleString();$('gameOverTitle').textContent=reason==='SEALED GAP DETECTED'?'A GAP HAS BEEN SEALED':'THE STACK REACHED THE TOP';$('gameOverMessage').textContent='Your existing board and score are preserved. Try a fresh falling block up to three times without resetting your board.';$('status').textContent='Board rescue available — '+rescueRemaining+' attempt'+(rescueRemaining===1?'':'s')+' remaining.';updateRescueUI();$('gameOver').classList.add('open');persist();if(rescueRemaining===0)submitVerifiedRun()}
+function rescueAttempt(){if(!gameOver||rescueRemaining<=0)return;rescueRemaining--;events.push({type:'rescue'});const t=nextType||randomType();nextType=randomType();const candidate={...t,cells:t.cells.map(p=>[...p]),x:Math.floor((W-(Math.max(...t.cells.map(p=>p[1]))+1))/2),y:0,rotation:0};if(!fits(candidate)){active=null;$('gameOverMessage').textContent='That fresh block could not enter. Your board is preserved — use another rescue opportunity.';updateRescueUI();persist();if(rescueRemaining===0)submitVerifiedRun();return}active=candidate;gameOver=false;running=true;paused=false;last=0;acc=0;$('gameOver').classList.remove('open');$('pause').textContent='PAUSE';$('status').textContent='RESCUED! A fresh block has entered your existing board.';drawNext();updateRescueUI();render();persist();raf=requestAnimationFrame(loop)}
+function loop(now){if(!running)return;if(!last)last=now;const dt=now-last;last=now;if(!paused&&!gameOver){acc+=dt;const interval=dropInterval();if(acc>=interval){acc=0;step()}}raf=requestAnimationFrame(loop)}
+function resetBoard(){cancelAnimationFrame(raf);locking=false;clearingRows=[];grid=Array.from({length:H},()=>Array(W).fill(0));score=0;lines=0;level=1;fallSpeed=1;combo=0;locking=false;clearingRows=[];paused=false;gameOver=false;rescueRemaining=3;running=true;last=0;acc=0;events=[];verifiedMoves=0;rewardSubmitted=false;nextType=randomType();$('gameOver').classList.remove('open');$('pause').textContent='PAUSE';updateRescueUI();spawn();updateStats();render();$('status').textContent='Blocks are falling. Move and rotate them to complete rows.';persist();raf=requestAnimationFrame(loop)}
+async function start(){if(currentUser&&supabase){$('status').textContent='Starting a secure CHOME Blocks run…';const {data,error}=await supabase.functions.invoke('chome-blocks-rewards',{body:{action:'start'}});if(error||!data?.ok){sessionId=null;$('status').textContent=data?.error||'Secure rewards unavailable. Starting guest play.';rngState=(Math.floor(Math.random()*2147483646)+1)>>>0;}else{sessionId=data.session_id;rngState=Number(data.board_seed)>>>0;}}else{sessionId=null;rngState=(Math.floor(Math.random()*2147483646)+1)>>>0;}events=[];resetBoard()}
+function pauseToggle(){if(gameOver)return;paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';$('status').textContent=paused?'Game paused.':'Back in the game!'}
+function restore(d){if(!d||d.version!==3||!Array.isArray(d.grid)||d.grid.length!==H||!d.grid.every(r=>Array.isArray(r)&&r.length===W)||!Array.isArray(d.events))return false;grid=d.grid;score=Number(d.score)||0;best=Math.max(best,Number(d.best)||0);lines=Number(d.lines)||0;level=Number(d.level)||1;fallSpeed=Math.max(.5,Math.min(3,Number(d.fallSpeed)||1));rescueRemaining=Math.max(0,Math.min(3,Number(d.rescueRemaining??3)));nextType=d.nextType?.cells?clone(d.nextType):randomType();active=d.active?.cells?{...clone(d.active),x:Number(d.active.x)||0,y:Number(d.active.y)||0,rotation:Number(d.active.rotation)||0}:null;if(!active&&!d.gameOver)return false;sessionId=d.sessionId||null;events=d.events;rngState=Number(d.rngState)||1;verifiedMoves=Number(d.verifiedMoves)||0;rewardSubmitted=Boolean(d.rewardSubmitted);gameOver=Boolean(d.gameOver);paused=false;running=!gameOver;updateStats();drawNext();render();return true}
+async function wallet(){const [cx,gp]=await Promise.all([supabase.rpc('get_my_rewards_wallet'),supabase.rpc('get_my_game_points_wallet')]);if(cx.error||gp.error){$('choxStatus').textContent='Wallets unavailable right now.';return}const x=Array.isArray(cx.data)?cx.data[0]:cx.data,y=Array.isArray(gp.data)?gp.data[0]:gp.data;$('choxBalance').textContent=Number(x?.points_balance||0).toLocaleString()+' CHOX';$('gamePointsBalance').textContent=Number(y?.points_balance||0).toLocaleString()+' GP';$('choxStatus').textContent='Both shared wallets connected · rewards are verified after a completed run.'}
+async function submitVerifiedRun(){if(rewardSubmitted||!currentUser||!sessionId)return;rewardSubmitted=true;events.push({type:'finish'});persist();$('status').textContent='Verifying your completed run with CHOME…';const {data,error}=await supabase.functions.invoke('chome-blocks-rewards',{body:{action:'complete',session_id:sessionId,score,moves:verifiedMoves,events}});if(error||!data?.ok){events.pop();rewardSubmitted=false;$('status').textContent=data?.error||'Run verification failed. No rewards were added.';persist();return}const gp=Number(data.rewards?.game_points?.points||0),cx=Number(data.rewards?.chox?.points||0);$('status').textContent='Verified! You earned '+gp.toLocaleString()+' Game Points'+(cx?' and '+cx+' CHOX':'')+'.';wallet().catch(()=>{});persist()}
+$('rescueButton').addEventListener('click',rescueAttempt);$('soundToggle').addEventListener('click',()=>{settings.sound=!settings.sound;saveSettings();updateSettingsUI();if(settings.sound)tone(520)});$('musicToggle').addEventListener('click',()=>setMusic(!settings.music));$('vibrationToggle').addEventListener('click',()=>{settings.vibration=!settings.vibration;saveSettings();updateSettingsUI();buzz(25)});$('down').addEventListener('click',()=>{if(active&&!gameOver&&!paused&&!locking){buzz(7);if(fits(active,1,0)){active.y++;render();persist()}else lockPiece()}});$('speedDown').addEventListener('click',()=>adjustSpeed(-.25));$('speedUp').addEventListener('click',()=>adjustSpeed(.25));$('rotate').addEventListener('click',rotate);$('drop').addEventListener('click',hardDrop);$('pause').addEventListener('click',pauseToggle);$('newGame').addEventListener('click',start);$('playAgain').addEventListener('click',start);
+let holdTimer=null;function bindHold(id,fn){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);fn();clearInterval(holdTimer);holdTimer=setInterval(fn,115)});['pointerup','pointerleave','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>clearInterval(holdTimer)))}bindHold('left',()=>move(-1));bindHold('right',()=>move(1));
+window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowDown','ArrowUp',' ','p','P'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft')move(-1);else if(e.key==='ArrowRight')move(1);else if(e.key==='ArrowDown')$('down').click();else if(e.key==='ArrowUp'||e.key==='x'||e.key==='X')rotate();else if(e.key===' ')hardDrop();else if(e.key==='p'||e.key==='P')pauseToggle()});
+let touchX=0,touchY=0;const board=$('board');board.addEventListener('touchstart',e=>{const t=e.touches[0];touchX=t.clientX;touchY=t.clientY},{passive:true});board.addEventListener('touchend',e=>{const t=e.changedTouches[0],dx=t.clientX-touchX,dy=t.clientY-touchY;if(Math.abs(dx)>24)move(dx>0?1:-1);if(dy>35)$('down').click();},{passive:true});
+try{const savedSettings=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null');if(savedSettings)settings={...settings,...savedSettings}}catch(e){}updateSettingsUI();if(settings.music)musicPending=true;window.addEventListener('pointerdown',unlockAudio,{passive:true});window.addEventListener('keydown',unlockAudio);
+// Start locally first. Network services must never hold the game screen hostage.
+let restored=false;try{const local=JSON.parse(localStorage.getItem(KEY)||'null');restored=restore(local)}catch(e){}if(!restored)start();else{updateRescueUI();raf=requestAnimationFrame(loop);$('status').textContent='Your saved game has been restored.'}
+$('choxStatus').textContent='Guest play is ready. Connecting online features in the background…';
+(async()=>{try{
+ const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+ supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
+ const {data,error}=await supabase.auth.getSession();if(error)throw error;
+ currentUser=data?.session?.user||null;
+ if(currentUser){loadAchievements().catch(e=>console.warn('Achievement load:',e));wallet().catch(e=>console.warn('Wallet load:',e));if(!sessionId)start()}
+ else $('choxStatus').textContent='Guest play is enabled. Sign in to view your wallet.';
+ supabase.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user){currentUser=session.user;start().then(()=>{loadAchievements().catch(e=>console.warn('Achievement load:',e));wallet().catch(e=>console.warn('Wallet load:',e))})}if(event==='SIGNED_OUT'){currentUser=null;sessionId=null;$('choxStatus').textContent='Signed out · guest play remains available.';$('choxBalance').textContent='— CHOX';$('gamePointsBalance').textContent='— GP'}});
+ }catch(e){$('choxStatus').textContent='Guest play is ready. Online features are temporarily unavailable.';console.warn('Background online setup:',e)}})();
+
+window.chomeGameControls={pause(){pauseToggle()},isPaused(){return paused},restart(){start()},sound(){ $('soundToggle').click() },soundLabel(){return settings.sound?'🔊 SOUND ON':'🔇 SOUND OFF'}};
+</script><script>(function(){const loader=document.getElementById('chomePageLoader');if(!loader)return;let hidden=false;function hide(){if(hidden)return;hidden=true;loader.classList.add('is-hidden');}if(document.readyState==='complete'){setTimeout(hide,180);}else{window.addEventListener('load',()=>setTimeout(hide,180),{once:true});}window.addEventListener('pageshow',hide);document.addEventListener('click',event=>{const link=event.target.closest('a[href]');if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||link.target&&link.target!=='_self'||link.hasAttribute('download'))return;const url=new URL(link.href,location.href);if(url.origin!==location.origin||url.pathname===location.pathname||url.hash&&url.pathname===location.pathname)return;event.preventDefault();document.documentElement.classList.add('chome-leaving');loader.classList.remove('is-hidden');setTimeout(()=>{location.href=url.href;},170);});})();</script><style id="chomeGameMenuStyles">
+#chomeGameMenuButton{position:fixed;top:14px;right:14px;z-index:1200;border:1px solid #6674a8;background:rgba(13,20,43,.94);color:#fff;border-radius:14px;padding:10px 14px;font:800 13px system-ui;letter-spacing:.04em;box-shadow:0 8px 28px #0005;backdrop-filter:blur(12px)}
+#chomeGameMenuPanel{position:fixed;top:62px;right:14px;z-index:1201;width:min(270px,calc(100vw - 28px));padding:14px;border:1px solid #6674a8;border-radius:18px;background:rgba(13,20,43,.98);color:#fff;box-shadow:0 18px 55px #0009;display:none;font:14px system-ui}
+#chomeGameMenuPanel.open{display:grid;gap:9px}
+#chomeGameMenuPanel strong{font-size:15px;letter-spacing:.06em}
+#chomeGameMenuPanel button,#chomeGameMenuPanel a{display:block;width:100%;box-sizing:border-box;text-align:center;border:1px solid #53648f;border-radius:11px;padding:11px;background:#202e55;color:#fff;text-decoration:none;font-weight:750}
+#chomeGameMenuPanel button.primary{background:linear-gradient(110deg,#7046d8,#168fa8);border:0}
+#chomeGameMenuPanel button:disabled{opacity:.45}
+#chomeGameMenuNote{color:#aebcdd;font-size:12px;line-height:1.45}
+@media(prefers-reduced-motion:no-preference){#chomeGameMenuPanel{animation:chomeMenuIn .16s ease-out}@keyframes chomeMenuIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}}
+</style>
+<button id="chomeGameMenuButton" type="button" aria-expanded="false" aria-controls="chomeGameMenuPanel">☰ GAME MENU</button>
+<section id="chomeGameMenuPanel" aria-label="Game menu">
+<strong>CHOME GAME MENU</strong>
+<button id="chomeMenuPause" type="button">⏸ PAUSE</button>
+<button id="chomeMenuRestart" class="primary" type="button">↻ RESTART GAME</button>
+<button id="chomeMenuSound" type="button">🔊 SOUND</button>
+<a href="index.html">← BACK TO ALL GAMES</a>
+<div id="chomeGameMenuNote">Your game controls are always within reach.</div>
+</section>
+<script>
+(()=>{const $=id=>document.getElementById(id),button=$('chomeGameMenuButton'),panel=$('chomeGameMenuPanel');if(!button||!panel)return;
+const toggle=open=>{panel.classList.toggle('open',open);button.setAttribute('aria-expanded',String(open));};
+button.addEventListener('click',()=>toggle(!panel.classList.contains('open')));
+document.addEventListener('click',e=>{if(!panel.contains(e.target)&&e.target!==button)toggle(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')toggle(false)});
+const pause=$('chomeMenuPause'),restart=$('chomeMenuRestart'),sound=$('chomeMenuSound');
+const api=window.chomeGameControls||{};
+if(!api.pause){pause.hidden=true;}else{pause.addEventListener('click',()=>{api.pause();pause.textContent=api.isPaused()?'▶ RESUME':'⏸ PAUSE';});}
+if(api.restart)restart.addEventListener('click',()=>{if(confirm('Restart this game from the beginning?')){api.restart();toggle(false);if(api.pauseLabel)pause.textContent=api.pauseLabel();}});
+else restart.hidden=true;
+if(api.sound){sound.addEventListener('click',()=>{api.sound();sound.textContent=api.soundLabel?api.soundLabel():'🔊 SOUND';});if(api.soundLabel)sound.textContent=api.soundLabel();}
+else sound.hidden=true;
+if(api.note)$('chomeGameMenuNote').textContent=api.note;
+})();
+</script>
+</body></html>
