@@ -52,8 +52,8 @@ button{touch-action:manipulation}
 </div>
 <div class="w-full bg-black/30 rounded-full h-3 border border-white/20 p-0.5 overflow-hidden"><div id="progressBar" class="bg-gradient-to-r from-yellow-400 to-green-400 h-full rounded-full w-0 transition-all"></div></div>
 <div id="cloudSaveStatus" class="w-full text-center text-xs text-white/80 py-1" aria-live="polite"><span id="cloudSaveMessage">Guest play</span><span id="cloudSaveGuestSuffix"> · <a id="cloudSaveLink" href="player.html" class="underline text-yellow-200 font-bold">Sign in</a> to sync progress across devices</span></div>
-<div id="leaderboardStatus" class="w-full text-center text-xs text-white/80 pb-1" aria-live="polite"><span id="leaderboardMessage">Sign in and pass a level to join the rankings.</span> · <a href="leaderboards.html" class="underline text-yellow-200 font-bold">View leaderboard</a></div>
-<div id="choxStatus" class="w-full text-center text-xs text-yellow-200 pb-1" aria-live="polite">Sign in to earn CHOX rewards.</div>
+<div id="leaderboardStatus" class="w-full text-center text-xs text-white/80 pb-1" aria-live="polite"><span id="leaderboardMessage">Sign in to submit a game score to the rankings.</span> · <a href="leaderboards.html" class="underline text-yellow-200 font-bold">View leaderboard</a></div>
+<div id="choxStatus" class="w-full text-center text-xs text-yellow-200 pb-1" aria-live="polite">CHOX rewards are temporarily paused during anti-cheat verification.</div>
 </header>
 <main class="relative w-full max-w-md aspect-square my-auto flex items-center justify-center">
 <div id="boardContainer" class="relative w-full h-full game-board rounded-3xl p-2 sm:p-3 border-2 border-white/30 overflow-hidden">
@@ -80,23 +80,12 @@ function setCloudStatus(text){const el=document.getElementById("cloudSaveMessage
 function setLeaderboardStatus(text){const el=document.getElementById("leaderboardMessage");if(el)el.textContent=text;}
 function setChoxStatus(text){const el=document.getElementById("choxStatus");if(el)el.textContent=text;}
 async function claimChox(stage){
- if(!currentPlayer){setChoxStatus("Sign in to earn CHOX rewards.");return;}
- try{
-  const {data,error}=await supabase.rpc("claim_fruit_fancy_chox",{p_level:level+1,p_stage:stage,p_extra_time_used:extraTimeUsed,p_score:score});
-  if(error)throw error;
-  const result=Array.isArray(data)?data[0]:data;
-  const awarded=Number(result?.awarded||0),total=Number(result?.level_total||0);
-  if(awarded>0){setChoxStatus("+"+awarded+" CHOX added · Level total "+total+"/100");combo("+"+awarded+" CHOX! ✨");}
-  else setChoxStatus("CHOX progress saved · Level total "+total+"/100");
- }catch(error){
-  console.error("Fruit Fancy CHOX reward failed:",error);
-  setChoxStatus("CHOX reward could not sync. It can be retried after your next qualifying move.");
-  if(stage==="halfway")halfwayClaimedThisRun=false;
- }
+ if(!currentPlayer){setChoxStatus("CHOX rewards are temporarily paused during anti-cheat verification.");return;}
+ setChoxStatus("CHOX rewards are temporarily paused while verified game sessions are being installed. Your game progress still saves.");
 }
 async function submitLevelScore(){
  if(scoreSubmittedForRun)return;
- if(!currentPlayer){setLeaderboardStatus("Sign in and pass a level to join the rankings.");return;}
+ if(!currentPlayer){setLeaderboardStatus("Sign in to submit a game score to the rankings.");return;}
  scoreSubmittedForRun=true;
  setLeaderboardStatus("Submitting your level score…");
  try{
@@ -146,8 +135,8 @@ async function loadSavedGame(user){
 async function refreshPlayerSession(){
  const {data,error}=await supabase.auth.getSession();if(error){console.error(error);return;}
  const next=data.session?.user||null;
- if(next?.id!==currentPlayer?.id){currentPlayer=next;if(next){setChoxStatus("Earn CHOX by reaching halfway or clearing a level.");setLeaderboardStatus("Pass a level to submit your score.");await loadSavedGame(next);if(score>=Math.ceil(target/2)&&!halfwayClaimedThisRun){halfwayClaimedThisRun=true;claimChox("halfway");}}else{setChoxStatus("Sign in to earn CHOX rewards.");setLeaderboardStatus("Sign in and pass a level to join the rankings.");setCloudStatus("Guest play · sign in to sync progress across devices");}}
- else if(next){setCloudStatus("✓ Cloud saves enabled · signed in");setChoxStatus("Earn CHOX by reaching halfway or clearing a level.");setLeaderboardStatus("Pass a level to submit your score.");}
+ if(next?.id!==currentPlayer?.id){currentPlayer=next;if(next){setChoxStatus("CHOX rewards are temporarily paused during anti-cheat verification.");setLeaderboardStatus("Pass a level to submit your score.");await loadSavedGame(next);if(score>=Math.ceil(target/2)&&!halfwayClaimedThisRun){halfwayClaimedThisRun=true;claimChox("halfway");}}else{setChoxStatus("CHOX rewards are temporarily paused during anti-cheat verification.");setLeaderboardStatus("Sign in to submit a game score to the rankings.");setCloudStatus("Guest play · sign in to sync progress across devices");}}
+ else if(next){setCloudStatus("✓ Cloud saves enabled · signed in");setChoxStatus("CHOX rewards are temporarily paused during anti-cheat verification.");setLeaderboardStatus("Pass a level to submit your score.");}
 }
 const $=id=>document.getElementById(id),grid=$('grid'),line=$('lineCanvas'),fx=$('fxCanvas'),lc=line.getContext('2d'),fc=fx.getContext('2d');
 function fruit(){return FRUITS[Math.floor(Math.random()*FRUITS.length)]}
