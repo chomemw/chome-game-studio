@@ -318,7 +318,7 @@ async function loadRewardsWallet(){
  currentWalletBalance=Number(wallet.points_balance||0);
  if(wallet.points_per_usd)payoutConfig.points_per_usd=Number(wallet.points_per_usd);
  $('walletPoints').textContent=fmt(wallet.points_balance);
- $('walletValue').textContent='Estimated value: 
+ $('walletValue').textContent='Estimated value: '+(currentWalletBalance/Number(payoutConfig.points_per_usd||20000)).toFixed(2)+' USD · indicative only';
  $('walletEarned').textContent=fmt(wallet.lifetime_earned);
  
  status.textContent='Wallet connected · shared across CHOME games.';
