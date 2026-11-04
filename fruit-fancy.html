@@ -73,7 +73,7 @@ const supabase = createClient("https://zbumbbzvrjqjgroxzixg.supabase.co", "sb_pu
 const N=6,FRUITS=[['apple','🍎','#ff4d4d'],['banana','🍌','#ffeb3b'],['grape','🍇','#ab47bc'],['orange','🍊','#ffa726'],['strawberry','🍓','#e91e63'],['watermelon','🍉','#66bb6a'],['cherry','🍒','#d81b60']].map(([type,emoji,color])=>({type,emoji,color}));
 const LEVELS=[{target:400,ice:0,bombs:0},{target:700,ice:3,bombs:0},{target:1100,ice:4,bombs:2},{target:1600,ice:6,bombs:3},{target:2200,ice:8,bombs:4}];
 let level=0,score=0,target=400,moves=0,board=[],path=[],dragging=false,busy=false,sound=true,audio=null,particles=[],boardScanTimer=null;
-let currentPlayer=null,saveChain=Promise.resolve(),initialized=false,scoreSubmittedForRun=false;
+let currentPlayer=null,saveChain=Promise.resolve(),initialized=false,scoreSubmittedForRun=false,activeGameSessionId=null;
 let extraTimeUsed=0,halfwayClaimedThisRun=false,gameMenuPaused=false;
 const LEVEL_DURATION=120;let timeLeft=LEVEL_DURATION,levelDeadline=0,timerId=null;
 function setCloudStatus(text){const el=document.getElementById("cloudSaveMessage");if(el)el.textContent=text;const suffix=document.getElementById("cloudSaveGuestSuffix");if(suffix)suffix.style.display=currentPlayer?"none":"inline";}
@@ -81,21 +81,39 @@ function setLeaderboardStatus(text){const el=document.getElementById("leaderboar
 function setChoxStatus(text){const el=document.getElementById("choxStatus");if(el)el.textContent=text;}
 async function claimChox(stage){
  if(!currentPlayer){setChoxStatus("CHOX rewards are temporarily paused during anti-cheat verification.");return;}
- setChoxStatus("CHOX rewards are temporarily paused while verified game sessions are being installed. Your game progress still saves.");
+ setChoxStatus("CHOX rewards are paused until the full gameplay reward checks are completed. Your game progress still saves.");
+}
+async function beginVerifiedRun(){
+ activeGameSessionId=null;
+ if(!currentPlayer)return;
+ try{
+  const {data,error}=await supabase.functions.invoke("game-session",{body:{action:"start",game_id:"fruit-fancy",level:level+1}});
+  if(error)throw error;
+  if(!data?.ok||!data.session_id)throw new Error(data?.error||"Could not start a verified game session.");
+  activeGameSessionId=data.session_id;
+  setLeaderboardStatus("Verified run started. Complete this level to submit your score.");
+ }catch(error){
+  console.error("Fruit Fancy verified session could not start:",error);
+  setLeaderboardStatus("Verified score submission is temporarily unavailable. Your game progress still saves.");
+ }
 }
 async function submitLevelScore(){
  if(scoreSubmittedForRun)return;
  if(!currentPlayer){setLeaderboardStatus("Sign in to submit a game score to the rankings.");return;}
+ if(!activeGameSessionId){setLeaderboardStatus("This resumed run has no verified session. Restart the level for a verified score.");return;}
  scoreSubmittedForRun=true;
- setLeaderboardStatus("Submitting your level score…");
+ setLeaderboardStatus("Verifying your completed level…");
+ const sessionId=activeGameSessionId;
  try{
-  const {error}=await supabase.rpc("record_game_score",{p_game_id:"fruit-fancy",p_level:level+1,p_score:score});
+  const {data,error}=await supabase.functions.invoke("game-session",{body:{action:"complete",session_id:sessionId,score,moves}});
   if(error)throw error;
-  setLeaderboardStatus("✓ Level score submitted. Check your ranking above.");
+  if(!data?.ok||!data?.result?.accepted)throw new Error(data?.error||"The game result was not accepted.");
+  activeGameSessionId=null;
+  setLeaderboardStatus("✓ Verified level score submitted. CHOX rewards remain paused.");
  }catch(error){
-  console.error("Fruit Fancy leaderboard submission failed:",error);
-  scoreSubmittedForRun=false;
-  setLeaderboardStatus("Score submission failed. It will retry after your next completed run.");
+  console.error("Fruit Fancy verified score submission failed:",error);
+  activeGameSessionId=null;
+  setLeaderboardStatus("This run could not be verified. Start a fresh level to try again.");
  }
 }
 function gameSnapshot(){return {version:1,level,score,target,moves,sound,extraTimeUsed,halfwayClaimedThisRun,timeLeft:Math.max(0,Math.ceil((levelDeadline-Date.now())/1000)),savedAt:Date.now(),board:board.map(row=>row.map(cell=>({fruit:cell.fruit.type,ice:!!cell.ice,bomb:!!cell.bomb})))};}
@@ -124,18 +142,34 @@ function restoreGame(data){
  return true;
 }
 async function loadSavedGame(user){
- if(!user||!currentPlayer||currentPlayer.id!==user.id)return;
+ if(!user||!currentPlayer||currentPlayer.id!==user.id)return false;
  setCloudStatus("Loading your cloud save…");
  const {data,error}=await supabase.from("game_saves").select("save_data,updated_at").eq("user_id",user.id).eq("game_id","fruit-fancy").maybeSingle();
- if(!currentPlayer||currentPlayer.id!==user.id)return;
- if(error){console.error("Fruit Fancy cloud load failed:",error);setCloudStatus("Cloud save could not load · playing on this device.");return;}
- if(data&&restoreGame(data.save_data))setCloudStatus("✓ Progress restored from cloud · "+new Date(data.updated_at).toLocaleString());
- else setCloudStatus("Signed in · your Fruit Fancy progress will save automatically.");
+ if(!currentPlayer||currentPlayer.id!==user.id)return false;
+ if(error){console.error("Fruit Fancy cloud load failed:",error);setCloudStatus("Cloud save could not load · playing on this device.");return false;}
+ if(data&&restoreGame(data.save_data)){setCloudStatus("✓ Progress restored from cloud · "+new Date(data.updated_at).toLocaleString());return true;}
+ setCloudStatus("Signed in · your Fruit Fancy progress will save automatically.");
+ return false;
 }
 async function refreshPlayerSession(){
  const {data,error}=await supabase.auth.getSession();if(error){console.error(error);return;}
  const next=data.session?.user||null;
- if(next?.id!==currentPlayer?.id){currentPlayer=next;if(next){setChoxStatus("CHOX rewards are temporarily paused during anti-cheat verification.");setLeaderboardStatus("Pass a level to submit your score.");await loadSavedGame(next);if(score>=Math.ceil(target/2)&&!halfwayClaimedThisRun){halfwayClaimedThisRun=true;claimChox("halfway");}}else{setChoxStatus("CHOX rewards are temporarily paused during anti-cheat verification.");setLeaderboardStatus("Sign in to submit a game score to the rankings.");setCloudStatus("Guest play · sign in to sync progress across devices");}}
+ if(next?.id!==currentPlayer?.id){
+  currentPlayer=next;
+  activeGameSessionId=null;
+  if(next){
+   setChoxStatus("CHOX rewards are paused until the full gameplay reward checks are completed.");
+   setLeaderboardStatus("Preparing a verified game session…");
+   const restored=await loadSavedGame(next);
+   if(restored)setLeaderboardStatus("Your saved run was restored. Start a fresh level for a verified leaderboard score.");
+   else await beginVerifiedRun();
+   if(score>=Math.ceil(target/2)&&!halfwayClaimedThisRun){halfwayClaimedThisRun=true;claimChox("halfway");}
+  }else{
+   setChoxStatus("CHOX rewards are paused during gameplay verification.");
+   setLeaderboardStatus("Sign in to submit a game score to the rankings.");
+   setCloudStatus("Guest play · sign in to sync progress across devices");
+  }
+}
  else if(next){setCloudStatus("✓ Cloud saves enabled · signed in");setChoxStatus("CHOX rewards are temporarily paused during anti-cheat verification.");setLeaderboardStatus("Pass a level to submit your score.");}
 }
 const $=id=>document.getElementById(id),grid=$('grid'),line=$('lineCanvas'),fx=$('fxCanvas'),lc=line.getContext('2d'),fc=fx.getContext('2d');
@@ -144,7 +178,7 @@ $('fullscreenBtn').addEventListener('click',async()=>{try{if(!document.fullscree
 function audioInit(){if(!audio)audio=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume()}
 function tone(type,p=1){if(!sound)return;try{audioInit();let o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime;o.connect(g);g.connect(audio.destination);o.type=type==='blast'?'sawtooth':type==='bomb'?'square':'triangle';let start=type==='bomb'?120:type==='blast'?150:380;o.frequency.setValueAtTime(start,t);o.frequency.exponentialRampToValueAtTime(type==='bomb'?30:type==='blast'?600:Math.max(650,500*p),t+(type==='blast'?.4:.18));g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.start(t);o.stop(t+.26)}catch(e){}}
 function resize(){let r=$('boardContainer').getBoundingClientRect();[line,fx].forEach(c=>{c.width=Math.round(r.width*devicePixelRatio);c.height=Math.round(r.height*devicePixelRatio);c.style.width=r.width+'px';c.style.height=r.height+'px';c.getContext('2d').setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)})}
-function start(i=level,shouldSave=true){gameMenuPaused=false;stopTimer();level=(i+LEVELS.length)%LEVELS.length;let cfg=LEVELS[level];score=0;target=cfg.target;moves=0;timeLeft=LEVEL_DURATION;extraTimeUsed=0;halfwayClaimedThisRun=false;path=[];busy=false;dragging=false;scoreSubmittedForRun=false;makeBoard(cfg.ice,cfg.bombs);ensurePlayableBoard();$('modalOverlay').classList.remove('show');update();startTimer();if(shouldSave)saveGame()}
+function start(i=level,shouldSave=true){gameMenuPaused=false;stopTimer();level=(i+LEVELS.length)%LEVELS.length;let cfg=LEVELS[level];score=0;target=cfg.target;moves=0;timeLeft=LEVEL_DURATION;extraTimeUsed=0;halfwayClaimedThisRun=false;path=[];busy=false;dragging=false;scoreSubmittedForRun=false;makeBoard(cfg.ice,cfg.bombs);ensurePlayableBoard();$('modalOverlay').classList.remove('show');update();startTimer();if(currentPlayer)beginVerifiedRun();if(shouldSave)saveGame()}
 function makeBoard(ice,bombs){board=Array.from({length:N},(_,r)=>Array.from({length:N},(_,c)=>({fruit:fruit(),ice:false,bomb:false})));let place=(key,count)=>{let n=0;while(n<count){let r=Math.random()*N|0,c=Math.random()*N|0;if(!board[r][c][key]&&!(key==='bomb'&&board[r][c].ice)){board[r][c][key]=true;n++}}};place('ice',ice);place('bomb',bombs);render()}
 function render(){grid.innerHTML='';board.forEach((row,r)=>row.forEach((cell,c)=>{let el=document.createElement('div');el.className='tile';el.dataset.r=r;el.dataset.c=c;let icon=document.createElement('span');icon.className='fruit-icon';icon.textContent=cell.bomb?'💣':cell.fruit.emoji;el.append(icon);if(cell.ice){let ice=document.createElement('div');ice.className='ice-layer';ice.innerHTML='<i class="fas fa-snowflake animate-pulse"></i>';el.append(ice)}grid.append(el)}))}
 function update(){$('levelText').textContent=level+1;$('scoreText').textContent=score.toLocaleString();$('targetText').textContent=target.toLocaleString();$('movesText').textContent='∞';$('progressBar').style.width=Math.min(100,score/target*100)+'%';const t=$('timeText');if(t){const seconds=Math.max(0,timeLeft);t.textContent=Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');t.classList.toggle('urgent',seconds<=20)}}
