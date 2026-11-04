@@ -259,7 +259,7 @@ $('choxStatus').textContent='Guest play is ready. Connecting online features in 
  supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
  const {data,error}=await supabase.auth.getSession();if(error)throw error;
  currentUser=data?.session?.user||null;
- if(currentUser){loadAchievements().catch(e=>console.warn('Achievement load:',e));wallet().catch(e=>console.warn('Wallet load:',e));restoreCloud().then(restored=>{if(!restored&&!sessionId)start()}).catch(()=>{if(!sessionId)start()})}
+ if(currentUser){loadAchievements().catch(e=>console.warn('Achievement load:',e));wallet().catch(e=>console.warn('Wallet load:',e));restoreCloud().then(restored=>{if(!restored&&!sessionId)start();else if(!restored&&gameOver&&rescueRemaining===0&&!rewardSubmitted)submitVerifiedRun()}).catch(()=>{if(!sessionId)start();else if(gameOver&&rescueRemaining===0&&!rewardSubmitted)submitVerifiedRun()})}
  else $('choxStatus').textContent='Guest play is enabled. Sign in to view your wallet.';
  supabase.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user){currentUser=session.user;start().then(()=>{loadAchievements().catch(e=>console.warn('Achievement load:',e));wallet().catch(e=>console.warn('Wallet load:',e))})}if(event==='SIGNED_OUT'){currentUser=null;sessionId=null;$('choxStatus').textContent='Signed out · guest play remains available.';$('choxBalance').textContent='— CHOX';$('gamePointsBalance').textContent='— GP'}});
  }catch(e){$('choxStatus').textContent='Guest play is ready. Online features are temporarily unavailable.';console.warn('Background online setup:',e)}})();
