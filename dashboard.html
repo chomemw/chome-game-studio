@@ -561,7 +561,7 @@ function showPlayerView(view){
  overviewWelcome.hidden=!overview;walletSection.hidden=!wallet;gamesSection.hidden=!overview;payoutSection.hidden=!payout;leaderboardSection.hidden=!leaderboard;referralSection.hidden=!referrals;
  overviewNav?.classList.toggle('active',overview);walletNav?.classList.toggle('active',wallet);payoutNav?.classList.toggle('active',payout);leaderboardNav?.classList.toggle('active',leaderboard);referralNav?.classList.toggle('active',referrals);
  const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':wallet?'CHOX WALLET':leaderboard?'LEADERBOARDS':referrals?'REFERRAL CENTRE':'PLAYER SPACE';
- if(payout&&!payoutPanelLoaded){payoutPanelLoaded=true;loadPayoutPanel();}
+ if((payout||wallet)&&!payoutPanelLoaded){payoutPanelLoaded=true;loadPayoutPanel();}
  if(referrals&&!referralPanelLoaded){referralPanelLoaded=true;loadReferralPanel();}
  window.scrollTo({top:0,behavior:'smooth'});
  setSidebarOpen(false);
