@@ -40,9 +40,18 @@ h1{font-size:clamp(38px,7vw,66px);line-height:.98;letter-spacing:-.075em;margin:
 .empty strong{display:block;color:#fff;font-size:16px;margin-bottom:7px}
 footer{padding:24px 0 36px;color:#77839b;font-size:10px;display:flex;justify-content:space-between;gap:15px}
 @media(max-width:600px){.shell{width:calc(100% - 28px)}header{height:68px}nav{gap:12px;font-size:10px}main{padding:48px 0 65px}.board{padding:14px}.player-row{grid-template-columns:30px 40px minmax(0,1fr) auto;gap:8px;padding:10px}.avatar{width:38px;height:38px}.score{font-size:12px}.game-label{font-size:9px;padding:8px 9px}}
+
+/* Embedded mode: render only the leaderboard panel inside the player dashboard. */
+body.embed-mode{background:#090f1d;min-height:0}
+body.embed-mode .shell{width:100%;max-width:none;margin:0}
+body.embed-mode header,body.embed-mode footer{display:none}
+body.embed-mode main{padding:18px 0 24px}
+body.embed-mode main>.eyebrow,body.embed-mode main>h1,body.embed-mode main>.intro,body.embed-mode main>.note{display:none}
+body.embed-mode .board{padding:18px;border-radius:14px;box-shadow:none;background:transparent;border:0}
+@media(max-width:600px){body.embed-mode main{padding:8px 0 16px}body.embed-mode .board{padding:10px}}
 </style>
 </head>
-<body>
+<body class="">
 <div class="shell">
 <header><a class="brand" href="index.html">CHOME <span>PLAYER</span></a><nav><a href="index.html">STUDIO HOME</a><a href="player.html">SIGN IN</a><a href="dashboard.html">DASHBOARD</a></nav></header>
 <main>
@@ -63,6 +72,7 @@ footer{padding:24px 0 36px;color:#77839b;font-size:10px;display:flex;justify-con
 </main>
 <footer><span>© <span id="year"></span> CHOME GAME STUDIO</span><span>WORLDS WORTH EXPLORING.</span></footer>
 </div>
+<script>if(new URLSearchParams(location.search).get("embed")==="1")document.body.classList.add("embed-mode");</script>
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const supabase=createClient("https://zbumbbzvrjqjgroxzixg.supabase.co","sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK");
