@@ -103,6 +103,8 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 
 
 [hidden]{display:none!important}
+.leaderboard-section{margin-top:30px;scroll-margin-top:105px}.leaderboard-frame-wrap{overflow:hidden;border:1px solid #ffffff20;border-radius:20px;background:#090f1d;box-shadow:0 16px 45px #0003}.leaderboard-frame{display:block;width:100%;height:920px;border:0;background:#090d18}@media(max-width:600px){.leaderboard-frame{height:1050px}}
+
 /* Player dashboard layout — inspired by the clear account-centre structure of GRASH FX */
 :root{--chome-sidebar:#0b1221;--chome-panel:#111b2e;--chome-accent:#8b6cff}
 .shell.dashboard-layout{width:100%;max-width:none;min-height:100vh;margin:0;display:grid;grid-template-columns:252px minmax(0,1fr);gap:0}
@@ -175,7 +177,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
     <a href="#games"><span>🎮</span> My Games</a>
     <a href="#walletHeading"><span>◈</span> CHOX Wallet</a>
     <a href="#payouts" id="payoutNavLink"><span>↗</span> Payout Centre</a>
-    <a href="leaderboards.html"><span>🏆</span> Leaderboards</a>
+    <a href="#leaderboards" id="leaderboardNavLink"><span>🏆</span> Leaderboards</a>
     <a href="#profile" id="sidebarProfileLink"><span>◎</span> My Profile</a>
   </nav>
   <div class="sidebar-bottom">
@@ -235,6 +237,8 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
     <p class="wallet-note">A saved address is not proof of ownership. Double-check the full address and network. Cash redemption remains disabled until CHOME completes score-integrity checks, legal review, treasury funding and end-to-end payout testing.</p>
   </div>
 </section>
+
+<section class="leaderboard-section" id="leaderboardSection" hidden aria-labelledby="leaderboardHeading"><div class="section-head"><div><div class="eyebrow">CHOME PLAYER COMMUNITY</div><h2 id="leaderboardHeading">LEADERBOARDS</h2></div></div><div class="leaderboard-frame-wrap"><iframe class="leaderboard-frame" src="leaderboards.html?embed=1" title="CHOME player leaderboards" loading="lazy"></iframe></div></section>
 
 <section class="games-section" id="gamesSection">
 <div class="section-head"><div><div class="eyebrow">Choose your next adventure</div><h2>YOUR GAMES</h2></div><div class="eyebrow">ONE PLAYER ID · MANY WORLDS</div></div>
@@ -390,20 +394,21 @@ profileOverlay.addEventListener('click',event=>{if(event.target===profileOverlay
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&profileOverlay.classList.contains('open'))setProfileOpen(false)});
 
 // Keep payout details inside the dedicated Payout Centre view.
-const overviewNav=$('overviewNavLink'),payoutNav=$('payoutNavLink');
-const overviewWelcome=$('overviewWelcome'),walletSection=$('walletSection'),gamesSection=$('gamesSection'),payoutSection=$('payouts');
+const overviewNav=$('overviewNavLink'),payoutNav=$('payoutNavLink'),leaderboardNav=$('leaderboardNavLink');
+const overviewWelcome=$('overviewWelcome'),walletSection=$('walletSection'),gamesSection=$('gamesSection'),payoutSection=$('payouts'),leaderboardSection=$('leaderboardSection');
 let payoutPanelLoaded=false;
 function showPlayerView(view){
- const payout=view==='payouts';
- overviewWelcome.hidden=payout;walletSection.hidden=payout;gamesSection.hidden=payout;payoutSection.hidden=!payout;
- overviewNav?.classList.toggle('active',!payout);payoutNav?.classList.toggle('active',payout);
- const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':'PLAYER SPACE';
+ const payout=view==='payouts',leaderboard=view==='leaderboards',overview=!payout&&!leaderboard;
+ overviewWelcome.hidden=!overview;walletSection.hidden=!overview;gamesSection.hidden=!overview;payoutSection.hidden=!payout;leaderboardSection.hidden=!leaderboard;
+ overviewNav?.classList.toggle('active',overview);payoutNav?.classList.toggle('active',payout);leaderboardNav?.classList.toggle('active',leaderboard);
+ const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':leaderboard?'LEADERBOARDS':'PLAYER SPACE';
  if(payout&&!payoutPanelLoaded){payoutPanelLoaded=true;loadPayoutPanel();}
  window.scrollTo({top:0,behavior:'smooth'});
  setSidebarOpen(false);
 }
 overviewNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('overview')});
 payoutNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('payouts')});
+leaderboardNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('leaderboards')});
 
 // Responsive player sidebar navigation
 const sidebar=$('playerSidebar'),sidebarToggle=$('sidebarToggle'),sidebarScrim=$('sidebarScrim');
