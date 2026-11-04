@@ -165,6 +165,11 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
  .section-head h2{font-size:21px}
 }
 
+
+/* CHOME referral centre */
+.referral-section{margin-top:30px;scroll-margin-top:105px}.referral-panel{padding:24px;border:1px solid #a895ff42;border-radius:20px;background:linear-gradient(145deg,#151f35,#101827);box-shadow:0 16px 45px #0003}.referral-hero{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px;border:1px solid #a895ff38;border-radius:16px;background:radial-gradient(circle at 90% 0,#8b6cff32,transparent 40%),#090f1d}.referral-kicker{font-size:10px;color:#c4b7ff;font-weight:950;letter-spacing:.16em}.referral-reward{font-size:clamp(34px,5vw,48px);font-weight:1000;letter-spacing:-.06em;margin:9px 0}.referral-reward span{font-size:14px;color:#f1d18b;letter-spacing:.12em}.referral-hero p{max-width:620px;margin:0;color:#aeb9cf;font-size:12px;line-height:1.7}.referral-medal{width:68px;height:68px;flex:none;display:grid;place-items:center;border-radius:50%;background:linear-gradient(145deg,#f8dda1,#ad7a30);color:#412b13;font-size:34px;box-shadow:0 8px 25px #0005}.referral-share-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:12px;margin-top:15px}.referral-share-card{min-width:0;padding:16px;border:1px solid #ffffff1c;border-radius:14px;background:#090f1d}.referral-share-card label{display:block;color:#aeb9cf;font-size:9px;font-weight:950;letter-spacing:.12em;margin-bottom:9px}.referral-copy-row{display:flex;gap:8px}.referral-copy-row input{width:100%;min-width:0;padding:11px;border:1px solid #ffffff20;border-radius:9px;background:#070c17;color:#fff;font-size:11px}.referral-copy{flex:none;padding:0 12px;border:1px solid #a895ff55;border-radius:9px;background:#8b6cff;color:white;font-size:9px;font-weight:950;cursor:pointer}.referral-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}.referral-stat{padding:17px;border:1px solid #ffffff1b;border-radius:13px;background:#090f1d}.referral-stat small{display:block;color:#9eabc2;font-size:9px;font-weight:900;letter-spacing:.1em}.referral-stat strong{display:block;margin-top:9px;font-size:23px}.referral-history{margin-top:20px;padding:17px;border:1px solid #ffffff1c;border-radius:14px;background:#090f1d}.referral-history .wallet-activity-head{margin-bottom:10px}.referral-history-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #ffffff16}.referral-history-row strong{display:block;font-size:12px}.referral-history-row small{display:block;color:#9aa7bd;font-size:10px;margin-top:4px}.referral-history-row em{font-style:normal;color:#8be2b2;font-size:10px;font-weight:900;white-space:nowrap}.referral-status{min-height:18px;margin-top:13px;color:#c3b6ff;font-size:11px}.referral-terms{margin:10px 0 0;color:#8290a8;font-size:10px;line-height:1.65}@media(max-width:650px){.referral-panel{padding:15px}.referral-hero{padding:17px}.referral-medal{width:48px;height:48px;font-size:25px}.referral-share-grid{grid-template-columns:1fr}.referral-copy-row input{font-size:10px}.referral-copy{padding:0 9px}}
+
+.wallet-ledger-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #ffffff16}.wallet-ledger-row strong{display:block;font-size:12px}.wallet-ledger-row small{display:block;color:#9aa7bd;font-size:10px;margin-top:4px}.wallet-ledger-row b{font-size:11px;white-space:nowrap}.wallet-ledger-row .positive{color:#8be2b2}.wallet-ledger-row .negative{color:#ffb2b2}
 </style>
 </head>
 <body>
@@ -178,6 +183,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
     <a href="#walletHeading"><span>◈</span> CHOX Wallet</a>
     <a href="#payouts" id="payoutNavLink"><span>↗</span> Payout Centre</a>
     <a href="#leaderboards" id="leaderboardNavLink"><span>🏆</span> Leaderboards</a>
+    <a href="#referrals" id="referralNavLink"><span>✦</span> Referral Centre</a>
     <a href="#profile" id="sidebarProfileLink"><span>◎</span> My Profile</a>
   </nav>
   <div class="sidebar-bottom">
@@ -203,7 +209,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 </form>
 <div class="message" id="profileMessage" role="status" aria-live="polite"></div>
 </section></div>
-<section class="wallet-section" id="walletSection" aria-labelledby="walletHeading"><div class="section-head"><div><div class="eyebrow">One wallet across CHOME</div><h2 id="walletHeading">REWARDS WALLET</h2></div><div class="eyebrow">PLAY · EARN · PROGRESS</div></div><div class="wallet-panel"><div><div class="wallet-topline"><div class="wallet-label">CHOX REWARDS ASSET</div><span class="wallet-live">WALLET ACTIVE</span></div><div class="wallet-balance-row"><div class="chox-coin" aria-hidden="true">C</div><div><div><strong class="wallet-balance" id="walletPoints">—</strong><span class="wallet-unit">CHOX</span></div><div class="wallet-value" id="walletValue">Available rewards balance</div></div></div></div><div class="wallet-stats"><div class="wallet-stat earned"><small>LIFETIME CHOX EARNED</small><strong id="walletEarned">—</strong></div></div><p class="wallet-note">CHOX is CHOME’s in-platform rewards currency. It is separate from GAME SCORE.</p></div><div class="wallet-status" id="walletStatus" role="status" aria-live="polite"></div><div class="wallet-activity"><div class="wallet-activity-head"><h3>RECENT WALLET ACTIVITY</h3><span>TRANSACTION HISTORY</span></div><div class="wallet-empty"><span class="wallet-empty-icon">↗</span><span>CHOX earning is being prepared. Your completed reward transactions will appear here once rewards go live.</span></div></div></section>
+<section class="wallet-section" id="walletSection" aria-labelledby="walletHeading"><div class="section-head"><div><div class="eyebrow">One wallet across CHOME</div><h2 id="walletHeading">REWARDS WALLET</h2></div><div class="eyebrow">PLAY · EARN · PROGRESS</div></div><div class="wallet-panel"><div><div class="wallet-topline"><div class="wallet-label">CHOX REWARDS ASSET</div><span class="wallet-live">WALLET ACTIVE</span></div><div class="wallet-balance-row"><div class="chox-coin" aria-hidden="true">C</div><div><div><strong class="wallet-balance" id="walletPoints">—</strong><span class="wallet-unit">CHOX</span></div><div class="wallet-value" id="walletValue">Available rewards balance</div></div></div></div><div class="wallet-stats"><div class="wallet-stat earned"><small>LIFETIME CHOX EARNED</small><strong id="walletEarned">0</strong></div><div class="wallet-stat redeemed"><small>LIFETIME CHOX REDEEMED</small><strong id="walletRedeemed">0</strong></div></div><p class="wallet-note">CHOX is CHOME’s in-platform rewards currency. It is separate from GAME SCORE. The USD estimate is indicative and does not mean cash payouts are currently open.</p></div><div class="wallet-status" id="walletStatus" role="status" aria-live="polite">Your CHOX wallet is ready.</div><div class="wallet-activity"><div class="wallet-activity-head"><h3>RECENT WALLET ACTIVITY</h3><span>LAST 12 ENTRIES</span></div><div id="walletActivityList"><div class="wallet-empty"><span class="wallet-empty-icon">◈</span><span>Loading your wallet activity…</span></div></div></div></section>
 
 <section class="payout-section" id="payouts" aria-labelledby="payoutHeading" hidden>
   <div class="section-head"><div><div class="eyebrow">Player cash-out setup</div><h2 id="payoutHeading">USDT PAYOUTS</h2></div><div class="eyebrow">TRON · TRC20</div></div>
@@ -239,6 +245,24 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 </section>
 
 <section class="leaderboard-section" id="leaderboardSection" hidden aria-labelledby="leaderboardHeading"><div class="section-head"><div><div class="eyebrow">CHOME PLAYER COMMUNITY</div><h2 id="leaderboardHeading">LEADERBOARDS</h2></div></div><div class="leaderboard-frame-wrap"><iframe class="leaderboard-frame" src="leaderboards.html?embed=1" title="CHOME player leaderboards" loading="lazy"></iframe></div></section>
+
+<section class="referral-section" id="referrals" hidden aria-labelledby="referralHeading">
+ <div class="section-head"><div><div class="eyebrow">Grow the CHOME player community</div><h2 id="referralHeading">REFERRAL CENTRE</h2></div><div class="eyebrow">INVITE · PLAY · EARN</div></div>
+ <div class="referral-panel">
+  <div class="referral-hero"><div><div class="referral-kicker">YOUR INVITATION REWARD</div><div class="referral-reward">100,000 <span>CHOX</span></div><p>Earn 100,000 CHOX when a friend joins CHOME through your link, verifies their email and signs in for the first time.</p></div><div class="referral-medal">✦</div></div>
+  <div class="referral-share-grid">
+   <div class="referral-share-card"><label for="myReferralCode">YOUR REFERRAL CODE</label><div class="referral-copy-row"><input id="myReferralCode" readonly value="Loading…" aria-label="Your referral code"><button type="button" id="copyReferralCode" class="referral-copy">COPY CODE</button></div></div>
+   <div class="referral-share-card"><label for="myReferralLink">YOUR INVITATION LINK</label><div class="referral-copy-row"><input id="myReferralLink" readonly value="Loading…" aria-label="Your invitation link"><button type="button" id="copyReferralLink" class="referral-copy">COPY LINK</button></div></div>
+  </div>
+  <div class="referral-stats">
+   <div class="referral-stat"><small>SUCCESSFUL REFERRALS</small><strong id="referralCount">0</strong></div>
+   <div class="referral-stat"><small>CHOX REWARDED</small><strong id="referralEarned">0</strong></div>
+  </div>
+  <div class="referral-history"><div class="wallet-activity-head"><h3>YOUR INVITED PLAYERS</h3><span>REFERRAL HISTORY</span></div><div id="referralHistoryList"><div class="wallet-empty"><span class="wallet-empty-icon">✦</span><span>No successful referrals yet. Share your link to invite your first player.</span></div></div></div>
+  <div class="referral-status" id="referralStatus" role="status" aria-live="polite">Your personal referral code is being prepared.</div>
+  <p class="referral-terms">A referral is rewarded once per new player after email verification and first sign-in. Self-referrals and repeat claims are blocked. Rewards are credited as CHOX, not directly as USDT.</p>
+ </div>
+</section>
 
 <section class="games-section" id="gamesSection">
 <div class="section-head"><div><div class="eyebrow">Choose your next adventure</div><h2>YOUR GAMES</h2></div><div class="eyebrow">ONE PLAYER ID · MANY WORLDS</div></div>
@@ -324,9 +348,43 @@ async function loadRewardsWallet(){
  $('walletPoints').textContent=fmt(wallet.points_balance);
  $('walletValue').textContent='Estimated value: '+(currentWalletBalance/Number(payoutConfig.points_per_usd||20000)).toFixed(2)+' USD · indicative only';
  $('walletEarned').textContent=fmt(wallet.lifetime_earned);
- 
+ $('walletRedeemed').textContent=fmt(wallet.lifetime_redeemed);
  status.textContent='Wallet connected · shared across CHOME games.';
 }
+async function loadRewardsActivity(){
+ const host=$('walletActivityList');host.replaceChildren();
+ const {data,error}=await supabase.rpc('get_my_rewards_activity');
+ if(error){const empty=document.createElement('div');empty.className='wallet-empty';empty.textContent='Wallet activity is temporarily unavailable. Your balance remains available above.';host.append(empty);console.error('Wallet activity:',error);return;}
+ if(!data?.length){const empty=document.createElement('div');empty.className='wallet-empty';const icon=document.createElement('span');icon.className='wallet-empty-icon';icon.textContent='◈';const copy=document.createElement('span');copy.textContent='No CHOX activity yet. Your wallet is ready and will record verified rewards here.';empty.append(icon,copy);host.append(empty);return;}
+ data.forEach(row=>{const item=document.createElement('div');item.className='wallet-ledger-row';const detail=document.createElement('div');const title=document.createElement('strong');title.textContent=row.description||row.source||'Wallet transaction';const meta=document.createElement('small');meta.textContent=new Date(row.created_at).toLocaleString()+' · '+String(row.entry_type||'activity').toUpperCase();detail.append(title,meta);const amount=document.createElement('b');const points=Number(row.points_delta||0);amount.textContent=(points>0?'+':'')+fmtLedger(points)+' CHOX';amount.className=points>=0?'positive':'negative';item.append(detail,amount);host.append(item);});
+}
+function fmtLedger(value){return Number(value||0).toLocaleString(undefined,{maximumFractionDigits:0});}
+
+
+async function loadReferralPanel(){
+ const status=$('referralStatus');status.textContent='Loading your referral details…';
+ const {data,error}=await supabase.rpc('get_my_referral_summary');
+ if(error){status.textContent='Your referral centre is temporarily unavailable. Please try again.';console.error('Referral summary:',error);return;}
+ const summary=typeof data==='string'?JSON.parse(data):data;
+ if(!summary?.code){status.textContent='Your referral code could not be prepared. Please refresh.';return;}
+ const link=new URL('player.html',location.href);link.searchParams.set('signup','1');link.searchParams.set('ref',summary.code);
+ $('myReferralCode').value=summary.code;$('myReferralLink').value=link.toString();
+ $('referralCount').textContent=fmtLedger(summary.successful_referrals||0);
+ $('referralEarned').textContent=fmtLedger(summary.points_earned||0);
+ const host=$('referralHistoryList');host.replaceChildren();
+ const rows=Array.isArray(summary.referrals)?summary.referrals:[];
+ if(!rows.length){const empty=document.createElement('div');empty.className='wallet-empty';const icon=document.createElement('span');icon.className='wallet-empty-icon';icon.textContent='✦';const copy=document.createElement('span');copy.textContent='No successful referrals yet. Share your link to invite your first player.';empty.append(icon,copy);host.append(empty);}
+ else rows.forEach(row=>{const item=document.createElement('div');item.className='referral-history-row';const detail=document.createElement('div');const name=document.createElement('strong');name.textContent=row.display_name||row.username||'CHOME Player';const meta=document.createElement('small');meta.textContent='Joined '+new Date(row.created_at).toLocaleDateString();detail.append(name,meta);const reward=document.createElement('em');reward.textContent='+'+fmtLedger(row.reward_points)+' CHOX';item.append(detail,reward);host.append(item);});
+ status.textContent='Your personal invitation link is ready to share.';
+}
+async function copyReferralValue(id){
+ const value=$(id).value;if(!value)return;
+ try{await navigator.clipboard.writeText(value);$('referralStatus').textContent='Copied to clipboard.';}
+ catch{$(id).focus();$(id).select();$('referralStatus').textContent='Select and copy the highlighted text.';}
+}
+$('copyReferralCode').addEventListener('click',()=>copyReferralValue('myReferralCode'));
+$('copyReferralLink').addEventListener('click',()=>copyReferralValue('myReferralLink'));
+
 function payoutMessage(id,text){
  const el=$(id);el.textContent=text;el.classList.add('show');
 }
@@ -394,21 +452,23 @@ profileOverlay.addEventListener('click',event=>{if(event.target===profileOverlay
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&profileOverlay.classList.contains('open'))setProfileOpen(false)});
 
 // Keep payout details inside the dedicated Payout Centre view.
-const overviewNav=$('overviewNavLink'),payoutNav=$('payoutNavLink'),leaderboardNav=$('leaderboardNavLink');
-const overviewWelcome=$('overviewWelcome'),walletSection=$('walletSection'),gamesSection=$('gamesSection'),payoutSection=$('payouts'),leaderboardSection=$('leaderboardSection');
-let payoutPanelLoaded=false;
+const overviewNav=$('overviewNavLink'),payoutNav=$('payoutNavLink'),leaderboardNav=$('leaderboardNavLink'),referralNav=$('referralNavLink');
+const overviewWelcome=$('overviewWelcome'),walletSection=$('walletSection'),gamesSection=$('gamesSection'),payoutSection=$('payouts'),leaderboardSection=$('leaderboardSection'),referralSection=$('referrals');
+let payoutPanelLoaded=false,referralPanelLoaded=false;
 function showPlayerView(view){
- const payout=view==='payouts',leaderboard=view==='leaderboards',overview=!payout&&!leaderboard;
- overviewWelcome.hidden=!overview;walletSection.hidden=!overview;gamesSection.hidden=!overview;payoutSection.hidden=!payout;leaderboardSection.hidden=!leaderboard;
- overviewNav?.classList.toggle('active',overview);payoutNav?.classList.toggle('active',payout);leaderboardNav?.classList.toggle('active',leaderboard);
- const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':leaderboard?'LEADERBOARDS':'PLAYER SPACE';
+ const payout=view==='payouts',leaderboard=view==='leaderboards',referrals=view==='referrals',overview=!payout&&!leaderboard&&!referrals;
+ overviewWelcome.hidden=!overview;walletSection.hidden=!overview;gamesSection.hidden=!overview;payoutSection.hidden=!payout;leaderboardSection.hidden=!leaderboard;referralSection.hidden=!referrals;
+ overviewNav?.classList.toggle('active',overview);payoutNav?.classList.toggle('active',payout);leaderboardNav?.classList.toggle('active',leaderboard);referralNav?.classList.toggle('active',referrals);
+ const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':leaderboard?'LEADERBOARDS':referrals?'REFERRAL CENTRE':'PLAYER SPACE';
  if(payout&&!payoutPanelLoaded){payoutPanelLoaded=true;loadPayoutPanel();}
+ if(referrals&&!referralPanelLoaded){referralPanelLoaded=true;loadReferralPanel();}
  window.scrollTo({top:0,behavior:'smooth'});
  setSidebarOpen(false);
 }
 overviewNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('overview')});
 payoutNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('payouts')});
 leaderboardNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('leaderboards')});
+referralNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('referrals')});
 
 // Responsive player sidebar navigation
 const sidebar=$('playerSidebar'),sidebarToggle=$('sidebarToggle'),sidebarScrim=$('sidebarScrim');
@@ -424,7 +484,7 @@ supabase.auth.onAuthStateChange((event,session)=>{
 });
 const {data:{session}}=await supabase.auth.getSession();
 if(!session?.user)window.location.replace('player.html?notice=signin');
-else{await loadProfile(session.user);await loadRewardsWallet();}
+else{await loadProfile(session.user);await loadRewardsWallet();await loadRewardsActivity();const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
 
 $('payoutPoints').addEventListener('input',updatePayoutEstimate);
 $('payoutAddressForm').addEventListener('submit',async event=>{
