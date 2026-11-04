@@ -397,10 +397,6 @@ sidebar?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>s
 document.addEventListener('keydown',event=>{if(event.key==='Escape')setSidebarOpen(false)});
 $('sidebarProfileLink')?.addEventListener('click',event=>{event.preventDefault();setSidebarOpen(false);setProfileOpen(true)});
 
-const menuToggle=$('menuToggle'),playerMenu=$('playerMenu');
-menuToggle.addEventListener('click',()=>{const open=playerMenu.classList.toggle('open');menuToggle.setAttribute('aria-expanded',String(open))});
-playerMenu.querySelectorAll('a:not(.menu-muted)').forEach(a=>a.addEventListener('click',()=>{playerMenu.classList.remove('open');menuToggle.setAttribute('aria-expanded','false')}));
-document.addEventListener('click',event=>{if(!event.target.closest('.header-actions')){playerMenu.classList.remove('open');menuToggle.setAttribute('aria-expanded','false')}});
 supabase.auth.onAuthStateChange((event,session)=>{
  if(event==='SIGNED_OUT')window.location.replace('index.html');
 });
