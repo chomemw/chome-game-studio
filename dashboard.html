@@ -137,6 +137,25 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 .welcome-panel .intro{max-width:680px}
 .welcome-action{flex:none;display:inline-flex;align-items:center;gap:18px;padding:14px 18px;border-radius:12px;background:#8b6cff;color:white;font-size:10px;font-weight:950;letter-spacing:.09em;box-shadow:0 9px 25px #8b6cff3b}
 .welcome-action span{font-size:18px}
+
+.overview-wallet-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:0 0 30px}
+.overview-wallet-card{min-width:0;padding:20px 22px;border:1px solid #b9aaff42;border-radius:18px;background:radial-gradient(circle at 90% 0%,#a98bff20,transparent 38%),linear-gradient(135deg,#211d3c,#111a2c);box-shadow:0 16px 40px #0003}
+.overview-points-card{border-color:#62d7bd50;background:radial-gradient(circle at 90% 0%,#4ac7a326,transparent 38%),linear-gradient(135deg,#102d31,#101b2a)}
+.overview-wallet-card-top,.overview-wallet-footer{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.overview-wallet-card-top{color:#c8bbff;font-size:10px;font-weight:950;letter-spacing:.16em}
+.overview-points-card .overview-wallet-card-top{color:#9ce9d9}
+.overview-wallet-symbol{display:grid;place-items:center;width:32px;height:32px;border-radius:11px;background:#ffffff12;color:#fff;font-size:17px;font-weight:1000}
+.overview-wallet-amount{display:flex;align-items:baseline;gap:9px;margin:13px 0 5px;min-width:0}
+.overview-wallet-amount strong{font-size:clamp(30px,4vw,40px);line-height:1.1;letter-spacing:-.06em;overflow-wrap:anywhere}
+.overview-wallet-amount span{font-size:11px;font-weight:950;letter-spacing:.1em;color:#f1d18b}
+.overview-points-card .overview-wallet-amount span{color:#9ce9d9}
+.overview-wallet-meta{min-height:18px;color:#aeb9cf;font-size:11px}
+.overview-wallet-footer{margin-top:17px;padding-top:13px;border-top:1px solid #ffffff1b;color:#9eabc2;font-size:10px;flex-wrap:wrap}
+.overview-wallet-link{border:0;background:transparent;color:#c8bbff;font-size:10px;font-weight:950;letter-spacing:.08em;cursor:pointer;padding:4px 0}
+.overview-points-card .overview-wallet-link{color:#9ce9d9}
+.overview-wallet-loading{grid-column:1/-1;color:#aeb9cf;font-size:10px;min-height:14px}
+@media(max-width:620px){.overview-wallet-summary{grid-template-columns:1fr;gap:12px}.overview-wallet-card{padding:18px}}
+
 .wallet-section,.payout-section,.games-section{scroll-margin-top:105px}
 .section-head{margin-bottom:18px}
 .section-head h2{font-size:23px}
@@ -231,6 +250,21 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 <header class="dashboard-topbar"><button class="sidebar-mobile-toggle" id="sidebarToggle" type="button" aria-expanded="false" aria-controls="playerSidebar" aria-label="Open navigation">☰</button><div class="topbar-title"><span class="eyebrow">CHOME GAME STUDIO</span><strong>PLAYER SPACE</strong></div><button class="profile-shortcut" id="profileShortcut" type="button" aria-label="Open your player profile"><span class="mini-avatar" id="headerAvatar">🎮</span><span class="profile-word">MY PROFILE</span><span class="profile-chevron">⌄</span></button><div class="header-actions"><nav class="menu-popover" id="playerMenu" aria-label="Player menu"></nav></div></header>
 <main id="top">
 <section class="welcome-panel" id="overviewWelcome"><div><div class="eyebrow">YOUR PERSONAL GAMING SPACE</div><h1>Welcome back, <span id="welcomePlayerName">Player</span>.</h1><p class="intro">Your games, achievements and CHOX rewards — all in one place. Pick up where you left off and explore what is waiting for you.</p></div><a class="welcome-action" href="#games">EXPLORE GAMES <span>→</span></a></section>
+<section class="overview-wallet-summary" id="overviewWalletSummary" aria-label="Your balances">
+ <div class="overview-wallet-card overview-chox-card">
+  <div class="overview-wallet-card-top"><span>CHOX BALANCE</span><span class="overview-wallet-symbol">C</span></div>
+  <div class="overview-wallet-amount"><strong id="overviewChoxBalance">—</strong><span>CHOX</span></div>
+  <div class="overview-wallet-meta" id="overviewChoxValue">Indicative value loading…</div>
+  <div class="overview-wallet-footer"><span id="overviewChoxEarned">Lifetime earned: —</span><button type="button" class="overview-wallet-link" id="overviewOpenWallet">OPEN WALLET →</button></div>
+ </div>
+ <div class="overview-wallet-card overview-points-card">
+  <div class="overview-wallet-card-top"><span>GAME POINTS BALANCE</span><span class="overview-wallet-symbol">P</span></div>
+  <div class="overview-wallet-amount"><strong id="overviewGamePointsBalance">—</strong><span>POINTS</span></div>
+  <div class="overview-wallet-meta">In-game currency · no cash value</div>
+  <div class="overview-wallet-footer"><span id="overviewGamePointsEarned">Lifetime earned: —</span><button type="button" class="overview-wallet-link" id="overviewOpenPointsWallet">OPEN WALLET →</button></div>
+ </div>
+ <div class="overview-wallet-loading" id="overviewWalletStatus" role="status" aria-live="polite">Connecting your balances…</div>
+</section>
 <div class="profile-overlay" id="profileOverlay" aria-hidden="true"><section class="panel profile-panel" id="profile" role="dialog" aria-modal="true" aria-labelledby="profileDisplayHeading"><button class="profile-close" id="closeProfile" type="button" aria-label="Close profile">×</button>
 <div class="profile-head"><div class="avatar" id="avatarPreview">🎮</div><div><div class="eyebrow">PLAYER PROFILE</div><h2 id="profileDisplayHeading">Loading profile…</h2><div class="handle" id="profileHandle">@player</div></div></div>
 <p class="sub">Your player identity is shared across CHOME Game Studio.</p><div class="account-meta"><span>ACCOUNT EMAIL</span><strong id="accountEmail">Loading…</strong></div>
@@ -411,12 +445,16 @@ function fmtLedger(value){return Number(value||0).toLocaleString(undefined,{maxi
 async function loadRewardsWallet(){
  const status=$('walletStatus');if($('walletPoints').textContent==='—')status.textContent='Loading CHOX balance…';
  const {data,error}=await rewardsRpc('get_my_rewards_wallet');
- if(error){status.textContent='CHOX balance could not be loaded. Please refresh.';console.error('CHOX wallet:',error);return;}
+ if(error){status.textContent='CHOX balance could not be loaded. Please refresh.';$('overviewWalletStatus').textContent='CHOX balance temporarily unavailable. Open Wallet to retry.';console.error('CHOX wallet:',error);return;}
  const wallet=Array.isArray(data)?data[0]:data;
  if(!wallet){status.textContent='Your CHOX wallet is being prepared.';return;}
  currentWalletBalance=Number(wallet.points_balance||0);
  if(wallet.points_per_usd)payoutConfig.points_per_usd=Number(wallet.points_per_usd);
  $('walletPoints').textContent=fmtLedger(wallet.points_balance);
+ $('overviewChoxBalance').textContent=fmtLedger(wallet.points_balance);
+ $('overviewChoxValue').textContent='Estimated value: '+(currentWalletBalance/Number(payoutConfig.points_per_usd||20000)).toFixed(2)+' USD · indicative only';
+ $('overviewChoxEarned').textContent='Lifetime earned: '+fmtLedger(wallet.lifetime_earned);
+ $('overviewWalletStatus').textContent='Your balances are synced from your player wallets.';
  $('walletValue').textContent='Estimated value: '+(currentWalletBalance/Number(payoutConfig.points_per_usd||20000)).toFixed(2)+' USD · indicative only';
  $('walletEarned').textContent=fmtLedger(wallet.lifetime_earned);
  $('walletRedeemed').textContent=fmtLedger(wallet.lifetime_redeemed);
@@ -432,10 +470,13 @@ async function loadRewardsActivity(){
 async function loadGamePointsWallet(){
  const status=$('gamePointsStatus');if($('gamePointsBalance').textContent==='—')status.textContent='Loading Game Points balance…';
  const {data,error}=await rewardsRpc('get_my_game_points_wallet');
- if(error){status.textContent='Game Points balance could not be loaded. Please refresh.';console.error('Game Points wallet:',error);return;}
+ if(error){status.textContent='Game Points balance could not be loaded. Please refresh.';$('overviewWalletStatus').textContent='Game Points balance temporarily unavailable. Open Wallet to retry.';console.error('Game Points wallet:',error);return;}
  const wallet=Array.isArray(data)?data[0]:data;
  if(!wallet){status.textContent='Your Game Points wallet is being prepared.';return;}
  $('gamePointsBalance').textContent=fmtLedger(wallet.points_balance);
+ $('overviewGamePointsBalance').textContent=fmtLedger(wallet.points_balance);
+ $('overviewGamePointsEarned').textContent='Lifetime earned: '+fmtLedger(wallet.lifetime_earned);
+ $('overviewWalletStatus').textContent='Your balances are synced from your player wallets.';
  $('gamePointsEarned').textContent=fmtLedger(wallet.lifetime_earned);
  $('gamePointsSpent').textContent=fmtLedger(wallet.lifetime_spent);
  status.textContent='Game Points wallet connected · shared across CHOME games.';
@@ -558,7 +599,7 @@ const overviewWelcome=$('overviewWelcome'),walletSection=$('walletSection'),game
 let payoutPanelLoaded=false,referralPanelLoaded=false;
 function showPlayerView(view){
  const payout=view==='payouts',wallet=view==='wallet',leaderboard=view==='leaderboards',referrals=view==='referrals',overview=view==='overview';
- overviewWelcome.hidden=!overview;walletSection.hidden=!wallet;gamesSection.hidden=!overview;payoutSection.hidden=!payout;leaderboardSection.hidden=!leaderboard;referralSection.hidden=!referrals;
+ overviewWelcome.hidden=!overview;$('overviewWalletSummary').hidden=!overview;walletSection.hidden=!wallet;gamesSection.hidden=!overview;payoutSection.hidden=!payout;leaderboardSection.hidden=!leaderboard;referralSection.hidden=!referrals;
  overviewNav?.classList.toggle('active',overview);walletNav?.classList.toggle('active',wallet);payoutNav?.classList.toggle('active',payout);leaderboardNav?.classList.toggle('active',leaderboard);referralNav?.classList.toggle('active',referrals);
  const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':wallet?'CHOX WALLET':leaderboard?'LEADERBOARDS':referrals?'REFERRAL CENTRE':'PLAYER SPACE';
  if((payout||wallet)&&!payoutPanelLoaded){payoutPanelLoaded=true;loadPayoutPanel();}
@@ -587,6 +628,8 @@ supabase.auth.onAuthStateChange((event,session)=>{
 const {data:{session}}=await supabase.auth.getSession();
 if(!session?.user)window.location.replace('player.html?notice=signin');
 else{await loadProfile(session.user);const [walletSetup,pointsWalletSetup]=await Promise.all([rewardsRpc('ensure_my_rewards_wallet'),rewardsRpc('ensure_my_game_points_wallet')]);if(walletSetup.error)console.error('CHOX wallet setup:',walletSetup.error);if(pointsWalletSetup.error)console.error('Game Points wallet setup:',pointsWalletSetup.error);await Promise.all([loadRewardsWallet(),loadRewardsActivity(),loadGamePointsWallet(),loadGamePointsActivity()]);const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
+$('overviewOpenWallet')?.addEventListener('click',()=>showPlayerView('wallet'));
+$('overviewOpenPointsWallet')?.addEventListener('click',()=>showPlayerView('wallet'));
 $('refreshWallet')?.addEventListener('click',()=>refreshRewardsWallet(false));
 document.querySelectorAll('.activity-toggle').forEach(button=>button.addEventListener('click',()=>toggleActivity(button)));
 // Refresh after returning from a game or restoring this page from the browser cache.
