@@ -232,7 +232,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
   <div class="sidebar-section-label">PLAYER SPACE</div>
   <nav class="sidebar-nav">
     <a class="active" href="#top" id="overviewNavLink"><span>⌂</span> Overview</a>
-    <a href="#games"><span>🎮</span> My Games</a>
+    <a href="#games" id="gamesNavLink"><span>🎮</span> My Games</a>
     <a href="#walletHeading" id="walletNavLink"><span>◈</span> CHOX Wallet</a>
     <a href="#payouts" id="payoutNavLink"><span>↗</span> Payout Centre</a>
     <a href="#leaderboards" id="leaderboardNavLink"><span>🏆</span> Leaderboards</a>
@@ -594,20 +594,21 @@ profileOverlay.addEventListener('click',event=>{if(event.target===profileOverlay
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&profileOverlay.classList.contains('open'))setProfileOpen(false)});
 
 // Keep payout details inside the dedicated Payout Centre view.
-const overviewNav=$('overviewNavLink'),walletNav=$('walletNavLink'),payoutNav=$('payoutNavLink'),leaderboardNav=$('leaderboardNavLink'),referralNav=$('referralNavLink');
+const overviewNav=$('overviewNavLink'),gamesNav=$('gamesNavLink'),walletNav=$('walletNavLink'),payoutNav=$('payoutNavLink'),leaderboardNav=$('leaderboardNavLink'),referralNav=$('referralNavLink');
 const overviewWelcome=$('overviewWelcome'),walletSection=$('walletSection'),gamesSection=$('gamesSection'),payoutSection=$('payouts'),leaderboardSection=$('leaderboardSection'),referralSection=$('referrals');
 let payoutPanelLoaded=false,referralPanelLoaded=false;
 function showPlayerView(view){
- const payout=view==='payouts',wallet=view==='wallet',leaderboard=view==='leaderboards',referrals=view==='referrals',overview=view==='overview';
- overviewWelcome.hidden=!overview;$('overviewWalletSummary').hidden=!overview;walletSection.hidden=!wallet;gamesSection.hidden=!overview;payoutSection.hidden=!payout;leaderboardSection.hidden=!leaderboard;referralSection.hidden=!referrals;
- overviewNav?.classList.toggle('active',overview);walletNav?.classList.toggle('active',wallet);payoutNav?.classList.toggle('active',payout);leaderboardNav?.classList.toggle('active',leaderboard);referralNav?.classList.toggle('active',referrals);
- const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':wallet?'CHOX WALLET':leaderboard?'LEADERBOARDS':referrals?'REFERRAL CENTRE':'PLAYER SPACE';
+ const payout=view==='payouts',wallet=view==='wallet',games=view==='games',leaderboard=view==='leaderboards',referrals=view==='referrals',overview=view==='overview';
+ overviewWelcome.hidden=!overview;$('overviewWalletSummary').hidden=!overview;walletSection.hidden=!wallet;gamesSection.hidden=!(overview||games);payoutSection.hidden=!payout;leaderboardSection.hidden=!leaderboard;referralSection.hidden=!referrals;
+ overviewNav?.classList.toggle('active',overview);gamesNav?.classList.toggle('active',games);walletNav?.classList.toggle('active',wallet);payoutNav?.classList.toggle('active',payout);leaderboardNav?.classList.toggle('active',leaderboard);referralNav?.classList.toggle('active',referrals);
+ const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':wallet?'CHOX WALLET':games?'MY GAMES':leaderboard?'LEADERBOARDS':referrals?'REFERRAL CENTRE':'PLAYER SPACE';
  if((payout||wallet)&&!payoutPanelLoaded){payoutPanelLoaded=true;loadPayoutPanel();}
  if(referrals&&!referralPanelLoaded){referralPanelLoaded=true;loadReferralPanel();}
  window.scrollTo({top:0,behavior:'smooth'});
  setSidebarOpen(false);
 }
 overviewNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('overview')});
+gamesNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('games')});
 walletNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('wallet')});
 payoutNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('payouts')});
 leaderboardNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('leaderboards')});
