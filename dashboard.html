@@ -484,7 +484,7 @@ supabase.auth.onAuthStateChange((event,session)=>{
 });
 const {data:{session}}=await supabase.auth.getSession();
 if(!session?.user)window.location.replace('player.html?notice=signin');
-else{await loadProfile(session.user);await loadRewardsWallet();await loadRewardsActivity();const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
+else{await loadProfile(session.user);const walletSetup=await supabase.rpc('ensure_my_rewards_wallet');if(walletSetup.error)console.error('Wallet setup:',walletSetup.error);await loadRewardsWallet();await loadRewardsActivity();const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
 
 $('payoutPoints').addEventListener('input',updatePayoutEstimate);
 $('payoutAddressForm').addEventListener('submit',async event=>{
