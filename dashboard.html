@@ -209,7 +209,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 </form>
 <div class="message" id="profileMessage" role="status" aria-live="polite"></div>
 </section></div>
-<section class="wallet-section" id="walletSection" aria-labelledby="walletHeading"><div class="section-head"><div><div class="eyebrow">One wallet across CHOME</div><h2 id="walletHeading">REWARDS WALLET</h2></div><div class="eyebrow">PLAY · EARN · PROGRESS</div></div><div class="wallet-panel"><div><div class="wallet-topline"><div class="wallet-label">CHOX REWARDS ASSET</div><span class="wallet-live">WALLET ACTIVE</span></div><div class="wallet-balance-row"><div class="chox-coin" aria-hidden="true">C</div><div><div><strong class="wallet-balance" id="walletPoints">—</strong><span class="wallet-unit">CHOX</span></div><div class="wallet-value" id="walletValue">Available rewards balance</div></div></div></div><div class="wallet-stats"><div class="wallet-stat earned"><small>LIFETIME CHOX EARNED</small><strong id="walletEarned">0</strong></div><div class="wallet-stat redeemed"><small>LIFETIME CHOX REDEEMED</small><strong id="walletRedeemed">0</strong></div></div><p class="wallet-note">CHOX is CHOME’s in-platform rewards currency. It is separate from GAME SCORE. The USD estimate is indicative and does not mean cash payouts are currently open.</p></div><div class="wallet-status" id="walletStatus" role="status" aria-live="polite">Your CHOX wallet is ready.</div><div class="wallet-activity"><div class="wallet-activity-head"><h3>RECENT WALLET ACTIVITY</h3><span>LAST 12 ENTRIES</span></div><div id="walletActivityList"><div class="wallet-empty"><span class="wallet-empty-icon">◈</span><span>Loading your wallet activity…</span></div></div></div></section>
+<section class="wallet-section" id="walletSection" aria-labelledby="walletHeading"><div class="section-head"><div><div class="eyebrow">One wallet across CHOME</div><h2 id="walletHeading">REWARDS WALLET</h2></div><div class="eyebrow">PLAY · EARN · PROGRESS</div></div><div class="wallet-panel"><div><div class="wallet-topline"><div class="wallet-label">CHOX REWARDS ASSET</div><span class="wallet-live">WALLET ACTIVE</span></div><div class="wallet-balance-row"><div class="chox-coin" aria-hidden="true">C</div><div><div><strong class="wallet-balance" id="walletPoints">—</strong><span class="wallet-unit">CHOX</span></div><div class="wallet-value" id="walletValue">Available rewards balance</div></div></div></div><div class="wallet-stats"><div class="wallet-stat earned"><small>LIFETIME CHOX EARNED</small><strong id="walletEarned">0</strong></div><div class="wallet-stat redeemed"><small>LIFETIME CHOX REDEEMED</small><strong id="walletRedeemed">0</strong></div></div><p class="wallet-note">CHOX is CHOME’s in-platform rewards currency. It is separate from GAME SCORE. The USD estimate is indicative and does not mean cash payouts are currently open.</p></div><div class="wallet-status" id="walletStatus" role="status" aria-live="polite">Your CHOX wallet is ready.</div><div class="wallet-activity"><div class="wallet-activity-head"><h3>RECENT WALLET ACTIVITY</h3><div style="display:flex;align-items:center;gap:10px"><span>LAST 12 ENTRIES</span><button type="button" id="refreshWallet" class="secondary" style="padding:8px 11px;font-size:10px">↻ REFRESH</button></div></div><div id="walletActivityList"><div class="wallet-empty"><span class="wallet-empty-icon">◈</span><span>Loading your wallet activity…</span></div></div></div></section>
 
 <section class="payout-section" id="payouts" aria-labelledby="payoutHeading" hidden>
   <div class="section-head"><div><div class="eyebrow">Player cash-out setup</div><h2 id="payoutHeading">USDT PAYOUTS</h2></div><div class="eyebrow">TRON · TRC20</div></div>
@@ -360,6 +360,12 @@ async function loadRewardsActivity(){
  if(!data?.length){const empty=document.createElement('div');empty.className='wallet-empty';const icon=document.createElement('span');icon.className='wallet-empty-icon';icon.textContent='◈';const copy=document.createElement('span');copy.textContent='No CHOX activity yet. Your wallet is ready and will record verified rewards here.';empty.append(icon,copy);host.append(empty);return;}
  data.forEach(row=>{const item=document.createElement('div');item.className='wallet-ledger-row';const detail=document.createElement('div');const title=document.createElement('strong');title.textContent=row.description||row.source||'Wallet transaction';const meta=document.createElement('small');meta.textContent=new Date(row.created_at).toLocaleString()+' · '+String(row.entry_type||'activity').toUpperCase();detail.append(title,meta);const amount=document.createElement('b');const points=Number(row.points_delta||0);amount.textContent=(points>0?'+':'')+fmtLedger(points)+' CHOX';amount.className=points>=0?'positive':'negative';item.append(detail,amount);host.append(item);});
 }
+async function refreshRewardsWallet(){
+ const button=$('refreshWallet');
+ if(button){button.disabled=true;button.textContent='↻ UPDATING…';}
+ try{await Promise.all([loadRewardsWallet(),loadRewardsActivity()]);}
+ finally{if(button){button.disabled=false;button.textContent='↻ REFRESH';}}
+}
 function fmtLedger(value){return Number(value||0).toLocaleString(undefined,{maximumFractionDigits:0});}
 
 
@@ -489,6 +495,11 @@ supabase.auth.onAuthStateChange((event,session)=>{
 const {data:{session}}=await supabase.auth.getSession();
 if(!session?.user)window.location.replace('player.html?notice=signin');
 else{await loadProfile(session.user);const walletSetup=await supabase.rpc('ensure_my_rewards_wallet');if(walletSetup.error)console.error('Wallet setup:',walletSetup.error);await loadRewardsWallet();await loadRewardsActivity();const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
+$('refreshWallet')?.addEventListener('click',refreshRewardsWallet);
+// Refresh after returning from a game or restoring this page from the browser cache.
+window.addEventListener('pageshow',()=>{if(document.visibilityState==='visible')refreshRewardsWallet();});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshRewardsWallet();});
+window.addEventListener('focus',()=>refreshRewardsWallet());
 
 $('payoutPoints').addEventListener('input',updatePayoutEstimate);
 $('payoutAddressForm').addEventListener('submit',async event=>{
