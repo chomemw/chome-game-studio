@@ -1,373 +1,314 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090d18">
-<title>Player Dashboard | CHOME Game Studio</title>
-<style>
-:root{color-scheme:dark;--bg:#090d18;--line:#ffffff1c;--muted:#9aa7bd;--purple:#8b6cff;--white:#f7f7fb}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#34265f 0,transparent 48%),var(--bg);color:var(--white);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-a{color:inherit;text-decoration:none}button,input,textarea{font:inherit}.shell{width:min(1060px,calc(100% - 32px));margin:auto}
-header{height:88px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:14px;border-bottom:1px solid var(--line);position:relative;z-index:10}
-.brand{display:flex;align-items:center;justify-self:end;gap:8px;font-weight:950;letter-spacing:.12em;font-size:11px;white-space:nowrap}.mark{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:var(--purple);font-size:14px}
-.profile-shortcut{justify-self:start;display:flex;align-items:center;gap:9px;min-width:0;background:transparent;border:1px solid var(--line);border-radius:14px;padding:7px 12px 7px 7px;color:var(--white);cursor:pointer;text-align:left;font-size:10px;font-weight:900;letter-spacing:.1em}.profile-word{color:#c9c0ff}
-.profile-overlay{display:none;position:fixed;inset:0;z-index:50;background:#030611c9;backdrop-filter:blur(7px);align-items:center;justify-content:center;padding:18px}.profile-overlay.open{display:flex}.profile-panel{position:relative;width:min(560px,100%);max-height:calc(100vh - 36px);overflow-y:auto;margin:0;padding:25px}.profile-close{position:absolute;right:16px;top:14px;width:36px;height:36px;border:1px solid var(--line);border-radius:10px;background:#ffffff0c;color:white;font-size:22px;cursor:pointer}.profile-close:hover{background:#ffffff18}
-.mini-avatar{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#302858;color:white;font-size:16px;overflow:hidden;flex:none}.mini-avatar img{width:100%;height:100%;object-fit:cover}
-.header-actions{justify-self:end;position:relative;display:flex;flex-direction:column;align-items:flex-end;gap:5px}.menu-toggle{background:#151f35;color:var(--white);border:1px solid var(--line);border-radius:12px;padding:10px 13px;cursor:pointer;font-size:12px;font-weight:900;letter-spacing:.08em}.menu-toggle span{font-size:17px;margin-left:5px;vertical-align:-1px}
-.menu-popover{display:none;position:absolute;right:0;top:calc(100% + 12px);width:260px;padding:10px;background:#111a2c;border:1px solid #ffffff24;border-radius:16px;box-shadow:0 22px 55px #0009;z-index:20}.menu-popover.open{display:grid;gap:5px}.menu-popover a,.menu-popover button{display:flex;align-items:center;gap:12px;width:100%;padding:14px 13px;border:0;border-radius:10px;background:transparent;color:#e9e8f4;text-align:left;text-decoration:none;font-size:14px;font-weight:850;cursor:pointer}.menu-popover a:hover,.menu-popover button:hover{background:#ffffff10}.menu-popover .menu-muted{color:#77839b;cursor:default}.menu-divider{height:1px;background:var(--line);margin:4px 2px}
-main{padding:42px 0 76px}.eyebrow{color:#b9aaff;font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase}
-h1{font-size:clamp(36px,6vw,56px);letter-spacing:-.07em;line-height:1;margin:12px 0}.intro{color:var(--muted);line-height:1.7;font-size:14px;max-width:680px;margin:0}
-.panel{background:linear-gradient(145deg,#151f35,#101827);border:1px solid var(--line);border-radius:22px;padding:25px;box-shadow:0 25px 70px #0004}
-.profile-panel{margin-top:28px;scroll-margin-top:24px}.account-meta{display:flex;flex-wrap:wrap;gap:8px 14px;padding:13px 14px;margin:0 0 20px;border:1px solid var(--line);border-radius:12px;background:#090f1d}.account-meta span{color:#9aa7bd;font-size:10px;font-weight:900;letter-spacing:.12em}.account-meta strong{font-size:12px;font-weight:750;overflow-wrap:anywhere}.profile-head{display:flex;align-items:center;gap:16px;margin-bottom:22px}.avatar{width:76px;height:76px;border-radius:22px;background:#302858;border:1px solid #b5a5ff55;display:grid;place-items:center;font-size:32px;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.profile-head h2{margin:0 0 5px;font-size:22px}.handle{color:#b9aaff;font-size:12px}
-.sub{font-size:12px;color:var(--muted);line-height:1.65;margin:0 0 22px}
-.field{display:block;margin:14px 0}.field span{display:block;font-size:11px;font-weight:800;color:#cbd2e1;margin-bottom:7px}
-.field input,.field textarea{width:100%;background:#090f1d;border:1px solid #ffffff22;border-radius:11px;color:white;padding:13px 14px;outline:none}
-.field input:focus,.field textarea:focus{border-color:#a895ff;box-shadow:0 0 0 3px #8b6cff22}.field textarea{min-height:86px;resize:vertical}
-.primary,.secondary{border:0;border-radius:11px;padding:13px 16px;font-size:12px;font-weight:900;letter-spacing:.05em;cursor:pointer}
-.primary{width:100%;background:var(--purple);color:white;box-shadow:0 10px 26px #8b6cff35}.secondary{background:#ffffff10;color:#e6e2ff;border:1px solid var(--line)}
-.primary:disabled{opacity:.6;cursor:wait}.file-label{display:block;padding:12px;border:1px dashed #ffffff40;border-radius:11px;color:#d9d1ff;font-size:11px;text-align:center;cursor:pointer}.file-label input{display:none}
-.message{display:none;margin-top:15px;padding:12px 13px;border-radius:10px;background:#201d38;border:1px solid #9b87ff44;color:#e5ddff;font-size:12px;line-height:1.55;overflow-wrap:anywhere}.message.show{display:block}
-.profile-actions{display:flex;gap:10px;margin-top:15px}.profile-actions>*{flex:1}
-.wallet-section{margin-top:30px}.wallet-panel{position:relative;isolation:isolate;display:grid;grid-template-columns:1.12fr .88fr;gap:22px;align-items:center;overflow:hidden;background:radial-gradient(circle at 88% 5%,#a98bff27,transparent 34%),linear-gradient(135deg,#211d3c 0%,#151d32 54%,#0d1525 100%);border:1px solid #b9aaff42;border-radius:22px;padding:25px;box-shadow:0 24px 65px #0005}.wallet-panel:after{content:"X";position:absolute;z-index:-1;right:22%;top:-55px;font-size:240px;line-height:1;font-weight:1000;color:#ffffff08;transform:rotate(-14deg);pointer-events:none}.wallet-topline{display:flex;align-items:center;gap:9px;margin-bottom:23px}.wallet-label{color:#c8bbff;font-size:10px;font-weight:950;letter-spacing:.19em}.wallet-live{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid #ffffff20;border-radius:99px;background:#ffffff0b;color:#c5f4d7;font-size:8px;font-weight:900;letter-spacing:.12em}.wallet-live:before{content:"";width:6px;height:6px;border-radius:50%;background:#5bd69a;box-shadow:0 0 10px #5bd69a}.wallet-balance-row{display:flex;align-items:center;gap:15px}.chox-coin{width:62px;height:62px;flex:none;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 32% 25%,#fff0bd,#e4b85c 32%,#a96e25 72%,#70441e);border:3px solid #f5d993;box-shadow:inset 0 0 0 3px #8a5b29,0 8px 24px #0006;color:#3a2614;font-size:27px;font-weight:1000;text-shadow:0 1px #fff8}.wallet-balance{font-size:clamp(36px,6vw,48px);font-weight:950;letter-spacing:-.065em;line-height:1;margin:0}.wallet-unit{color:#f1d18b;font-size:13px;font-weight:950;letter-spacing:.12em;margin-left:7px}.wallet-value{font-size:12px;color:#aeb9cf;margin-top:8px}.wallet-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.wallet-stat{min-height:91px;padding:15px;border:1px solid #ffffff1c;background:#080e1b9c;border-radius:14px}.wallet-stat small{display:block;color:#9eabc2;font-size:9px;font-weight:900;letter-spacing:.1em;line-height:1.45}.wallet-stat strong{display:block;color:#f5f3ff;font-size:20px;letter-spacing:-.03em;margin-top:10px}.wallet-stat.earned{border-color:#6dd7a333}.wallet-stat.redeemed{border-color:#b9aaff33}.wallet-note{grid-column:1/-1;margin:0;padding-top:14px;border-top:1px solid #ffffff18;color:#a7b2c8;font-size:11px;line-height:1.65}.wallet-status{font-size:11px;color:#b9aaff;margin-top:10px;min-height:16px}.wallet-activity{margin-top:13px;padding:18px 20px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#111a2b,#0d1422)}.wallet-activity-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.wallet-activity h3{font-size:13px;margin:0;letter-spacing:.02em}.wallet-activity-head span{font-size:9px;color:#9aa7bd;font-weight:850;letter-spacing:.1em}.wallet-empty{display:flex;align-items:center;gap:12px;margin-top:15px;padding:13px;border:1px dashed #ffffff24;border-radius:12px;color:#9aa7bd;font-size:11px;line-height:1.5}.wallet-empty-icon{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:10px;background:#8b6cff1c;color:#c7baff;font-size:17px}@media(max-width:520px){.wallet-panel{grid-template-columns:1fr;padding:19px}.wallet-stats{grid-template-columns:1fr 1fr}.chox-coin{width:54px;height:54px;font-size:23px}.wallet-activity{padding:16px}} .games-section{margin-top:38px;scroll-margin-top:24px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:17px}.section-head h2{font-size:25px;letter-spacing:-.05em;margin:7px 0 0}.games{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
-.game-card{display:block;min-height:190px;padding:20px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(145deg,#182541,#111827);transition:transform .2s,border-color .2s}.game-card:hover{transform:translateY(-3px);border-color:#8b6cff88}.game-icon{font-size:30px;margin-bottom:18px}.game-card small{color:#b9aaff;font-size:9px;font-weight:900;letter-spacing:.15em}.game-card h3{font-size:19px;margin:7px 0}.game-card p{font-size:11px;color:var(--muted);line-height:1.55;margin:0}.game-card.disabled{opacity:.7}
-footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:11px;display:flex;justify-content:space-between;gap:14px}
-@media(max-width:760px){.games{grid-template-columns:1fr 1fr}.profile-panel{padding:21px}}@media(max-width:520px){header{height:78px;grid-template-columns:minmax(0,1fr) auto;gap:5px}.brand{font-size:10px;gap:6px}.brand .mark{width:23px;height:23px;font-size:12px}.profile-shortcut{padding:5px;border-radius:11px;max-width:190px}.mini-avatar{width:30px;height:30px}.profile-identity strong{font-size:10px}.profile-identity small{font-size:8px}.menu-toggle{padding:8px 10px;font-size:10px}.menu-toggle span{font-size:15px}.games{grid-template-columns:1fr}.profile-actions{flex-direction:column}.section-head{display:block}}
-
-/* CHOX wallet readability and standard sizing */
-.wallet-panel{border-width:2px;padding:30px;gap:26px}
-.wallet-topline{margin-bottom:25px;gap:12px}
-.wallet-label{font-size:13px;letter-spacing:.14em}
-.wallet-live{font-size:10px;padding:7px 11px;letter-spacing:.1em}
-.wallet-live:before{width:8px;height:8px}
-.chox-coin{width:70px;height:70px;font-size:30px}
-.wallet-balance{font-size:clamp(42px,6vw,54px)}
-.wallet-unit{font-size:16px}
-.wallet-value{font-size:14px;line-height:1.5}
-.wallet-stats{gap:13px}
-.wallet-stat{min-height:108px;padding:18px;border-width:2px}
-.wallet-stat small{font-size:11px;letter-spacing:.08em;line-height:1.5}
-.wallet-stat strong{font-size:24px;margin-top:12px}
-.wallet-note{font-size:13px;line-height:1.7;padding-top:17px;border-top-width:2px}
-.wallet-status{font-size:13px;line-height:1.5;min-height:20px}
-.wallet-activity{padding:22px;border-width:2px}
-.wallet-activity h3{font-size:16px}
-.wallet-activity-head span{font-size:11px;letter-spacing:.08em}
-.wallet-empty{font-size:13px;line-height:1.65;padding:16px;border-width:2px}
-.wallet-empty-icon{width:42px;height:42px;font-size:20px}
-@media(max-width:520px){
- .wallet-panel{padding:20px;gap:20px}
- .wallet-topline{margin-bottom:20px;flex-wrap:wrap}
- .wallet-label{font-size:12px}
- .wallet-live{font-size:9px}
- .chox-coin{width:58px;height:58px;font-size:25px}
- .wallet-balance{font-size:clamp(34px,10vw,44px)}
- .wallet-unit{font-size:14px}
- .wallet-value{font-size:13px}
- .wallet-stat{min-height:96px;padding:13px}
- .wallet-stat small{font-size:10px}
- .wallet-stat strong{font-size:20px}
- .wallet-note{font-size:12px}
- .wallet-activity{padding:16px}
- .wallet-activity h3{font-size:14px}
- .wallet-activity-head span{font-size:9px}
- .wallet-empty{font-size:12px;padding:13px}
-}
 
 
-/* CHOME USDT payout setup */
-.payout-section{margin-top:30px;scroll-margin-top:24px}
-.payout-panel{padding:24px;border:1px solid #ffffff20;border-radius:20px;background:linear-gradient(145deg,#14243a,#101827)}
-.payout-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.payout-card{padding:18px;border:1px solid #ffffff1b;border-radius:15px;background:#090f1d}
-.payout-card h3{font-size:14px;margin:0 0 8px}
-.payout-card p{font-size:11px;line-height:1.65;color:#9aa7bd;margin:0 0 13px}
-.payout-field{display:block;margin:12px 0}
-.payout-field span{display:block;font-size:10px;font-weight:850;color:#cbd2e1;margin-bottom:7px}
-.payout-field input{width:100%;min-width:0;background:#070c17;border:1px solid #ffffff25;border-radius:10px;color:#fff;padding:12px;outline:none}
-.payout-field input:focus{border-color:#a895ff;box-shadow:0 0 0 3px #8b6cff22}
-.payout-button{width:100%;border:0;border-radius:10px;padding:12px;background:#8b6cff;color:white;font-size:11px;font-weight:950;letter-spacing:.06em;cursor:pointer}
-.payout-button:disabled{opacity:.45;cursor:not-allowed}
-.payout-message{display:none;margin-top:11px;padding:10px;border-radius:9px;background:#201d38;border:1px solid #9b87ff44;color:#e5ddff;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
-.payout-message.show{display:block}
-.payout-banner{margin:0 0 16px;padding:12px 14px;border:1px solid #d6ad6540;border-radius:11px;background:#3a2c1a44;color:#f2d69a;font-size:11px;line-height:1.6}
-.payout-history{margin-top:17px}
-.payout-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px 0;border-top:1px solid #ffffff16}
-.payout-row strong{display:block;font-size:12px}
-.payout-row small{display:block;color:#9aa7bd;font-size:10px;margin-top:4px;overflow-wrap:anywhere}
-.payout-status{font-size:9px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;padding:6px 8px;border-radius:99px;background:#ffffff12;color:#cbd2e1}
-.payout-status.pending{color:#f2d69a;background:#9a6b202b}
-.payout-status.paid{color:#8be2b2;background:#1d8b5430}
-.payout-status.rejected{color:#ffaaaa;background:#a33b3b30}
-@media(max-width:680px){.payout-grid{grid-template-columns:1fr}.payout-panel{padding:17px}}
-
-
-[hidden]{display:none!important}
-.leaderboard-section{margin-top:30px;scroll-margin-top:105px}.leaderboard-frame-wrap{overflow:hidden;border:1px solid #ffffff20;border-radius:20px;background:#090f1d;box-shadow:0 16px 45px #0003}.leaderboard-frame{display:block;width:100%;height:920px;border:0;background:#090d18}@media(max-width:600px){.leaderboard-frame{height:1050px}}
-
-/* Player dashboard layout — inspired by the clear account-centre structure of GRASH FX */
-:root{--chome-sidebar:#0b1221;--chome-panel:#111b2e;--chome-accent:#8b6cff}
-.shell.dashboard-layout{width:100%;max-width:none;min-height:100vh;margin:0;display:grid;grid-template-columns:252px minmax(0,1fr);gap:0}
-.player-sidebar{grid-column:1;grid-row:1/4;position:sticky;top:0;height:100vh;min-height:620px;display:flex;flex-direction:column;padding:25px 16px 18px;background:linear-gradient(180deg,#0d1628,#090f1c);border-right:1px solid #ffffff17;z-index:40}
-.sidebar-brand{display:flex;align-items:center;gap:11px;padding:3px 9px 27px;font-size:13px;font-weight:1000;letter-spacing:.12em}
-.sidebar-brand .mark{width:36px;height:36px;border-radius:12px;font-size:18px;box-shadow:0 7px 22px #8b6cff40}
-.sidebar-brand small{display:block;color:#8390a8;font-size:8px;letter-spacing:.18em;margin-top:4px}
-.sidebar-section-label{padding:16px 11px 9px;color:#71809a;font-size:9px;font-weight:950;letter-spacing:.17em}
-.sidebar-nav{display:grid;gap:6px;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:3px}
-.sidebar-nav a,.sidebar-bottom a,.sidebar-bottom button{display:flex;align-items:center;gap:13px;width:100%;min-height:46px;padding:11px 13px;border:1px solid transparent;border-radius:12px;background:transparent;color:#aebbd0;text-decoration:none;text-align:left;font-size:12px;font-weight:800;transition:.18s}
-.sidebar-nav a span,.sidebar-bottom a span,.sidebar-bottom button span{width:19px;text-align:center;font-size:16px}
-.sidebar-nav a:hover,.sidebar-bottom a:hover,.sidebar-bottom button:hover{background:#ffffff0a;color:white}
-.sidebar-nav a.active{background:linear-gradient(100deg,#8b6cff2b,#8b6cff0b);border-color:#a895ff38;color:#eeeaff}
-.sidebar-bottom{margin-top:auto;display:grid;gap:5px;padding-top:18px;border-top:1px solid #ffffff17}
-.sidebar-bottom button{cursor:pointer}
-.sidebar-bottom small{padding:16px 12px 0;color:#68758d;font-size:8px;font-weight:900;letter-spacing:.14em}
-.dashboard-content{grid-column:2;min-width:0;display:flex;flex-direction:column}
-.dashboard-topbar{height:82px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 clamp(20px,4vw,54px);border-bottom:1px solid #ffffff17;background:#0b1221d9;position:sticky;top:0;z-index:30;backdrop-filter:blur(16px)}
-.topbar-title{display:grid;gap:4px;margin-right:auto}
-.topbar-title .eyebrow{font-size:8px;letter-spacing:.17em}
-.topbar-title strong{font-size:13px;letter-spacing:.1em}
-.dashboard-topbar .profile-shortcut{justify-self:auto;max-width:260px;padding:7px 12px 7px 7px}
-.profile-chevron{color:#8f9bb1;font-size:15px}
-.sidebar-mobile-toggle{display:none;width:40px;height:40px;border:1px solid #ffffff20;border-radius:11px;background:#151f35;color:white;font-size:18px}
-.dashboard-content main{width:min(1320px,100%);margin:0 auto;padding:36px clamp(20px,4vw,54px) 72px}
-.dashboard-content footer{width:100%;padding:22px clamp(20px,4vw,54px);margin-top:auto}
-.welcome-panel{display:flex;justify-content:space-between;align-items:center;gap:22px;padding:30px 32px;margin-bottom:30px;border:1px solid #a895ff38;border-radius:22px;background:radial-gradient(circle at 88% 15%,#8b6cff35,transparent 33%),linear-gradient(120deg,#1b2340,#111a2c 65%,#101827);box-shadow:0 22px 55px #0003}
-.welcome-panel h1{font-size:clamp(31px,4vw,46px);margin:11px 0 10px;letter-spacing:-.065em}
-.welcome-panel h1 span{color:#c1b3ff}
-.welcome-panel .intro{max-width:680px}
-.welcome-action{flex:none;display:inline-flex;align-items:center;gap:18px;padding:14px 18px;border-radius:12px;background:#8b6cff;color:white;font-size:10px;font-weight:950;letter-spacing:.09em;box-shadow:0 9px 25px #8b6cff3b}
-.welcome-action span{font-size:18px}
-
-.overview-wallet-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:0 0 30px}
-.overview-wallet-card{min-width:0;padding:20px 22px;border:1px solid #b9aaff42;border-radius:18px;background:radial-gradient(circle at 90% 0%,#a98bff20,transparent 38%),linear-gradient(135deg,#211d3c,#111a2c);box-shadow:0 16px 40px #0003}
-.overview-points-card{border-color:#62d7bd50;background:radial-gradient(circle at 90% 0%,#4ac7a326,transparent 38%),linear-gradient(135deg,#102d31,#101b2a)}
-.overview-wallet-card-top,.overview-wallet-footer{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.overview-wallet-card-top{color:#c8bbff;font-size:10px;font-weight:950;letter-spacing:.16em}
-.overview-points-card .overview-wallet-card-top{color:#9ce9d9}
-.overview-wallet-symbol{display:grid;place-items:center;width:32px;height:32px;border-radius:11px;background:#ffffff12;color:#fff;font-size:17px;font-weight:1000}
-.overview-wallet-amount{display:flex;align-items:baseline;gap:9px;margin:13px 0 5px;min-width:0}
-.overview-wallet-amount strong{font-size:clamp(30px,4vw,40px);line-height:1.1;letter-spacing:-.06em;overflow-wrap:anywhere}
-.overview-wallet-amount span{font-size:11px;font-weight:950;letter-spacing:.1em;color:#f1d18b}
-.overview-points-card .overview-wallet-amount span{color:#9ce9d9}
-.overview-wallet-meta{min-height:18px;color:#aeb9cf;font-size:11px}
-.overview-wallet-footer{margin-top:17px;padding-top:13px;border-top:1px solid #ffffff1b;color:#9eabc2;font-size:10px;flex-wrap:wrap}
-.overview-wallet-link{border:0;background:transparent;color:#c8bbff;font-size:10px;font-weight:950;letter-spacing:.08em;cursor:pointer;padding:4px 0}
-.overview-points-card .overview-wallet-link{color:#9ce9d9}
-.overview-wallet-loading{grid-column:1/-1;color:#aeb9cf;font-size:10px;min-height:14px}
-@media(max-width:620px){.overview-wallet-summary{grid-template-columns:1fr;gap:12px}.overview-wallet-card{padding:18px}}
-
-.wallet-section,.payout-section,.games-section{scroll-margin-top:105px}
-.section-head{margin-bottom:18px}
-.section-head h2{font-size:23px}
-.panel,.wallet-panel,.payout-panel{box-shadow:0 16px 45px #0003}
-.profile-overlay{z-index:80}
-.sidebar-scrim{display:none}
-@media(max-width:850px){
- .shell.dashboard-layout{grid-template-columns:minmax(0,1fr)}
- .player-sidebar{position:fixed;left:0;top:0;width:min(280px,84vw);height:100dvh;min-height:0;transform:translateX(-105%);transition:transform .22s ease;box-shadow:18px 0 50px #0008}
- .player-sidebar.open{transform:translateX(0)}
- .sidebar-scrim.open{display:block;position:fixed;inset:0;background:#020611b8;z-index:35}
- .dashboard-content{grid-column:1}
- .sidebar-mobile-toggle{display:grid;place-items:center}
- .dashboard-topbar{height:72px;padding:0 16px;gap:12px}
- .dashboard-content main{padding:24px 16px 54px}
- .dashboard-content footer{padding:19px 16px;flex-wrap:wrap}
-}
-@media(max-width:560px){
- .topbar-title .eyebrow{font-size:7px}
- .topbar-title strong{font-size:11px}
- .dashboard-topbar .profile-shortcut{gap:6px;padding:5px 8px 5px 5px;font-size:9px}
- .dashboard-topbar .mini-avatar{width:29px;height:29px}
- .welcome-panel{display:block;padding:22px 20px;margin-bottom:23px}
- .welcome-panel h1{font-size:33px}
- .welcome-action{margin-top:18px}
- .section-head h2{font-size:21px}
-}
-
-
-/* CHOME referral centre */
-.referral-section{margin-top:30px;scroll-margin-top:105px}.referral-panel{padding:24px;border:1px solid #a895ff42;border-radius:20px;background:linear-gradient(145deg,#151f35,#101827);box-shadow:0 16px 45px #0003}.referral-hero{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px;border:1px solid #a895ff38;border-radius:16px;background:radial-gradient(circle at 90% 0,#8b6cff32,transparent 40%),#090f1d}.referral-kicker{font-size:10px;color:#c4b7ff;font-weight:950;letter-spacing:.16em}.referral-reward{font-size:clamp(34px,5vw,48px);font-weight:1000;letter-spacing:-.06em;margin:9px 0}.referral-reward span{font-size:14px;color:#f1d18b;letter-spacing:.12em}.referral-hero p{max-width:620px;margin:0;color:#aeb9cf;font-size:12px;line-height:1.7}.referral-medal{width:68px;height:68px;flex:none;display:grid;place-items:center;border-radius:50%;background:linear-gradient(145deg,#f8dda1,#ad7a30);color:#412b13;font-size:34px;box-shadow:0 8px 25px #0005}.referral-share-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:12px;margin-top:15px}.referral-share-card{min-width:0;padding:16px;border:1px solid #ffffff1c;border-radius:14px;background:#090f1d}.referral-share-card label{display:block;color:#aeb9cf;font-size:9px;font-weight:950;letter-spacing:.12em;margin-bottom:9px}.referral-copy-row{display:flex;gap:8px}.referral-copy-row input{width:100%;min-width:0;padding:11px;border:1px solid #ffffff20;border-radius:9px;background:#070c17;color:#fff;font-size:11px}.referral-copy{flex:none;padding:0 12px;border:1px solid #a895ff55;border-radius:9px;background:#8b6cff;color:white;font-size:9px;font-weight:950;cursor:pointer}.referral-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:15px}.referral-stat{padding:17px;border:1px solid #ffffff1b;border-radius:13px;background:#090f1d}.referral-stat small{display:block;color:#9eabc2;font-size:9px;font-weight:900;letter-spacing:.1em}.referral-stat strong{display:block;margin-top:9px;font-size:23px}.referral-history{margin-top:20px;padding:17px;border:1px solid #ffffff1c;border-radius:14px;background:#090f1d}.referral-history .wallet-activity-head{margin-bottom:10px}.referral-history-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #ffffff16}.referral-history-row strong{display:block;font-size:12px}.referral-history-row small{display:block;color:#9aa7bd;font-size:10px;margin-top:4px}.referral-history-row em{font-style:normal;color:#8be2b2;font-size:10px;font-weight:900;white-space:nowrap}.referral-status{min-height:18px;margin-top:13px;color:#c3b6ff;font-size:11px}.referral-terms{margin:10px 0 0;color:#8290a8;font-size:10px;line-height:1.65}@media(max-width:850px){.referral-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.referral-panel{padding:15px}.referral-hero{padding:17px}.referral-medal{width:48px;height:48px;font-size:25px}.referral-share-grid{grid-template-columns:1fr}.referral-copy-row input{font-size:10px}.referral-copy{padding:0 9px}}
-
-.activity-toggle{margin-top:12px;padding:9px 12px;border:1px solid #ffffff24;border-radius:10px;background:#ffffff0a;color:#c9c0ff;font-size:10px;font-weight:900;letter-spacing:.08em;cursor:pointer}.activity-toggle:hover{background:#ffffff14}.wallet-ledger-row[hidden]{display:none}.payout-inline{margin-top:18px;border:1px solid #b9aaff35;border-radius:18px;background:#111a2b;overflow:hidden}.payout-inline>summary{list-style:none;cursor:pointer;padding:18px 20px;color:#e9e4ff;font-size:12px;font-weight:950;letter-spacing:.08em}.payout-inline>summary::-webkit-details-marker{display:none}.payout-inline>summary:after{content:"＋";float:right;color:#c9baff}.payout-inline[open]>summary:after{content:"−"}.payout-inline>summary span{display:block;margin-top:5px;color:#9aa7bd;font-size:10px;font-weight:600;letter-spacing:0}.payout-inline .payout-section{padding:0 18px 18px}.wallet-ledger-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #ffffff16}.wallet-ledger-row strong{display:block;font-size:12px}.wallet-ledger-row small{display:block;color:#9aa7bd;font-size:10px;margin-top:4px}.wallet-ledger-row b{font-size:11px;white-space:nowrap}.wallet-ledger-row .positive{color:#8be2b2}.wallet-ledger-row .negative{color:#ffb2b2}
-
-/* Dual-currency rewards dashboard */
-.dual-wallet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}
-.wallet-account-card{min-width:0;display:flex;flex-direction:column;gap:10px}
-.wallet-account-card .wallet-panel{grid-template-columns:1fr;gap:20px;min-height:310px;padding:23px}
-.wallet-account-card .wallet-topline{margin-bottom:20px;flex-wrap:wrap}
-.wallet-account-card .wallet-balance{font-size:clamp(32px,4vw,46px);overflow-wrap:anywhere}
-.wallet-account-card .wallet-stats{grid-template-columns:1fr 1fr}
-.wallet-account-card .wallet-stat{min-width:0;min-height:88px;padding:13px}
-.wallet-account-card .wallet-stat strong{font-size:clamp(17px,2vw,22px);overflow-wrap:anywhere}
-.wallet-account-card .wallet-note{grid-column:auto;font-size:11px;line-height:1.65}
-.wallet-account-card .wallet-activity{margin-top:0;flex:1;padding:17px}
-.wallet-account-card .wallet-activity-head{align-items:flex-start}
-.wallet-account-card .wallet-activity h3{font-size:12px}
-.wallet-refresh{width:auto;white-space:nowrap;padding:11px 14px}
-.game-points-panel{background:radial-gradient(circle at 88% 5%,#4ac7a32b,transparent 35%),linear-gradient(140deg,#102d31 0%,#122832 52%,#101b2a 100%);border-color:#62d7bd50}
-.game-points-panel:after{content:"P";color:#ffffff08}
-.game-points-panel .wallet-label{color:#9ce9d9}
-.points-live{display:inline-flex;align-items:center;padding:6px 9px;border:1px solid #67d8bc40;border-radius:99px;background:#67d8bc12;color:#a9efdf;font-size:9px;font-weight:900;letter-spacing:.1em}
-.points-coin{width:62px;height:62px;flex:none;display:grid;place-items:center;border-radius:19px;background:linear-gradient(145deg,#a1f0d9,#2c9d91);border:1px solid #b4ffeb;color:#083b39;font-size:28px;font-weight:1000;box-shadow:0 9px 25px #0005}
-.points-unit{color:#9ce9d9}
-.points-earned{border-color:#67d8bc45!important}
-.points-spent{border-color:#8ab6ff45!important}
-.points-earned strong{color:#9ce9d9!important}
-.points-spent strong{color:#b6caff!important}
-.points-status{color:#8dddc9}
-.wallet-ledger-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid #ffffff14}
-.wallet-ledger-row:first-child{border-top:0}
-.wallet-ledger-row strong{display:block;font-size:11px;line-height:1.45;overflow-wrap:anywhere}
-.wallet-ledger-row small{display:block;color:#8998b0;font-size:9px;margin-top:4px;line-height:1.5}
-.wallet-ledger-row b{font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.wallet-ledger-row b.positive{color:#8be2b2}.wallet-ledger-row b.negative{color:#ffb3a8}
-@media(max-width:980px){.dual-wallet-grid{grid-template-columns:1fr}.wallet-account-card .wallet-panel{min-height:0}}
-@media(max-width:520px){.section-head .wallet-refresh{margin-top:14px}.wallet-account-card .wallet-panel{padding:18px}.wallet-account-card .wallet-balance{font-size:clamp(30px,9vw,40px)}.wallet-account-card .wallet-stat{padding:11px}.points-coin{width:54px;height:54px;font-size:24px}}
-</style>
-</head>
-<body>
-<div class="shell dashboard-layout">
-<aside class="player-sidebar" id="playerSidebar" aria-label="Player navigation">
-  <a class="sidebar-brand" href="index.html"><span class="mark">C</span><span>CHOME <small>GAME STUDIO</small></span></a>
-  <div class="sidebar-section-label">PLAYER SPACE</div>
-  <nav class="sidebar-nav">
-    <a class="active" href="#top" id="overviewNavLink"><span>⌂</span> Overview</a>
-    <a href="#games" id="gamesNavLink"><span>🎮</span> My Games</a>
-    <a href="#walletHeading" id="walletNavLink"><span>◈</span> CHOX Wallet</a>
-    <a href="#payouts" id="payoutNavLink"><span>↗</span> Payout Centre</a>
-    <a href="#leaderboards" id="leaderboardNavLink"><span>🏆</span> Leaderboards</a>
-    <a href="#referrals" id="referralNavLink"><span>✦</span> Referral Centre</a>
-    <a href="#profile" id="sidebarProfileLink"><span>◎</span> My Profile</a>
-  </nav>
-  <div class="sidebar-bottom">
-    <a href="index.html"><span>↗</span> Studio Home</a>
-    <button id="menuSignOut" type="button"><span>⇥</span> Sign Out</button>
-    <small>WORLDS WORTH EXPLORING.</small>
-  </div>
-</aside>
-<div class="sidebar-scrim" id="sidebarScrim"></div>
-<div class="dashboard-content">
-<header class="dashboard-topbar"><button class="sidebar-mobile-toggle" id="sidebarToggle" type="button" aria-expanded="false" aria-controls="playerSidebar" aria-label="Open navigation">☰</button><div class="topbar-title"><span class="eyebrow">CHOME GAME STUDIO</span><strong>PLAYER SPACE</strong></div><button class="profile-shortcut" id="profileShortcut" type="button" aria-label="Open your player profile"><span class="mini-avatar" id="headerAvatar">🎮</span><span class="profile-word">MY PROFILE</span><span class="profile-chevron">⌄</span></button><div class="header-actions"><nav class="menu-popover" id="playerMenu" aria-label="Player menu"></nav></div></header>
-<main id="top">
-<section class="welcome-panel" id="overviewWelcome"><div><div class="eyebrow">YOUR PERSONAL GAMING SPACE</div><h1>Welcome back, <span id="welcomePlayerName">Player</span>.</h1><p class="intro">Your games, achievements and CHOX rewards — all in one place. Pick up where you left off and explore what is waiting for you.</p></div><a class="welcome-action" href="#games">EXPLORE GAMES <span>→</span></a></section>
-<section class="overview-wallet-summary" id="overviewWalletSummary" aria-label="Your balances">
- <div class="overview-wallet-card overview-chox-card">
-  <div class="overview-wallet-card-top"><span>CHOX BALANCE</span><span class="overview-wallet-symbol">C</span></div>
-  <div class="overview-wallet-amount"><strong id="overviewChoxBalance">—</strong><span>CHOX</span></div>
-  <div class="overview-wallet-meta" id="overviewChoxValue">Indicative value loading…</div>
-  <div class="overview-wallet-footer"><span id="overviewChoxEarned">Lifetime earned: —</span><button type="button" class="overview-wallet-link" id="overviewOpenWallet">OPEN WALLET →</button></div>
- </div>
- <div class="overview-wallet-card overview-points-card">
-  <div class="overview-wallet-card-top"><span>GAME POINTS BALANCE</span><span class="overview-wallet-symbol">P</span></div>
-  <div class="overview-wallet-amount"><strong id="overviewGamePointsBalance">—</strong><span>POINTS</span></div>
-  <div class="overview-wallet-meta">In-game currency · no cash value</div>
-  <div class="overview-wallet-footer"><span id="overviewGamePointsEarned">Lifetime earned: —</span><button type="button" class="overview-wallet-link" id="overviewOpenPointsWallet">OPEN WALLET →</button></div>
- </div>
- <div class="overview-wallet-loading" id="overviewWalletStatus" role="status" aria-live="polite">Connecting your balances…</div>
+<section class="games-section" id="gamesSection">
+<div class="section-head"><div><div class="eyebrow">Choose your next adventure</div><h2>YOUR GAMES</h2></div><div class="eyebrow">ONE PLAYER ID · MANY WORLDS</div></div>
+<div class="games" id="games">
+<a class="game-card" href="fruit-fancy.html"><div class="game-icon">🍓</div><small>PLAY NOW · CLOUD SAVES</small><h3>Fruit Fancy</h3><p>Continue your puzzle adventure. Your progress syncs when you play while signed in.</p></a>
+<a class="game-card" href="chome-blocks.html"><div class="game-icon">🧩</div><small>PLAY NOW · CLOUD SAVES</small><h3>CHOME Blocks</h3><p>Fit the shapes, clear lines and build your best score. Progress syncs when signed in.</p></a>
+<a class="game-card" href="candy-trail.html"><div class="game-icon">🍬</div><small>PLAY NOW · NEW</small><h3>Candy Trail Saga</h3><p>Swap candies, create combos and clear level targets in a colorful match-three adventure.</p></a>
+<a class="game-card" href="chome-tycoon.html"><div class="game-icon">🏙️</div><small>PLAY NOW · PROTOTYPE</small><h3>CHOME Tycoon</h3><p>Launch your first company, manage daily operations and build your business empire.</p></a>
+<div class="game-card disabled"><div class="game-icon">☁️</div><small>IN DEVELOPMENT</small><h3>Skybound</h3><p>A new world is taking shape. More adventures are on the way.</p></div>
+<div class="game-card disabled"><div class="game-icon">✨</div><small>COMING SOON</small><h3>More games</h3><p>Your player dashboard will grow as new CHOME games arrive.</p></div>
+</div>
 </section>
-<div class="profile-overlay" id="profileOverlay" aria-hidden="true"><section class="panel profile-panel" id="profile" role="dialog" aria-modal="true" aria-labelledby="profileDisplayHeading"><button class="profile-close" id="closeProfile" type="button" aria-label="Close profile">×</button>
-<div class="profile-head"><div class="avatar" id="avatarPreview">🎮</div><div><div class="eyebrow">PLAYER PROFILE</div><h2 id="profileDisplayHeading">Loading profile…</h2><div class="handle" id="profileHandle">@player</div></div></div>
-<p class="sub">Your player identity is shared across CHOME Game Studio.</p><div class="account-meta"><span>ACCOUNT EMAIL</span><strong id="accountEmail">Loading…</strong></div>
-<form id="profileForm">
-<label class="field"><span>Display name</span><input id="editDisplayName" maxlength="40" required></label>
-<label class="field"><span>Username (3–20 letters, numbers or underscores)</span><input id="editUsername" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" title="Use 3–20 characters: letters, numbers or underscores." required></label>
-<label class="field"><span>About you</span><textarea id="bio" maxlength="160" placeholder="Tell other players a little about yourself"></textarea></label>
-<label class="file-label">UPLOAD PROFILE PICTURE (MAX 2 MB)<input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
-<button class="primary" id="saveProfile" type="submit" style="margin-top:14px">SAVE PROFILE</button>
-</form>
-<div class="message" id="profileMessage" role="status" aria-live="polite"></div>
-</section></div>
-<section class="wallet-section" id="walletSection" hidden aria-labelledby="walletHeading">
- <div class="section-head"><div><div class="eyebrow">Two separate balances · one player account</div><h2 id="walletHeading">CHOX WALLET & GAME POINTS</h2></div><button type="button" id="refreshWallet" class="secondary wallet-refresh">↻ REFRESH BALANCES</button></div>
- <div class="dual-wallet-grid">
-  <article class="wallet-account-card chox-account-card">
-   <div class="wallet-panel">
-    <div>
-     <div class="wallet-topline"><div class="wallet-label">CHOX REWARDS WALLET</div><span class="wallet-live">ACTIVE</span></div>
-     <div class="wallet-balance-row"><div class="chox-coin" aria-hidden="true">C</div><div><div><strong class="wallet-balance" id="walletPoints">—</strong><span class="wallet-unit">CHOX</span></div><div class="wallet-value" id="walletValue">Indicative value loading…</div></div></div>
-    </div>
-    <div class="wallet-stats">
-     <div class="wallet-stat earned"><small>LIFETIME CHOX EARNED</small><strong id="walletEarned">0</strong></div>
-     <div class="wallet-stat redeemed"><small>LIFETIME CHOX REDEEMED</small><strong id="walletRedeemed">0</strong></div>
-     <div class="wallet-stat"><small>PENDING REDEMPTION</small><strong id="walletPending">0 CHOX</strong></div>
-     <div class="wallet-stat"><small>TOTAL PAYOUT RECEIVED</small><strong id="walletPaid">$0.00</strong></div>
-    </div>
-    <p class="wallet-note">Your game's individual CHOX reward rules remain unchanged. CHOX is separate from Game Points. Its USD estimate is indicative; payouts remain managed inside the Payout Centre.</p>
-   </div>
-   <div class="wallet-status" id="walletStatus" role="status" aria-live="polite">Connecting your CHOX wallet…</div>
-   <div class="wallet-activity"><div class="wallet-activity-head"><h3>RECENT CHOX ACTIVITY</h3><span>LAST 12 ENTRIES</span></div><div id="walletActivityList"><div class="wallet-empty">Loading CHOX activity…</div></div><button class="activity-toggle" type="button" data-activity="walletActivityList" aria-expanded="false">VIEW ALL ACTIVITY</button></div>
-  </article>
-  <article class="wallet-account-card game-points-account-card">
-   <div class="wallet-panel game-points-panel">
-    <div>
-     <div class="wallet-topline"><div class="wallet-label">GAME POINTS WALLET</div><span class="points-live">PLAYER PROGRESSION</span></div>
-     <div class="wallet-balance-row"><div class="points-coin" aria-hidden="true">P</div><div><div><strong class="wallet-balance" id="gamePointsBalance">—</strong><span class="wallet-unit points-unit">POINTS</span></div><div class="wallet-value">In-game currency · no cash value</div></div></div>
-    </div>
-    <div class="wallet-stats">
-     <div class="wallet-stat points-earned"><small>LIFETIME POINTS EARNED</small><strong id="gamePointsEarned">0</strong></div>
-     <div class="wallet-stat points-spent"><small>LIFETIME POINTS SPENT</small><strong id="gamePointsSpent">0</strong></div>
-    </div>
-    <p class="wallet-note">Earn Game Points through eligible game activities. Use them for competition entry and selected game or level unlocks. Game Points cannot be withdrawn or converted into CHOX.</p>
-   </div>
-   <div class="wallet-status points-status" id="gamePointsStatus" role="status" aria-live="polite">Connecting your Game Points wallet…</div>
-   <div class="wallet-activity"><div class="wallet-activity-head"><h3>RECENT GAME POINTS ACTIVITY</h3><span>LAST 12 ENTRIES</span></div><div id="gamePointsActivityList"><div class="wallet-empty">Loading Game Points activity…</div></div><button class="activity-toggle" type="button" data-activity="gamePointsActivityList" aria-expanded="false">VIEW ALL ACTIVITY</button></div>
-  </article>
- </div>
+</main>
+<footer><span>© <span id="year"></span> CHOME GAME STUDIO</span><span>WORLDS WORTH EXPLORING.</span></footer>
+</div>
+</div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
+const $=id=>document.getElementById(id);let currentUser=null;
+$('year').textContent=new Date().getFullYear();
+function message(text){const el=$('profileMessage');el.textContent=text;el.classList.add('show')}
+function friendly(error){
+ const raw=error?.message||'Something went wrong. Please try again.';
+ if(/duplicate key|unique constraint|profiles_username_lower_unique_idx/i.test(raw))return 'That username is already taken. Please choose another one.';
+ return raw;
+}
+function busy(button,on,label){button.disabled=on;button.textContent=on?'PLEASE WAIT…':label}
+function renderAvatar(url,name){
+ const box=$('avatarPreview'),mini=$('headerAvatar');
+box.innerHTML='';mini.innerHTML='';
+ if(url){const img=document.createElement('img');img.src=url;img.alt='Player avatar';box.append(img);const small=document.createElement('img');small.src=url;small.alt='';mini.append(small)}
+ else {const initial=(name||'🎮').trim().charAt(0).toUpperCase()||'🎮';box.textContent=initial;mini.textContent=initial}
+}
+async function loadProfile(user){
+ currentUser=user;$('accountEmail').textContent=user.email||'Not available';
+ const {data,error}=await supabase.from('profiles').select('id,username,display_name,avatar_url,bio').eq('id',user.id).single();
+ if(error){message('You are signed in, but your player profile could not be loaded: '+friendly(error));return}
+ $('profileDisplayHeading').textContent=data.display_name||data.username;
+ $('welcomePlayerName').textContent=(data.display_name||data.username||'Player').split(' ')[0];
+ $('profileHandle').textContent='@'+data.username;
+ $('editDisplayName').value=data.display_name||'';
+ $('editUsername').value=data.username||'';
+ $('bio').value=data.bio||'';
+ renderAvatar(data.avatar_url,data.display_name||data.username);
+}
+$('profileForm').addEventListener('submit',async event=>{
+ event.preventDefault();if(!currentUser)return;
+ const button=$('saveProfile');busy(button,true,'SAVE PROFILE');
+ const updates={username:$('editUsername').value.trim(),display_name:$('editDisplayName').value.trim(),bio:$('bio').value.trim()};
+ if(!/^[A-Za-z0-9_]{3,20}$/.test(updates.username)){busy(button,false,'SAVE PROFILE');message('Username must be 3–20 letters, numbers or underscores.');return}
+ const file=$('avatarFile').files[0];
+ if(file){
+  if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024){busy(button,false,'SAVE PROFILE');message('Choose a PNG, JPG or WebP image no larger than 2 MB.');return}
+  const extension=file.type==='image/jpeg'?'jpg':file.type.split('/')[1],path=currentUser.id+'/'+crypto.randomUUID()+'.'+extension;
+  const {error:uploadError}=await supabase.storage.from('chome-avatars').upload(path,file,{contentType:file.type,upsert:false});
+  if(uploadError){busy(button,false,'SAVE PROFILE');message(friendly(uploadError));return}
+  updates.avatar_url=supabase.storage.from('chome-avatars').getPublicUrl(path).data.publicUrl;
+ }
+ const {data,error}=await supabase.from('profiles').update(updates).eq('id',currentUser.id).select('id,username,display_name,avatar_url,bio').single();
+ busy(button,false,'SAVE PROFILE');
+ if(error){message(friendly(error));return}
+ $('profileDisplayHeading').textContent=data.display_name||data.username;$('profileHandle').textContent='@'+data.username;
+ renderAvatar(data.avatar_url,data.display_name||data.username);$('avatarFile').value='';
+ message('Your player profile has been updated.');
+});
+let currentWalletBalance=0;
+let rewardsRefreshPromise=null,lastAutomaticRewardsRefresh=0;
+function rewardsRpc(name,args){return new Promise(resolve=>{const timer=setTimeout(()=>resolve({data:null,error:{message:'The request timed out. Tap Refresh Balances to try again.'}}),12000);supabase.rpc(name,args).then(result=>{clearTimeout(timer);resolve(result)}).catch(error=>{clearTimeout(timer);resolve({data:null,error})});});}
+function toggleActivity(button){const host=$(button.dataset.activity);if(!host)return;const expanded=button.getAttribute('aria-expanded')==='true';button.setAttribute('aria-expanded',String(!expanded));host.querySelectorAll('.wallet-ledger-row').forEach((row,index)=>{row.hidden=!expanded&&index>=3;});button.textContent=expanded?'VIEW ALL ACTIVITY':'SHOW LESS';}
+let payoutConfig={payouts_enabled:false,points_per_usd:20000,minimum_redemption_points:0};
+function fmtLedger(value){return Number(value||0).toLocaleString(undefined,{maximumFractionDigits:0});}
+async function loadRewardsWallet(){
+ const status=$('walletStatus');if($('walletPoints').textContent==='—')status.textContent='Loading CHOX balance…';
+ const {data,error}=await rewardsRpc('get_my_rewards_wallet');
+ if(error){status.textContent='CHOX balance could not be loaded. Please refresh.';$('overviewWalletStatus').textContent='CHOX balance temporarily unavailable. Open Wallet to retry.';console.error('CHOX wallet:',error);return;}
+ const wallet=Array.isArray(data)?data[0]:data;
+ if(!wallet){status.textContent='Your CHOX wallet is being prepared.';return;}
+ currentWalletBalance=Number(wallet.points_balance||0);
+ if(wallet.points_per_usd)payoutConfig.points_per_usd=Number(wallet.points_per_usd);
+ $('walletPoints').textContent=fmtLedger(wallet.points_balance);
+ $('overviewChoxBalance').textContent=fmtLedger(wallet.points_balance);
+ $('overviewChoxValue').textContent='Estimated value: '+(currentWalletBalance/Number(payoutConfig.points_per_usd||20000)).toFixed(2)+' USD · indicative only';
+ $('overviewChoxEarned').textContent='Lifetime earned: '+fmtLedger(wallet.lifetime_earned);
+ $('overviewWalletStatus').textContent='Your balances are synced from your player wallets.';
+ $('walletValue').textContent='Estimated value: '+(currentWalletBalance/Number(payoutConfig.points_per_usd||20000)).toFixed(2)+' USD · indicative only';
+ $('walletEarned').textContent=fmtLedger(wallet.lifetime_earned);
+ $('walletRedeemed').textContent=fmtLedger(wallet.lifetime_redeemed);
+ status.textContent='CHOX wallet connected · shared across CHOME games.';
+}
+async function loadRewardsActivity(){
+ const host=$('walletActivityList');host.replaceChildren();
+ const {data,error}=await rewardsRpc('get_my_rewards_activity');
+ if(error){const empty=document.createElement('div');empty.className='wallet-empty';empty.textContent='CHOX activity is temporarily unavailable.';host.append(empty);console.error('CHOX activity:',error);return;}
+ if(!data?.length){const empty=document.createElement('div');empty.className='wallet-empty';empty.textContent='No CHOX activity yet. Verified game rewards will appear here.';host.append(empty);return;}
+ data.forEach((row,index)=>{const item=document.createElement('div');item.className='wallet-ledger-row';item.hidden=index>=3;const detail=document.createElement('div');const title=document.createElement('strong');title.textContent=row.description||row.source||'CHOX transaction';const meta=document.createElement('small');meta.textContent=new Date(row.created_at).toLocaleString()+' · '+String(row.entry_type||'activity').toUpperCase();detail.append(title,meta);const amount=document.createElement('b');const points=Number(row.points_delta||0);amount.textContent=(points>0?'+':'')+fmtLedger(points)+' CHOX';amount.className=points>=0?'positive':'negative';item.append(detail,amount);host.append(item);});
+}
+async function loadGamePointsWallet(){
+ const status=$('gamePointsStatus');if($('gamePointsBalance').textContent==='—')status.textContent='Loading Game Points balance…';
+ const {data,error}=await rewardsRpc('get_my_game_points_wallet');
+ if(error){status.textContent='Game Points balance could not be loaded. Please refresh.';$('overviewWalletStatus').textContent='Game Points balance temporarily unavailable. Open Wallet to retry.';console.error('Game Points wallet:',error);return;}
+ const wallet=Array.isArray(data)?data[0]:data;
+ if(!wallet){status.textContent='Your Game Points wallet is being prepared.';return;}
+ $('gamePointsBalance').textContent=fmtLedger(wallet.points_balance);
+ $('overviewGamePointsBalance').textContent=fmtLedger(wallet.points_balance);
+ $('overviewGamePointsEarned').textContent='Lifetime earned: '+fmtLedger(wallet.lifetime_earned);
+ $('overviewWalletStatus').textContent='Your balances are synced from your player wallets.';
+ $('gamePointsEarned').textContent=fmtLedger(wallet.lifetime_earned);
+ $('gamePointsSpent').textContent=fmtLedger(wallet.lifetime_spent);
+ status.textContent='Game Points wallet connected · shared across CHOME games.';
+}
+async function loadGamePointsActivity(){
+ const host=$('gamePointsActivityList');host.replaceChildren();
+ const {data,error}=await rewardsRpc('get_my_game_points_activity');
+ if(error){const empty=document.createElement('div');empty.className='wallet-empty';empty.textContent='Game Points activity is temporarily unavailable.';host.append(empty);console.error('Game Points activity:',error);return;}
+ if(!data?.length){const empty=document.createElement('div');empty.className='wallet-empty';empty.textContent='No Game Points activity yet. Eligible game rewards will appear here.';host.append(empty);return;}
+ data.forEach((row,index)=>{const item=document.createElement('div');item.className='wallet-ledger-row';item.hidden=index>=3;const detail=document.createElement('div');const title=document.createElement('strong');title.textContent=row.description||row.source||'Game Points transaction';const meta=document.createElement('small');meta.textContent=new Date(row.created_at).toLocaleString()+' · '+String(row.entry_type||'activity').toUpperCase();detail.append(title,meta);const amount=document.createElement('b');const points=Number(row.points_delta||0);amount.textContent=(points>0?'+':'')+fmtLedger(points)+' PTS';amount.className=points>=0?'positive':'negative';item.append(detail,amount);host.append(item);});
+}
+async function refreshRewardsWallet(automatic=false){
+ if(automatic&&Date.now()-lastAutomaticRewardsRefresh<2500)return rewardsRefreshPromise;
+ if(rewardsRefreshPromise)return rewardsRefreshPromise;
+ if(automatic)lastAutomaticRewardsRefresh=Date.now();
+ const button=$('refreshWallet');
+ if(button&&!automatic){button.disabled=true;button.textContent='↻ UPDATING…';}
+ rewardsRefreshPromise=(async()=>{try{await Promise.all([loadRewardsWallet(),loadRewardsActivity(),loadGamePointsWallet(),loadGamePointsActivity()]);}finally{if(button&&!automatic){button.disabled=false;button.textContent='↻ REFRESH BALANCES';}rewardsRefreshPromise=null;}})();
+ return rewardsRefreshPromise;
+}
+async function loadReferralPanel(){
+ const status=$('referralStatus');status.textContent='Loading your referral details…';
+ const {data,error}=await supabase.rpc('get_my_referral_summary');
+ if(error){status.textContent='Your referral centre is temporarily unavailable. Please try again.';console.error('Referral summary:',error);return;}
+ const summary=typeof data==='string'?JSON.parse(data):data;
+ if(!summary?.code){status.textContent='Your referral code could not be prepared. Please refresh.';return;}
+ const link=new URL('player.html',location.href);link.searchParams.set('signup','1');link.searchParams.set('ref',summary.code);
+ $('myReferralCode').value=summary.code;$('myReferralLink').value=link.toString();
+ $('referralCount').textContent=fmtLedger(summary.referral_count||0);
+ $('referralPending').textContent=fmtLedger(summary.pending_referrals||0);
+ $('referralSuccessful').textContent=fmtLedger(summary.successful_referrals||0);
+ $('referralEarned').textContent=fmtLedger(summary.points_earned||0);
+ const host=$('referralHistoryList');host.replaceChildren();
+ const rows=Array.isArray(summary.referrals)?summary.referrals:[];
+ if(!rows.length){const empty=document.createElement('div');empty.className='wallet-empty';const icon=document.createElement('span');icon.className='wallet-empty-icon';icon.textContent='✦';const copy=document.createElement('span');copy.textContent='No successful referrals yet. Share your link to invite your first player.';empty.append(icon,copy);host.append(empty);}
+ else rows.forEach(row=>{const item=document.createElement('div');item.className='referral-history-row';const detail=document.createElement('div');const name=document.createElement('strong');name.textContent=row.display_name||row.username||'CHOME Player';const meta=document.createElement('small');meta.textContent='Joined '+new Date(row.created_at).toLocaleDateString();detail.append(name,meta);const reward=document.createElement('em');reward.textContent=row.status==='rewarded'?'+'+fmtLedger(row.reward_points)+' CHOX':'AWAITING VERIFICATION';if(row.status!=='rewarded')reward.style.color='#f2d69a';item.append(detail,reward);host.append(item);});
+ status.textContent='Your personal invitation link is ready to share.';
+}
+async function copyReferralValue(id){
+ const value=$(id).value;if(!value)return;
+ try{await navigator.clipboard.writeText(value);$('referralStatus').textContent='Copied to clipboard.';}
+ catch{$(id).focus();$(id).select();$('referralStatus').textContent='Select and copy the highlighted text.';}
+}
+$('copyReferralCode').addEventListener('click',()=>copyReferralValue('myReferralCode'));
+$('copyReferralLink').addEventListener('click',()=>copyReferralValue('myReferralLink'));
 
-</section>
-<section class="payout-section" id="payouts" hidden aria-labelledby="payoutHeading">
-  <div class="section-head"><div><div class="eyebrow">Player cash-out setup</div><h2 id="payoutHeading">USDT PAYOUTS</h2></div><div class="eyebrow">TRON · TRC20</div></div>
-  <div class="payout-panel">
-    <div class="payout-banner" id="payoutAvailability">Cash payouts are not open yet. You can save your receiving address now; your CHOX stays in your rewards wallet until the payout programme is approved and activated.</div>
-    <div class="payout-grid">
-      <div class="payout-card">
-        <h3>YOUR USDT RECEIVING ADDRESS</h3>
-        <p>Enter a TRON address that you control and can receive USDT TRC20. This is a receiving address only. Never send funds to it from CHOME.</p>
-        <form id="payoutAddressForm">
-          <label class="payout-field"><span>TRON (TRC20) address</span><input id="payoutAddress" type="text" maxlength="34" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="T..." required></label>
-          <button class="payout-button" id="savePayoutAddress" type="submit">SAVE RECEIVING ADDRESS</button>
-        </form>
-        <div class="payout-message" id="payoutAddressMessage" role="status" aria-live="polite"></div>
-      </div>
-      <div class="payout-card">
-        <h3>CHOX REDEMPTION</h3>
-        <p id="payoutRateText">Planning conversion rate: loading…</p>
-        <form id="payoutRequestForm">
-          <label class="payout-field"><span>CHOX amount to redeem</span><input id="payoutPoints" type="number" min="1" step="1" inputmode="numeric" placeholder="100000" required></label>
-          <p id="payoutEstimate">Estimated value: — USDT</p>
-          <button class="payout-button" id="requestPayout" type="submit" disabled>USDT PAYOUTS NOT OPEN</button>
-        </form>
-        <div class="payout-message" id="payoutRequestMessage" role="status" aria-live="polite"></div>
-      </div>
-    </div>
-    <div class="payout-history">
-      <div class="wallet-activity-head"><h3>YOUR PAYOUT HISTORY</h3><span>LAST 50 REQUESTS</span></div>
-      <div id="payoutHistory"><div class="wallet-empty"><span class="wallet-empty-icon">↗</span><span>No payout requests yet.</span></div></div>
-    </div>
-    <p class="wallet-note">A saved address is not proof of ownership. Double-check the full address and network. Cash redemption remains disabled until CHOME completes score-integrity checks, legal review, treasury funding and end-to-end payout testing.</p>
-  </div>
-</section>
+function payoutMessage(id,text){
+ const el=$(id);el.textContent=text;el.classList.add('show');
+}
+function payoutBusy(button,on,label){button.disabled=on;button.textContent=on?'PLEASE WAIT…':label;}
+function renderPayoutHistory(rows){
+ const host=$('payoutHistory');host.replaceChildren();
+ if(!rows||!rows.length){
+  const empty=document.createElement('div');empty.className='wallet-empty';
+  const icon=document.createElement('span');icon.className='wallet-empty-icon';icon.textContent='↗';
+  const text=document.createElement('span');text.textContent='No payout requests yet.';
+  empty.append(icon,text);host.append(empty);return;
+ }
+ rows.forEach(row=>{
+  const item=document.createElement('div');item.className='payout-row';
+  const details=document.createElement('div');
+  const amount=document.createElement('strong');amount.textContent=Number(row.usd_amount).toFixed(2)+' USDT · '+Number(row.points_amount).toLocaleString()+' CHOX';
+  const meta=document.createElement('small');meta.textContent=new Date(row.created_at).toLocaleString()+' · '+row.network+' · '+row.destination_address;
+  details.append(amount,meta);
+  if(row.tx_hash){const link=document.createElement('a');link.href='https://tronscan.org/#/transaction/'+encodeURIComponent(row.tx_hash);link.target='_blank';link.rel='noopener noreferrer';link.textContent='View transaction';link.style.display='inline-block';link.style.marginTop='5px';link.style.fontSize='10px';link.style.color='#b9aaff';details.append(link);}
+  if(row.admin_note){const note=document.createElement('small');note.textContent='Note: '+row.admin_note;details.append(note);}
+  const status=document.createElement('span');status.className='payout-status '+row.status;status.textContent=row.status;
+  item.append(details,status);host.append(item);
+ });
+}
+function updatePayoutEstimate(){
+ const points=Number($('payoutPoints').value||0);
+ const rate=Number(payoutConfig.points_per_usd||20000);
+ $('payoutEstimate').textContent='Estimated value: '+(points>0&&rate>0?(points/rate).toFixed(2):'—')+' USDT · available CHOX: '+currentWalletBalance.toLocaleString();
+}
+async function loadPayoutPanel(){
+ const [configResult,addressResult,historyResult]=await Promise.all([
+  supabase.rpc('get_my_usdt_payout_config'),
+  supabase.rpc('get_my_usdt_payout_address'),
+  supabase.rpc('get_my_usdt_payout_requests')
+ ]);
+ if(configResult.error){$('payoutAvailability').textContent='Payout setup is temporarily unavailable. Please try again later.';console.error(configResult.error);return;}
+ const config=Array.isArray(configResult.data)?configResult.data[0]:configResult.data;
+ if(config){
+  payoutConfig={payouts_enabled:config.payouts_enabled===true,points_per_usd:Number(config.points_per_usd||20000),minimum_redemption_points:Number(config.minimum_redemption_points||0)};
+ }
+ $('payoutRateText').textContent='Planning rate: '+Number(payoutConfig.points_per_usd).toLocaleString()+' CHOX = 1.00 USDT. The displayed value is indicative; payouts are not guaranteed until the programme opens.';
+ $('payoutAvailability').textContent=payoutConfig.payouts_enabled
+  ?'Payout requests are open. Requests are reviewed before USDT is sent; submission does not mean payment is complete.'
+  :'Cash payouts are not open yet. You can save your receiving address now; your CHOX stays in your rewards wallet until the payout programme is approved and activated.';
+ $('requestPayout').disabled=!payoutConfig.payouts_enabled;
+ $('requestPayout').textContent=payoutConfig.payouts_enabled?'REQUEST USDT PAYOUT':'USDT PAYOUTS NOT OPEN';
+ const address=Array.isArray(addressResult.data)?addressResult.data[0]:addressResult.data;
+ if(address?.address)$('payoutAddress').value=address.address;
+ if(addressResult.error)console.error('Payout address:',addressResult.error);
+ if(historyResult.error)console.error('Payout history:',historyResult.error);
+ const payoutRows=historyResult.error?[]:(historyResult.data||[]);
+ renderPayoutHistory(payoutRows);
+ const pendingChox=payoutRows.filter(row=>['pending','approved','processing'].includes(String(row.status||'').toLowerCase())).reduce((sum,row)=>sum+Number(row.points_amount||0),0);
+ const paidUsd=payoutRows.filter(row=>['completed','paid'].includes(String(row.status||'').toLowerCase())).reduce((sum,row)=>sum+Number(row.usd_amount||0),0);
+ $('walletPending').textContent=fmtLedger(pendingChox)+' CHOX';
+ $('walletPaid').textContent='$'+paidUsd.toFixed(2)+' USDT';
+}
+async function signOut(){
+ const {error}=await supabase.auth.signOut();
+ if(error)message(friendly(error));
+ else window.location.replace('index.html');
+}
+$('menuSignOut').addEventListener('click',signOut);
+const profileOverlay=$('profileOverlay'),profileShortcut=$('profileShortcut');
+function setProfileOpen(open){profileOverlay.classList.toggle('open',open);profileOverlay.setAttribute('aria-hidden',String(!open));profileShortcut.setAttribute('aria-expanded',String(open));if(open){$('closeProfile').focus();showPlayerView('overview')}else profileShortcut.focus()}
+profileShortcut.addEventListener('click',()=>setProfileOpen(true));
+$('closeProfile').addEventListener('click',()=>setProfileOpen(false));
+profileOverlay.addEventListener('click',event=>{if(event.target===profileOverlay)setProfileOpen(false)});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&profileOverlay.classList.contains('open'))setProfileOpen(false)});
+
+// Keep payout details inside the dedicated Payout Centre view.
+const overviewNav=$('overviewNavLink'),gamesNav=$('gamesNavLink'),walletNav=$('walletNavLink'),payoutNav=$('payoutNavLink'),competitionsNav=$('competitionsNavLink'),rewardsNav=$('rewardsNavLink'),referralNav=$('referralNavLink'),helpNav=$('helpNavLink');
+const overviewWelcome=$('overviewWelcome'),walletSection=$('walletSection'),gamesSection=$('gamesSection'),payoutSection=$('payouts'),leaderboardSection=$('leaderboardSection'),referralSection=$('referrals'),rewardsSection=$('rewardsCentre'),helpSection=$('helpSupport');
+let payoutPanelLoaded=false,referralPanelLoaded=false;
+function showPlayerView(view){
+ const payout=view==='payouts',wallet=view==='wallet',games=view==='games',competitions=view==='competitions',rewards=view==='rewards',referrals=view==='referrals',help=view==='help',overview=view==='overview';
+ overviewWelcome.hidden=!overview;$('overviewWalletSummary').hidden=!overview;walletSection.hidden=!wallet;gamesSection.hidden=!(overview||games);payoutSection.hidden=!payout;leaderboardSection.hidden=!competitions;referralSection.hidden=!referrals;rewardsSection.hidden=!rewards;helpSection.hidden=!help;
+ overviewNav?.classList.toggle('active',overview);gamesNav?.classList.toggle('active',games);walletNav?.classList.toggle('active',wallet);payoutNav?.classList.toggle('active',payout);competitionsNav?.classList.toggle('active',competitions);rewardsNav?.classList.toggle('active',rewards);referralNav?.classList.toggle('active',referrals);helpNav?.classList.toggle('active',help);
+ const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':wallet?'CHOX WALLET':games?'GAMES':competitions?'COMPETITIONS':rewards?'REWARDS CENTRE':referrals?'REFERRALS':help?'HELP & SUPPORT':'DASHBOARD';
+ if((payout||wallet)&&!payoutPanelLoaded){payoutPanelLoaded=true;loadPayoutPanel();}
+ if(referrals&&!referralPanelLoaded){referralPanelLoaded=true;loadReferralPanel();}
+ window.scrollTo({top:0,behavior:'smooth'});
+ setSidebarOpen(false);
+}
+overviewNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('overview')});
+gamesNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('games')});
+walletNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('wallet')});
+payoutNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('payouts')});
+competitionsNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('competitions')});
+rewardsNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('rewards')});
+referralNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('referrals')});
+helpNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('help')});
+
+// Responsive player sidebar navigation
+const sidebar=$('playerSidebar'),sidebarToggle=$('sidebarToggle'),sidebarScrim=$('sidebarScrim');
+function setSidebarOpen(open){sidebar?.classList.toggle('open',open);sidebarScrim?.classList.toggle('open',open);sidebarToggle?.setAttribute('aria-expanded',String(open));}
+sidebarToggle?.addEventListener('click',()=>setSidebarOpen(!sidebar.classList.contains('open')));
+sidebarScrim?.addEventListener('click',()=>setSidebarOpen(false));
+sidebar?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setSidebarOpen(false)));
+document.addEventListener('keydown',event=>{if(event.key==='Escape')setSidebarOpen(false)});
+$('sidebarProfileLink')?.addEventListener('click',event=>{event.preventDefault();setSidebarOpen(false);setProfileOpen(true)});
+
+supabase.auth.onAuthStateChange((event,session)=>{
+ if(event==='SIGNED_OUT')window.location.replace('index.html');
+});
+const {data:{session}}=await supabase.auth.getSession();
+if(!session?.user)window.location.replace('player.html?notice=signin');
+else{await loadProfile(session.user);const [walletSetup,pointsWalletSetup]=await Promise.all([rewardsRpc('ensure_my_rewards_wallet'),rewardsRpc('ensure_my_game_points_wallet')]);if(walletSetup.error)console.error('CHOX wallet setup:',walletSetup.error);if(pointsWalletSetup.error)console.error('Game Points wallet setup:',pointsWalletSetup.error);await Promise.all([loadRewardsWallet(),loadRewardsActivity(),loadGamePointsWallet(),loadGamePointsActivity()]);const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
+$('overviewOpenWallet')?.addEventListener('click',()=>showPlayerView('wallet'));
+$('overviewOpenPointsWallet')?.addEventListener('click',()=>showPlayerView('rewards'));
+$('refreshRewardsCentre')?.addEventListener('click',()=>refreshRewardsWallet(false));
+$('refreshWallet')?.addEventListener('click',()=>refreshRewardsWallet(false));
+document.querySelectorAll('.activity-toggle').forEach(button=>button.addEventListener('click',()=>toggleActivity(button)));
+// Refresh after returning from a game or restoring this page from the browser cache.
+window.addEventListener('pageshow',()=>{if(document.visibilityState==='visible')refreshRewardsWallet(true);});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshRewardsWallet(true);});
+
+$('payoutPoints').addEventListener('input',updatePayoutEstimate);
+$('payoutAddressForm').addEventListener('submit',async event=>{
+ event.preventDefault();
+ const address=$('payoutAddress').value.trim();
+ if(!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address)){
+  payoutMessage('payoutAddressMessage','Enter a valid 34-character TRON address. Confirm that it can receive USDT TRC20.');return;
+ }
+ const button=$('savePayoutAddress');payoutBusy(button,true,'SAVE RECEIVING ADDRESS');
+ const {data,error}=await supabase.rpc('save_my_usdt_payout_address',{p_address:address});
+ payoutBusy(button,false,'SAVE RECEIVING ADDRESS');
+ if(error){payoutMessage('payoutAddressMessage',friendly(error));return;}
+ $('payoutAddress').value=(Array.isArray(data)?data[0]?.address:'')||address;
+ payoutMessage('payoutAddressMessage','Your TRON receiving address has been saved. Please double-check it before any future payout.');
+});
+$('payoutRequestForm').addEventListener('submit',async event=>{
+ event.preventDefault();
+ const points=Number($('payoutPoints').value);
+ if(!payoutConfig.payouts_enabled){payoutMessage('payoutRequestMessage','USDT payouts are not open yet. Your CHOX remains in your rewards wallet.');return;}
+ if(!Number.isSafeInteger(points)||points<=0){payoutMessage('payoutRequestMessage','Enter a whole-number CHOX amount.');return;}
+ if(points>currentWalletBalance){payoutMessage('payoutRequestMessage','You do not have enough available CHOX.');return;}
+ const button=$('requestPayout');payoutBusy(button,true,'REQUEST USDT PAYOUT');
+ const {data,error}=await supabase.rpc('request_usdt_payout',{p_points:points});
+ payoutBusy(button,false,'REQUEST USDT PAYOUT');
+ if(error){payoutMessage('payoutRequestMessage',friendly(error));return;}
+ const request=Array.isArray(data)?data[0]:data;
+ payoutMessage('payoutRequestMessage','Your request '+(request?.request_id||'')+' has been recorded as pending. USDT has not been sent yet.');
+ $('payoutPoints').value='';
+ await loadRewardsWallet();await loadPayoutPanel();
+});
+
+</script>
+</body>
+</html>
 
 
-<section class="leaderboard-section" id="leaderboardSection" hidden aria-labelledby="leaderboardHeading"><div class="section-head"><div><div class="eyebrow">CHOME PLAYER COMMUNITY</div><h2 id="leaderboardHeading">LEADERBOARDS</h2></div></div><div class="leaderboard-frame-wrap"><iframe class="leaderboard-frame" src="leaderboards.html?embed=1" title="CHOME player leaderboards" loading="lazy"></iframe></div></section>
-
-<section class="referral-section" id="referrals" hidden aria-labelledby="referralHeading">
- <div class="section-head"><div><div class="eyebrow">Grow the CHOME player community</div><h2 id="referralHeading">REFERRAL CENTRE</h2></div><div class="eyebrow">INVITE · PLAY · EARN</div></div>
+<section class="referral-section" id="helpSupport" hidden aria-labelledby="helpHeading">
+ <div class="section-head"><div><div class="eyebrow">We are here to help</div><h2 id="helpHeading">HELP &amp; SUPPORT</h2></div></div>
  <div class="referral-panel">
-  <div class="referral-hero"><div><div class="referral-kicker">YOUR INVITATION REWARD</div><div class="referral-reward">100,000 <span>CHOX</span></div><p>Earn 100,000 CHOX when a friend joins CHOME through your link, verifies their email and signs in for the first time.</p></div><div class="referral-medal">✦</div></div>
-  <div class="referral-share-grid">
-   <div class="referral-share-card"><label for="myReferralCode">YOUR REFERRAL CODE</label><div class="referral-copy-row"><input id="myReferralCode" readonly value="Loading…" aria-label="Your referral code"><button type="button" id="copyReferralCode" class="referral-copy">COPY CODE</button></div></div>
-   <div class="referral-share-card"><label for="myReferralLink">YOUR INVITATION LINK</label><div class="referral-copy-row"><input id="myReferralLink" readonly value="Loading…" aria-label="Your invitation link"><button type="button" id="copyReferralLink" class="referral-copy">COPY LINK</button></div></div>
-  </div>
-  <div class="referral-stats">
-   <div class="referral-stat"><small>TOTAL INVITED</small><strong id="referralCount">0</strong></div>
-   <div class="referral-stat"><small>AWAITING VERIFICATION</small><strong id="referralPending">0</strong></div>
-   <div class="referral-stat"><small>SUCCESSFUL</small><strong id="referralSuccessful">0</strong></div>
-   <div class="referral-stat"><small>CHOX REWARDED</small><strong id="referralEarned">0</strong></div>
-  </div>
-  <div class="referral-history"><div class="wallet-activity-head"><h3>YOUR INVITED PLAYERS</h3><span>REFERRAL HISTORY</span></div><div id="referralHistoryList"><div class="wallet-empty"><span class="wallet-empty-icon">✦</span><span>No successful referrals yet. Share your link to invite your first player.</span></div></div></div>
-  <div class="referral-status" id="referralStatus" role="status" aria-live="polite">Your personal referral code is being prepared.</div>
-  <p class="referral-terms">A referral is rewarded once per new player after email verification and first sign-in. Self-referrals and repeat claims are blocked. Rewards are credited as CHOX, not directly as USDT.</p>
+  <div class="referral-share-card" style="margin-bottom:14px"><h3>ACCOUNT &amp; WALLET HELP</h3><p>For account access, missing rewards, Game Points, CHOX balances or payout questions, include your CHOME username and a clear description of the issue.</p></div>
+  <div class="wallet-empty"><span class="wallet-empty-icon">✉</span><span>Direct support contact details will be published here once the official CHOME support channel is ready. Please do not share your password or private wallet recovery phrase with anyone.</span></div>
  </div>
 </section>
 
