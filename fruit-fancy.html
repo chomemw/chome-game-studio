@@ -73,7 +73,7 @@ const supabase = createClient("https://zbumbbzvrjqjgroxzixg.supabase.co", "sb_pu
 const N=6,FRUITS=[['apple','🍎','#ff4d4d'],['banana','🍌','#ffeb3b'],['grape','🍇','#ab47bc'],['orange','🍊','#ffa726'],['strawberry','🍓','#e91e63'],['watermelon','🍉','#66bb6a'],['cherry','🍒','#d81b60']].map(([type,emoji,color])=>({type,emoji,color}));
 const LEVELS=[{target:400,ice:0,bombs:0},{target:700,ice:3,bombs:0},{target:1100,ice:4,bombs:2},{target:1600,ice:6,bombs:3},{target:2200,ice:8,bombs:4}];
 let level=0,score=0,target=400,moves=0,board=[],path=[],dragging=false,busy=false,sound=true,audio=null,particles=[],boardScanTimer=null;
-let currentPlayer=null,saveChain=Promise.resolve(),initialized=false,scoreSubmittedForRun=false,activeGameSessionId=null;
+let currentPlayer=null,saveChain=Promise.resolve(),initialized=false,scoreSubmittedForRun=false,activeGameSessionId=null,gameSessionRequest=0;
 let extraTimeUsed=0,halfwayClaimedThisRun=false,gameMenuPaused=false;
 const LEVEL_DURATION=120;let timeLeft=LEVEL_DURATION,levelDeadline=0,timerId=null;
 function setCloudStatus(text){const el=document.getElementById("cloudSaveMessage");if(el)el.textContent=text;const suffix=document.getElementById("cloudSaveGuestSuffix");if(suffix)suffix.style.display=currentPlayer?"none":"inline";}
@@ -84,15 +84,18 @@ async function claimChox(stage){
  setChoxStatus("CHOX rewards are paused until the full gameplay reward checks are completed. Your game progress still saves.");
 }
 async function beginVerifiedRun(){
+ const requestId=++gameSessionRequest;
  activeGameSessionId=null;
  if(!currentPlayer)return;
  try{
   const {data,error}=await supabase.functions.invoke("game-session",{body:{action:"start",game_id:"fruit-fancy",level:level+1}});
+  if(requestId!==gameSessionRequest)return;
   if(error)throw error;
   if(!data?.ok||!data.session_id)throw new Error(data?.error||"Could not start a verified game session.");
   activeGameSessionId=data.session_id;
   setLeaderboardStatus("Verified run started. Complete this level to submit your score.");
  }catch(error){
+  if(requestId!==gameSessionRequest)return;
   console.error("Fruit Fancy verified session could not start:",error);
   setLeaderboardStatus("Verified score submission is temporarily unavailable. Your game progress still saves.");
  }
@@ -156,6 +159,7 @@ async function refreshPlayerSession(){
  const next=data.session?.user||null;
  if(next?.id!==currentPlayer?.id){
   currentPlayer=next;
+  gameSessionRequest++;
   activeGameSessionId=null;
   if(next){
    setChoxStatus("CHOX rewards are paused until the full gameplay reward checks are completed.");
