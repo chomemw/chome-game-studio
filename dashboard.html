@@ -391,7 +391,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
  </div>
 </section>
 
-<section class="games-section" id="gamesSection">
+<section class="games-section" id="gamesSection" hidden>
 <div class="section-head"><div><div class="eyebrow">Choose your next adventure</div><h2>YOUR GAMES</h2></div><div class="eyebrow">ONE PLAYER ID · MANY WORLDS</div></div>
 <div class="games" id="games">
 <a class="game-card" href="fruit-fancy.html"><div class="game-icon">🍓</div><small>PLAY NOW · CLOUD SAVES</small><h3>Fruit Fancy</h3><p>Continue your puzzle adventure. Your progress syncs when you play while signed in.</p></a>
@@ -619,7 +619,7 @@ const overviewWelcome=$('overviewWelcome'),walletSection=$('walletSection'),game
 let payoutPanelLoaded=false,referralPanelLoaded=false;
 function showPlayerView(view){
  const payout=view==='payouts',wallet=view==='wallet',games=view==='games',competitions=view==='competitions',rewards=view==='rewards',referrals=view==='referrals',help=view==='help',overview=view==='overview';
- overviewWelcome.hidden=!overview;$('overviewWalletSummary').hidden=!overview;walletSection.hidden=!wallet;gamesSection.hidden=!(overview||games);payoutSection.hidden=!payout;leaderboardSection.hidden=!competitions;referralSection.hidden=!referrals;rewardsSection.hidden=!rewards;helpSection.hidden=!help;
+ overviewWelcome.hidden=!overview;$('overviewWalletSummary').hidden=!overview;walletSection.hidden=!wallet;gamesSection.hidden=!games;payoutSection.hidden=!payout;leaderboardSection.hidden=!competitions;referralSection.hidden=!referrals;rewardsSection.hidden=!rewards;helpSection.hidden=!help;
  overviewNav?.classList.toggle('active',overview);gamesNav?.classList.toggle('active',games);walletNav?.classList.toggle('active',wallet);payoutNav?.classList.toggle('active',payout);competitionsNav?.classList.toggle('active',competitions);rewardsNav?.classList.toggle('active',rewards);referralNav?.classList.toggle('active',referrals);helpNav?.classList.toggle('active',help);
  const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':wallet?'CHOX WALLET':games?'GAMES':competitions?'COMPETITIONS':rewards?'REWARDS CENTRE':referrals?'REFERRALS':help?'HELP & SUPPORT':'DASHBOARD';
  if((payout||wallet)&&!payoutPanelLoaded){payoutPanelLoaded=true;loadPayoutPanel();}
