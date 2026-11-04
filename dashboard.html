@@ -139,6 +139,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 .welcome-action span{font-size:18px}
 
 .overview-wallet-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:0 0 30px}
+.announcement-panel{margin:0 0 30px;padding:20px 22px;border:1px solid #ffffff1c;border-radius:18px;background:linear-gradient(135deg,#151f34,#101827)}.announcement-panel h2{margin:6px 0 14px;font-size:19px}.announcement-list{display:grid;gap:10px}.announcement-item{padding:13px 14px;border:1px solid #ffffff14;border-radius:12px;background:#ffffff06}.announcement-item strong{display:block;font-size:13px;margin-bottom:5px}.announcement-item p{margin:0;color:#aebbd0;font-size:12px;line-height:1.65;white-space:pre-wrap}.announcement-date{display:block;margin-top:8px;color:#8290a8;font-size:10px}.announcement-empty{color:#91a0b8;font-size:12px}
 .overview-wallet-card{min-width:0;padding:20px 22px;border:1px solid #b9aaff42;border-radius:18px;background:radial-gradient(circle at 90% 0%,#a98bff20,transparent 38%),linear-gradient(135deg,#211d3c,#111a2c);box-shadow:0 16px 40px #0003}
 .overview-points-card{border-color:#62d7bd50;background:radial-gradient(circle at 90% 0%,#4ac7a326,transparent 38%),linear-gradient(135deg,#102d31,#101b2a)}
 .overview-wallet-card-top,.overview-wallet-footer{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -267,6 +268,7 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
  </div>
  <div class="overview-wallet-loading" id="overviewWalletStatus" role="status" aria-live="polite">Connecting your balances…</div>
 </section>
+<section class="announcement-panel" id="whatsNewPanel"><div class="eyebrow">STUDIO UPDATES</div><h2>What’s New at CHOME</h2><div class="announcement-list" id="announcementList"><div class="announcement-empty">Loading studio updates…</div></div></section>
 <div class="profile-overlay" id="profileOverlay" aria-hidden="true"><section class="panel profile-panel" id="profile" role="dialog" aria-modal="true" aria-labelledby="profileDisplayHeading"><button class="profile-close" id="closeProfile" type="button" aria-label="Close profile">×</button>
 <div class="profile-head"><div class="avatar" id="avatarPreview">🎮</div><div><div class="eyebrow">PLAYER PROFILE</div><h2 id="profileDisplayHeading">Loading profile…</h2><div class="handle" id="profileHandle">@player</div></div></div>
 <p class="sub">Your player identity is shared across CHOME Game Studio.</p><div class="account-meta"><span>ACCOUNT EMAIL</span><strong id="accountEmail">Loading…</strong></div>
@@ -424,6 +426,7 @@ box.innerHTML='';mini.innerHTML='';
  if(url){const img=document.createElement('img');img.src=url;img.alt='Player avatar';box.append(img);const small=document.createElement('img');small.src=url;small.alt='';mini.append(small)}
  else {const initial=(name||'🎮').trim().charAt(0).toUpperCase()||'🎮';box.textContent=initial;mini.textContent=initial}
 }
+async function loadAnnouncements(){const host=$('announcementList');if(!host)return;const{data,error}=await supabase.rpc('get_chome_announcements');host.replaceChildren();if(error){const p=document.createElement('div');p.className='announcement-empty';p.textContent='Studio updates are temporarily unavailable.';host.append(p);return;}if(!data?.length){const p=document.createElement('div');p.className='announcement-empty';p.textContent='No new announcements right now. Check back soon.';host.append(p);return;}data.forEach(item=>{const card=document.createElement('article');card.className='announcement-item';const title=document.createElement('strong');title.textContent=item.title;const body=document.createElement('p');body.textContent=item.body;const date=document.createElement('span');date.className='announcement-date';date.textContent=item.published_at?new Date(item.published_at).toLocaleString():'';card.append(title,body,date);host.append(card);});}
 async function loadProfile(user){
  currentUser=user;$('accountEmail').textContent=user.email||'Not available';
  const {data,error}=await supabase.from('profiles').select('id,username,display_name,avatar_url,bio').eq('id',user.id).single();
@@ -650,7 +653,7 @@ supabase.auth.onAuthStateChange((event,session)=>{
 });
 const {data:{session}}=await supabase.auth.getSession();
 if(!session?.user)window.location.replace('player.html?notice=signin');
-else{await loadProfile(session.user);const [walletSetup,pointsWalletSetup]=await Promise.all([rewardsRpc('ensure_my_rewards_wallet'),rewardsRpc('ensure_my_game_points_wallet')]);if(walletSetup.error)console.error('CHOX wallet setup:',walletSetup.error);if(pointsWalletSetup.error)console.error('Game Points wallet setup:',pointsWalletSetup.error);await Promise.all([loadRewardsWallet(),loadRewardsActivity(),loadGamePointsWallet(),loadGamePointsActivity()]);const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
+else{await loadProfile(session.user);await loadAnnouncements();const [walletSetup,pointsWalletSetup]=await Promise.all([rewardsRpc('ensure_my_rewards_wallet'),rewardsRpc('ensure_my_game_points_wallet')]);if(walletSetup.error)console.error('CHOX wallet setup:',walletSetup.error);if(pointsWalletSetup.error)console.error('Game Points wallet setup:',pointsWalletSetup.error);await Promise.all([loadRewardsWallet(),loadRewardsActivity(),loadGamePointsWallet(),loadGamePointsActivity()]);const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
 $('overviewOpenWallet')?.addEventListener('click',()=>showPlayerView('wallet'));
 $('overviewOpenPointsWallet')?.addEventListener('click',()=>showPlayerView('rewards'));
 $('refreshRewardsCentre')?.addEventListener('click',()=>refreshRewardsWallet(false));
