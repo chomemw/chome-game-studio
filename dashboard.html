@@ -253,6 +253,128 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 
 .overview-mission-card{display:flex;align-items:center;gap:16px;margin:16px 0 22px;padding:20px 22px;border:1px solid #a895ff44;border-radius:17px;background:linear-gradient(110deg,#29214b 0%,#141e32 65%,#101827 100%)}.overview-mission-icon{width:48px;height:48px;flex:none;display:grid;place-items:center;border-radius:14px;background:#a895ff22;font-size:24px}.overview-mission-copy{min-width:0;flex:1}.overview-mission-copy h2{margin:5px 0;font-size:17px;letter-spacing:-.04em}.overview-mission-copy p{margin:0;color:#aab6ca;font-size:11px;line-height:1.6}.overview-mission-button{flex:none;padding:12px 15px;border:1px solid #b8a8ff66;border-radius:10px;background:#8b6cff;color:#fff;font-size:10px;font-weight:950;letter-spacing:.06em;cursor:pointer}.overview-mission-button:hover{filter:brightness(1.12)}@media(max-width:650px){.overview-mission-card{align-items:flex-start;flex-wrap:wrap;padding:17px}.overview-mission-copy{flex:1 1 calc(100% - 70px)}.overview-mission-button{margin-left:64px}}
 
+
+/* CHOME dashboard design system: readable type, consistent contrast and reward colors */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{
+  --bg:#090d18;--line:#ffffff20;--muted:#aebbd0;--purple:#8b6cff;--white:#f4f5fa;
+  --chome-sidebar:#0d1628;--chome-panel:#151f35;--chome-accent:#8b6cff;
+  --chome-text:#f4f5fa;--chome-muted:#aebbd0;--chome-gold:#e4b85c;
+  --chome-teal:#62d7bd;--chome-success:#5bd69a;--chome-warning:#f2d69a;--chome-danger:#ff8585;
+}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--chome-text);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1,h2,h3,h4,.topbar-title strong,.sidebar-brand{font-family:"Space Grotesk",Inter,ui-sans-serif,system-ui,sans-serif}
+p{line-height:1.7}
+.player-sidebar{background:linear-gradient(180deg,#0d1628 0%,#090f1c 100%)}
+.sidebar-section-label{font-size:11px;letter-spacing:.14em;color:#91a0b8}
+.sidebar-nav a,.sidebar-bottom a,.sidebar-bottom button{font-size:13px;font-weight:650;min-height:46px;color:#bdc8da}
+.sidebar-nav a.active{color:#f1edff}
+.sidebar-bottom small{font-size:10px;color:#8390a8}
+.dashboard-topbar{background:#0b1221ed}
+.topbar-title .eyebrow{font-size:10px;letter-spacing:.14em;color:#aebbd0}
+.topbar-title strong{font-size:15px;letter-spacing:.04em}
+.welcome-panel h1{font-size:clamp(32px,4vw,44px);line-height:1.08;letter-spacing:-.045em}
+.welcome-panel .eyebrow,.eyebrow{font-size:11px;letter-spacing:.15em}
+.welcome-panel p,.announcement-item p{font-size:14px;line-height:1.7}
+.welcome-action{font-size:12px;letter-spacing:.06em}
+.announcement-panel h2{font-size:21px}
+.announcement-item strong{font-size:15px}
+.announcement-date{font-size:12px;color:#9aa8bd}
+.overview-wallet-card{background:radial-gradient(circle at 90% 0%,#a98bff20,transparent 38%),linear-gradient(135deg,#211d3c,#111a2c);border-color:#b9aaff55}
+.overview-points-card{background:radial-gradient(circle at 90% 0%,#4ac7a326,transparent 38%),linear-gradient(135deg,#102d31,#101b2a);border-color:#62d7bd60}
+.overview-wallet-card-top{font-size:12px;letter-spacing:.13em}
+.overview-points-card .overview-wallet-card-top{color:#9ce9d9}
+.overview-wallet-amount strong{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:clamp(34px,4vw,44px);font-weight:700;line-height:1.12;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.overview-wallet-amount span{font-size:12px;letter-spacing:.09em}
+.overview-wallet-meta{font-size:13px;line-height:1.55;color:#bdc8da}
+.overview-wallet-footer{font-size:12px;line-height:1.5;color:#aebbd0}
+.overview-wallet-link{font-size:12px}
+.overview-wallet-loading{font-size:12px}
+.section-head h2{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:24px;letter-spacing:-.035em}
+.panel h2,.panel h3,.payout-panel h2,.payout-card h3{font-family:"Space Grotesk",Inter,system-ui,sans-serif}
+.panel p,.payout-card p,.sub{font-size:14px;line-height:1.7}
+.wallet-label,.referral-kicker{font-size:12px;letter-spacing:.14em}
+.wallet-live{font-size:10px;letter-spacing:.08em}
+.wallet-balance,.referral-reward{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.045em}
+.wallet-balance{font-size:clamp(38px,5vw,52px);line-height:1.08}
+.wallet-unit{font-size:14px;color:#f1d18b}
+.wallet-value{font-size:14px;line-height:1.55;color:#bdc8da}
+.wallet-stat small,.referral-stat small{font-size:11px;letter-spacing:.07em;line-height:1.5;color:#aebbd0}
+.wallet-stat strong,.referral-stat strong{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:25px;font-variant-numeric:tabular-nums}
+.wallet-note,.wallet-empty{font-size:13px;line-height:1.7}
+.wallet-activity h3{font-size:16px}
+.wallet-activity-head span{font-size:11px;letter-spacing:.07em}
+.wallet-ledger-row strong,.referral-history-row strong,.payout-row strong{font-size:14px}
+.wallet-ledger-row small,.referral-history-row small,.payout-row small{font-size:12px;line-height:1.5}
+.wallet-ledger-row b{font-size:13px;font-variant-numeric:tabular-nums}
+.wallet-ledger-row .positive,.payout-status.paid{color:#70e2a6}
+.wallet-ledger-row .negative,.payout-status.rejected{color:#ff9999}
+.payout-panel h2{font-size:22px}
+.payout-card h3{font-size:16px}
+.payout-card p{font-size:13px}
+.payout-field span,.field span,.referral-share-card label{font-size:12px;color:#d0d8e6}
+.payout-field input,.field input,.field textarea,.referral-copy-row input{font-size:14px;min-height:44px}
+.primary,.secondary,.payout-button{font-size:13px;min-height:44px}
+.payout-button{background:#8b6cff}
+.payout-banner{font-size:13px;line-height:1.65;color:#f2d69a}
+.payout-row strong{font-size:14px}
+.payout-status{font-size:10px;letter-spacing:.08em}
+.referral-hero p{font-size:14px;line-height:1.7}
+.referral-reward{font-size:clamp(36px,5vw,50px)}
+.referral-reward span{font-size:15px}
+.referral-share-card label{font-size:11px;letter-spacing:.1em}
+.referral-copy{font-size:11px;min-height:40px}
+.referral-stat strong{font-size:25px}
+.referral-history-row em{font-size:12px}
+.referral-status,.referral-terms{font-size:12px;line-height:1.65}
+.game-card small{font-size:11px}
+.game-card h3{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:20px}
+.game-card p{font-size:13px;line-height:1.65}
+.profile-head h2{font-size:24px}
+.handle{font-size:13px}
+.account-meta span{font-size:11px}
+.account-meta strong{font-size:13px}
+.message,.payout-message{font-size:13px;line-height:1.6}
+.profile-shortcut{font-size:12px}
+.profile-identity strong{font-size:12px}
+.profile-identity small{font-size:10px}
+.menu-toggle{font-size:13px}
+.menu-popover a,.menu-popover button{font-size:14px}
+footer{font-size:12px}
+:where(a,button,input,textarea,summary):focus-visible{outline:2px solid #b9aaff;outline-offset:3px}
+@media(max-width:760px){
+  .sidebar-nav a,.sidebar-bottom a,.sidebar-bottom button{font-size:14px}
+  .welcome-panel{padding:24px}
+  .welcome-panel h1{font-size:clamp(29px,7vw,36px)}
+  .overview-wallet-amount strong{font-size:clamp(32px,8vw,40px)}
+  .section-head h2{font-size:21px}
+  .game-card h3{font-size:18px}
+}
+@media(max-width:520px){
+  body{font-size:14px}
+  .dashboard-topbar{height:72px;padding:0 14px}
+  .topbar-title .eyebrow{font-size:9px}
+  .topbar-title strong{font-size:13px}
+  .dashboard-topbar .profile-shortcut{font-size:11px}
+  .welcome-panel{padding:20px 18px;gap:14px}
+  .welcome-panel h1{font-size:30px}
+  .welcome-action{font-size:11px;padding:12px 14px}
+  .overview-wallet-card{padding:18px}
+  .overview-wallet-amount strong{font-size:34px}
+  .overview-wallet-meta,.overview-wallet-footer{font-size:12px}
+  .wallet-balance{font-size:clamp(34px,10vw,44px)}
+  .wallet-unit{font-size:13px}
+  .wallet-stat small,.referral-stat small{font-size:10px}
+  .wallet-stat strong,.referral-stat strong{font-size:21px}
+  .wallet-note,.wallet-empty,.referral-hero p{font-size:12px}
+  .payout-field span,.field span{font-size:12px}
+  .payout-field input,.field input,.field textarea{font-size:16px}
+  .referral-reward{font-size:36px}
+  .referral-copy-row input{font-size:13px}
+  .game-card p{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
 </style>
 </head>
 <body>
