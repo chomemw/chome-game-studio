@@ -22,12 +22,12 @@ h1{font-size:clamp(38px,7vw,66px);line-height:.98;letter-spacing:-.075em;margin:
 .board-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
 .game-label{font-size:11px;letter-spacing:.12em;font-weight:900;color:#e8e2ff;background:#302858;border:1px solid #8b6cff55;border-radius:999px;padding:9px 13px}
 .refresh{border:1px solid var(--line);background:#ffffff0c;color:#fff;border-radius:10px;padding:9px 12px;font-weight:800;font-size:11px;cursor:pointer}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:5px;background:#090f1d;border:1px solid var(--line);border-radius:13px;margin-bottom:17px}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:5px;background:#090f1d;border:1px solid var(--line);border-radius:13px;margin-bottom:12px}.game-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}.period-tabs{max-width:440px}.tabs button{min-width:0}.my-position{margin:0 0 12px;padding:13px 15px;border:1px solid #9d87ff77;border-radius:12px;background:#211d3c;color:#e5ddff;font-size:12px;font-weight:950;letter-spacing:.06em}.table-head{display:grid;grid-template-columns:44px minmax(0,1fr) auto 56px;gap:12px;padding:0 13px 9px;color:#8491aa;font-size:9px;font-weight:950;letter-spacing:.12em}.player-cell{display:flex;align-items:center;gap:12px;min-width:0}.identity{min-width:0}.played{text-align:right;color:#d8deeb;font-size:12px;font-weight:850}
 .tabs button{border:0;border-radius:9px;background:transparent;color:#9ba8be;padding:12px 8px;font-size:12px;font-weight:900;cursor:pointer}
 .tabs button[aria-pressed="true"]{background:#8b6cff;color:#fff;box-shadow:0 7px 22px #8b6cff35}
 #status{color:#b7c0d1;font-size:12px;padding:12px 2px}
 #rows{display:grid;gap:9px}
-.player-row{display:grid;grid-template-columns:44px 46px minmax(0,1fr) auto;align-items:center;gap:12px;padding:13px;background:#0b1220;border:1px solid var(--line);border-radius:14px}
+.player-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto 56px;align-items:center;gap:12px;padding:13px;background:#0b1220;border:1px solid var(--line);border-radius:14px}
 .player-row.me{border-color:#9d87ff99;background:#211d3c}
 .rank{font-weight:950;color:#a9b4c7;text-align:center}.player-row:first-child .rank{color:var(--gold)}
 .avatar{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#302858;overflow:hidden;font-weight:900;color:#fff}
@@ -39,7 +39,7 @@ h1{font-size:clamp(38px,7vw,66px);line-height:.98;letter-spacing:-.075em;margin:
 .empty{padding:35px 16px;text-align:center;border:1px dashed #ffffff30;border-radius:15px;color:#aab4c9;font-size:13px;line-height:1.7}
 .empty strong{display:block;color:#fff;font-size:16px;margin-bottom:7px}
 footer{padding:24px 0 36px;color:#77839b;font-size:10px;display:flex;justify-content:space-between;gap:15px}
-@media(max-width:600px){.shell{width:calc(100% - 28px)}header{height:68px}nav{gap:12px;font-size:10px}main{padding:48px 0 65px}.board{padding:14px}.player-row{grid-template-columns:30px 40px minmax(0,1fr) auto;gap:8px;padding:10px}.avatar{width:38px;height:38px}.score{font-size:12px}.game-label{font-size:9px;padding:8px 9px}}
+@media(max-width:600px){.shell{width:calc(100% - 28px)}header{height:68px}nav{gap:12px;font-size:10px}main{padding:48px 0 65px}.board{padding:14px}.player-row{grid-template-columns:30px minmax(0,1fr) auto 38px;gap:8px;padding:10px}.table-head{grid-template-columns:30px minmax(0,1fr) auto 38px;gap:8px;padding-left:10px;padding-right:10px}.player-cell{gap:8px}.avatar{width:38px;height:38px}.score{font-size:12px}.game-label{font-size:9px;padding:8px 9px}.game-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.game-tabs button{font-size:10px;padding:10px 5px}.period-tabs button{font-size:10px;padding:10px 5px}.player-name{font-size:12px}.username{font-size:9px}}
 
 /* Embedded mode: render only the leaderboard panel inside the player dashboard. */
 body.embed-mode{background:#090f1d;min-height:0}
@@ -57,18 +57,26 @@ body.embed-mode .board{padding:18px;border-radius:14px;box-shadow:none;backgroun
 <main>
 <div class="eyebrow">CHOME PLAYER COMMUNITY</div>
 <h1>THE LEADERBOARDS.</h1>
-<p class="intro">See who's climbing the ranks in Fruit Fancy. Rankings are based on each player's highest level cleared, then their best score on that level. You can browse without signing in.</p>
-<section class="board" aria-label="Fruit Fancy leaderboard">
-<div class="board-head"><span class="game-label">🍓 FRUIT FANCY</span><button class="refresh" id="refresh" type="button">↻ REFRESH</button></div>
-<div class="tabs" role="group" aria-label="Leaderboard period">
-<button type="button" data-period="daily" aria-pressed="true">DAILY</button>
-<button type="button" data-period="weekly" aria-pressed="false">WEEKLY</button>
-<button type="button" data-period="all-time" aria-pressed="false">ALL-TIME</button>
+<p class="intro">See the top 100 players across CHOME and switch between separate game rankings. Scores come from verified game completions; your own rank is highlighted when you are signed in.</p>
+<section class="board" aria-label="CHOME global and game leaderboards">
+<div class="board-head"><span class="game-label" id="boardTitle">🌍 ALL GAMES · GLOBAL</span><button class="refresh" id="refresh" type="button">↻ REFRESH</button></div>
+<div class="tabs game-tabs" role="group" aria-label="Choose leaderboard">
+<button type="button" data-game="all" aria-pressed="true">GLOBAL</button>
+<button type="button" data-game="candy-trail" aria-pressed="false">CANDY TRAIL</button>
+<button type="button" data-game="fruit-fancy" aria-pressed="false">FRUIT FANCY</button>
+<button type="button" data-game="chome-blocks" aria-pressed="false">CHOME BLOCKS</button>
 </div>
+<div class="tabs period-tabs" role="group" aria-label="Leaderboard period">
+<button type="button" data-period="daily" aria-pressed="false">DAILY</button>
+<button type="button" data-period="weekly" aria-pressed="false">WEEKLY</button>
+<button type="button" data-period="all-time" aria-pressed="true">ALL-TIME</button>
+</div>
+<div class="my-position" id="myPosition" hidden></div>
 <div id="status" role="status" aria-live="polite">Loading rankings…</div>
+<div class="table-head"><span>RANK</span><span>PLAYER</span><span>SCORE</span><span>GAMES</span></div>
 <div id="rows"></div>
 </section>
-<p class="note">Daily covers the last 24 hours. Weekly covers the last 7 days. All-time never expires. Scores are added when a signed-in player clears a level.</p>
+<p class="note">Global ranking adds each player’s best verified score from each game; game-specific ranking uses highest level, then best score. Daily covers 24 hours, weekly covers 7 days, and all-time never expires. Games played counts verified completed results. Your own position is included even if you are outside the top 100.</p>
 </main>
 <footer><span>© <span id="year"></span> CHOME GAME STUDIO</span><span>WORLDS WORTH EXPLORING.</span></footer>
 </div>
@@ -77,46 +85,45 @@ body.embed-mode .board{padding:18px;border-radius:14px;box-shadow:none;backgroun
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const supabase=createClient("https://zbumbbzvrjqjgroxzixg.supabase.co","sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK");
 const $=id=>document.getElementById(id);
-let period="daily",currentUserId=null,requestNumber=0;
+let period="all-time",game="all",currentUserId=null,requestNumber=0;
+const gameNames={"all":"ALL GAMES · GLOBAL","candy-trail":"CANDY TRAIL","fruit-fancy":"FRUIT FANCY","chome-blocks":"CHOME BLOCKS"};
 $("year").textContent=new Date().getFullYear();
-function setPeriod(next){
- period=next;
- document.querySelectorAll("[data-period]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.period===period)));
- loadLeaderboard();
-}
+function setPeriod(next){period=next;document.querySelectorAll("[data-period]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.period===period)));loadLeaderboard();}
+function setGame(next){game=next;document.querySelectorAll("[data-game]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.game===game)));$("boardTitle").textContent=(game==="all"?"🌍 ":"🎮 ")+gameNames[game];loadLeaderboard();}
 function renderRows(rows){
  const root=$("rows");root.replaceChildren();
- if(!rows||!rows.length){
-  const empty=document.createElement("div");empty.className="empty";
-  const strong=document.createElement("strong");strong.textContent="No scores yet";
-  const copy=document.createElement("span");copy.textContent="Be the first player to clear a Fruit Fancy level and claim the top spot.";
-  empty.append(strong,copy);root.append(empty);return;
- }
+ if(!rows||!rows.length){const empty=document.createElement("div");empty.className="empty";const strong=document.createElement("strong");strong.textContent="No verified scores yet";const copy=document.createElement("span");copy.textContent="Complete a game and your verified result will appear here. Rankings are never filled with sample players.";empty.append(strong,copy);root.append(empty);return;}
  rows.forEach(row=>{
   const item=document.createElement("div");item.className="player-row"+(row.user_id===currentUserId?" me":"");
   const rank=document.createElement("div");rank.className="rank";rank.textContent=Number(row.rank)===1?"🥇 #1":Number(row.rank)===2?"🥈 #2":Number(row.rank)===3?"🥉 #3":"#"+row.rank;
   const avatar=document.createElement("div");avatar.className="avatar";
-  if(row.avatar_url){const img=document.createElement("img");img.src=row.avatar_url;img.alt="";img.onerror=()=>{avatar.textContent=(row.username||"P").slice(0,1).toUpperCase();};avatar.append(img);}
-  else avatar.textContent=(row.username||"P").slice(0,1).toUpperCase();
-  const identity=document.createElement("div");
+  if(row.avatar_url){const img=document.createElement("img");img.src=row.avatar_url;img.alt="";img.onerror=()=>{avatar.textContent=(row.username||"P").slice(0,1).toUpperCase();};avatar.append(img);}else avatar.textContent=(row.username||"P").slice(0,1).toUpperCase();
+  const identity=document.createElement("div");identity.className="identity";
   const name=document.createElement("div");name.className="player-name";name.textContent=row.display_name||row.username||"Player";
   const username=document.createElement("div");username.className="username";username.textContent="@"+(row.username||"player")+(row.user_id===currentUserId?" · YOU":"");
   identity.append(name,username);
-  const score=document.createElement("div");score.className="score";score.textContent=Number(row.best_score).toLocaleString()+" pts";
-  const detail=document.createElement("small");detail.textContent="LEVEL "+row.best_level;score.append(detail);
-  item.append(rank,avatar,identity,score);root.append(item);
+  const score=document.createElement("div");score.className="score";score.textContent=Number(row.score||0).toLocaleString()+" pts";
+  if(game!=="all"){const detail=document.createElement("small");detail.textContent="BEST LEVEL "+Number(row.best_level||0);score.append(detail);}
+  const played=document.createElement("div");played.className="played";played.textContent=Number(row.games_played||0).toLocaleString();
+  const playerCell=document.createElement("div");playerCell.className="player-cell";playerCell.append(avatar,identity);
+  item.append(rank,playerCell,score,played);root.append(item);
  });
+ const mine=rows.find(r=>r.user_id===currentUserId);
+ $("myPosition").hidden=!mine;
+ $("myPosition").textContent=mine?"YOUR POSITION  ·  #"+mine.rank+"  ·  "+Number(mine.score||0).toLocaleString()+" PTS":"";
 }
 async function loadLeaderboard(){
- const request=++requestNumber;$("status").textContent="Loading "+period.replace("-"," ")+" rankings…";
- $("rows").replaceChildren();
- const {data,error}=await supabase.rpc("get_game_leaderboard",{p_period:period,p_game_id:"fruit-fancy"});
+ const request=++requestNumber;$("status").textContent="Loading "+period.replace("-"," ")+" rankings…";$("rows").replaceChildren();$("myPosition").hidden=true;
+ const {data,error}=await supabase.rpc("get_global_game_leaderboard",{p_period:period,p_game_id:game});
  if(request!==requestNumber)return;
  if(error){console.error("Leaderboard load failed:",error);$("status").textContent="The leaderboard is temporarily unavailable. Please refresh in a moment.";return;}
  renderRows(data||[]);
- $("status").textContent=(data?.length||0)+" ranked player"+((data?.length||0)===1?"":"s")+" · "+(period==="daily"?"Last 24 hours":period==="weekly"?"Last 7 days":"All-time");
+ const count=(data||[]).filter(r=>Number(r.rank)<=100).length;
+ const hasMine=(data||[]).some(r=>r.user_id===currentUserId&&Number(r.rank)>100);
+ $("status").textContent=count+" of the top 100 ranked players"+(hasMine?" · Your position is shown separately":"")+" · "+(period==="daily"?"Last 24 hours":period==="weekly"?"Last 7 days":"All-time");
 }
-document.querySelectorAll("[data-period]").forEach(button=>button.addEventListener("click",()=>setPeriod(button.dataset.period)));
+document.querySelectorAll("[data-period]").forEach(b=>b.addEventListener("click",()=>setPeriod(b.dataset.period)));
+document.querySelectorAll("[data-game]").forEach(b=>b.addEventListener("click",()=>setGame(b.dataset.game)));
 $("refresh").addEventListener("click",loadLeaderboard);
 async function initialize(){const {data}=await supabase.auth.getSession();currentUserId=data.session?.user?.id||null;await loadLeaderboard();}
 initialize();
