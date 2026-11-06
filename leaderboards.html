@@ -70,6 +70,33 @@ body.embed-mode .board{padding:18px;border-radius:14px;box-shadow:none;backgroun
 .profile-best-score{font-size:20px;font-weight:950;color:#ffe08a;margin-top:7px;font-variant-numeric:tabular-nums}
 .profile-status{font-size:11px;color:#aab4c9;padding:10px 2px}
 @media(max-width:700px){.profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-grid .profile-stat:last-child{grid-column:span 2}.profile-bests{grid-template-columns:1fr}.profile-section{padding:14px}}
+
+/* CHOME competition navigation and section views */
+.competition-hero{margin:0 0 22px}
+.competition-hero h1{font-size:clamp(32px,6vw,52px)}
+.competition-nav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:22px 0 28px;padding:6px;background:#090f1d;border:1px solid var(--line);border-radius:16px;position:sticky;top:8px;z-index:8;backdrop-filter:blur(12px)}
+.competition-nav button{min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 8px;border:1px solid transparent;border-radius:11px;background:transparent;color:#aab4c9;font-size:10px;font-weight:950;letter-spacing:.04em;cursor:pointer}
+.competition-nav button[aria-pressed="true"]{background:#302858;border-color:#9d87ff77;color:#fff;box-shadow:0 7px 22px #8b6cff24}
+.competition-nav button span{font-size:15px}
+.competition-view-status{min-height:18px;margin:-14px 2px 18px;color:#9ba8be;font-size:10px}
+body[data-competition-view="live-events"] .profile-section,body[data-competition-view="live-events"] .board,
+body[data-competition-view="upcoming"] .daily-section,body[data-competition-view="upcoming"] .profile-section,body[data-competition-view="upcoming"] .board,
+body[data-competition-view="leaderboards"] .profile-section,
+body[data-competition-view="prizes"] .profile-section,body[data-competition-view="prizes"] .board,
+body[data-competition-view="my-record"] .daily-section,body[data-competition-view="my-record"] .weekly-section,body[data-competition-view="my-record"] .board{display:none}
+body[data-competition-view="live-events"] .weekly-card:not([data-view-status="live"]){display:none}
+body[data-competition-view="upcoming"] .weekly-card:not([data-view-status="upcoming"]){display:none}
+body[data-competition-view="leaderboards"] .weekly-card:not([data-view-status="live"]){display:none}
+body[data-competition-view="prizes"] .weekly-card:not([data-view-status="completed"]){display:none}
+body[data-competition-view="prizes"] .daily-columns>div:first-child{display:none}
+body[data-competition-view="prizes"] .daily-columns{grid-template-columns:1fr}
+body[data-competition-view="leaderboards"] .daily-columns>div:last-child{display:none}
+body[data-competition-view="leaderboards"] .daily-columns{grid-template-columns:1fr}
+body[data-competition-view="my-record"] .profile-section{margin-top:0}
+body[data-competition-view="my-record"] .profile-section .profile-copy:after{content:" Your verified results are summarized below."}
+@media(max-width:760px){.competition-nav{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;top:4px}.competition-nav button{padding:11px 5px;font-size:9px;flex-direction:column;gap:4px}.competition-hero h1{font-size:34px}}
+@media(max-width:380px){.competition-nav button{font-size:8px}}
+
 </style>
 </head>
 <body class="">
@@ -77,8 +104,16 @@ body.embed-mode .board{padding:18px;border-radius:14px;box-shadow:none;backgroun
 <header><a class="brand" href="index.html">CHOME <span>PLAYER</span></a><nav><a href="index.html">STUDIO HOME</a><a href="player.html">SIGN IN</a><a href="dashboard.html">DASHBOARD</a></nav></header>
 <main>
 <div class="eyebrow">CHOME PLAYER COMMUNITY</div>
-<h1>THE LEADERBOARDS.</h1>
-<p class="intro">See the top 100 players across CHOME and switch between separate game rankings. Scores come from verified game completions; your own rank is highlighted when you are signed in.</p>
+<div class="competition-hero"><div class="eyebrow">COMPETE · CLIMB · WIN</div><h1>CHOME COMPETITIONS</h1><p class="intro">Discover live events, prepare for upcoming tournaments, follow the leaderboards and track your own competition record.</p></div>
+<nav class="competition-nav" aria-label="Competition sections">
+<button type="button" data-competition-tab="overview" aria-pressed="true"><span>🏆</span>OVERVIEW</button>
+<button type="button" data-competition-tab="live-events" aria-pressed="false"><span>⚡</span>LIVE EVENTS</button>
+<button type="button" data-competition-tab="upcoming" aria-pressed="false"><span>📅</span>UPCOMING</button>
+<button type="button" data-competition-tab="leaderboards" aria-pressed="false"><span>🥇</span>LEADERBOARDS</button>
+<button type="button" data-competition-tab="prizes" aria-pressed="false"><span>🎁</span>PRIZES &amp; WINNERS</button>
+<button type="button" data-competition-tab="my-record" aria-pressed="false"><span>👤</span>MY RECORD</button>
+</nav>
+<div id="competitionViewStatus" class="competition-view-status" aria-live="polite">Overview · all competition areas</div>
 <section class="daily-section" aria-labelledby="dailyTitle">
  <div class="daily-head">
   <div><div class="eyebrow">PLAY EVERY DAY</div><h2 id="dailyTitle">DAILY COMPETITIONS</h2><p class="daily-copy">Compete on verified scores and completed levels across CHOME games. Rankings reset at midnight Africa/Blantyre time.</p></div>
@@ -245,7 +280,7 @@ function renderWeeklyTournaments(items){
  const grid=$("weeklyTournamentGrid");grid.replaceChildren();
  if(!items.length){const empty=document.createElement("div");empty.className="daily-loading";empty.textContent="No weekly tournaments have been scheduled yet. Check back soon.";grid.append(empty);$("weeklyTournamentStatus").textContent="No published weekly tournaments right now.";return;}
  items.forEach(t=>{
-  const card=document.createElement("article");card.className="weekly-card";
+  const card=document.createElement("article");card.className="weekly-card";card.dataset.viewStatus=t.status||"upcoming";
   const top=document.createElement("div");top.className="weekly-card-top";
   const titleWrap=document.createElement("div"),title=document.createElement("h3"),game=document.createElement("div");
   title.textContent=t.title;game.className="weekly-game";game.textContent=weeklyGameNames[t.game_id]||t.game_id||"CHOME Game";
@@ -328,6 +363,17 @@ async function loadCompetitionProfile(){
  panel.hidden=false;
  status.textContent="Your stats are based on verified completed daily challenges and closed weekly tournaments. Competition points add the verified score or level metric recorded for each competition entry.";
 }
+
+
+const competitionViewLabels={overview:"Overview · all competition areas","live-events":"Live events · currently active challenges and tournaments",upcoming:"Upcoming · scheduled tournaments and qualification details",leaderboards:"Leaderboards · current verified rankings and player standings",prizes:"Prizes & winners · completed events and announced results","my-record":"My record · your rank, entries, wins, podiums and personal bests"};
+function setCompetitionView(view){
+ if(!competitionViewLabels[view])return;
+ document.body.dataset.competitionView=view;
+ document.querySelectorAll("[data-competition-tab]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.competitionTab===view)));
+ $("competitionViewStatus").textContent=competitionViewLabels[view];
+}
+document.querySelectorAll("[data-competition-tab]").forEach(button=>button.addEventListener("click",()=>setCompetitionView(button.dataset.competitionTab)));
+setCompetitionView("overview");
 
 async function initialize(){const {data}=await supabase.auth.getSession();currentUserId=data.session?.user?.id||null;await Promise.all([loadLeaderboard(),loadDailyCompetitions(),loadWeeklyTournaments(),loadCompetitionProfile()]);}
 initialize();
