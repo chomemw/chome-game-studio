@@ -589,7 +589,7 @@ h1,h2,h3,.topbar-title strong{font-family:Inter,ui-sans-serif,system-ui,-apple-s
 <section class="leaderboard-section" id="leaderboardSection" hidden aria-labelledby="leaderboardHeading">
  <div class="section-head"><div><div class="eyebrow">Play together · climb the rankings</div><h2 id="leaderboardHeading">COMPETITIONS</h2></div><div class="eyebrow">CHOME PLAYER COMMUNITY</div></div>
  <div class="wallet-empty" style="margin:0 0 18px"><span class="wallet-empty-icon">🏆</span><span>Competition events and prize details will appear here when officially launched. Check the rankings below in the meantime.</span></div>
- <div class="leaderboard-frame-wrap"><iframe class="leaderboard-frame" src="leaderboards.html?embed=1" title="CHOME player leaderboards" loading="lazy"></iframe></div>
+ <div class="leaderboard-frame-wrap"><iframe id="competitionFrame" class="leaderboard-frame" src="leaderboards.html?embed=1" title="CHOME player competitions and leaderboards" loading="eager"></iframe></div>
 </section>
 
 <section class="referral-section" id="referrals" hidden aria-labelledby="referralHeading">
@@ -845,21 +845,24 @@ async function loadPayoutPanel(){
   supabase.rpc('get_my_usdt_payout_address'),
   supabase.rpc('get_my_usdt_payout_requests')
  ]);
- if(configResult.error){$('payoutAvailability').textContent='Payout setup is temporarily unavailable. Please try again later.';console.error(configResult.error);return;}
- const config=Array.isArray(configResult.data)?configResult.data[0]:configResult.data;
- if(config){
-  payoutConfig={payouts_enabled:config.payouts_enabled===true,points_per_usd:Number(config.points_per_usd||20000),minimum_redemption_points:Number(config.minimum_redemption_points||0)};
+ if(configResult.error){
+  $('payoutAvailability').textContent='Payout settings could not be loaded. Your receiving address and request history are being checked separately.';
+  console.error('Payout configuration:',configResult.error);
+  payoutConfig={payouts_enabled:false,points_per_usd:20000,minimum_redemption_points:0};
+ }else{
+  const config=Array.isArray(configResult.data)?configResult.data[0]:configResult.data;
+  if(config)payoutConfig={payouts_enabled:config.payouts_enabled===true,points_per_usd:Number(config.points_per_usd||20000),minimum_redemption_points:Number(config.minimum_redemption_points||0)};
+  $('payoutAvailability').textContent=payoutConfig.payouts_enabled
+   ?'Payout requests are open. Requests are reviewed before USDT is sent; submission does not mean payment is complete.'
+   :'Cash payouts are not open yet. You can save your receiving address now; your CHOX stays in your rewards wallet until the payout programme is approved and activated.';
  }
- $('payoutRateText').textContent='Planning rate: '+Number(payoutConfig.points_per_usd).toLocaleString()+' CHOX = 1.00 USDT. The displayed value is indicative; payouts are not guaranteed until the programme opens.';
- $('payoutAvailability').textContent=payoutConfig.payouts_enabled
-  ?'Payout requests are open. Requests are reviewed before USDT is sent; submission does not mean payment is complete.'
-  :'Cash payouts are not open yet. You can save your receiving address now; your CHOX stays in your rewards wallet until the payout programme is approved and activated.';
+ $('payoutRateText').textContent='Planning rate: '+Number(payoutConfig.points_per_usd).toLocaleString()+' CHOX = 1.00 USDT. This is an indicative estimate only.';
  $('requestPayout').disabled=!payoutConfig.payouts_enabled;
  $('requestPayout').textContent=payoutConfig.payouts_enabled?'REQUEST USDT PAYOUT':'USDT PAYOUTS NOT OPEN';
  const address=Array.isArray(addressResult.data)?addressResult.data[0]:addressResult.data;
  if(address?.address)$('payoutAddress').value=address.address;
- if(addressResult.error)console.error('Payout address:',addressResult.error);
- if(historyResult.error)console.error('Payout history:',historyResult.error);
+ if(addressResult.error){payoutMessage('payoutAddressMessage','Your saved receiving address could not be loaded. Please try again.');console.error('Payout address:',addressResult.error);}
+ if(historyResult.error){payoutMessage('payoutRequestMessage','Payout history could not be loaded. Please refresh this section.');console.error('Payout history:',historyResult.error);}
  const payoutRows=historyResult.error?[]:(historyResult.data||[]);
  renderPayoutHistory(payoutRows);
  const pendingChox=payoutRows.filter(row=>['pending','approved','processing'].includes(String(row.status||'').toLowerCase())).reduce((sum,row)=>sum+Number(row.points_amount||0),0);
@@ -883,14 +886,27 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&profileOver
 // Keep payout details inside the dedicated Payout Centre view.
 const overviewNav=$('overviewNavLink'),gamesNav=$('gamesNavLink'),walletNav=$('walletNavLink'),payoutNav=$('payoutNavLink'),competitionsNav=$('competitionsNavLink'),rewardsNav=$('rewardsNavLink'),referralNav=$('referralNavLink'),helpNav=$('helpNavLink');
 const overviewWelcome=$('overviewWelcome'),walletSection=$('walletSection'),gamesSection=$('gamesSection'),payoutSection=$('payouts'),leaderboardSection=$('leaderboardSection'),referralSection=$('referrals'),rewardsSection=$('rewardsCentre'),helpSection=$('helpSupport');
-let payoutPanelLoaded=false,referralPanelLoaded=false;
+let payoutPanelPromise=null,referralPanelPromise=null;
+function refreshPayoutPanel(){
+ if(!payoutPanelPromise)payoutPanelPromise=loadPayoutPanel().catch(error=>{console.error('Payout centre refresh:',error);$('payoutAvailability').textContent='Payout Centre could not refresh. Please try opening it again.';}).finally(()=>{payoutPanelPromise=null;});
+ return payoutPanelPromise;
+}
+function refreshReferralPanel(){
+ if(!referralPanelPromise)referralPanelPromise=loadReferralPanel().catch(error=>{console.error('Referral centre refresh:',error);$('referralStatus').textContent='Your referral centre could not refresh. Please try again.';}).finally(()=>{referralPanelPromise=null;});
+ return referralPanelPromise;
+}
 function showPlayerView(view){
  const payout=view==='payouts',wallet=view==='wallet',games=view==='games',competitions=view==='competitions',rewards=view==='rewards',referrals=view==='referrals',help=view==='help',overview=view==='overview';
  overviewWelcome.hidden=!overview;$('overviewWalletSummary').hidden=!overview;walletSection.hidden=!wallet;gamesSection.hidden=!games;payoutSection.hidden=!payout;leaderboardSection.hidden=!competitions;referralSection.hidden=!referrals;rewardsSection.hidden=!rewards;helpSection.hidden=!help;
  overviewNav?.classList.toggle('active',overview);gamesNav?.classList.toggle('active',games);walletNav?.classList.toggle('active',wallet);payoutNav?.classList.toggle('active',payout);competitionsNav?.classList.toggle('active',competitions);rewardsNav?.classList.toggle('active',rewards);referralNav?.classList.toggle('active',referrals);helpNav?.classList.toggle('active',help);
  const heading=document.querySelector('.topbar-title strong');if(heading)heading.textContent=payout?'PAYOUT CENTRE':wallet?'CHOX WALLET':games?'GAMES':competitions?'COMPETITIONS':rewards?'REWARDS CENTRE':referrals?'REFERRALS':help?'HELP & SUPPORT':'DASHBOARD';
- if((payout||wallet)&&!payoutPanelLoaded){payoutPanelLoaded=true;loadPayoutPanel();}
- if(referrals&&!referralPanelLoaded){referralPanelLoaded=true;loadReferralPanel();}
+ if(wallet||payout){refreshRewardsWallet(true);refreshPayoutPanel();}
+ if(rewards){refreshRewardsWallet(true);loadDailyMissions();}
+ if(referrals)refreshReferralPanel();
+ if(competitions){
+  const frame=$('competitionFrame');
+  if(frame){frame.loading='eager';if(frame.dataset.loaded==='true'){try{frame.contentWindow.location.reload();}catch(error){console.warn('Competition frame refresh:',error);}}else frame.dataset.loaded='true';}
+ }
  window.scrollTo({top:0,behavior:'smooth'});
  setSidebarOpen(false);
 }
