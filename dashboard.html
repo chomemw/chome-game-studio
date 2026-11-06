@@ -224,6 +224,27 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 .wallet-ledger-row b.positive{color:#8be2b2}.wallet-ledger-row b.negative{color:#ffb3a8}
 @media(max-width:980px){.dual-wallet-grid{grid-template-columns:1fr}.wallet-account-card .wallet-panel{min-height:0}}
 @media(max-width:520px){.section-head .wallet-refresh{margin-top:14px}.wallet-account-card .wallet-panel{padding:18px}.wallet-account-card .wallet-balance{font-size:clamp(30px,9vw,40px)}.wallet-account-card .wallet-stat{padding:11px}.points-coin{width:54px;height:54px;font-size:24px}}
+
+/* Rewards Centre feature hub */
+.rewards-guidance{display:flex;align-items:flex-start;gap:14px;margin:18px 0;padding:18px 20px;border:1px solid #d8b56a45;border-radius:16px;background:linear-gradient(120deg,#33291b66,#111a2b)}
+.rewards-guidance-icon{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:12px;background:#d9ad5a20;color:#f2d69a;font-size:20px}
+.rewards-guidance strong{display:block;color:#f2d69a;font-size:10px;letter-spacing:.13em}
+.rewards-guidance p{margin:7px 0 0;color:#bdc6d6;font-size:11px;line-height:1.7}
+.rewards-feature-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-top:18px}
+.rewards-feature-card,.rewards-info-card{min-width:0;padding:18px;border:1px solid #ffffff1c;border-radius:16px;background:linear-gradient(145deg,#151f34,#0e1727)}
+.rewards-feature-icon{font-size:25px;margin-bottom:15px}
+.rewards-feature-tag{color:#b9aaff;font-size:8px;font-weight:950;letter-spacing:.13em}
+.rewards-feature-card h3{margin:7px 0;font-size:15px}
+.rewards-feature-card p,.rewards-info-card p{min-height:58px;margin:0;color:#9eabc2;font-size:10px;line-height:1.65}
+.feature-status{display:inline-block;margin-top:13px;padding:6px 8px;border:1px solid #ffffff20;border-radius:99px;background:#ffffff08;color:#c3cbd9;font-size:8px;font-weight:950;letter-spacing:.1em}
+.rewards-lower-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+.rewards-info-card .wallet-activity-head{margin-bottom:10px}
+.rewards-info-card p{min-height:0}
+.rewards-text-button{margin-top:14px;padding:9px 11px;border:1px solid #a895ff55;border-radius:9px;background:#8b6cff18;color:#d7ceff;font-size:9px;font-weight:950;letter-spacing:.07em;cursor:pointer}
+.rewards-text-button:hover{background:#8b6cff30}
+@media(max-width:1000px){.rewards-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.rewards-feature-grid,.rewards-lower-grid{grid-template-columns:1fr}.rewards-feature-card p{min-height:0}.rewards-guidance{padding:15px}}
+
 </style>
 </head>
 <body>
@@ -323,7 +344,20 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
    <div class="wallet-status points-status" id="gamePointsStatus" role="status" aria-live="polite">Connecting your Game Points wallet…</div>
    <div class="wallet-activity"><div class="wallet-activity-head"><h3>RECENT GAME POINTS ACTIVITY</h3><span>LAST 12 ENTRIES</span></div><div id="gamePointsActivityList"><div class="wallet-empty">Loading Game Points activity…</div></div><button class="activity-toggle" type="button" data-activity="gamePointsActivityList" aria-expanded="false">VIEW ALL ACTIVITY</button></div>
   </article></div>
- <div class="wallet-activity" style="margin-top:18px"><div class="wallet-activity-head"><h3>MISSIONS &amp; ACHIEVEMENTS</h3><span>MORE REWARDS COMING</span></div><div class="wallet-empty"><span class="wallet-empty-icon">✧</span><span>Your achievements, daily missions and bonus challenges will appear here as they become available.</span></div></div>
+ <div class="rewards-guidance" role="note">
+  <div class="rewards-guidance-icon">✦</div>
+  <div><strong>HOW CHOME REWARDS WORK</strong><p>CHOX is your redeemable rewards currency. Game Points are for in-game progression and competitions; they cannot be converted into CHOX. Match-based CHOX rewards have a 20,000 CHOX daily limit. First-clear level bonuses are tracked separately.</p></div>
+ </div>
+ <div class="rewards-feature-grid" aria-label="Rewards programme features">
+  <article class="rewards-feature-card"><div class="rewards-feature-icon">🎯</div><div class="rewards-feature-tag">DAILY MISSIONS</div><h3>Daily goals</h3><p>Short game goals and reward tasks will be listed here when missions launch.</p><span class="feature-status">COMING SOON</span></article>
+  <article class="rewards-feature-card"><div class="rewards-feature-icon">⚡</div><div class="rewards-feature-tag">WEEKLY CHALLENGES</div><h3>Weekly challenges</h3><p>Multi-game challenges with clear objectives and progress tracking are planned.</p><span class="feature-status">COMING SOON</span></article>
+  <article class="rewards-feature-card"><div class="rewards-feature-icon">🔥</div><div class="rewards-feature-tag">PLAY STREAKS</div><h3>Consistency streaks</h3><p>Track consecutive active days and future streak milestones in one place.</p><span class="feature-status">COMING SOON</span></article>
+  <article class="rewards-feature-card"><div class="rewards-feature-icon">🏅</div><div class="rewards-feature-tag">ACHIEVEMENTS</div><h3>Your milestones</h3><p>Game-specific badges and completed milestones will appear here once connected.</p><span class="feature-status">COMING SOON</span></article>
+ </div>
+ <div class="rewards-lower-grid">
+  <article class="rewards-info-card"><div class="wallet-activity-head"><h3>REWARD HISTORY</h3><span>LIVE WALLET RECORDS</span></div><p>Your verified CHOX and Game Points transactions are shown in the wallet activity panels above. Open CHOX Wallet for your full CHOX transaction history.</p><button type="button" class="rewards-text-button" id="rewardsOpenChoxWallet">VIEW CHOX WALLET →</button></article>
+  <article class="rewards-info-card"><div class="wallet-activity-head"><h3>COMPETITION REWARDS</h3><span>LEADERBOARDS</span></div><p>Competition rankings are available in Competitions. Prize events and reward terms will be displayed there when officially launched.</p><button type="button" class="rewards-text-button" id="rewardsOpenCompetitions">VIEW COMPETITIONS →</button></article>
+ </div>
 </section>
 <section class="payout-section" id="payouts" hidden aria-labelledby="payoutHeading">
   <div class="section-head"><div><div class="eyebrow">Player cash-out setup</div><h2 id="payoutHeading">USDT PAYOUTS</h2></div><div class="eyebrow">TRON · TRC20</div></div>
@@ -659,6 +693,8 @@ else{
  if(accountAccessError||accountAccess?.status==='restricted')window.location.replace('account-restricted.html');
  else{await loadProfile(session.user);await loadAnnouncements();const [walletSetup,pointsWalletSetup]=await Promise.all([rewardsRpc('ensure_my_rewards_wallet'),rewardsRpc('ensure_my_game_points_wallet')]);if(walletSetup.error)console.error('CHOX wallet setup:',walletSetup.error);if(pointsWalletSetup.error)console.error('Game Points wallet setup:',pointsWalletSetup.error);await Promise.all([loadRewardsWallet(),loadRewardsActivity(),loadGamePointsWallet(),loadGamePointsActivity()]);const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
 }
+$('rewardsOpenChoxWallet')?.addEventListener('click',()=>showPlayerView('wallet'));
+$('rewardsOpenCompetitions')?.addEventListener('click',()=>showPlayerView('competitions'));
 $('overviewOpenWallet')?.addEventListener('click',()=>showPlayerView('wallet'));
 $('overviewOpenPointsWallet')?.addEventListener('click',()=>showPlayerView('rewards'));
 $('refreshRewardsCentre')?.addEventListener('click',()=>refreshRewardsWallet(false));
