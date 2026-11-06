@@ -245,6 +245,11 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 @media(max-width:1000px){.rewards-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.rewards-feature-grid,.rewards-lower-grid{grid-template-columns:1fr}.rewards-feature-card p{min-height:0}.rewards-guidance{padding:15px}}
 
+
+/* Live daily missions */
+.mission-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:22px 0 14px}.mission-head h3{font-size:18px;margin:6px 0}.mission-head p{margin:0;color:#9eabc2;font-size:11px;line-height:1.6}.mission-day{padding:8px 11px;border:1px solid #a895ff44;border-radius:10px;color:#cfc4ff;font-size:9px;font-weight:950;letter-spacing:.1em;white-space:nowrap}.daily-mission-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.daily-mission-card{min-width:0;padding:17px;border:1px solid #ffffff1c;border-radius:15px;background:linear-gradient(145deg,#151f34,#0d1727)}.daily-mission-card.done{border-color:#65d7a755}.mission-card-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.mission-card-top strong{font-size:12px}.mission-reward{color:#9ce9d9;font-size:10px;font-weight:950;white-space:nowrap}.daily-mission-card p{min-height:34px;margin:9px 0;color:#9eabc2;font-size:10px;line-height:1.6}.mission-progress,.streak-track{height:7px;overflow:hidden;border-radius:99px;background:#ffffff13;margin:12px 0}.mission-progress span,.streak-track span{display:block;width:0;height:100%;border-radius:99px;background:linear-gradient(90deg,#8b6cff,#67d8bc);transition:width .25s}.mission-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px}.mission-count{color:#aebbd0;font-size:9px;font-weight:850}.mission-claim{border:1px solid #a895ff55;border-radius:9px;background:#8b6cff;color:white;padding:9px 12px;font-size:9px;font-weight:950;letter-spacing:.06em;cursor:pointer}.mission-claim:disabled{background:#ffffff0b;border-color:#ffffff16;color:#7f8ba1;cursor:default}.mission-lower-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:14px}.mission-panel{min-width:0;padding:18px;border:1px solid #ffffff1c;border-radius:15px;background:linear-gradient(145deg,#151f34,#0e1727)}.mission-panel-top{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#c9c0ff;font-size:10px;font-weight:950;letter-spacing:.06em}.mission-panel-top strong{font-size:14px;color:white}.mission-panel p{min-height:34px;color:#9eabc2;font-size:10px;line-height:1.65}.mission-panel small{color:#8998b0;font-size:9px}.mission-note{margin-top:14px;padding:12px 14px;border:1px solid #ffffff18;border-radius:11px;color:#9eabc2;font-size:10px;line-height:1.6}.mission-note.error{border-color:#ff9c9c55;color:#ffb8b8}.mission-note.success{border-color:#65d7a755;color:#9ce9d9}
+@media(max-width:700px){.daily-mission-list,.mission-lower-grid{grid-template-columns:1fr}.mission-head{align-items:start}.mission-card-bottom{flex-wrap:wrap}}
+
 </style>
 </head>
 <body>
@@ -348,12 +353,15 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
   <div class="rewards-guidance-icon">✦</div>
   <div><strong>HOW CHOME REWARDS WORK</strong><p>CHOX is your redeemable rewards currency. Game Points are for in-game progression and competitions; they cannot be converted into CHOX. Match-based CHOX rewards have a 20,000 CHOX daily limit. First-clear level bonuses are tracked separately.</p></div>
  </div>
- <div class="rewards-feature-grid" aria-label="Rewards programme features">
-  <article class="rewards-feature-card"><div class="rewards-feature-icon">🎯</div><div class="rewards-feature-tag">DAILY MISSIONS</div><h3>Daily goals</h3><p>Short game goals and reward tasks will be listed here when missions launch.</p><span class="feature-status">COMING SOON</span></article>
-  <article class="rewards-feature-card"><div class="rewards-feature-icon">⚡</div><div class="rewards-feature-tag">WEEKLY CHALLENGES</div><h3>Weekly challenges</h3><p>Multi-game challenges with clear objectives and progress tracking are planned.</p><span class="feature-status">COMING SOON</span></article>
-  <article class="rewards-feature-card"><div class="rewards-feature-icon">🔥</div><div class="rewards-feature-tag">PLAY STREAKS</div><h3>Consistency streaks</h3><p>Track consecutive active days and future streak milestones in one place.</p><span class="feature-status">COMING SOON</span></article>
-  <article class="rewards-feature-card"><div class="rewards-feature-icon">🏅</div><div class="rewards-feature-tag">ACHIEVEMENTS</div><h3>Your milestones</h3><p>Game-specific badges and completed milestones will appear here once connected.</p><span class="feature-status">COMING SOON</span></article>
+ <div class="mission-head"><div><div class="eyebrow">PLAY · COMPLETE · CLAIM</div><h3>YOUR DAILY MISSIONS</h3><p>Complete verified game goals and claim Game Points. Missions reset at midnight Malawi time.</p></div><div class="mission-day" id="missionDayLabel">TODAY</div></div>
+ <div id="dailyMissionList" class="daily-mission-list"><div class="wallet-empty">Loading today's missions…</div></div>
+ <div class="mission-lower-grid">
+  <article class="mission-panel"><div class="mission-panel-top"><span>🔥 PLAY STREAK</span><strong id="missionStreakValue">0 DAYS</strong></div><p id="missionStreakText">Claim your daily login reward to start a streak.</p><div class="streak-track"><span id="missionStreakFill"></span></div><small id="missionStreakMilestone">Next milestone: 3 days</small></article>
+  <article class="mission-panel"><div class="mission-panel-top"><span>⚡ WEEKLY LEVEL CHALLENGE</span><strong id="weeklyMissionProgress">0 / 5</strong></div><p>Complete five verified levels this week across CHOME games.</p><div class="mission-progress"><span id="weeklyMissionFill"></span></div><button type="button" class="mission-claim" id="weeklyMissionClaim" data-mission="weekly_five_levels" disabled>CLAIM 250 GAME POINTS</button></article>
+  <article class="mission-panel community-mission"><div class="mission-panel-top"><span>🌍 CHOME COMMUNITY GOAL</span><strong id="communityMissionProgress">0 / 5,000</strong></div><p>All players contribute to this shared weekly target by completing verified levels.</p><div class="mission-progress"><span id="communityMissionFill"></span></div><small>Community progress · resets weekly</small></article>
+  <article class="mission-panel"><div class="mission-panel-top"><span>🤝 BUDDY QUESTS</span><span class="feature-status">COMING SOON</span></div><p>Team up with another player, complete shared goals and unlock group reward chests. This will activate when player-to-player quest pairing is ready.</p></article>
  </div>
+ <div class="mission-note" id="missionStatus" role="status" aria-live="polite">Mission rewards are credited to Game Points only. CHOX game rewards remain unchanged.</div>
  <div class="rewards-lower-grid">
   <article class="rewards-info-card"><div class="wallet-activity-head"><h3>REWARD HISTORY</h3><span>LIVE WALLET RECORDS</span></div><p>Your verified CHOX and Game Points transactions are shown in the wallet activity panels above. Open CHOX Wallet for your full CHOX transaction history.</p><button type="button" class="rewards-text-button" id="rewardsOpenChoxWallet">VIEW CHOX WALLET →</button></article>
   <article class="rewards-info-card"><div class="wallet-activity-head"><h3>COMPETITION REWARDS</h3><span>LEADERBOARDS</span></div><p>Competition rankings are available in Competitions. Prize events and reward terms will be displayed there when officially launched.</p><button type="button" class="rewards-text-button" id="rewardsOpenCompetitions">VIEW COMPETITIONS →</button></article>
@@ -555,6 +563,39 @@ async function refreshRewardsWallet(automatic=false){
  rewardsRefreshPromise=(async()=>{try{await Promise.all([loadRewardsWallet(),loadRewardsActivity(),loadGamePointsWallet(),loadGamePointsActivity()]);}finally{if(button&&!automatic){button.disabled=false;button.textContent='↻ REFRESH BALANCES';}rewardsRefreshPromise=null;}})();
  return rewardsRefreshPromise;
 }
+
+async function loadDailyMissions(){
+ const host=$('dailyMissionList'),status=$('missionStatus');
+ if(!host)return;
+ const {data,error}=await supabase.rpc('get_my_daily_missions');
+ if(error){host.innerHTML='<div class="wallet-empty">Daily missions are temporarily unavailable. Please refresh.</div>';status.textContent='Could not load mission progress: '+friendly(error);status.classList.add('error');console.error('Daily missions:',error);return;}
+ const payload=typeof data==='string'?JSON.parse(data):data;
+ const missions=Array.isArray(payload?.missions)?payload.missions:[];host.replaceChildren();
+ $('missionDayLabel').textContent=new Date(payload.date+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
+ missions.forEach(m=>{
+  const progress=Math.min(Number(m.progress||0),Number(m.target||1)),target=Number(m.target||1),done=progress>=target,claimed=!!m.claimed;
+  const card=document.createElement('article');card.className='daily-mission-card'+(claimed?' done':'');
+  const top=document.createElement('div');top.className='mission-card-top';const title=document.createElement('strong');title.textContent=m.title;const reward=document.createElement('span');reward.className='mission-reward';reward.textContent='+'+Number(m.reward_points).toLocaleString()+' PTS';top.append(title,reward);
+  const desc=document.createElement('p');desc.textContent=m.description;
+  const bar=document.createElement('div');bar.className='mission-progress';const fill=document.createElement('span');fill.style.width=Math.min(100,progress/target*100)+'%';bar.append(fill);
+  const bottom=document.createElement('div');bottom.className='mission-card-bottom';const count=document.createElement('span');count.className='mission-count';count.textContent=claimed?'REWARD CLAIMED':progress+' / '+target+' COMPLETE';const button=document.createElement('button');button.type='button';button.className='mission-claim';button.dataset.mission=m.key;button.textContent=claimed?'CLAIMED':done?'CLAIM REWARD':'IN PROGRESS';button.disabled=claimed||!done;bottom.append(count,button);card.append(top,desc,bar,bottom);host.append(card);
+ });
+ const streak=payload.streak||{};$('missionStreakValue').textContent=Number(streak.current||0)+' DAYS';$('missionStreakText').textContent=Number(streak.current||0)>0?'Keep checking in daily to build your streak. Best streak: '+Number(streak.best||0)+' days.':'Claim your daily login reward to start a streak.';$('missionStreakMilestone').textContent='Next milestone: '+Number(streak.next_milestone||3)+' days';$('missionStreakFill').style.width=Math.min(100,(Number(streak.current||0)/Number(streak.next_milestone||3))*100)+'%';
+ const weekly=payload.weekly||{},wp=Number(weekly.progress||0),wt=Number(weekly.target||5);$('weeklyMissionProgress').textContent=wp+' / '+wt;$('weeklyMissionFill').style.width=Math.min(100,wp/wt*100)+'%';const weeklyButton=$('weeklyMissionClaim');weeklyButton.disabled=!!weekly.claimed||wp<wt;weeklyButton.textContent=weekly.claimed?'CLAIMED':wp>=wt?'CLAIM 250 GAME POINTS':'IN PROGRESS';
+ const community=payload.community||{},cp=Number(community.progress||0),ct=Number(community.target||5000);$('communityMissionProgress').textContent=cp.toLocaleString()+' / '+ct.toLocaleString();$('communityMissionFill').style.width=Math.min(100,cp/ct*100)+'%';
+ status.textContent='Progress is based on verified CHOME game records. Claim each completed mission once per reset period.';status.classList.remove('error');
+}
+async function claimMission(key,button){
+ const status=$('missionStatus');button.disabled=true;button.textContent='CLAIMING…';
+ const {data,error}=await supabase.rpc('claim_daily_mission',{p_mission_key:key});
+ const result=typeof data==='string'?JSON.parse(data):data;
+ if(error||!result?.ok){status.textContent=error?friendly(error):(result?.error||'The reward could not be claimed.');status.classList.add('error');await loadDailyMissions();return;}
+ status.textContent='Success! '+Number(result.reward_points).toLocaleString()+' Game Points added to your wallet.';status.classList.remove('error');status.classList.add('success');
+ await Promise.all([loadDailyMissions(),loadGamePointsWallet(),loadGamePointsActivity()]);
+}
+$('dailyMissionList').addEventListener('click',event=>{const button=event.target.closest('button[data-mission]');if(button&&!button.disabled)claimMission(button.dataset.mission,button);});
+$('weeklyMissionClaim').addEventListener('click',event=>{const button=event.currentTarget;if(!button.disabled)claimMission('weekly_five_levels',button);});
+
 async function loadReferralPanel(){
  const status=$('referralStatus');status.textContent='Loading your referral details…';
  const {data,error}=await supabase.rpc('get_my_referral_summary');
@@ -691,13 +732,13 @@ if(!session?.user)window.location.replace('player.html?notice=signin');
 else{
  const {data:accountAccess,error:accountAccessError}=await supabase.rpc('get_my_account_access');
  if(accountAccessError||accountAccess?.status==='restricted')window.location.replace('account-restricted.html');
- else{await loadProfile(session.user);await loadAnnouncements();const [walletSetup,pointsWalletSetup]=await Promise.all([rewardsRpc('ensure_my_rewards_wallet'),rewardsRpc('ensure_my_game_points_wallet')]);if(walletSetup.error)console.error('CHOX wallet setup:',walletSetup.error);if(pointsWalletSetup.error)console.error('Game Points wallet setup:',pointsWalletSetup.error);await Promise.all([loadRewardsWallet(),loadRewardsActivity(),loadGamePointsWallet(),loadGamePointsActivity()]);const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
+ else{await loadProfile(session.user);await loadAnnouncements();const [walletSetup,pointsWalletSetup]=await Promise.all([rewardsRpc('ensure_my_rewards_wallet'),rewardsRpc('ensure_my_game_points_wallet')]);if(walletSetup.error)console.error('CHOX wallet setup:',walletSetup.error);if(pointsWalletSetup.error)console.error('Game Points wallet setup:',pointsWalletSetup.error);await Promise.all([loadRewardsWallet(),loadRewardsActivity(),loadGamePointsWallet(),loadGamePointsActivity()]);await loadDailyMissions();const referralClaim=await supabase.rpc('claim_my_referral');if(referralClaim.error)console.error('Referral claim:',referralClaim.error);else if(referralClaim.data?.status==='rewarded')console.info('Referral successfully qualified.');}
 }
 $('rewardsOpenChoxWallet')?.addEventListener('click',()=>showPlayerView('wallet'));
 $('rewardsOpenCompetitions')?.addEventListener('click',()=>showPlayerView('competitions'));
 $('overviewOpenWallet')?.addEventListener('click',()=>showPlayerView('wallet'));
 $('overviewOpenPointsWallet')?.addEventListener('click',()=>showPlayerView('rewards'));
-$('refreshRewardsCentre')?.addEventListener('click',()=>refreshRewardsWallet(false));
+$('refreshRewardsCentre')?.addEventListener('click',async()=>{await refreshRewardsWallet(false);await loadDailyMissions();});
 $('refreshWallet')?.addEventListener('click',()=>refreshRewardsWallet(false));
 document.querySelectorAll('.activity-toggle').forEach(button=>button.addEventListener('click',()=>toggleActivity(button)));
 // Refresh after returning from a game or restoring this page from the browser cache.
