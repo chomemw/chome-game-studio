@@ -250,6 +250,9 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 .mission-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:22px 0 14px}.mission-head h3{font-size:18px;margin:6px 0}.mission-head p{margin:0;color:#9eabc2;font-size:11px;line-height:1.6}.mission-day{padding:8px 11px;border:1px solid #a895ff44;border-radius:10px;color:#cfc4ff;font-size:9px;font-weight:950;letter-spacing:.1em;white-space:nowrap}.daily-mission-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.daily-mission-card{min-width:0;padding:17px;border:1px solid #ffffff1c;border-radius:15px;background:linear-gradient(145deg,#151f34,#0d1727)}.daily-mission-card.done{border-color:#65d7a755}.mission-card-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.mission-card-top strong{font-size:12px}.mission-reward{color:#9ce9d9;font-size:10px;font-weight:950;white-space:nowrap}.daily-mission-card p{min-height:34px;margin:9px 0;color:#9eabc2;font-size:10px;line-height:1.6}.mission-progress,.streak-track{height:7px;overflow:hidden;border-radius:99px;background:#ffffff13;margin:12px 0}.mission-progress span,.streak-track span{display:block;width:0;height:100%;border-radius:99px;background:linear-gradient(90deg,#8b6cff,#67d8bc);transition:width .25s}.mission-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px}.mission-count{color:#aebbd0;font-size:9px;font-weight:850}.mission-claim{border:1px solid #a895ff55;border-radius:9px;background:#8b6cff;color:white;padding:9px 12px;font-size:9px;font-weight:950;letter-spacing:.06em;cursor:pointer}.mission-claim:disabled{background:#ffffff0b;border-color:#ffffff16;color:#7f8ba1;cursor:default}.mission-lower-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:14px}.mission-panel{min-width:0;padding:18px;border:1px solid #ffffff1c;border-radius:15px;background:linear-gradient(145deg,#151f34,#0e1727)}.mission-panel-top{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#c9c0ff;font-size:10px;font-weight:950;letter-spacing:.06em}.mission-panel-top strong{font-size:14px;color:white}.mission-panel p{min-height:34px;color:#9eabc2;font-size:10px;line-height:1.65}.mission-panel small{color:#8998b0;font-size:9px}.mission-note{margin-top:14px;padding:12px 14px;border:1px solid #ffffff18;border-radius:11px;color:#9eabc2;font-size:10px;line-height:1.6}.mission-note.error{border-color:#ff9c9c55;color:#ffb8b8}.mission-note.success{border-color:#65d7a755;color:#9ce9d9}
 @media(max-width:700px){.daily-mission-list,.mission-lower-grid{grid-template-columns:1fr}.mission-head{align-items:start}.mission-card-bottom{flex-wrap:wrap}}
 
+
+.overview-mission-card{display:flex;align-items:center;gap:16px;margin:16px 0 22px;padding:20px 22px;border:1px solid #a895ff44;border-radius:17px;background:linear-gradient(110deg,#29214b 0%,#141e32 65%,#101827 100%)}.overview-mission-icon{width:48px;height:48px;flex:none;display:grid;place-items:center;border-radius:14px;background:#a895ff22;font-size:24px}.overview-mission-copy{min-width:0;flex:1}.overview-mission-copy h2{margin:5px 0;font-size:17px;letter-spacing:-.04em}.overview-mission-copy p{margin:0;color:#aab6ca;font-size:11px;line-height:1.6}.overview-mission-button{flex:none;padding:12px 15px;border:1px solid #b8a8ff66;border-radius:10px;background:#8b6cff;color:#fff;font-size:10px;font-weight:950;letter-spacing:.06em;cursor:pointer}.overview-mission-button:hover{filter:brightness(1.12)}@media(max-width:650px){.overview-mission-card{align-items:flex-start;flex-wrap:wrap;padding:17px}.overview-mission-copy{flex:1 1 calc(100% - 70px)}.overview-mission-button{margin-left:64px}}
+
 </style>
 </head>
 <body>
@@ -293,6 +296,11 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
   <div class="overview-wallet-footer"><span id="overviewGamePointsEarned">Lifetime earned: —</span><button type="button" class="overview-wallet-link" id="overviewOpenPointsWallet">OPEN WALLET →</button></div>
  </div>
  <div class="overview-wallet-loading" id="overviewWalletStatus" role="status" aria-live="polite">Connecting your balances…</div>
+</section>
+<section class="overview-mission-card" aria-label="Daily missions">
+ <div class="overview-mission-icon">🎯</div>
+ <div class="overview-mission-copy"><div class="eyebrow">PLAY · COMPLETE · EARN</div><h2>YOUR DAILY MISSIONS</h2><p id="overviewMissionSummary">Your daily game goals and Game Points rewards are ready. Complete verified levels, build your streak and unlock the bonus chest.</p></div>
+ <button type="button" class="overview-mission-button" id="overviewOpenMissions">OPEN MISSIONS <span>→</span></button>
 </section>
 <section class="announcement-panel" id="whatsNewPanel"><div class="eyebrow">STUDIO UPDATES</div><h2>What’s New at CHOME</h2><div class="announcement-list" id="announcementList"><div class="announcement-empty">Loading studio updates…</div></div></section>
 <div class="profile-overlay" id="profileOverlay" aria-hidden="true"><section class="panel profile-panel" id="profile" role="dialog" aria-modal="true" aria-labelledby="profileDisplayHeading"><button class="profile-close" id="closeProfile" type="button" aria-label="Close profile">×</button>
@@ -572,6 +580,8 @@ async function loadDailyMissions(){
  if(error){host.innerHTML='<div class="wallet-empty">Daily missions are temporarily unavailable. Please refresh.</div>';status.textContent='Could not load mission progress: '+friendly(error);status.classList.add('error');console.error('Daily missions:',error);return;}
  const payload=typeof data==='string'?JSON.parse(data):data;
  const missions=Array.isArray(payload?.missions)?payload.missions:[];host.replaceChildren();
+ const claimedCount=missions.filter(m=>m.claimed).length;const readyCount=missions.filter(m=>Number(m.progress||0)>=Number(m.target||1)&&!m.claimed).length;
+ const overviewMissionSummary=$('overviewMissionSummary');if(overviewMissionSummary)overviewMissionSummary.textContent=claimedCount+' of '+missions.length+' daily rewards claimed · '+readyCount+' mission'+(readyCount===1?' is':'s are')+' ready to claim. Open Rewards Centre to see your progress and weekly challenge.';
  $('missionDayLabel').textContent=new Date(payload.date+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
  missions.forEach(m=>{
   const progress=Math.min(Number(m.progress||0),Number(m.target||1)),target=Number(m.target||1),done=progress>=target,claimed=!!m.claimed;
@@ -713,6 +723,7 @@ walletNav?.addEventListener('click',event=>{event.preventDefault();showPlayerVie
 payoutNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('payouts')});
 competitionsNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('competitions')});
 rewardsNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('rewards')});
+$('overviewOpenMissions')?.addEventListener('click',()=>showPlayerView('rewards'));
 referralNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('referrals')});
 helpNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('help')});
 
