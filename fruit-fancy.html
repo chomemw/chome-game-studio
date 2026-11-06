@@ -85,25 +85,20 @@ async function claimChox(stage){
  setChoxStatus("CHOX rewards are credited automatically after each server-verified connection.");
 }
 async function beginVerifiedRun(){
- const requestId=++gameSessionRequest;
- activeGameSessionId=null;verifiedSessionPending=false;
- if(!currentPlayer)return;
- verifiedSessionPending=true;
+ const requestId=++gameSessionRequest;activeGameSessionId=null;verifiedSessionPending=false;
  try{
+  const {data:authData,error:authError}=await supabase.auth.getSession();if(authError)throw authError;
+  const player=authData.session?.user||null;if(!player){currentPlayer=null;setChoxStatus("Sign in to earn CHOX from verified fruit connections.");return;}
+  currentPlayer=player;verifiedSessionPending=true;
   const {data,error}=await supabase.functions.invoke("game-session",{body:{action:"start",game_id:"fruit-fancy",level:level+1}});
-  if(requestId!==gameSessionRequest)return;
-  if(error)throw error;
+  if(requestId!==gameSessionRequest)return;if(error)throw error;
   if(!data?.ok||!data.session_id)throw new Error(data?.error||"Could not start a verified game session.");
-  activeGameSessionId=data.session_id;verifiedSessionPending=false;
+  const {data:check,error:checkError}=await supabase.auth.getSession();if(checkError)throw checkError;
+  if(check.session?.user?.id!==player.id)throw new Error("Sign-in changed while starting the verified run.");
+  currentPlayer=check.session.user;activeGameSessionId=data.session_id;verifiedSessionPending=false;
   initialMoves=Number(data.initial_moves)||movesForLevel(level);movesRemaining=Number.isInteger(data.moves_remaining)?data.moves_remaining:initialMoves;continueCount=Number(data.continue_count)||0;
-  prepareVerifiedBoard(data.board_seed);
-  setLeaderboardStatus("Verified run started. Complete this level to submit your score.");
- }catch(error){
-  if(requestId!==gameSessionRequest)return;
-  activeGameSessionId=null;verifiedSessionPending=false;
-  console.error("Fruit Fancy verified session could not start:",error);
-  setLeaderboardStatus("Verified score submission is temporarily unavailable. Your game progress still saves.");
- }
+  prepareVerifiedBoard(data.board_seed);setLeaderboardStatus("Verified run started. Complete this level to submit your score.");
+ }catch(error){if(requestId!==gameSessionRequest)return;activeGameSessionId=null;verifiedSessionPending=false;console.error("Fruit Fancy verified session could not start:",error);setChoxStatus("CHOX rewards could not start for this run. Please restart the level while signed in.");setLeaderboardStatus("Verified score submission is temporarily unavailable. Your game progress still saves.");}
 }
 async function queueVerifiedProgress(){
  if(!currentPlayer||!activeGameSessionId||verifiedMoveLog.length===0)return progressSyncChain;
@@ -123,29 +118,19 @@ async function queueVerifiedProgress(){
  return progressSyncChain;
 }
 async function submitLevelScore(){
- if(scoreSubmittedForRun)return;
- if(!currentPlayer){setLeaderboardStatus("Sign in to submit a game score to the rankings.");return;}
- if(!activeGameSessionId){setLeaderboardStatus("This resumed run has no verified session. Restart the level for a verified score.");return;}
- scoreSubmittedForRun=true;
- setLeaderboardStatus("Verifying your completed level and CHOX…");
- const sessionId=activeGameSessionId;
+ if(scoreSubmittedForRun)return;scoreSubmittedForRun=true;setLeaderboardStatus("Verifying your completed level and CHOX…");
  try{
-  await progressSyncChain;
+  const {data:authData,error:authError}=await supabase.auth.getSession();if(authError)throw authError;
+  const player=authData.session?.user||null;if(!player){currentPlayer=null;setLeaderboardStatus("Sign in to submit a game score to the rankings.");setChoxStatus("Sign in again before submitting this level's CHOX rewards.");return;}
+  currentPlayer=player;if(!activeGameSessionId){setLeaderboardStatus("This run has no verified session. Restart the level after signing in to earn CHOX.");setChoxStatus("No verified reward session was active for this run. Please restart the level.");return;}
+  const sessionId=activeGameSessionId,userId=player.id;await progressSyncChain;
+  const {data:check,error:checkError}=await supabase.auth.getSession();if(checkError)throw checkError;
+  if(check.session?.user?.id!==userId)throw new Error("Sign-in changed before reward submission.");currentPlayer=check.session.user;
   const {data,error}=await supabase.functions.invoke("game-session",{body:{action:"complete",session_id:sessionId,score,moves,events:verifiedMoveLog}});
-  if(error)throw error;
-  if(!data?.ok||!data?.result?.accepted)throw new Error(data?.error||"The game result was not accepted.");
-  activeGameSessionId=null;
-  const rewards=data.rewards||{},stage=Number(rewards.stage_chox_credited||0),moveChox=Number(rewards.move_chox_credited||0),gamePoints=Number(rewards.game_points_credited||0);
-  verifiedMoveChoxEarned=moveChox;
-  const rewardText="✓ Level verified · "+moveChox.toLocaleString()+" move CHOX · "+stage.toLocaleString()+" first-clear CHOX · "+gamePoints.toLocaleString()+" Game Points.";
-  setChoxStatus(rewardText);
-  setLeaderboardStatus("✓ Verified level score submitted.");
- }catch(error){
-  console.error("Fruit Fancy verified score submission failed:",error);
-  activeGameSessionId=null;
-  setLeaderboardStatus("This run could not be fully verified. Start a fresh level to try again.");
-  setChoxStatus("Some CHOX progress could not be confirmed. Please check your wallet activity.");
- }
+  if(error)throw error;if(!data?.ok||!data?.result?.accepted)throw new Error(data?.error||"The game result was not accepted.");
+  activeGameSessionId=null;const rewards=data.rewards||{},stage=Number(rewards.stage_chox_credited||0),moveChox=Number(rewards.move_chox_credited||0),gamePoints=Number(rewards.game_points_credited||0);verifiedMoveChoxEarned=moveChox;
+  setChoxStatus("✓ Level verified · "+moveChox.toLocaleString()+" move CHOX · "+stage.toLocaleString()+" first-clear CHOX · "+gamePoints.toLocaleString()+" Game Points.");setLeaderboardStatus("✓ Verified level score submitted.");
+ }catch(error){console.error("Fruit Fancy verified score submission failed:",error);activeGameSessionId=null;setLeaderboardStatus("This run could not be fully verified. Start a fresh level to try again.");setChoxStatus("Some CHOX progress could not be confirmed. Please check your wallet activity.");}
 }
 function gameSnapshot(){return {version:2,level,score,target,moves,initialMoves,movesRemaining,continueCount,sound,halfwayClaimedThisRun,savedAt:Date.now(),board:board.map(row=>row.map(cell=>({fruit:cell.fruit.type,ice:!!cell.ice,bomb:!!cell.bomb})))};}
 async function saveGame(){
