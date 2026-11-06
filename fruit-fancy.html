@@ -140,12 +140,12 @@ async function submitLevelScore(){
    if(error)throw error;
    if(!data?.ok||!data?.result?.accepted)throw new Error(data?.error||"The game result was not accepted.");
    const rewards=data.rewards||{},stage=Number(rewards.stage_chox_credited||0),moveChox=Number(rewards.move_chox_credited||0),gamePoints=Number(rewards.game_points_credited||0);
-   activeGameSessionId=null;verifiedMoveChoxEarned=moveChox;
+   activeGameSessionId=null;const totalMoveChox=verifiedMoveChoxEarned+moveChox;verifiedMoveChoxEarned=totalMoveChox;
    let walletBalance=null;
    const {data:walletData,error:walletError}=await supabase.rpc("get_my_rewards_wallet");
    if(!walletError){const wallet=Array.isArray(walletData)?walletData[0]:walletData;if(wallet&&wallet.points_balance!==undefined)walletBalance=Number(wallet.points_balance);}
    const walletText=walletBalance===null?"Wallet balance unavailable; check your CHOX wallet.":"Current CHOX wallet: "+walletBalance.toLocaleString()+".";
-   setChoxStatus("✓ REWARDS CONFIRMED · "+moveChox.toLocaleString()+" move CHOX + "+stage.toLocaleString()+" first-clear CHOX + "+gamePoints.toLocaleString()+" Game Points. "+walletText);
+   setChoxStatus("✓ REWARDS CONFIRMED · "+totalMoveChox.toLocaleString()+" total move CHOX + "+stage.toLocaleString()+" first-clear CHOX + "+gamePoints.toLocaleString()+" Game Points. "+walletText);
    setLeaderboardStatus("✓ Verified level score submitted and rewards confirmed.");
    return {move:moveChox,stage,gamePoints,walletBalance};
   }catch(error){
