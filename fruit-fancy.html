@@ -110,7 +110,7 @@ async function queueVerifiedProgress(){
   if(error)throw error;
   if(!data?.ok)throw new Error(data?.error||"Verified progress was not accepted.");
   const earned=Number(data.progress?.move_chox_credited||0);
-  if(earned>0){verifiedMoveChoxEarned+=earned;setChoxStatus("+"+earned.toLocaleString()+" CHOX credited · "+verifiedMoveChoxEarned.toLocaleString()+" earned this run.");}
+  if(earned>0){verifiedMoveChoxEarned+=earned;setChoxStatus("+"+earned.toLocaleString()+" CHOX credited · "+verifiedMoveChoxEarned.toLocaleString()+" earned this run.");popup($("boardContainer").clientWidth/2,32,"+"+earned.toLocaleString()+" CHOX");}
  }).catch(error=>{
   console.error("Fruit Fancy CHOX progress sync failed:",error);
   setChoxStatus("CHOX progress is waiting to sync. Keep this run open while connection recovers.");
@@ -145,7 +145,7 @@ async function submitLevelScore(){
    const {data:walletData,error:walletError}=await supabase.rpc("get_my_rewards_wallet");
    if(!walletError){const wallet=Array.isArray(walletData)?walletData[0]:walletData;if(wallet&&wallet.points_balance!==undefined)walletBalance=Number(wallet.points_balance);}
    const walletText=walletBalance===null?"Wallet balance unavailable; check your CHOX wallet.":"Current CHOX wallet: "+walletBalance.toLocaleString()+".";
-   setChoxStatus("✓ REWARDS CONFIRMED · "+totalMoveChox.toLocaleString()+" total move CHOX + "+stage.toLocaleString()+" first-clear CHOX + "+gamePoints.toLocaleString()+" Game Points. "+walletText);
+   setChoxStatus("✓ REWARDS CONFIRMED · "+totalMoveChox.toLocaleString()+" total move CHOX + "+stage.toLocaleString()+" first-clear CHOX + "+gamePoints.toLocaleString()+" Game Points. "+walletText);if(stage>0)popup($("boardContainer").clientWidth/2,32,"+"+stage.toLocaleString()+" LEVEL CHOX");
    setLeaderboardStatus("✓ Verified level score submitted and rewards confirmed.");
    return {move:moveChox,stage,gamePoints,walletBalance};
   }catch(error){
