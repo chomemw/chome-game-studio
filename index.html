@@ -153,15 +153,65 @@ h1, h2, h3 { font-family: var(--site-font-heading); }
 .footer{flex-wrap:wrap}
 @media(max-width:850px){.info-grid{grid-template-columns:1fr 1fr}.support-panel{align-items:flex-start;flex-direction:column}}
 @media(max-width:620px){.info-grid,.reward-grid,.faq-list{grid-template-columns:1fr}.support-panel{padding:23px}}
+
+/* CHOME homepage refinement: consistent type scale, clearer navigation and mobile menu */
+:root{--type-body:15px;--type-small:12px}
+body{font-size:var(--type-body);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.brand{font-size:15px;letter-spacing:.1em;white-space:nowrap}
+.nav{gap:clamp(10px,1.25vw,18px);font-size:12px;letter-spacing:.015em;white-space:nowrap}
+.nav a{padding:10px 0;transition:color .18s ease}
+.nav a:focus-visible,.nav-cta:focus-visible,.menu-btn:focus-visible,.primary-btn:focus-visible{outline:2px solid #b9aaff;outline-offset:4px}
+.nav-mobile-hub{display:none}
+.nav-cta{font-size:12px;padding:12px 15px;white-space:nowrap}
+.menu-btn{font-size:12px;font-weight:850;letter-spacing:.08em;cursor:pointer}
+.hero-copy p{font-size:16px;line-height:1.75}
+.section-head p{font-size:14px}
+.game-info h3{font-size:19px;line-height:1.25;min-height:0}
+.game-info p{font-size:12px;line-height:1.55}
+.game-info .tag{font-size:10px;letter-spacing:.13em}
+.game-play{font-size:12px;min-height:40px}
+.status{font-size:10px}
+.info-card p,.support-panel p{font-size:13px}
+.reward-card p{font-size:14px}
+.reward-note{font-size:13px}
+.faq-list summary{font-size:14px}
+.faq-list details p,.news-card p{font-size:13px}
+.news-card small{font-size:11px}
+.footer{font-size:12px}
+@media(max-width:1050px){
+  .topbar{gap:12px}
+  .nav{gap:10px;font-size:11px}
+  .brand{font-size:14px;letter-spacing:.07em}
+  .nav-cta{font-size:11px;padding:10px 11px}
+}
+@media(max-width:900px){
+  .topbar{height:74px}
+  .menu-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 13px}
+  .nav-cta{display:none}
+  .nav{display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;padding:16px;background:#101827;border:1px solid #ffffff25;border-radius:16px;box-shadow:0 22px 55px #0009;flex-direction:column;align-items:stretch;gap:3px;white-space:normal}
+  .nav.open{display:flex}
+  .nav a{display:flex;align-items:center;min-height:44px;padding:10px 12px;border-radius:9px;font-size:14px}
+  .nav a:hover{background:#ffffff0d}
+  .nav .nav-mobile-hub{display:flex;margin-top:7px;background:var(--site-primary);color:#fff;font-weight:900}
+}
+@media(max-width:620px){
+  .hero-copy p{font-size:15px}
+  .section-head p{font-size:14px}
+  .game-info h3{font-size:16px}
+  .game-info p{font-size:12px}
+  .footer-links{flex-wrap:wrap;gap:12px 18px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
 </style>
 </head>
 <body><div id="chomePageLoader" role="status" aria-label="Loading CHOME Game Studio"><div class="chome-loader-inner"><div class="chome-loader-mark">C</div><div>CHOME GAME STUDIO</div><div class="chome-loader-track"></div></div></div>
 <div id="app">
   <header class="shell topbar">
     <a class="brand" href="#home" aria-label="CHOME Game Studio home"><span class="brand-mark">C</span><span>CHOME <span style="color:#a895ff">STUDIO</span></span></a>
-    <nav class="nav" id="nav"><a href="#games">GAMES</a><a href="leaderboards.html">LEADERBOARDS</a><a href="#how-it-works">HOW IT WORKS</a><a href="#rewards">REWARDS</a><a href="#news">NEWS</a><a href="#about">ABOUT</a><a href="#support">SUPPORT</a><a href="player.html">PLAYER</a></nav>
+    <nav class="nav" id="nav" aria-label="Main navigation"><a href="#home">HOME</a><a href="#games">GAMES</a><a href="leaderboards.html">LEADERBOARDS</a><a href="#how-it-works">HOW IT WORKS</a><a href="#rewards">REWARDS</a><a href="#news">NEWS</a><a href="#about">ABOUT</a><a href="#faq">FAQ</a><a href="#support">SUPPORT</a><a class="nav-mobile-hub" href="player.html">PLAYER HUB ↗</a></nav>
     <a class="nav-cta" href="player.html">PLAYER SIGN IN <span>↗</span></a>
-    <button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Open navigation menu" aria-controls="nav" aria-expanded="false">☰ <span>MENU</span></button>
   </header>
   <main>
     <section class="shell hero" id="home">
@@ -260,8 +310,15 @@ h1, h2, h3 { font-family: var(--site-font-heading); }
 <script>
 const menuButton = document.getElementById('menuBtn');
 const nav = document.getElementById('nav');
-menuButton.addEventListener('click', () => nav.classList.toggle('open'));
-nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => nav.classList.remove('open')));
+function setMenuOpen(open) {
+  nav.classList.toggle('open', open);
+  menuButton.setAttribute('aria-expanded', String(open));
+  menuButton.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
+  menuButton.querySelector('span').textContent = open ? 'CLOSE' : 'MENU';
+}
+menuButton.addEventListener('click', () => setMenuOpen(!nav.classList.contains('open')));
+nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => setMenuOpen(false)));
+document.addEventListener('keydown', event => { if (event.key === 'Escape') setMenuOpen(false); });
 document.getElementById('year').textContent = new Date().getFullYear();
 const gameCards = [...document.querySelectorAll('.game-card')];
 const searchBox = document.getElementById('gameSearch');
