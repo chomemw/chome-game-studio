@@ -53,6 +53,23 @@ body.embed-mode main{padding:18px 0 24px}
 body.embed-mode main>.eyebrow,body.embed-mode main>h1,body.embed-mode main>.intro,body.embed-mode main>.note{display:none}
 body.embed-mode .board{padding:18px;border-radius:14px;box-shadow:none;background:transparent;border:0}
 @media(max-width:600px){body.embed-mode main{padding:8px 0 16px}body.embed-mode .board{padding:10px}}
+
+/* Personal competition profile */
+.profile-section{margin:0 0 28px;background:linear-gradient(145deg,#1b2440,#101827);border:1px solid #8b6cff55;border-radius:20px;padding:20px}
+.profile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+.profile-head h2{font-size:22px;letter-spacing:-.04em;margin:6px 0}
+.profile-copy{font-size:11px;color:#aab4c9;line-height:1.6;margin:0}
+.profile-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.profile-stat{background:#0b1220;border:1px solid var(--line);border-radius:13px;padding:13px;min-width:0}
+.profile-stat-label{font-size:8px;letter-spacing:.1em;font-weight:950;color:#98a5bb}
+.profile-stat-value{font-size:23px;font-weight:950;letter-spacing:-.04em;margin-top:7px;color:#fff;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.profile-stat-value.gold{color:#ffe08a}.profile-stat-value.purple{color:#c9bbff}
+.profile-bests{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.profile-best{background:#0b1220;border:1px solid var(--line);border-radius:13px;padding:13px}
+.profile-best-name{font-size:9px;font-weight:950;letter-spacing:.08em;color:#aab4c9}
+.profile-best-score{font-size:20px;font-weight:950;color:#ffe08a;margin-top:7px;font-variant-numeric:tabular-nums}
+.profile-status{font-size:11px;color:#aab4c9;padding:10px 2px}
+@media(max-width:700px){.profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-grid .profile-stat:last-child{grid-column:span 2}.profile-bests{grid-template-columns:1fr}.profile-section{padding:14px}}
 </style>
 </head>
 <body class="">
@@ -76,6 +93,26 @@ body.embed-mode .board{padding:18px;border-radius:14px;box-shadow:none;backgroun
  <div id="weeklyTournamentStatus" class="weekly-copy" role="status" aria-live="polite">Loading weekly tournaments…</div>
  <div id="weeklyTournamentGrid" class="weekly-grid"><div class="daily-loading">Loading tournament schedule…</div></div>
  <p class="weekly-footnote">Tournament scores use verified game results recorded between the displayed start and end times. Qualification rules are shown before you compete. Prize details are informational only; no prize is guaranteed unless separately confirmed and funded.</p>
+</section>
+
+<section class="profile-section" aria-labelledby="myCompetitionProfileTitle">
+ <div class="profile-head"><div><div class="eyebrow">YOUR COMPETITIVE RECORD</div><h2 id="myCompetitionProfileTitle">MY COMPETITION PROFILE</h2><p class="profile-copy">Your record across completed daily challenges and weekly tournaments, calculated from verified game results.</p></div></div>
+ <div id="competitionProfileStatus" class="profile-status" role="status" aria-live="polite">Loading your competition profile…</div>
+ <div id="competitionProfile" hidden>
+  <div class="profile-grid">
+   <div class="profile-stat"><div class="profile-stat-label">OVERALL COMPETITION RANK</div><div class="profile-stat-value purple" id="profileRank">—</div></div>
+   <div class="profile-stat"><div class="profile-stat-label">COMPETITIONS ENTERED</div><div class="profile-stat-value" id="profileEntered">0</div></div>
+   <div class="profile-stat"><div class="profile-stat-label">WINS</div><div class="profile-stat-value gold" id="profileWins">0</div></div>
+   <div class="profile-stat"><div class="profile-stat-label">TOP-THREE FINISHES</div><div class="profile-stat-value" id="profilePodiums">0</div></div>
+   <div class="profile-stat"><div class="profile-stat-label">TOTAL COMPETITION POINTS</div><div class="profile-stat-value gold" id="profilePoints">0</div></div>
+  </div>
+  <div class="profile-subhead" style="font-size:10px;font-weight:950;letter-spacing:.12em;color:#b9aaff;margin:18px 0 9px">PERSONAL BEST SCORES</div>
+  <div class="profile-bests">
+   <div class="profile-best"><div class="profile-best-name">🍬 CANDY TRAIL</div><div class="profile-best-score" id="bestCandy">0</div></div>
+   <div class="profile-best"><div class="profile-best-name">🍓 FRUIT FANCY</div><div class="profile-best-score" id="bestFruit">0</div></div>
+   <div class="profile-best"><div class="profile-best-name">🧩 CHOME BLOCKS</div><div class="profile-best-score" id="bestBlocks">0</div></div>
+  </div>
+ </div>
 </section>
 <section class="board" aria-label="CHOME global and game leaderboards">
 <div class="board-head"><span class="game-label" id="boardTitle">🌍 ALL GAMES · GLOBAL</span><button class="refresh" id="refresh" type="button">↻ REFRESH</button></div>
@@ -270,7 +307,29 @@ async function loadLeaderboard(){
 document.querySelectorAll("[data-period]").forEach(b=>b.addEventListener("click",()=>setPeriod(b.dataset.period)));
 document.querySelectorAll("[data-game]").forEach(b=>b.addEventListener("click",()=>setGame(b.dataset.game)));
 $("refresh").addEventListener("click",loadLeaderboard);
-async function initialize(){const {data}=await supabase.auth.getSession();currentUserId=data.session?.user?.id||null;await Promise.all([loadLeaderboard(),loadDailyCompetitions(),loadWeeklyTournaments()]);}
+
+async function loadCompetitionProfile(){
+ const status=$("competitionProfileStatus"),panel=$("competitionProfile");
+ if(!currentUserId){status.textContent="Sign in to view your personal competition statistics.";panel.hidden=true;return;}
+ status.textContent="Loading your verified competition record…";
+ const {data,error}=await supabase.rpc("get_my_competition_profile");
+ if(error){console.error("Competition profile load failed:",error);status.textContent="Your competition profile is temporarily unavailable. Please refresh.";panel.hidden=true;return;}
+ let p=data;if(typeof p==="string"){try{p=JSON.parse(p);}catch{p=null;}}
+ if(!p){status.textContent="No competition profile data is available yet.";panel.hidden=true;return;}
+ const fmt=v=>Number(v||0).toLocaleString();
+ $("profileRank").textContent=p.competition_rank?"#"+fmt(p.competition_rank):"—";
+ $("profileEntered").textContent=fmt(p.competitions_entered);
+ $("profileWins").textContent=fmt(p.wins);
+ $("profilePodiums").textContent=fmt(p.top_three_finishes);
+ $("profilePoints").textContent=fmt(p.total_competition_points);
+ $("bestCandy").textContent=fmt(p.personal_bests?.candy_trail);
+ $("bestFruit").textContent=fmt(p.personal_bests?.fruit_fancy);
+ $("bestBlocks").textContent=fmt(p.personal_bests?.chome_blocks);
+ panel.hidden=false;
+ status.textContent="Your stats are based on verified completed daily challenges and closed weekly tournaments. Competition points add the verified score or level metric recorded for each competition entry.";
+}
+
+async function initialize(){const {data}=await supabase.auth.getSession();currentUserId=data.session?.user?.id||null;await Promise.all([loadLeaderboard(),loadDailyCompetitions(),loadWeeklyTournaments(),loadCompetitionProfile()]);}
 initialize();
 </script>
 </body>
