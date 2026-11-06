@@ -375,6 +375,42 @@ footer{font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
+
+/* CHOME homepage-aligned visual system */
+:root{
+ --bg:#090d18;
+ --line:#ffffff1c;
+ --muted:#aab3c7;
+ --purple:#8b6cff;
+ --white:#f7f7fb;
+ --chome-sidebar:#101827;
+ --chome-panel:#17223b;
+ --chome-accent:#8b6cff;
+ --site-background:#090d18;
+ --site-primary:#8b6cff;
+ --site-secondary:#17223b;
+ --site-text:#f7f7fb;
+}
+body{background:#090d18;color:#f7f7fb}
+.player-sidebar{background:linear-gradient(180deg,#101827 0%,#090d18 100%);border-right-color:#ffffff1c}
+.dashboard-topbar{background:#090d18eF;border-bottom-color:#ffffff1c}
+.panel,.profile-panel{background:linear-gradient(145deg,#17223b 0%,#111a2c 100%);border-color:#ffffff1c}
+.game-card,.menu-popover{background:#111a2c;border-color:#ffffff1c}
+.wallet-activity{background:linear-gradient(145deg,#17223b,#111a2c);border-color:#ffffff1c}
+.wallet-panel{background:radial-gradient(circle at 88% 5%,#8b6cff30,transparent 34%),linear-gradient(135deg,#211d3c 0%,#17223b 54%,#111a2c 100%);border-color:#8b6cff66}
+.payout-panel{background:linear-gradient(145deg,#17223b,#111a2c);border-color:#ffffff1c}
+.payout-card,.field input,.field textarea,.payout-field input,.account-meta{background:#090d18}
+.menu-toggle,.sidebar-mobile-toggle{background:#17223b;border-color:#ffffff24}
+.sidebar-nav a.active{background:linear-gradient(100deg,#8b6cff38,#8b6cff12);border-color:#8b6cff66;color:#f7f7fb}
+.primary,.payout-button{background:#8b6cff;box-shadow:0 10px 28px #8b6cff38}
+.primary:hover,.payout-button:hover{filter:brightness(1.1)}
+.eyebrow,.profile-word,.handle,.sidebar-brand small,.wallet-label{color:#b9aaff}
+h1,h2,h3,.topbar-title strong{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.intro,.sub,.game-card p,.payout-card p{color:#aab3c7}
+@media(max-width:760px){
+ .player-sidebar{background:linear-gradient(180deg,#101827,#090d18);box-shadow:18px 0 55px #0009}
+}
+
 </style>
 </head>
 <body>
