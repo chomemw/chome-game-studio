@@ -12,7 +12,7 @@
 *{box-sizing:border-box}body{margin:0;font-family:Fredoka,cursive,sans-serif;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 .font-nunito{font-family:Nunito,sans-serif}.game-board{box-shadow:0 15px 35px #0004,inset 0 0 15px #ffffff66;background:linear-gradient(135deg,#ffffff40,#ffffff0d);backdrop-filter:blur(12px)}
 #grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(6,minmax(0,1fr));gap:clamp(4px,1.4vw,8px);width:100%;height:100%}
-#timeText{font-variant-numeric:tabular-nums}#timeText.urgent{color:#fecaca;animation:timerPulse .7s infinite alternate}@keyframes timerPulse{to{opacity:.55}}
+
 .tile{position:relative;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#ffffff1c;border:1px solid #ffffff38;box-shadow:inset 0 1px 5px #fff2;min-width:0;min-height:0;font-size:clamp(28px,8vw,56px);cursor:pointer;transition:transform .13s;touch-action:none}
 .tile.selected{transform:scale(1.13);filter:drop-shadow(0 0 10px #ffeb3b);z-index:3}
 .tile .fruit-icon{pointer-events:none;filter:drop-shadow(0 3px 2px #0005)}
@@ -76,8 +76,7 @@ function levelConfig(index){if(index<LEVELS.length)return LEVELS[index];const n=
 function movesForLevel(index){return Math.max(12,30-Math.floor(index/3));}
 let level=0,score=0,target=400,moves=0,initialMoves=30,movesRemaining=30,continueCount=0,board=[],path=[],dragging=false,busy=false,sound=true,audio=null,particles=[],boardScanTimer=null;
 let currentPlayer=null,saveChain=Promise.resolve(),initialized=false,scoreSubmittedForRun=false,activeGameSessionId=null,gameSessionRequest=0,gameRng=null,verifiedMoveLog=[],verifiedSessionPending=false;
-let extraTimeUsed=0,halfwayClaimedThisRun=false,gameMenuPaused=false,progressSyncChain=Promise.resolve(),verifiedMoveChoxEarned=0;
-const LEVEL_DURATION=120;let timeLeft=LEVEL_DURATION,levelDeadline=0,timerId=null;
+let halfwayClaimedThisRun=false,gameMenuPaused=false,progressSyncChain=Promise.resolve(),verifiedMoveChoxEarned=0;
 function setCloudStatus(text){const el=document.getElementById("cloudSaveMessage");if(el)el.textContent=text;const suffix=document.getElementById("cloudSaveGuestSuffix");if(suffix)suffix.style.display=currentPlayer?"none":"inline";}
 function setLeaderboardStatus(text){const el=document.getElementById("leaderboardMessage");if(el)el.textContent=text;}
 function setChoxStatus(text){const el=document.getElementById("choxStatus");if(el)el.textContent=text;}
@@ -222,7 +221,7 @@ function start(i=level,shouldSave=true){gameMenuPaused=false;gameRng=null;verifi
 function makeBoard(ice,bombs){board=Array.from({length:N},(_,r)=>Array.from({length:N},(_,c)=>({fruit:fruit(),ice:false,bomb:false})));let place=(key,count)=>{let n=0;while(n<count){let r=gameRandom()*N|0,c=gameRandom()*N|0;if(!board[r][c][key]&&!(key==='bomb'&&board[r][c].ice)){board[r][c][key]=true;n++}}};place('ice',ice);place('bomb',bombs);render()}
 function render(){grid.innerHTML='';board.forEach((row,r)=>row.forEach((cell,c)=>{let el=document.createElement('div');el.className='tile';el.dataset.r=r;el.dataset.c=c;let icon=document.createElement('span');icon.className='fruit-icon';icon.textContent=cell.bomb?'💣':cell.fruit.emoji;el.append(icon);if(cell.ice){let ice=document.createElement('div');ice.className='ice-layer';ice.innerHTML='<i class="fas fa-snowflake animate-pulse"></i>';el.append(ice)}grid.append(el)}))}
 function update(){$('levelText').textContent=level+1;$('scoreText').textContent=score.toLocaleString();$('targetText').textContent=target.toLocaleString();$('movesText').textContent=String(movesRemaining);$('progressBar').style.width=Math.min(100,score/target*100)+'%'}
-function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}levelDeadline=Date.now()+Math.max(0,timeLeft)*1000}
+function stopTimer(){}
 function startTimer(){update()}
 function hasAvailableMove(){for(let r=0;r<N;r++)for(let c=0;c<N;c++){const first=board[r][c];if(first.ice||first.bomb)continue;const type=first.fruit.type,used=new Set([r*N+c]);const extend=(rr,cc)=>{if(used.size>=3)return true;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const nr=rr+dr,nc=cc+dc,k=nr*N+nc;if(nr<0||nr>=N||nc<0||nc>=N||used.has(k))continue;const cell=board[nr][nc];if(cell.ice||(!cell.bomb&&cell.fruit.type!==type))continue;used.add(k);if(extend(nr,nc))return true;used.delete(k)}return false};if(extend(r,c))return true}return false}
 function findPlayableTriple(){for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(board[r][c].ice||board[r][c].bomb)continue;const chain=[{r,c}],walk=()=>{if(chain.length===3)return true;const last=chain[chain.length-1];for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const nr=last.r+dr,nc=last.c+dc;if(nr<0||nr>=N||nc<0||nc>=N||board[nr][nc].ice||chain.some(p=>p.r===nr&&p.c===nc))continue;chain.push({r:nr,c:nc});if(walk())return true;chain.pop()}return false};if(walk())return chain.slice()}return []}
@@ -250,7 +249,7 @@ grid.addEventListener('pointerdown',down);window.addEventListener('pointermove',
 $('soundBtn').addEventListener('click',()=>{sound=!sound;$('soundBtn').innerHTML=sound?'<i class="fas fa-volume-up"></i>':'<i class="fas fa-volume-mute text-red-300"></i>'});
 $('refreshBtn').addEventListener('click',refreshBoard);$('modalActionBtn').addEventListener('click',()=>score>=target?start(level+1):start(level));
 function particlesLoop(){fc.clearRect(0,0,fx.width,fx.height);particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.08;p.life-=.035;fc.globalAlpha=Math.max(0,p.life);fc.fillStyle=p.color;fc.beginPath();fc.arc(p.x,p.y,p.r,0,Math.PI*2);fc.fill()});fc.globalAlpha=1;particles=particles.filter(p=>p.life>0);requestAnimationFrame(particlesLoop)}
-async function initializeGame(){resize();start(0,false);particlesLoop();initialized=true;startBoardScanner();await refreshPlayerSession();if(!busy&&!dragging&&moves>0&&timeLeft>0)scanBoardAutomatically();}
+async function initializeGame(){resize();start(0,false);particlesLoop();initialized=true;startBoardScanner();await refreshPlayerSession();if(!busy&&!dragging&&moves>0&&movesRemaining>0)scanBoardAutomatically();}
 supabase.auth.onAuthStateChange((event)=>{if(["SIGNED_IN","SIGNED_OUT","TOKEN_REFRESHED","USER_UPDATED"].includes(event))setTimeout(()=>refreshPlayerSession(),0)});
 window.addEventListener("pageshow",()=>{if(initialized)refreshPlayerSession()});
 window.addEventListener('resize',resize);window.addEventListener('load',initializeGame);
