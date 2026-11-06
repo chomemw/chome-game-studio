@@ -13,7 +13,7 @@
 <div class="progress"><i id="bar"></i></div>
 <section class="board-wrap"><div class="grid" id="grid" aria-label="Candy game board"></div></section>
 <div class="actions"><button class="btn" id="restart" style="flex:1">↻ Restart</button><button class="btn secondary" id="shuffle">🔀 Shuffle</button><button class="btn secondary" id="sound">🔊 Sound on</button></div>
-<section class="panel"><b id="message">Connect 3 or more matching candies.</b><div style="margin-top:5px">Tap a candy, then tap a neighbouring candy to swap.</div></section>
+<section class="panel"><b id="message">Connect 3 or more matching candies.</b><div id="choxStatus" style="margin-top:6px;color:#ffe36e;font-weight:700" aria-live="polite">CHOX rewards: 3–4 matches +5 · 5–6 +10 · 7–8 +15 · 9+ +20. First level clears: 100 / 110 / 121 / 133 / 146 CHOX.</div><div style="margin-top:5px">Tap a candy, then tap a neighbouring candy to swap.</div></section>
 <div class="tiny" id="cloudStatus">Progress saves on this device. Sign in to sync across devices.</div>
 </main>
 <div class="overlay" id="overlay"><div class="dialog"><div id="emoji" style="font-size:55px">🏆</div><h2 id="result">Sweet!</h2><p id="detail">Level complete.</p><div id="recordSummary" style="margin:12px 0;padding:10px;border-radius:14px;background:#ffffff80;font-weight:700;line-height:1.7">Score records</div><button class="btn" id="adContinue" disabled style="display:none">Rewarded ads not connected</button><button class="btn" id="continue">Continue</button></div></div>
