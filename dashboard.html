@@ -102,6 +102,12 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:#77839b;font-size:1
 @media(max-width:680px){.payout-grid{grid-template-columns:1fr}.payout-panel{padding:17px}}
 
 
+
+/* Player home surface: identity, quick play and community */
+.welcome-player-line{display:flex;align-items:center;gap:18px;min-width:0}.overview-player-avatar{width:68px;height:68px;flex:none;display:grid;place-items:center;overflow:hidden;border-radius:20px;border:1px solid #b9aaff66;background:linear-gradient(145deg,#392d68,#1a2440);font-size:28px;font-weight:950;color:#fff}.overview-player-avatar img{width:100%;height:100%;object-fit:cover}.overview-player-handle{margin-top:10px;color:#c7baff;font-size:10px;font-weight:900;letter-spacing:.12em}.overview-continue-section{margin:0 0 28px}.overview-section-head{display:flex;justify-content:space-between;align-items:end;gap:14px;margin-bottom:15px}.overview-section-head h2,.overview-community-panel h2{margin:7px 0 5px;font-size:23px;letter-spacing:-.045em}.overview-section-head p,.overview-community-panel p{margin:0;color:#9aa7bd;font-size:12px;line-height:1.6}.overview-text-link{border:0;background:transparent;color:#c7baff;font-size:10px;font-weight:950;letter-spacing:.08em;cursor:pointer;padding:10px 0}.overview-game-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.overview-game-card{min-width:0;min-height:205px;display:flex;flex-direction:column;align-items:flex-start;padding:19px;border:1px solid #ffffff1c;border-radius:18px;background:linear-gradient(145deg,#192642,#101827);transition:transform .18s,border-color .18s}.overview-game-card:hover{transform:translateY(-3px);border-color:#a895ff88}.overview-game-card.candy{background:radial-gradient(circle at 90% 5%,#ff8cbb24,transparent 40%),linear-gradient(145deg,#2b1d3d,#111827)}.overview-game-card.fruit{background:radial-gradient(circle at 90% 5%,#ffb75c24,transparent 40%),linear-gradient(145deg,#2b2736,#111827)}.overview-game-card.blocks{background:radial-gradient(circle at 90% 5%,#7da8ff24,transparent 40%),linear-gradient(145deg,#1c2943,#111827)}.overview-game-art{font-size:31px;margin-bottom:12px}.overview-game-tag{color:#b9aaff;font-size:8px;font-weight:950;letter-spacing:.12em}.overview-game-card strong{font-size:17px;margin-top:7px}.overview-game-card small{color:#aab3c7;font-size:11px;line-height:1.5;margin-top:5px}.overview-game-card b{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:auto;padding-top:17px;color:#d7ceff;font-size:9px;letter-spacing:.1em}.overview-game-card b span{font-size:16px}.overview-community-panel{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 0 28px;padding:20px 22px;border:1px solid #8b6cff45;border-radius:18px;background:radial-gradient(circle at 90% 0%,#8b6cff20,transparent 40%),linear-gradient(120deg,#171f37,#101827)}.overview-community-button{flex:none;border:1px solid #a895ff66;border-radius:11px;background:#8b6cff;color:white;padding:13px 16px;font-size:10px;font-weight:950;letter-spacing:.08em;cursor:pointer;box-shadow:0 8px 22px #8b6cff30}
+@media(max-width:760px){.overview-game-grid{grid-template-columns:1fr 1fr}.overview-game-card:last-child{grid-column:1/-1}.welcome-player-line{align-items:flex-start}.overview-player-avatar{width:56px;height:56px;border-radius:16px}}
+@media(max-width:520px){.welcome-panel{align-items:flex-start;flex-direction:column;padding:22px}.welcome-player-line{gap:12px}.overview-player-avatar{width:48px;height:48px;font-size:22px}.overview-game-grid{grid-template-columns:1fr}.overview-game-card:last-child{grid-column:auto}.overview-game-card{min-height:175px}.overview-section-head{align-items:flex-start}.overview-community-panel{align-items:flex-start;flex-direction:column}.overview-community-button{width:100%}}
+
 [hidden]{display:none!important}
 .leaderboard-section{margin-top:30px;scroll-margin-top:105px}.leaderboard-frame-wrap{overflow:hidden;border:1px solid #ffffff20;border-radius:20px;background:#090f1d;box-shadow:0 16px 45px #0003}.leaderboard-frame{display:block;width:100%;height:920px;border:0;background:#090d18}@media(max-width:600px){.leaderboard-frame{height:1050px}}
 
@@ -439,7 +445,7 @@ h1,h2,h3,.topbar-title strong{font-family:Inter,ui-sans-serif,system-ui,-apple-s
 <div class="dashboard-content">
 <header class="dashboard-topbar"><button class="sidebar-mobile-toggle" id="sidebarToggle" type="button" aria-expanded="false" aria-controls="playerSidebar" aria-label="Open navigation">☰</button><div class="topbar-title"><span class="eyebrow">CHOME GAME STUDIO</span><strong>PLAYER SPACE</strong></div><button class="profile-shortcut" id="profileShortcut" type="button" aria-label="Open your player profile"><span class="mini-avatar" id="headerAvatar">🎮</span><span class="profile-word">MY PROFILE</span><span class="profile-chevron">⌄</span></button><div class="header-actions"><nav class="menu-popover" id="playerMenu" aria-label="Player menu"></nav></div></header>
 <main id="top">
-<section class="welcome-panel" id="overviewWelcome"><div><div class="eyebrow">YOUR PERSONAL GAMING SPACE</div><h1>Welcome back, <span id="welcomePlayerName">Player</span>.</h1><p class="intro">Your games, achievements and CHOX rewards — all in one place. Pick up where you left off and explore what is waiting for you.</p></div><a class="welcome-action" href="#games">EXPLORE GAMES <span>→</span></a></section>
+<section class="welcome-panel" id="overviewWelcome"><div class="welcome-player-line"><div class="overview-player-avatar" id="overviewPlayerAvatar">🎮</div><div><div class="eyebrow">YOUR PERSONAL GAMING SPACE</div><h1>Welcome back, <span id="welcomePlayerName">Player</span>.</h1><p class="intro">Your games, achievements and CHOX rewards — all in one place. Pick up where you left off and explore what is waiting for you.</p><div class="overview-player-handle" id="overviewPlayerHandle">YOUR CHOME PLAYER PROFILE</div></div></div><a class="welcome-action" href="#games">EXPLORE GAMES <span>→</span></a></section>
 <section class="overview-wallet-summary" id="overviewWalletSummary" aria-label="Your balances">
  <div class="overview-wallet-card overview-chox-card">
   <div class="overview-wallet-card-top"><span>CHOX BALANCE</span><span class="overview-wallet-symbol">C</span></div>
@@ -459,6 +465,18 @@ h1,h2,h3,.topbar-title strong{font-family:Inter,ui-sans-serif,system-ui,-apple-s
  <div class="overview-mission-icon">🎯</div>
  <div class="overview-mission-copy"><div class="eyebrow">PLAY · COMPLETE · EARN</div><h2>YOUR DAILY MISSIONS</h2><p id="overviewMissionSummary">Your daily game goals and Game Points rewards are ready. Complete verified levels, build your streak and unlock the bonus chest.</p></div>
  <button type="button" class="overview-mission-button" id="overviewOpenMissions">OPEN MISSIONS <span>→</span></button>
+</section>
+<section class="overview-continue-section" aria-labelledby="overviewContinueHeading">
+ <div class="overview-section-head"><div><div class="eyebrow">YOUR NEXT ADVENTURE</div><h2 id="overviewContinueHeading">CONTINUE PLAYING</h2><p>Jump straight back into a CHOME game.</p></div><button type="button" class="overview-text-link" id="overviewAllGames">VIEW ALL GAMES →</button></div>
+ <div class="overview-game-grid">
+  <a class="overview-game-card candy" href="candy-trail.html"><span class="overview-game-art">🍬</span><span class="overview-game-tag">MATCH · COMBOS · LEVELS</span><strong>Candy Trail Saga</strong><small>Continue your candy adventure</small><b>PLAY NOW <span>→</span></b></a>
+  <a class="overview-game-card fruit" href="fruit-fancy.html"><span class="overview-game-art">🍓</span><span class="overview-game-tag">PUZZLE · CLOUD SAVES</span><strong>Fruit Fancy</strong><small>Match fruits and beat your best</small><b>PLAY NOW <span>→</span></b></a>
+  <a class="overview-game-card blocks" href="chome-blocks.html"><span class="overview-game-art">🧩</span><span class="overview-game-tag">PUZZLE · HIGH SCORES</span><strong>CHOME Blocks</strong><small>Fit shapes and clear the board</small><b>PLAY NOW <span>→</span></b></a>
+ </div>
+</section>
+<section class="overview-community-panel" aria-label="Player rankings">
+ <div><div class="eyebrow">PLAY WITH THE WORLD</div><h2>SEE WHERE YOU STAND</h2><p>Check the CHOME leaderboard and see how players are climbing the rankings.</p></div>
+ <button type="button" class="overview-community-button" id="overviewOpenLeaderboard">VIEW LEADERBOARD →</button>
 </section>
 <section class="announcement-panel" id="whatsNewPanel"><div class="eyebrow">STUDIO UPDATES</div><h2>What’s New at CHOME</h2><div class="announcement-list" id="announcementList"><div class="announcement-empty">Loading studio updates…</div></div></section>
 <div class="profile-overlay" id="profileOverlay" aria-hidden="true"><section class="panel profile-panel" id="profile" role="dialog" aria-modal="true" aria-labelledby="profileDisplayHeading"><button class="profile-close" id="closeProfile" type="button" aria-label="Close profile">×</button>
@@ -631,10 +649,10 @@ function friendly(error){
 }
 function busy(button,on,label){button.disabled=on;button.textContent=on?'PLEASE WAIT…':label}
 function renderAvatar(url,name){
- const box=$('avatarPreview'),mini=$('headerAvatar');
-box.innerHTML='';mini.innerHTML='';
- if(url){const img=document.createElement('img');img.src=url;img.alt='Player avatar';box.append(img);const small=document.createElement('img');small.src=url;small.alt='';mini.append(small)}
- else {const initial=(name||'🎮').trim().charAt(0).toUpperCase()||'🎮';box.textContent=initial;mini.textContent=initial}
+ const box=$('avatarPreview'),mini=$('headerAvatar'),overview=$('overviewPlayerAvatar');
+box.innerHTML='';mini.innerHTML='';if(overview)overview.innerHTML='';
+ if(url){const img=document.createElement('img');img.src=url;img.alt='Player avatar';box.append(img);const small=document.createElement('img');small.src=url;small.alt='';mini.append(small);if(overview){const large=document.createElement('img');large.src=url;large.alt='Your player avatar';overview.append(large)}}
+ else {const initial=(name||'🎮').trim().charAt(0).toUpperCase()||'🎮';box.textContent=initial;mini.textContent=initial;if(overview)overview.textContent=initial}
 }
 async function loadAnnouncements(){const host=$('announcementList');if(!host)return;const{data,error}=await supabase.rpc('get_chome_announcements');host.replaceChildren();if(error){const p=document.createElement('div');p.className='announcement-empty';p.textContent='Studio updates are temporarily unavailable.';host.append(p);return;}if(!data?.length){const p=document.createElement('div');p.className='announcement-empty';p.textContent='No new announcements right now. Check back soon.';host.append(p);return;}data.forEach(item=>{const card=document.createElement('article');card.className='announcement-item';const title=document.createElement('strong');title.textContent=item.title;const body=document.createElement('p');body.textContent=item.body;const date=document.createElement('span');date.className='announcement-date';date.textContent=item.published_at?new Date(item.published_at).toLocaleString():'';card.append(title,body,date);host.append(card);});}
 async function loadProfile(user){
@@ -643,6 +661,7 @@ async function loadProfile(user){
  if(error){message('You are signed in, but your player profile could not be loaded: '+friendly(error));return}
  $('profileDisplayHeading').textContent=data.display_name||data.username;
  $('welcomePlayerName').textContent=(data.display_name||data.username||'Player').split(' ')[0];
+ $('overviewPlayerHandle').textContent='@'+data.username+' · CHOME PLAYER';
  $('profileHandle').textContent='@'+data.username;
  $('editDisplayName').value=data.display_name||'';
  $('editUsername').value=data.username||'';
@@ -882,6 +901,8 @@ payoutNav?.addEventListener('click',event=>{event.preventDefault();showPlayerVie
 competitionsNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('competitions')});
 rewardsNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('rewards')});
 $('overviewOpenMissions')?.addEventListener('click',()=>showPlayerView('rewards'));
+$('overviewAllGames')?.addEventListener('click',()=>showPlayerView('games'));
+$('overviewOpenLeaderboard')?.addEventListener('click',()=>showPlayerView('competitions'));
 referralNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('referrals')});
 helpNav?.addEventListener('click',event=>{event.preventDefault();showPlayerView('help')});
 
