@@ -76,13 +76,13 @@ function levelConfig(index){if(index<LEVELS.length)return LEVELS[index];const n=
 function movesForLevel(index){return Math.max(12,30-Math.floor(index/3));}
 let level=0,score=0,target=400,moves=0,initialMoves=30,movesRemaining=30,continueCount=0,board=[],path=[],dragging=false,busy=false,sound=true,audio=null,particles=[],boardScanTimer=null;
 let currentPlayer=null,saveChain=Promise.resolve(),initialized=false,scoreSubmittedForRun=false,activeGameSessionId=null,gameSessionRequest=0,gameRng=null,verifiedMoveLog=[],verifiedSessionPending=false;
-let halfwayClaimedThisRun=false,gameMenuPaused=false,progressSyncChain=Promise.resolve(),verifiedMoveChoxEarned=0;
+let halfwayClaimedThisRun=false,gameMenuPaused=false,progressSyncChain=Promise.resolve(),verifiedMoveChoxEarned=0,levelRewardPromise=null;
 function setCloudStatus(text){const el=document.getElementById("cloudSaveMessage");if(el)el.textContent=text;const suffix=document.getElementById("cloudSaveGuestSuffix");if(suffix)suffix.style.display=currentPlayer?"none":"inline";}
 function setLeaderboardStatus(text){const el=document.getElementById("leaderboardMessage");if(el)el.textContent=text;}
 function setChoxStatus(text){const el=document.getElementById("choxStatus");if(el)el.textContent=text;}
 async function claimChox(stage){
  if(!currentPlayer){setChoxStatus("Sign in to earn CHOX from verified fruit connections.");return;}
- setChoxStatus("CHOX rewards are credited automatically after each server-verified connection.");
+ setChoxStatus("Verified move rewards are processed by the server. Your CHOX total will update after confirmation.");
 }
 async function beginVerifiedRun(){
  const requestId=++gameSessionRequest;activeGameSessionId=null;verifiedSessionPending=false;
@@ -118,19 +118,44 @@ async function queueVerifiedProgress(){
  return progressSyncChain;
 }
 async function submitLevelScore(){
- if(scoreSubmittedForRun)return;scoreSubmittedForRun=true;setLeaderboardStatus("Verifying your completed level and CHOX…");
- try{
-  const {data:authData,error:authError}=await supabase.auth.getSession();if(authError)throw authError;
-  const player=authData.session?.user||null;if(!player){currentPlayer=null;setLeaderboardStatus("Sign in to submit a game score to the rankings.");setChoxStatus("Sign in again before submitting this level's CHOX rewards.");return;}
-  currentPlayer=player;if(!activeGameSessionId){setLeaderboardStatus("This run has no verified session. Restart the level after signing in to earn CHOX.");setChoxStatus("No verified reward session was active for this run. Please restart the level.");return;}
-  const sessionId=activeGameSessionId,userId=player.id;await progressSyncChain;
-  const {data:check,error:checkError}=await supabase.auth.getSession();if(checkError)throw checkError;
-  if(check.session?.user?.id!==userId)throw new Error("Sign-in changed before reward submission.");currentPlayer=check.session.user;
-  const {data,error}=await supabase.functions.invoke("game-session",{body:{action:"complete",session_id:sessionId,score,moves,events:verifiedMoveLog}});
-  if(error)throw error;if(!data?.ok||!data?.result?.accepted)throw new Error(data?.error||"The game result was not accepted.");
-  activeGameSessionId=null;const rewards=data.rewards||{},stage=Number(rewards.stage_chox_credited||0),moveChox=Number(rewards.move_chox_credited||0),gamePoints=Number(rewards.game_points_credited||0);verifiedMoveChoxEarned=moveChox;
-  setChoxStatus("✓ Level verified · "+moveChox.toLocaleString()+" move CHOX · "+stage.toLocaleString()+" first-clear CHOX · "+gamePoints.toLocaleString()+" Game Points.");setLeaderboardStatus("✓ Verified level score submitted.");
- }catch(error){console.error("Fruit Fancy verified score submission failed:",error);activeGameSessionId=null;setLeaderboardStatus("This run could not be fully verified. Start a fresh level to try again.");setChoxStatus("Some CHOX progress could not be confirmed. Please check your wallet activity.");}
+ if(levelRewardPromise)return levelRewardPromise;
+ if(scoreSubmittedForRun)return null;
+ scoreSubmittedForRun=true;
+ levelRewardPromise=(async()=>{
+  setLeaderboardStatus("Verifying your completed level and CHOX…");
+  try{
+   const {data:authData,error:authError}=await supabase.auth.getSession();
+   if(authError)throw authError;
+   const player=authData.session?.user||null;
+   if(!player){currentPlayer=null;setLeaderboardStatus("Sign in to submit a game score to the rankings.");setChoxStatus("Sign in again before submitting this level's CHOX rewards.");return null;}
+   currentPlayer=player;
+   if(!activeGameSessionId){setLeaderboardStatus("This run has no verified session. Restart the level after signing in to earn CHOX.");setChoxStatus("REWARD NOT CONFIRMED · No verified session was active. Please restart the level.");return null;}
+   const sessionId=activeGameSessionId,userId=player.id;
+   await progressSyncChain;
+   const {data:check,error:checkError}=await supabase.auth.getSession();
+   if(checkError)throw checkError;
+   if(check.session?.user?.id!==userId)throw new Error("Sign-in changed before reward submission.");
+   currentPlayer=check.session.user;
+   const {data,error}=await supabase.functions.invoke("game-session",{body:{action:"complete",session_id:sessionId,score,moves,events:verifiedMoveLog}});
+   if(error)throw error;
+   if(!data?.ok||!data?.result?.accepted)throw new Error(data?.error||"The game result was not accepted.");
+   const rewards=data.rewards||{},stage=Number(rewards.stage_chox_credited||0),moveChox=Number(rewards.move_chox_credited||0),gamePoints=Number(rewards.game_points_credited||0);
+   activeGameSessionId=null;verifiedMoveChoxEarned=moveChox;
+   let walletBalance=null;
+   const {data:walletData,error:walletError}=await supabase.rpc("get_my_rewards_wallet");
+   if(!walletError){const wallet=Array.isArray(walletData)?walletData[0]:walletData;if(wallet&&wallet.points_balance!==undefined)walletBalance=Number(wallet.points_balance);}
+   const walletText=walletBalance===null?"Wallet balance unavailable; check your CHOX wallet.":"Current CHOX wallet: "+walletBalance.toLocaleString()+".";
+   setChoxStatus("✓ REWARDS CONFIRMED · "+moveChox.toLocaleString()+" move CHOX + "+stage.toLocaleString()+" first-clear CHOX + "+gamePoints.toLocaleString()+" Game Points. "+walletText);
+   setLeaderboardStatus("✓ Verified level score submitted and rewards confirmed.");
+   return {move:moveChox,stage,gamePoints,walletBalance};
+  }catch(error){
+   console.error("Fruit Fancy verified reward submission failed:",error);
+   setLeaderboardStatus("REWARD PENDING · This level could not yet be fully verified.");
+   setChoxStatus("REWARD PENDING · "+(error?.message||"Server confirmation failed")+". Your result has not been reported as paid.");
+   return null;
+  }
+ })();
+ return levelRewardPromise;
 }
 function gameSnapshot(){return {version:2,level,score,target,moves,initialMoves,movesRemaining,continueCount,sound,halfwayClaimedThisRun,savedAt:Date.now(),board:board.map(row=>row.map(cell=>({fruit:cell.fruit.type,ice:!!cell.ice,bomb:!!cell.bomb})))};}
 async function saveGame(){
@@ -204,7 +229,7 @@ function audioInit(){if(!audio)audio=new(window.AudioContext||window.webkitAudio
 function tone(type,p=1){if(!sound)return;try{audioInit();let o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime;o.connect(g);g.connect(audio.destination);o.type=type==='blast'?'sawtooth':type==='bomb'?'square':'triangle';let start=type==='bomb'?120:type==='blast'?150:380;o.frequency.setValueAtTime(start,t);o.frequency.exponentialRampToValueAtTime(type==='bomb'?30:type==='blast'?600:Math.max(650,500*p),t+(type==='blast'?.4:.18));g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.start(t);o.stop(t+.26)}catch(e){}}
 async function celebrationSound(){if(!sound)return;try{audioInit();if(audio.state==='suspended')await audio.resume();const now=audio.currentTime;[523.25,659.25,783.99,1046.5,1318.5].forEach((frequency,i)=>{const o=audio.createOscillator(),g=audio.createGain(),t=now+i*.13;o.type='triangle';o.frequency.setValueAtTime(frequency,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+.34);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+.36)})}catch(e){console.warn('Celebration sound unavailable',e)}}
 function resize(){let r=$('boardContainer').getBoundingClientRect();[line,fx].forEach(c=>{c.width=Math.round(r.width*devicePixelRatio);c.height=Math.round(r.height*devicePixelRatio);c.style.width=r.width+'px';c.style.height=r.height+'px';c.getContext('2d').setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)})}
-function start(i=level,shouldSave=true){gameMenuPaused=false;gameRng=null;verifiedMoveLog=[];level=Math.max(0,Math.min(9999,Number(i)||0));let cfg=levelConfig(level);score=0;target=cfg.target;moves=0;initialMoves=movesForLevel(level);movesRemaining=initialMoves;continueCount=0;verifiedMoveChoxEarned=0;progressSyncChain=Promise.resolve();halfwayClaimedThisRun=false;path=[];busy=false;dragging=false;scoreSubmittedForRun=false;makeBoard(cfg.ice,cfg.bombs);ensurePlayableBoard();$('modalOverlay').classList.remove('show');update();if(currentPlayer)beginVerifiedRun();if(shouldSave)saveGame()}
+function start(i=level,shouldSave=true){gameMenuPaused=false;gameRng=null;verifiedMoveLog=[];level=Math.max(0,Math.min(9999,Number(i)||0));let cfg=levelConfig(level);score=0;target=cfg.target;moves=0;initialMoves=movesForLevel(level);movesRemaining=initialMoves;continueCount=0;verifiedMoveChoxEarned=0;progressSyncChain=Promise.resolve();halfwayClaimedThisRun=false;path=[];busy=false;dragging=false;scoreSubmittedForRun=false;levelRewardPromise=null;makeBoard(cfg.ice,cfg.bombs);ensurePlayableBoard();$('modalOverlay').classList.remove('show');update();if(currentPlayer)beginVerifiedRun();if(shouldSave)saveGame()}
 function makeBoard(ice,bombs){board=Array.from({length:N},(_,r)=>Array.from({length:N},(_,c)=>({fruit:fruit(),ice:false,bomb:false})));let place=(key,count)=>{let n=0;while(n<count){let r=gameRandom()*N|0,c=gameRandom()*N|0;if(!board[r][c][key]&&!(key==='bomb'&&board[r][c].ice)){board[r][c][key]=true;n++}}};place('ice',ice);place('bomb',bombs);render()}
 function render(){grid.innerHTML='';board.forEach((row,r)=>row.forEach((cell,c)=>{let el=document.createElement('div');el.className='tile';el.dataset.r=r;el.dataset.c=c;let icon=document.createElement('span');icon.className='fruit-icon';icon.textContent=cell.bomb?'💣':cell.fruit.emoji;el.append(icon);if(cell.ice){let ice=document.createElement('div');ice.className='ice-layer';ice.innerHTML='<i class="fas fa-snowflake animate-pulse"></i>';el.append(ice)}grid.append(el)}))}
 function update(){$('levelText').textContent=level+1;$('scoreText').textContent=score.toLocaleString();$('targetText').textContent=target.toLocaleString();$('movesText').textContent=String(movesRemaining);$('progressBar').style.width=Math.min(100,score/target*100)+'%'}
@@ -230,7 +255,7 @@ function combo(txt){let e=document.createElement('div');e.className='combo-popup
 async function process(){busy=true;if(movesRemaining<=0){busy=false;path=[];endCheck();return;}if(currentPlayer&&activeGameSessionId)verifiedMoveLog.push({type:"move",path:path.map(p=>({r:p.r,c:p.c}))});moves++;movesRemaining--;let length=path.length,blast=length>=7,points=length*10+(blast?100:0);score+=points;if(score>=Math.ceil(target/2)&&!halfwayClaimedThisRun){if(currentPlayer){halfwayClaimedThisRun=true;claimChox("halfway")}else setChoxStatus("Sign in to collect your CHOX progress.")}tone(blast?'blast':'pop',1);if(blast)combo('JUICY BLENDER BLAST! 🍹');else if(length>=5)combo('FRUITTASTIC! 🌟');let root=$('boardContainer').getBoundingClientRect(),remove=new Set(path.map(p=>p.r+','+p.c));path.forEach(p=>{let cell=board[p.r][p.c],el=grid.querySelector('[data-r="'+p.r+'"][data-c="'+p.c+'"]'),r=el.getBoundingClientRect(),x=r.left+r.width/2-root.left,y=r.top+r.height/2-root.top;popup(x,y,'+'+Math.round(points/length));burst(x,y,cell.fruit.color);if(cell.bomb){tone('bomb');for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){let rr=p.r+dr,cc=p.c+dc;if(rr>=0&&rr<N&&cc>=0&&cc<N)remove.add(rr+','+cc)}}[[p.r-1,p.c],[p.r+1,p.c],[p.r,p.c-1],[p.r,p.c+1]].forEach(([r,c])=>{if(r>=0&&r<N&&c>=0&&c<N&&board[r][c].ice)board[r][c].ice=false})});grid.querySelectorAll('.tile').forEach(t=>t.classList.remove('selected'));path=[];update();await new Promise(r=>setTimeout(r,280));gravity(remove);await new Promise(r=>setTimeout(r,180));busy=false;if(score<target&&movesRemaining>0)ensurePlayableBoard();update();if(currentPlayer&&activeGameSessionId)queueVerifiedProgress();endCheck();saveGame()}
 function gravity(remove){remove.forEach(s=>{let [r,c]=s.split(',').map(Number);board[r][c]=null});for(let c=0;c<N;c++){let dest=N-1;for(let r=N-1;r>=0;r--)if(board[r][c]){board[dest][c]=board[r][c];if(dest!==r)board[r][c]=null;dest--}for(let r=dest;r>=0;r--)board[r][c]={fruit:fruit(),ice:false,bomb:gameRandom()<.08}}render()}
 async function submitLostRunReward(){if(!currentPlayer||!activeGameSessionId||continueCount<2||movesRemaining>0)return;try{await progressSyncChain;const {data,error}=await supabase.functions.invoke("game-session",{body:{action:"fail",session_id:activeGameSessionId}});if(error)throw error;if(!data?.ok)throw new Error(data?.error||"Lost-run reward was rejected.");activeGameSessionId=null;setChoxStatus("Lost-run reward credited: 100 Game Points + 2 CHOX.");}catch(error){console.error("Fruit Fancy lost-run reward failed:",error);setChoxStatus("Lost-run reward is waiting for server confirmation. Please keep this result.");}}
-async function endCheck(){if(score>=target){await celebrationSound();claimChox("complete");await submitLevelScore();show('🏆','🎉 CONGRATULATIONS!','You completed Level '+(level+1)+'! Your score has been recorded. '+$('choxStatus').textContent,'Next Level')}else if(movesRemaining<=0){tone('fail');if(continueCount>=2)await submitLostRunReward();show('💔','MOVES EXHAUSTED!',continueCount>=2?'Both rewarded continues are used. This level is officially lost.':'All moves are used. Rewarded-ad continues are not available until an ad provider is connected.','Restart Level')}}
+async function endCheck(){if(score>=target){await celebrationSound();await submitLevelScore();show('🏆','🎉 CONGRATULATIONS!','You completed Level '+(level+1)+'! '+$('choxStatus').textContent,'Next Level')}else if(movesRemaining<=0){tone('fail');if(continueCount>=2)await submitLostRunReward();show('💔','MOVES EXHAUSTED!',continueCount>=2?'Both rewarded continues are used. This level is officially lost.':'All moves are used. Rewarded-ad continues are not available until an ad provider is connected.','Restart Level')}}
 function show(icon,title,desc,btn){$('modalIcon').textContent=icon;$('modalTitle').textContent=title;$('modalDesc').textContent=desc;$('modalFinalScore').textContent=score.toLocaleString();$('modalMovesLeft').textContent=String(movesRemaining);$('modalContinues').textContent=continueCount+' / 2';$('modalContinueBtn').classList.toggle('hidden',score>=target||movesRemaining>0||continueCount>=2);$('modalContinueBtn').disabled=true;$('modalContinueBtn').textContent='Rewarded ads not connected';$('modalActionBtn').textContent=btn;$('modalOverlay').classList.add('show')}
 grid.addEventListener('pointerdown',down);window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
 $('soundBtn').addEventListener('click',()=>{sound=!sound;$('soundBtn').innerHTML=sound?'<i class="fas fa-volume-up"></i>':'<i class="fas fa-volume-mute text-red-300"></i>'});
