@@ -124,7 +124,7 @@ function renderRows(rows){
  $("myPosition").textContent=!currentUserId?"":mine?"YOUR POSITION  ·  #"+mine.rank+"  ·  "+Number(mine.score||0).toLocaleString()+" PTS":"YOUR POSITION  ·  NOT RANKED YET — COMPLETE A GAME TO JOIN";
 }
 
-let dailyEndAt=null,dailyTimer=null;
+let dailyEndAt=null,dailyTimer=null,dailyRefreshing=false;
 const challengeIcons={"all":"🌍","candy-trail":"🍬","fruit-fancy":"🍓","chome-blocks":"🧩"};
 function safeText(value,fallback="Player"){return value==null||value===""?fallback:String(value);}
 function makeDailyPerson(player,metric){
@@ -167,7 +167,7 @@ function updateDailyCountdown(){
  const remaining=Math.max(0,Math.floor((dailyEndAt-Date.now())/1000));
  const hours=Math.floor(remaining/3600),minutes=Math.floor((remaining%3600)/60),seconds=remaining%60;
  $("dailyCountdown").textContent=[hours,minutes,seconds].map(n=>String(n).padStart(2,"0")).join(":");
- if(remaining===0){$("dailyCompetitionStatus").textContent="Daily competitions have closed. Refreshing the next daily cycle…";}
+ if(remaining===0&&!dailyRefreshing){dailyRefreshing=true;$("dailyCompetitionStatus").textContent="Daily competitions have closed. Loading the next daily cycle…";loadDailyCompetitions().finally(()=>{dailyRefreshing=false;});}
 }
 async function loadDailyCompetitions(){
  $("dailyCompetitionStatus").textContent="Loading today's competitions…";
