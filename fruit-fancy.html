@@ -135,9 +135,10 @@ async function submitLevelScore(){
   if(error)throw error;
   if(!data?.ok||!data?.result?.accepted)throw new Error(data?.error||"The game result was not accepted.");
   activeGameSessionId=null;
-  const rewards=data.rewards||{},stage=Number(rewards.stage_chox_credited||0);
-  if(stage>0)setChoxStatus("🏆 +"+stage.toLocaleString()+" stage bonus CHOX · "+verifiedMoveChoxEarned.toLocaleString()+" move CHOX this run.");
-  else setChoxStatus("✓ Level verified · "+verifiedMoveChoxEarned.toLocaleString()+" move CHOX earned. First-clear stage bonus already claimed.");
+  const rewards=data.rewards||{},stage=Number(rewards.stage_chox_credited||0),moveChox=Number(rewards.move_chox_credited||0),gamePoints=Number(rewards.game_points_credited||0);
+  verifiedMoveChoxEarned=moveChox;
+  const rewardText="✓ Level verified · "+moveChox.toLocaleString()+" move CHOX · "+stage.toLocaleString()+" first-clear CHOX · "+gamePoints.toLocaleString()+" Game Points.";
+  setChoxStatus(rewardText);
   setLeaderboardStatus("✓ Verified level score submitted.");
  }catch(error){
   console.error("Fruit Fancy verified score submission failed:",error);
