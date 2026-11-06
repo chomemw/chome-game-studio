@@ -109,8 +109,8 @@ function renderRows(rows){
   item.append(rank,playerCell,score,played);root.append(item);
  });
  const mine=rows.find(r=>r.user_id===currentUserId);
- $("myPosition").hidden=!mine;
- $("myPosition").textContent=mine?"YOUR POSITION  ·  #"+mine.rank+"  ·  "+Number(mine.score||0).toLocaleString()+" PTS":"";
+ $("myPosition").hidden=!currentUserId;
+ $("myPosition").textContent=!currentUserId?"":mine?"YOUR POSITION  ·  #"+mine.rank+"  ·  "+Number(mine.score||0).toLocaleString()+" PTS":"YOUR POSITION  ·  NOT RANKED YET — COMPLETE A GAME TO JOIN";
 }
 async function loadLeaderboard(){
  const request=++requestNumber;$("status").textContent="Loading "+period.replace("-"," ")+" rankings…";$("rows").replaceChildren();$("myPosition").hidden=true;
