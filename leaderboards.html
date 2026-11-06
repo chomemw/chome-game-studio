@@ -88,6 +88,8 @@ body[data-competition-view="live-events"] .weekly-card:not([data-view-status="li
 body[data-competition-view="upcoming"] .weekly-card:not([data-view-status="upcoming"]){display:none}
 body[data-competition-view="leaderboards"] .weekly-card:not([data-view-status="live"]){display:none}
 body[data-competition-view="prizes"] .weekly-card:not([data-view-status="completed"]){display:none}
+body[data-competition-view="live-events"] .daily-columns>div:last-child{display:none}
+body[data-competition-view="live-events"] .daily-columns{grid-template-columns:1fr}
 body[data-competition-view="prizes"] .daily-columns>div:first-child{display:none}
 body[data-competition-view="prizes"] .daily-columns{grid-template-columns:1fr}
 body[data-competition-view="leaderboards"] .daily-columns>div:last-child{display:none}
