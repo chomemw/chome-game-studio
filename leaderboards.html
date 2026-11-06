@@ -241,7 +241,7 @@ function updateWeeklyCountdowns(){
  document.querySelectorAll(".weekly-countdown").forEach(el=>{
   const start=new Date(el.dataset.starts).getTime(),end=new Date(el.dataset.ends).getTime(),now=Date.now();
   if(now<start){const sec=Math.max(0,Math.floor((start-now)/1000));el.textContent="STARTS IN · "+formatCountdown(sec);}
-  else if(now<end){const sec=Math.max(0,Math.floor((end-now)/1000));el.textContent="CLOSES IN · "+formatCountdown(sec);}
+  else if(now<end){const sec=Math.max(0,Math.floor((end-now)/1000));el.textContent="CLOSES IN · "+formatCountdown(sec);if(el.dataset.status==="upcoming")shouldRefresh=true;}
   else{el.textContent="TOURNAMENT CLOSED";if(el.dataset.status!=="completed")shouldRefresh=true;}
  });
  if(shouldRefresh&&!weeklyRefreshLock){weeklyRefreshLock=true;loadWeeklyTournaments().finally(()=>{weeklyRefreshLock=false;});}
