@@ -309,6 +309,7 @@ function renderWeeklyTournaments(items){
  });
  $("weeklyTournamentStatus").textContent=items.length+" published tournament(s) · rankings update from verified results";
  updateWeeklyCountdowns();
+ if(typeof setCompetitionView==="function")setCompetitionView(document.body.dataset.competitionView||"overview");
 }
 function updateWeeklyCountdowns(){
  let shouldRefresh=false;
@@ -372,7 +373,8 @@ function setCompetitionView(view){
  if(!competitionViewLabels[view])return;
  document.body.dataset.competitionView=view;
  document.querySelectorAll("[data-competition-tab]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.competitionTab===view)));
- $("competitionViewStatus").textContent=competitionViewLabels[view];
+ const upcomingCount=document.querySelectorAll('.weekly-card[data-view-status="upcoming"]').length;
+ $("competitionViewStatus").textContent=competitionViewLabels[view]+(view==="upcoming"&&!upcomingCount?" · No tournaments have been scheduled yet.":"");
 }
 document.querySelectorAll("[data-competition-tab]").forEach(button=>button.addEventListener("click",()=>setCompetitionView(button.dataset.competitionTab)));
 setCompetitionView("overview");
