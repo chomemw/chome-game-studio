@@ -138,7 +138,7 @@ function update(dt){
   if(!running||paused||finished)return;
   elapsed+=dt;ui.time.textContent=fmt(elapsed);
   const ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+stickX;
-  const iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0)-stickY;
+  const iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0)+stickY;
   const len=Math.hypot(ix,iz);const nx=len>1?ix/len:ix,nz=len>1?iz/len:iz;
   const speed=7.3;player.position.x+=nx*speed*dt;player.position.z-=Math.max(0,-nz)*speed*dt;player.position.z+=Math.max(0,nz)*speed*.52*dt;
   player.position.x=THREE.MathUtils.clamp(player.position.x,-4.05,4.05);
