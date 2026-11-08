@@ -116,10 +116,11 @@ let running=false,finished=false,paused=false,elapsed=0,vertical=0,grounded=true
 const keys={};let jumpQueued=false,diveQueued=false;
 const ui={time:document.getElementById('time'),checkpoint:document.getElementById('checkpoint'),percent:document.getElementById('percent'),progress:document.getElementById('progress'),welcome:document.getElementById('welcome'),result:document.getElementById('result'),pause:document.getElementById('pause'),resultText:document.getElementById('resultText')};
 function fmt(t){const s=Math.floor(t);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
-function reset(){player.position.set(0,.05,3.5);vertical=0;grounded=true;elapsed=0;checkpoint=0;respawnZ=5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);ui.checkpoint.textContent='0/3';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden')}
+function reset(){player.position.set(0,.05,3.5);vertical=0;grounded=true;elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);ui.checkpoint.textContent='0/3';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden')}
 function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;body.rotation.set(0,0,0)}
-function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-94&&z<=-74))}\nfunction jump(){if(running&&!paused&&grounded){vertical=8.6;grounded=false}}
-function dive(){if(running&&!paused){vertical=Math.min(vertical,-5);body.rotation.x=-.55}}
+function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-94&&z<=-74))}
+function jump(){if(running&&!paused&&grounded){vertical=8.6;grounded=false}}
+function dive(){if(running&&!paused&&!grounded){vertical=Math.min(vertical,-9);body.rotation.x=-.55}}
 document.getElementById('start').addEventListener('click',reset);document.getElementById('again').addEventListener('click',reset);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
 addEventListener('keyup',e=>{keys[e.code]=false});
@@ -141,9 +142,11 @@ function update(dt){
   const iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0)+stickY;
   const len=Math.hypot(ix,iz);const nx=len>1?ix/len:ix,nz=len>1?iz/len:iz;
   const speed=7.3;player.position.x+=nx*speed*dt;player.position.z-=Math.max(0,-nz)*speed*dt;player.position.z+=Math.max(0,nz)*speed*.52*dt;
-  player.position.x=THREE.MathUtils.clamp(player.position.x,-4.05,4.05);
+  player.position.x=THREE.MathUtils.clamp(player.position.x,-4.05,4.05);player.position.z=Math.max(player.position.z,-94);
   if(jumpQueued){jump();jumpQueued=false}if(diveQueued){dive();diveQueued=false}
-  if(grounded&&!onTrack(player.position.x,player.position.z)){grounded=false;vertical=0}\n  if(!grounded){vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<=.05&&onTrack(player.position.x,player.position.z)){player.position.y=.05;vertical=0;grounded=true;body.rotation.x=0}if(player.position.y<-5){respawn()}}\n  // Bump into obstacle blocks; spinner is a moving hazard.
+  if(grounded&&!onTrack(player.position.x,player.position.z)){grounded=false;vertical=0}
+  if(!grounded){vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<=.05&&onTrack(player.position.x,player.position.z)){player.position.y=.05;vertical=0;grounded=true;body.rotation.x=0}if(player.position.y<-5){respawn()}}
+  // Bump into obstacle blocks; spinner is a moving hazard.
   for(const o of obstacles){let hit=false;if(o.type==='block'){hit=Math.abs(player.position.z-o.z)<(o.d/2+.42)&&Math.abs(player.position.x-o.x)<(o.w/2+.38)&&player.position.y<o.h+.35}else{const a=spinner.rotation.y,ux=Math.cos(a),uz=-Math.sin(a);const px=player.position.x,pz=player.position.z-o.z;const along=THREE.MathUtils.clamp(px*ux+pz*uz,-3.7,3.7);const dx=px-along*ux,dz=pz-along*uz;hit=Math.hypot(dx,dz)<.72&&Math.abs(player.position.y+1.2-1.45)<1.25}if(hit){player.position.z=Math.min(player.position.z,o.z+1.25);vertical=Math.max(vertical,2.2);body.rotation.z=(player.position.x<o.x?-.25:.25)}}
   // Checkpoints store a safe respawn position.
   checkpoints.forEach((z,i)=>{if(checkpoint===i&&player.position.z<z){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/3'}});
