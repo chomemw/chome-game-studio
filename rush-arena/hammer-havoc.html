@@ -37,7 +37,7 @@ try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 catch(e){try{THREE=await import('https://unpkg.com/three@0.160.0/build/three.module.js')}catch(err){window.__hammerError='3D engine could not load. Check connection and reload.';document.getElementById('status').textContent=window.__hammerError;throw err}}
 const root=document.getElementById('game'),scene=new THREE.Scene();
 scene.background=new THREE.Color(0x20282d);scene.fog=new THREE.FogExp2(0x20282d,.0125);
-const camera=new THREE.PerspectiveCamera( sixty=62,innerWidth/innerHeight,.1,260);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,260);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;root.appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0x9baab4,0x15191b,.62));
