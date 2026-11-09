@@ -43,6 +43,7 @@
     <p>Take on a high-altitude race course with realistic surfaces, industrial track details and moving hazards. This is the first solo practice build.</p>
     <button class="primary" id="start">START RUN</button>
     <span class="small">Third-person camera · Semi-realistic 3D · Sky Starter</span>
+    <span class="small" id="bootStatus" role="status" aria-live="polite">Preparing 3D engine…</span>
   </div>
 </div>
 <div class="overlay hidden" id="result">
@@ -57,6 +58,27 @@
 <div class="overlay hidden" id="pause">
   <div class="dialog"><div class="eyebrow">TAKE A BREATHER</div><h1>PAUSED</h1><p>Your run is waiting.</p><button class="primary" id="resume">RESUME</button></div>
 </div>
+<script>
+(() => {
+  const button = document.getElementById('start');
+  const status = document.getElementById('bootStatus');
+  const report = message => { if (status) status.textContent = message; };
+  window.__rushBootError = '';
+  button.addEventListener('click', () => {
+    if (typeof window.__rushStart === 'function') window.__rushStart();
+    else report(window.__rushBootError || 'The 3D engine is still loading. Please wait a moment and try again.');
+  });
+  window.addEventListener('error', event => {
+    window.__rushBootError = 'Game startup failed: ' + (event.message || 'A script failed to load.');
+    report(window.__rushBootError);
+  });
+  window.addEventListener('unhandledrejection', event => {
+    const reason = event.reason && (event.reason.message || String(event.reason));
+    window.__rushBootError = 'Game startup failed: ' + (reason || 'A required resource could not load.');
+    report(window.__rushBootError);
+  });
+})();
+</script>
 <script type="importmap">
 {
   "imports": {
@@ -66,7 +88,6 @@
 </script>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 
 const root=document.getElementById('game');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xa9c2d0);scene.fog=new THREE.Fog(0xa9c2d0,48,165);
@@ -127,7 +148,10 @@ let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
 // Three.js example Soldier.glb is a skinned Mixamo humanoid with Idle/Walk/Run clips.
 // Its source asset is distributed with the MIT-licensed three.js examples.
-new GLTFLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',gltf=>{
+(async()=>{
+ try {
+  const {GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
+  new GLTFLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',gltf=>{
   const model=gltf.scene;
   model.rotation.y=Math.PI;
   model.updateMatrixWorld(true);
@@ -148,6 +172,10 @@ new GLTFLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/dev/exa
   if(runnerModelLoaded){playRunnerAction('idle',0);}
   else {body.clear();body.add(fallbackTorso,fallbackHead,...fallbackLegs);}
 },undefined,error=>{console.warn('Rigged Rush Arena character could not load; using fallback runner.',error)});
+ } catch(error) {
+  console.warn('Optional character loader unavailable; using fallback runner.',error);
+ }
+})();
 
 let running=false,finished=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,stickX=0,stickY=0,lastFrame=0,slideTimer=0;
 const keys={};let jumpQueued=false,diveQueued=false;
@@ -158,7 +186,7 @@ function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;
 function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-94&&z<=-74))}
 function jump(){if(running&&!paused&&grounded){slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
-document.getElementById('start').addEventListener('click',reset);document.getElementById('again').addEventListener('click',reset);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
+window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';document.getElementById('again').addEventListener('click',reset);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
 addEventListener('keyup',e=>{keys[e.code]=false});
 const stick=document.getElementById('stick'),knob=document.getElementById('knob');let stickPointer=null;
