@@ -55,9 +55,12 @@ const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeo
 const cyl=(r1,r2,h,m,x,y,z,rotZ=0,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,24),m);o.position.set(x,y,z);o.rotation.z=rotZ;o.castShadow=true;o.receiveShadow=true;parent.add(o);return o};
 const beam=(a,b,r,m,parent=scene)=>{const d=new THREE.Vector3().subVectors(b,a),o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,d.length(),8),m);o.position.copy(a).add(b).multiplyScalar(.5);o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());o.castShadow=true;parent.add(o);return o};
 const sphere=(r,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),m);o.position.set(x,y,z);parent.add(o);return o};
-// Factory hall: a continuous architectural shell, not isolated floating props.
-const floor=box(26,.8,126,concrete,0,-.52,-60);floor.receiveShadow=true;
-box(26,.18,126,darkSteel,0,-1.02,-60);
+// Factory floor is split around the moving bridge so falling is physically possible.
+const floor=new THREE.Group();scene.add(floor);
+const floorNear=box(26,.8,81.25,concrete,0,-.52,-40.625,floor);floorNear.receiveShadow=true;
+box(26,.18,81.25,darkSteel,0,-1.02,-40.625,floor);
+const floorFar=box(26,.8,32,concrete,0,-.52,-110,floor);floorFar.receiveShadow=true;
+box(26,.18,32,darkSteel,0,-1.02,-110,floor);
 for(const x of [-13,13]){box(.7,14,126,concrete,x,6.5,-60);box(.18,14,126,steel,x+(x<0?.38:-.38),6.5,-60)}
 box(26,.55,126,darkSteel,0,14,-60);
 // Concrete wall pilasters, structural steel columns and overhead roof trusses.
@@ -241,9 +244,10 @@ function addMovingBridge(z,phase=0){
  for(let i=0;i<3;i++){
   const p=new THREE.Group();p.position.set((i-1)*2.65,0,z-i*2.2);scene.add(p);
   const deck=box(2.35,.32,3.5,grate,0,.55,0,p);
+  deck.userData.bridgeDeck=true;
   for(const x of [-1.05,1.05])box(.12,.45,3.35,steel,x,.88,0,p);
   box(2.25,.06,.12,paintYellow,0,.75,-1.55,p);
-  parts.push({group:p,baseX:p.position.x,phase:i*1.5});
+  parts.push({group:p,deck,baseX:p.position.x,phase:i*1.5,prevX:p.position.x,prevY:p.position.y,prevZ:p.position.z,halfX:1.175,halfZ:1.75,top:.71});
  }
  const warn=addWarning(z,8);
  hazards.push({type:'bridge',z,parts,warn,phase,hit:false});
@@ -313,7 +317,7 @@ function hazardSound(freq=105,duration=.22){
 function onHazardHit(message){
  if(performance.now()-lastHit<950)return;lastHit=performance.now();hazardSound(82,.34);
  $('warning').textContent=message.toUpperCase();$('warning').classList.add('show');
- player.position.x=0;player.position.y=0;vertical=0;grounded=true;slide=0;
+ player.position.x=0;player.position.y=0;vertical=0;grounded=true;slide=0;playerSupport=null;
  player.position.z=checkpoint>0?checkpointPositions[checkpoint-1]+3:2;
  setTimeout(()=>{$('warning').textContent='MACHINERY ACTIVE — TIME YOUR CROSSING'},1300);
 }
@@ -321,10 +325,10 @@ function onHazardHit(message){
 const checkpointPositions=[-24,-48,-72,-96],checkpointRings=[];
 for(let i=0;i<4;i++){const z=checkpointPositions[i],g=new THREE.Group();for(const x of [-4.1,4.1])box(.22,3.2,.22,paintYellow,x,1.6,0,g);box(8.4,.24,.25,paintRed,0,3.15,0,g);g.position.z=z;scene.add(g);checkpointRings.push(g)}
 const endZ=-121;
-let started=false,finished=false,elapsed=0,checkpoint=0,vertical=0,grounded=true,slide=0,joy={x:0,y:0},keys={};
+let started=false,finished=false,elapsed=0,checkpoint=0,vertical=0,grounded=true,slide=0,playerSupport=null,joy={x:0,y:0},keys={};
 const $=id=>document.getElementById(id);
-function reset(){try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume()}catch(e){}hazardSound(220,.12);player.position.set(0,0,2);vertical=0;grounded=true;slide=0;elapsed=0;checkpoint=0;finished=false;started=true;$('finish').classList.add('hidden');$('welcome').classList.add('hidden');$('cp').textContent='0/4';}
-function jump(){if(started&&!finished&&grounded){vertical=8.3;grounded=false}}
+function reset(){try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume()}catch(e){}hazardSound(220,.12);player.position.set(0,0,2);vertical=0;grounded=true;slide=0;playerSupport=null;elapsed=0;checkpoint=0;finished=false;started=true;$('finish').classList.add('hidden');$('welcome').classList.add('hidden');$('cp').textContent='0/4';}
+function jump(){if(started&&!finished&&grounded){vertical=8.3;grounded=false;playerSupport=null}}
 function dive(){if(started&&!finished&&grounded)slide=.9}
 $('again').addEventListener('click',reset);$('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});$('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});
 window.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='Space'){e.preventDefault();jump()}if(e.code==='ShiftLeft'||e.code==='ShiftRight')dive()});
@@ -339,9 +343,29 @@ const clock=new THREE.Clock();
 function update(dt){
  if(!started||finished)return;elapsed+=dt;const forward=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)-joy.y;const sideways=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+joy.x;
  const speed=6.6;player.position.z-=Math.max(-1,Math.min(1,forward))*speed*dt;player.position.x+=Math.max(-1,Math.min(1,sideways))*speed*.78*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-3.25,3.25);
- if(!grounded){vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<=0){player.position.y=0;vertical=0;grounded=true}}
  if(slide>0)slide=Math.max(0,slide-dt);
  updateHazards(dt);
+ // Carry a runner standing on a moving deck by the deck's exact frame-to-frame motion.
+ if(playerSupport){
+  const p=playerSupport;
+  player.position.x+=p.group.position.x-p.prevX;
+  player.position.y+=p.group.position.y-p.prevY;
+  player.position.z+=p.group.position.z-p.prevZ;
+ }
+ // Resolve bridge decks as real walkable top surfaces, with a genuine open pit below.
+ let supported=null;
+ for(const h of hazards){if(h.type!=='bridge')continue;for(const p of h.parts){
+  const top=p.group.position.y+p.top;
+  const within=Math.abs(player.position.x-p.group.position.x)<=p.halfX+.08&&Math.abs(player.position.z-p.group.position.z)<=p.halfZ+.08;
+  if(within&&vertical<=0&&player.position.y<=top+.14&&player.position.y>=top-.65){if(!supported||top>supported.topNow)supported={part:p,topNow:top}}
+ }}
+ const inBridgeGap=player.position.z<-81.25&&player.position.z>-94.0;
+ if(supported){player.position.y=supported.topNow;vertical=0;grounded=true;playerSupport=supported.part;}
+ else if(!inBridgeGap&&player.position.y<=0&&vertical<=0){player.position.y=0;vertical=0;grounded=true;playerSupport=null;}
+ else {playerSupport=null;grounded=false;vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<-4){onHazardHit('You fell from the moving bridge');}}
+ // Save each deck's current transform for next frame's moving-platform carry.
+ for(const h of hazards){if(h.type==='bridge')for(const p of h.parts){p.prevX=p.group.position.x;p.prevY=p.group.position.y;p.prevZ=p.group.position.z}}
+
  const progress=THREE.MathUtils.clamp((-player.position.z)/Math.abs(endZ),0,1);$('fill').style.width=(progress*100)+'%';$('pct').textContent=Math.round(progress*100)+'%';
  for(let i=checkpoint;i<4;i++){if(player.position.z<=checkpointPositions[i]){checkpoint=i+1;$('cp').textContent=checkpoint+'/4'}}
  $('time').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');
