@@ -154,6 +154,40 @@ function updateStorm(dt){
   if(thunderPending>0){thunderPending-=dt;if(thunderPending<=0){soundNoise(1.15,.16,260);soundTone(58,32,1.35,.18,'sawtooth',.12)}}
 }
 
+
+// Lightweight rain-splash particle pool. Reuses buffers instead of creating meshes per step.
+const splashCount=120,splashPositions=new Float32Array(splashCount*3),splashVelocities=Array.from({length:splashCount},()=>new THREE.Vector3()),splashLives=new Float32Array(splashCount);
+splashPositions.fill(-1000);
+const splashGeometry=new THREE.BufferGeometry();
+splashGeometry.setAttribute('position',new THREE.BufferAttribute(splashPositions,3));
+const splashMaterial=new THREE.PointsMaterial({color:0xc8eaff,size:.13,transparent:true,opacity:.82,depthWrite:false,sizeAttenuation:true});
+const splashField=new THREE.Points(splashGeometry,splashMaterial);splashField.frustumCulled=false;scene.add(splashField);
+let splashCursor=0;
+function spawnWaterSplash(x,z,count=10){
+  for(let n=0;n<count;n++){
+    const i=splashCursor++%splashCount,k=i*3;
+    splashPositions[k]=x+(Math.random()-.5)*.42;
+    splashPositions[k+1]=.09+Math.random()*.04;
+    splashPositions[k+2]=z+(Math.random()-.5)*.42;
+    const v=splashVelocities[i];v.set((Math.random()-.5)*2.7,.9+Math.random()*2.4,(Math.random()-.5)*2.7);
+    splashLives[i]=.28+Math.random()*.32;
+  }
+  splashGeometry.attributes.position.needsUpdate=true;
+}
+function updateWaterSplashes(dt){
+  let changed=false;
+  for(let i=0;i<splashCount;i++){
+    if(splashLives[i]<=0)continue;
+    splashLives[i]-=dt;
+    const k=i*3,v=splashVelocities[i];
+    splashPositions[k]+=v.x*dt;splashPositions[k+1]+=v.y*dt;splashPositions[k+2]+=v.z*dt;
+    v.y-=7.8*dt;
+    if(splashLives[i]<=0||splashPositions[k+1]<.035){splashLives[i]=0;splashPositions[k+1]=.025}
+    changed=true;
+  }
+  if(changed)splashGeometry.attributes.position.needsUpdate=true;
+}
+
 function makeRoadTexture(){const c=document.createElement('canvas');c.width=256;c.height=256;const g=c.getContext('2d');g.fillStyle='#343b40';g.fillRect(0,0,256,256);for(let i=0;i<2400;i++){const v=35+Math.random()*45;g.fillStyle='rgba('+v+','+v+','+v+','+(Math.random()*.22)+')';g.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*2,1+Math.random()*2)}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,5);t.colorSpace=THREE.SRGBColorSpace;return t}
 const roadTexture=makeRoadTexture();
 const grass=mat(0x526b58,.96),grass2=mat(0x35483c,.98),side=mat(0x4b555b,.72,.22),path=new THREE.MeshStandardMaterial({map:roadTexture,color:0xb4c0c9,roughness:.58,metalness:.12}),path2=mat(0x777f84,.9),white=mat(0xe8e6dc,.55),gold=mat(0xb78b4d,.38,.62),coral=mat(0xb84f45,.48,.18),purple=mat(0x485c70,.55,.24),cyan=mat(0x8ca6ae,.42,.35),dark=mat(0x222a30,.82);
@@ -410,7 +444,7 @@ function update(dt){
   player.position.x=THREE.MathUtils.clamp(player.position.x,-4.05,4.05);player.position.z=Math.max(player.position.z,-94);
   if(jumpQueued){jump();jumpQueued=false}if(diveQueued){dive();diveQueued=false}
   if(grounded&&!onTrack(player.position.x,player.position.z)){grounded=false;vertical=0}
-  if(!grounded){vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<=.05&&onTrack(player.position.x,player.position.z)){player.position.y=.05;vertical=0;grounded=true;body.rotation.x=0}if(player.position.y<-5){sfxFall();respawn()}}
+  if(!grounded){vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<=.05&&onTrack(player.position.x,player.position.z)){player.position.y=.05;vertical=0;grounded=true;body.rotation.x=0;spawnWaterSplash(player.position.x,player.position.z,18)}if(player.position.y<-5){sfxFall();respawn()}}
   // Resolve the rotating sweeper as a solid capsule in the track plane.
   const beamX=Math.cos(spinner.rotation.y),beamZ=-Math.sin(spinner.rotation.y);
   const relX=player.position.x-spinner.position.x,relZ=player.position.z-spinner.position.z;
@@ -431,9 +465,9 @@ function update(dt){
   if(player.position.z<-90){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You cleared Sky Starter with '+checkpoint+' checkpoints reached.';ui.result.classList.remove('hidden')}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/93.5*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
-  const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.run?'run':(runnerActions.walk?'walk':'idle')));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
+  const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.run?'run':(runnerActions.walk?'walk':'idle')));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
-function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.035);update(dt);updateStorm(dt);renderer.render(scene,camera)}
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.035);update(dt);updateStorm(dt);updateWaterSplashes(dt);renderer.render(scene,camera)}
 animate();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));renderer.setSize(innerWidth,innerHeight)});
 </script>
