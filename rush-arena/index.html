@@ -211,7 +211,7 @@ function update(dt){
   if(player.position.z<-90){finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You cleared Sky Starter with '+checkpoint+' checkpoints reached.';ui.result.classList.remove('hidden')}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/93.5*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
-  const moving=Math.abs(nx)+Math.abs(nz)>.08;const swing=moving?Math.sin(elapsed*13)*.55:0;limbs[0].rotation.x=swing;limbs[1].rotation.x=-swing;limbs[2].rotation.z=moving?-.16:0;limbs[3].rotation.z=moving?.16:0;body.position.y=moving?Math.abs(Math.sin(elapsed*13))*.07:0;body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
+  const moving=Math.abs(nx)+Math.abs(nz)>.08;const swing=moving?Math.sin(elapsed*13)*.55:0;limbs[0].rotation.x=swing;limbs[1].rotation.x=-swing;limbs[2].rotation.z=moving?-.16:0;limbs[3].rotation.z=moving?.16:0;body.position.y=slideTimer>0?-.48:(moving?Math.abs(Math.sin(elapsed*13))*.07:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.035);update(dt);renderer.render(scene,camera)}
 animate();
