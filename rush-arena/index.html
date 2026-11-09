@@ -115,7 +115,7 @@ const hemisphere=new THREE.HemisphereLight(0xb8c8d8,0x202832,1.05);scene.add(hem
 const sun=new THREE.DirectionalLight(0xb7c8dc,1.75);sun.position.set(-18,34,22);sun.castShadow=true;sun.shadow.mapSize.set(mobileDevice?512:768,mobileDevice?512:768);sun.shadow.bias=-0.00015;sun.shadow.camera.left=-28;sun.shadow.camera.right=28;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-110;scene.add(sun);
 const mat=(color,roughness=.78,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
 // Permanent storm atmosphere: lightweight rain streaks follow the runner.
-const rainCount=mobileDevice?150:320,rainPositions=new Float32Array(rainCount*6),rainGeometry=new THREE.BufferGeometry();
+const rainCount=mobileDevice?90:200,rainPositions=new Float32Array(rainCount*6),rainGeometry=new THREE.BufferGeometry();
 const rainSeed=[];
 for(let i=0;i<rainCount;i++){
   rainSeed.push({x:(Math.random()-.5)*22,y:Math.random()*17,z:(Math.random()-.5)*38,v:12+Math.random()*9});
@@ -157,7 +157,7 @@ function updateStorm(dt){
 
 
 // Lightweight rain-splash particle pool. Reuses buffers instead of creating meshes per step.
-const splashCount=mobileDevice?48:90,splashPositions=new Float32Array(splashCount*3),splashVelocities=Array.from({length:splashCount},()=>new THREE.Vector3()),splashLives=new Float32Array(splashCount);
+const splashCount=mobileDevice?32:64,splashPositions=new Float32Array(splashCount*3),splashVelocities=Array.from({length:splashCount},()=>new THREE.Vector3()),splashLives=new Float32Array(splashCount);
 splashPositions.fill(-1000);
 const splashGeometry=new THREE.BufferGeometry();
 splashGeometry.setAttribute('position',new THREE.BufferAttribute(splashPositions,3));
@@ -196,9 +196,20 @@ const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeo
 const sphere=(r,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,18,14),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o};
 const cylinder=(rt,rb,h,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,16),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o};
 
-// Sky islands, clouds and a distant horizon.
+// Sky islands and clouds. Cloud puffs share one instanced draw call.
 const sky=new THREE.Mesh(new THREE.SphereGeometry(180,24,16),new THREE.MeshBasicMaterial({color:0x8ed9f4,side:THREE.BackSide}));scene.add(sky);
-for(let i=0;i<24;i++){const x=(Math.random()-.5)*90,z=-Math.random()*112-8,y=10+Math.random()*22;const cloud=new THREE.Group();for(let j=0;j<5;j++)sphere(1.4+Math.random()*1.4,white,(j-2)*1.5,Math.random()*.7,0,cloud);cloud.position.set(x,y,z);scene.add(cloud)}
+const cloudGeometry=new THREE.SphereGeometry(1,12,8);
+const cloudInstances=new THREE.InstancedMesh(cloudGeometry,white,120);
+const cloudDummy=new THREE.Object3D();let cloudIndex=0;
+for(let i=0;i<24;i++){
+  const x=(Math.random()-.5)*90,z=-Math.random()*112-8,y=10+Math.random()*22;
+  for(let j=0;j<5;j++){
+    cloudDummy.position.set(x+(j-2)*1.5,y+Math.random()*.7,z);
+    cloudDummy.scale.setScalar(1.4+Math.random()*1.4);
+    cloudDummy.updateMatrix();cloudInstances.setMatrixAt(cloudIndex++,cloudDummy.matrix);
+  }
+}
+cloudInstances.instanceMatrix.needsUpdate=true;cloudInstances.frustumCulled=true;scene.add(cloudInstances);
 for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new THREE.Group();const top=cylinder(2.6,3.8,2.5,grass2,0,-1,0,island);top.rotation.y=Math.random();const cap=cylinder(2.65,2.65,.28,grass,0,.32,0,island);cap.position.y=.32;island.position.set(x,-2.2,z);scene.add(island)}
 
 // Floating course with three safe gaps that require a jump.
@@ -209,10 +220,22 @@ for(const [x,z,len] of floorSegments){
   box(9,.8,len,path,x,-.48,z);
   box(9.35,.34,len+.25,side,x,-.99,z);
 }
-// Worn asphalt shoulders, painted lane guides and steel safety barriers.
-for(let z=-5;z>-96;z-=4){box(.09,.018,.85,white,-1.5,.035,z);box(.09,.018,.85,white,1.5,.035,z)}
-for(const x of [-4.52,4.52]){box(.12,.12,94,side,x,.18,-44);box(.12,.12,94,gold,x,.34,-44);for(let z=-3;z>-92;z-=6){box(.18,.52,.16,side,x,.54,z);box(.2,.08,.2,white,x,.85,z)}}
-for(let z=-4;z>-94;z-=8){box(.22,.025,1.5,white,-4.1,.035,z);box(.22,.025,1.5,white,4.1,.035,z)}
+// Worn asphalt shoulders and repeated markings use instancing to reduce draw calls.
+function addBoxInstances(material,w,h,d,placements){
+  const mesh=new THREE.InstancedMesh(new THREE.BoxGeometry(w,h,d),material,placements.length);
+  const dummy=new THREE.Object3D();
+  placements.forEach((p,i)=>{dummy.position.set(p.x,p.y,p.z);dummy.rotation.y=p.ry||0;dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix)});
+  mesh.instanceMatrix.needsUpdate=true;mesh.frustumCulled=true;mesh.castShadow=false;mesh.receiveShadow=true;scene.add(mesh);return mesh;
+}
+const laneMarks=[];for(let z=-5;z>-96;z-=4){laneMarks.push({x:-1.5,y:.035,z},{x:1.5,y:.035,z})}
+addBoxInstances(white,.09,.018,.85,laneMarks);
+for(const x of [-4.52,4.52]){
+  box(.12,.12,94,side,x,.18,-44);box(.12,.12,94,gold,x,.34,-44);
+  const posts=[],caps=[];for(let z=-3;z>-92;z-=6){posts.push({x,y:.54,z});caps.push({x,y:.85,z})}
+  addBoxInstances(side,.18,.52,.16,posts);addBoxInstances(white,.2,.08,.2,caps);
+}
+const shoulderMarks=[];for(let z=-4;z>-94;z-=8)shoulderMarks.push({x:-4.1,y:.035,z},{x:4.1,y:.035,z});
+addBoxInstances(white,.22,.025,1.5,shoulderMarks);
 // Gaps: remove small sections of path with dark clouds beneath.
 for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-3.4,z+(Math.random()-.5)*1.8)}
 
@@ -239,7 +262,6 @@ obstacles.forEach((o,index)=>{
     const post=new THREE.Mesh(new THREE.CylinderGeometry(.055,.075,.95,8),side);post.position.set(x,.48,0);post.castShadow=true;rig.add(post);
     const lamp=new THREE.Mesh(new THREE.SphereGeometry(.19,12,10),new THREE.MeshStandardMaterial({color:0xff2020,emissive:0xff0800,emissiveIntensity:1.8,roughness:.3}));
     lamp.position.set(x,1.02,0);rig.add(lamp);
-    const light=new THREE.PointLight(0xff1717,1.5,5,2);light.position.copy(lamp.position);rig.add(light);
   }
   scene.add(rig);hazardBeacons.push({rig,lamps:rig.children.filter(child=>child.isMesh&&child.geometry.type==='SphereGeometry'),obstacle:o,index});
 });
@@ -469,7 +491,25 @@ function update(dt){
   const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.run?'run':(runnerActions.walk?'walk':'idle')));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 let lastRenderAt=0,frameAccumulator=0;
-function animate(now=0){requestAnimationFrame(animate);const frameDelta=clock.getDelta();if(document.hidden)return;if(!running||paused||finished)return;frameAccumulator+=frameDelta;const frameInterval=mobileDevice?1/30:1/60;if(now-lastRenderAt<frameInterval*1000)return;lastRenderAt=now;const dt=Math.min(frameAccumulator,.05);frameAccumulator=0;update(dt);updateStorm(dt);updateWaterSplashes(dt);renderer.render(scene,camera)}
+function animate(now=0){
+  requestAnimationFrame(animate);
+  const frameDelta=clock.getDelta();
+  if(document.hidden||!running||paused||finished){frameAccumulator=0;return}
+  frameAccumulator+=Math.min(frameDelta,.12);
+  const step=mobileDevice?1/30:1/60,frameInterval=step*1000;
+  if(now-lastRenderAt<frameInterval)return;
+  lastRenderAt=now;
+  // Fixed simulation steps prevent the runner and timer from falling into slow motion
+  // when a device briefly misses a render frame.
+  let steps=0;
+  while(frameAccumulator>=step&&steps<4){
+    update(step);updateStorm(step);updateWaterSplashes(step);
+    frameAccumulator-=step;steps++;
+  }
+  // Avoid a long catch-up spiral on severely overloaded devices.
+  if(steps===4&&frameAccumulator>step*2)frameAccumulator=step*2;
+  renderer.render(scene,camera);
+}
 renderer.render(scene,camera);
 animate();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight)});
