@@ -272,7 +272,7 @@ function updateHazards(dt){
    const wave=(Math.sin(phase)+1)/2;
    const down=wave>.58?(wave-.58)/.42:0;
    h.ram.position.y=5.15-down*3.55;
-   const near=Math.abs(player.position.z-h.z)<1.45&&Math.abs(player.position.x)<3.0&&player.position.y<2.05&&h.ram.position.y<3.25;
+   const near=Math.abs(player.position.z-h.z)<1.45&&Math.abs(player.position.x)<2.55&&player.position.y<2.05&&h.ram.position.y<3.25;
    const warn=Math.abs(player.position.z-h.z)<8&&down>.12;
    if(near&&!h.hit){h.hit=true;onHazardHit('Hydraulic crusher impact');}
    if(!near)h.hit=false;
@@ -281,7 +281,7 @@ function updateHazards(dt){
   }else if(h.type==='roller'){
    h.roller.rotation.z=phase*1.8;
    for(const r of h.rings)r.rotation.z=phase*1.8;
-   const near=Math.abs(player.position.z-h.z)<1.45&&Math.abs(player.position.x)<3.55&&player.position.y<2.25;
+   const near=Math.abs(player.position.z-h.z)<1.45&&Math.abs(player.position.x)<2.7&&player.position.y<2.25;
    const warn=Math.abs(player.position.z-h.z)<7;
    if(near&&!h.hit){h.hit=true;onHazardHit('Rotating steel roller knocked you down');}
    if(!near)h.hit=false;
@@ -289,7 +289,7 @@ function updateHazards(dt){
    h.warn.beacon.intensity=warn?2.5:0.15;
   }else if(h.type==='bridge'){
    for(const p of h.parts){p.group.position.x=p.baseX+Math.sin(phase+p.phase)*.85;p.group.position.y=.35+Math.sin(phase*1.3+p.phase)*.22;}
-   const near=Math.abs(player.position.z-h.z)<1.8&&Math.abs(player.position.x)<3.5&&player.position.y<1.1;
+   const near=h.parts.some(p=>Math.abs(player.position.z-p.group.position.z)<1.65&&Math.abs(player.position.x-p.group.position.x)<1.35&&player.position.y<1.25);
    const warn=Math.abs(player.position.z-h.z)<7;
    if(near&&!h.hit){h.hit=true;onHazardHit('Moving bridge platform caught you');}
    if(!near)h.hit=false;
@@ -297,9 +297,10 @@ function updateHazards(dt){
    h.warn.beacon.intensity=warn?2.4:.15;
   }
  }
+ if(warningActive&&performance.now()-lastWarningBeep>1450){lastWarningBeep=performance.now();hazardSound(410,.13)}
  $('warning').classList.toggle('show',warningActive);
 }
-let lastHit=0,audioCtx=null;
+let lastHit=0,lastWarningBeep=0,audioCtx=null;
 function hazardSound(freq=105,duration=.22){
  try{
   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
