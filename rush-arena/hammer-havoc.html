@@ -163,13 +163,38 @@ for(const z of [-16,-40,-64,-88,-112]){
 }
 // Dusty volumetric-looking haze: soft translucent layers rather than heavy particle simulation.
 for(let i=0;i<15;i++){const puff=new THREE.Mesh(new THREE.SphereGeometry(1,12,10),new THREE.MeshBasicMaterial({color:0x879096,transparent:true,opacity:.035,depthWrite:false}));puff.scale.set(3+Math.random()*3,.7+Math.random(),1.8+Math.random()*2);puff.position.set((Math.random()-.5)*15,2+Math.random()*5,-Math.random()*120);scene.add(puff)}
-// Player placeholder: proportioned athletic mannequin until shared Rush Arena athlete asset is connected.
+// Reuse the rigged, textured Rush Arena athlete rather than leaving a primitive mannequin.
 const player=new THREE.Group();scene.add(player);
-const bodyMat=mat(0x323c43,.68,.16),cloth=mat(0x777f83,.88),skin=mat(0x9a765f,.8),shoe=mat(0x171b1e,.9);
-const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.34,.72,5,10),bodyMat);torso.position.y=1.15;torso.castShadow=true;player.add(torso);
-const head=sphere(.22,skin,0,1.92,0,player);
-for(const x of [-.43,.43]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.13,.66,4,8),cloth);leg.position.set(x*.72,.48,0);leg.castShadow=true;player.add(leg);const boot=box(.25,.15,.42,shoe,x*.72,.12,-.08,player)}
-for(const x of [-.48,.48]){const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.62,4,8),cloth);arm.position.set(x,.98,0);arm.rotation.z=x*.28;arm.castShadow=true;player.add(arm)}
+const body=new THREE.Group();player.add(body);
+const fallbackMat=mat(0x34434b,.72,.12),fallbackSkin=mat(0x9a765f,.82),fallbackCloth=mat(0x5b666c,.88),fallbackShoe=mat(0x171b1e,.9);
+const fallbackTorso=new THREE.Mesh(new THREE.CapsuleGeometry(.31,.64,5,10),fallbackMat);fallbackTorso.position.y=1.12;fallbackTorso.castShadow=true;body.add(fallbackTorso);
+const fallbackHead=sphere(.22,fallbackSkin,0,1.86,0,body);
+for(const x of [-.16,.16]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.62,4,8),fallbackCloth);leg.position.set(x,.46,0);leg.castShadow=true;body.add(leg);box(.23,.14,.38,fallbackShoe,x,.1,-.07,body)}
+for(const x of [-.43,.43]){const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.58,4,8),fallbackCloth);arm.position.set(x,.98,0);arm.rotation.z=x*.22;arm.castShadow=true;body.add(arm)}
+let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
+function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction)activeRunnerAction.fadeOut(fade);next.reset().fadeIn(fade).play();activeRunnerAction=next;}
+(async()=>{
+ try{
+  const {GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
+  const loader=new GLTFLoader();
+  const athleteUrl='https://models.codelove.in/models/sports-male-03.glb';
+  const attachAthlete=gltf=>{
+   const model=gltf.scene;model.rotation.y=0;model.updateMatrixWorld(true);
+   const bounds=new THREE.Box3().setFromObject(model),height=Math.max(.01,bounds.max.y-bounds.min.y);
+   model.scale.setScalar(1.84/height);model.position.y=-bounds.min.y*model.scale.y;
+   model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true}});
+   body.clear();body.add(model);runnerMixer=new THREE.AnimationMixer(model);runnerActions={};
+   for(const clip of gltf.animations||[]){
+    const key=clip.name.toLowerCase().replace(/[\\s_-]+/g,'');let slot=null;
+    if(key.includes('idle'))slot='idle';else if(key.includes('walk'))slot='walk';else if(key.includes('run'))slot='run';else if(key.includes('jump'))slot='jump';else if(key.includes('slide')||key.includes('dive'))slot='slide';
+    if(slot&&!runnerActions[slot])runnerActions[slot]=runnerMixer.clipAction(clip);
+   }
+   runnerModelLoaded=!!(runnerActions.run||runnerActions.walk||runnerActions.idle);
+   if(runnerModelLoaded)playRunnerAction('idle',0);else console.warn('Athlete loaded without locomotion clips; keeping fallback');
+  };
+  loader.load(athleteUrl,attachAthlete,undefined,error=>console.warn('Rigged athlete unavailable; using fallback model',error));
+ }catch(error){console.warn('Optional athlete loader unavailable; using fallback model',error)}
+})();
 // Four route checkpoints; collision and hazard gameplay are intentionally separate Phase 2 work.
 const checkpointPositions=[-24,-48,-72,-96],checkpointRings=[];
 for(let i=0;i<4;i++){const z=checkpointPositions[i],g=new THREE.Group();for(const x of [-4.1,4.1])box(.22,3.2,.22,paintYellow,x,1.6,0,g);box(8.4,.24,.25,paintRed,0,3.15,0,g);g.position.z=z;scene.add(g);checkpointRings.push(g)}
@@ -198,7 +223,7 @@ function update(dt){
  for(let i=checkpoint;i<4;i++){if(player.position.z<=checkpointPositions[i]){checkpoint=i+1;$('cp').textContent=checkpoint+'/4'}}
  $('time').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');
 }
-function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);update(dt);
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);update(dt);if(runnerMixer)runnerMixer.update(dt);if(runnerModelLoaded&&started&&!finished)playRunnerAction(!grounded?'jump':(Math.abs(joy.x)+Math.abs(joy.y)>.12||keys.KeyW||keys.ArrowUp||keys.KeyS||keys.ArrowDown||keys.KeyA||keys.KeyD?'run':'idle'));
  const target=new THREE.Vector3(player.position.x,player.position.y+1.25,player.position.z+7.5);camera.position.lerp(new THREE.Vector3(player.position.x*.65,player.position.y+4.2,player.position.z+10.5),1-Math.pow(.001,dt));camera.lookAt(target);
  if(started&&!finished&&player.position.z<=endZ){finished=true;$('result').textContent='Route time: '+$('time').textContent+'. The factory environment is in place; obstacle mechanics are the next phase.';$('finish').classList.remove('hidden')}
  renderer.render(scene,camera)}
