@@ -140,6 +140,28 @@ stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointer
 // Camera follows from behind and eases toward the runner.
 camera.position.set(0,6,13);camera.lookAt(0,1,-2);
 const clock=new THREE.Clock();
+// Swept, axis-separated runner collision. Obstacles occupy a rectangle in X/Z
+// and extend upward from the track; the runner can clear them only when fully above.
+function moveRunner(dx,dz){
+  const radius=.38,runnerHeight=2.15;
+  const collidable=obstacles.filter(o=>o.type==='block'&&player.position.y<o.h&&player.position.y+runnerHeight>0);
+  let nextX=player.position.x+dx;
+  for(const o of collidable){
+    const halfX=o.w/2+radius,halfZ=o.d/2+radius;
+    if(Math.abs(player.position.z-o.z)<halfZ&&Math.abs(nextX-o.x)<halfX){
+      nextX=dx>0?Math.min(nextX,o.x-halfX):dx<0?Math.max(nextX,o.x+halfX):nextX;
+    }
+  }
+  player.position.x=nextX;
+  let nextZ=player.position.z+dz;
+  for(const o of collidable){
+    const halfX=o.w/2+radius,halfZ=o.d/2+radius;
+    if(Math.abs(player.position.x-o.x)<halfX&&Math.abs(nextZ-o.z)<halfZ){
+      nextZ=dz<0?Math.max(nextZ,o.z+halfZ):dz>0?Math.min(nextZ,o.z-halfZ):nextZ;
+    }
+  }
+  player.position.z=nextZ;
+}
 function update(dt){
   spinner.rotation.y+=dt*1.55;
   if(!running||paused||finished)return;
@@ -147,13 +169,27 @@ function update(dt){
   const ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+stickX;
   const iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0)+stickY;
   const len=Math.hypot(ix,iz);const nx=len>1?ix/len:ix,nz=len>1?iz/len:iz;
-  const speed=7.0;player.position.x+=nx*speed*dt;player.position.z-=Math.max(0,-nz)*speed*dt;player.position.z+=Math.max(0,nz)*speed*.52*dt;
+  const speed=7.0,dx=nx*speed*dt,dz=(-Math.max(0,-nz)+Math.max(0,nz)*.52)*speed*dt;
+  moveRunner(dx,dz);
   player.position.x=THREE.MathUtils.clamp(player.position.x,-4.05,4.05);player.position.z=Math.max(player.position.z,-94);
   if(jumpQueued){jump();jumpQueued=false}if(diveQueued){dive();diveQueued=false}
   if(grounded&&!onTrack(player.position.x,player.position.z)){grounded=false;vertical=0}
   if(!grounded){vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<=.05&&onTrack(player.position.x,player.position.z)){player.position.y=.05;vertical=0;grounded=true;body.rotation.x=0}if(player.position.y<-5){respawn()}}
-  // Bump into obstacle blocks; spinner is a moving hazard.
-  for(const o of obstacles){let hit=false;if(o.type==='block'){hit=Math.abs(player.position.z-o.z)<(o.d/2+.42)&&Math.abs(player.position.x-o.x)<(o.w/2+.38)&&player.position.y<o.h+.35}else{const a=spinner.rotation.y,ux=Math.cos(a),uz=-Math.sin(a);const px=player.position.x,pz=player.position.z-o.z;const along=THREE.MathUtils.clamp(px*ux+pz*uz,-3.7,3.7);const dx=px-along*ux,dz=pz-along*uz;hit=Math.hypot(dx,dz)<.72&&Math.abs(player.position.y+1.2-1.45)<1.25}if(hit){player.position.z=Math.min(player.position.z,o.z+1.25);vertical=Math.max(vertical,2.2);body.rotation.z=(player.position.x<o.x?-.25:.25)}}
+  // Resolve the rotating sweeper as a solid capsule in the track plane.
+  const beamX=Math.cos(spinner.rotation.y),beamZ=-Math.sin(spinner.rotation.y);
+  const relX=player.position.x-spinner.position.x,relZ=player.position.z-spinner.position.z;
+  const along=THREE.MathUtils.clamp(relX*beamX+relZ*beamZ,-3.7,3.7);
+  const nearX=spinner.position.x+along*beamX,nearZ=spinner.position.z+along*beamZ;
+  let pushX=player.position.x-nearX,pushZ=player.position.z-nearZ;
+  let pushLen=Math.hypot(pushX,pushZ);
+  const sweeperVerticalOverlap=player.position.y<1.62&&player.position.y+2.15>1.28;
+  if(sweeperVerticalOverlap&&pushLen<.62){
+    if(pushLen<.001){pushX=-beamZ;pushZ=beamX;pushLen=1}
+    player.position.x=nearX+pushX/pushLen*.62;
+    player.position.z=nearZ+pushZ/pushLen*.62;
+    vertical=Math.max(vertical,1.8);
+    body.rotation.z=pushX<0?-.22:.22;
+  }
   // Checkpoints store a safe respawn position.
   checkpoints.forEach((z,i)=>{if(checkpoint===i&&player.position.z<z){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/3'}});
   if(player.position.z<-90){finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You cleared Sky Starter with '+checkpoint+' checkpoints reached.';ui.result.classList.remove('hidden')}
