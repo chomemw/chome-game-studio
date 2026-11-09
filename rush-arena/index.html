@@ -135,7 +135,11 @@ for(const [x,z,len] of floorSegments){
 }
 // Worn asphalt shoulders, painted lane guides and steel safety barriers.
 for(let z=-5;z>-96;z-=4){box(.09,.018,.85,white,-1.5,.035,z);box(.09,.018,.85,white,1.5,.035,z)}
-for(const x of [-4.52,4.52]){box(.12,.12,94,side,x,.18,-44);box(.12,.12,94,gold,x,.34,-44);for(let z=-3;z>-92;z-=6){box(.18,.52,.16,side,x,.54,z);box(.2,.08,.2,white,x,.85,z)}}
+for(const x of [-4.52,4.52]){box(.12,.12,94,side,x,.18,-44);box(.12,.12,94,gold,x,.34,-44);for(let z=-3;z>-92;z-=6){box(.18,.52,.16,side,x,.54,z);box(.2,.08,.2,white,x,.85,z);box(.7,.08,.12,side,x+(x<0?.36:-.36),.72,z)}}
+for(let z=-8;z>-92;z-=12){for(const x of [-4.7,4.7]){box(.34,5.2,.38,side,x,-3.7,z);box(.55,.22,.55,gold,x,-1.08,z)}box(9.1,.13,.16,side,0,-4.7,z);for(const x of [-4.2,4.2]){const stay=box(.12,4.3,.12,gold,x,-2.8,z);stay.rotation.z=x<0?-.17:.17}}
+for(let z=-7;z>-91;z-=9){box(.035,.012,2.1,dark,-3.92,.045,z+.8);box(.035,.012,2.1,dark,3.92,.045,z+.8);for(const x of [-4.28,4.28])box(.06,.025,.32,gold,x,.055,z)}
+const ridgeMats=[mat(0x70858b,.98),mat(0x596f78,.98),mat(0x405861,.98)];
+for(let layer=0;layer<3;layer++){for(let i=0;i<11;i++){const x=-54+i*10.8+(layer%2)*3,z=-22-i*8-layer*17;const peak=new THREE.Mesh(new THREE.ConeGeometry(5+Math.random()*4,13+Math.random()*12,5),ridgeMats[layer]);peak.position.set(x,1+Math.random()*2,z);peak.rotation.z=(Math.random()-.5)*.12;peak.castShadow=true;scene.add(peak)}}
 for(let z=-4;z>-94;z-=8){box(.22,.025,1.5,white,-4.1,.035,z);box(.22,.025,1.5,white,4.1,.035,z)}
 // Gaps: remove small sections of path with dark clouds beneath.
 for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-3.4,z+(Math.random()-.5)*1.8)}
@@ -150,6 +154,17 @@ const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,g
 const obstacles=[];
 for(const [z,x,w,h,d,color] of [[-11,0,2.4,1.25,1.1,coral],[-18,-2.3,1.3,1.6,1.1,purple],[-35,1.8,1.5,1.3,1.1,cyan],[-43,-1.8,1.5,1.5,1.1,coral],[-64,0,2.3,1.25,1.1,purple],[-84,2.1,1.2,1.5,1.1,cyan]]){const o=box(w,h,d,color,x,h/2,z);obstacles.push({mesh:o,x,z,w,d,h,type:'block'})}
 // Low clearance gate: it physically blocks a standing runner; ground-dive to slide under.
+// High-visibility hazard bands and metal corner guards on solid bumpers.
+for(const o of obstacles.filter(item=>item.type==='block')){
+  const stripeMat=new THREE.MeshStandardMaterial({color:0xf4d879,roughness:.5,metalness:.18,emissive:0x302000});
+  for(let i=-2;i<=2;i++){
+    const stripe=new THREE.Mesh(new THREE.BoxGeometry(.13,.075,.055),stripeMat);
+    stripe.position.set(i*Math.min(.28,o.w*.12),o.h*.28,o.d/2+.035);
+    stripe.rotation.z=-.28;stripe.castShadow=true;o.mesh.add(stripe);
+  }
+  const cap=new THREE.Mesh(new THREE.BoxGeometry(o.w*.9,.07,o.d*.92),gold);
+  cap.position.y=o.h/2+.035;cap.castShadow=true;o.mesh.add(cap);
+}
 const gate=box(8,.34,.55,coral,0,1.34,-29);
 obstacles.push({mesh:gate,x:0,z:-29,w:8,d:.55,h:1.51,clearance:1.08,type:'overhead'});
 const gatePostL=box(.22,1.5,.65,side,-4.05,.75,-29);
@@ -176,7 +191,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
   const loader=new GLTFLoader();
   const athleteUrl='https://models.codelove.in/models/sports-male-03.glb';
   const soldierFallbackUrl='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb';
-  const attachRunner=(gltf,rotationY=Math.PI)=>{
+  const attachRunner=(gltf,rotationY=0)=>{
     const model=gltf.scene;
     // Keep the same forward course heading as the existing player; verify model-specific facing in device test.
     model.rotation.y=rotationY;
@@ -208,7 +223,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
     else throw new Error('Athlete model loaded without usable locomotion animations');
     console.info('Rush Arena athlete loaded:',gltf.animations.map(a=>a.name));
   };
-  loader.load(athleteUrl,attachRunner,undefined,athleteError=>{
+  loader.load(athleteUrl,gltf=>attachRunner(gltf,0),undefined,athleteError=>{
     console.warn('Athlete model unavailable; loading Soldier fallback.',athleteError);
     loader.load(soldierFallbackUrl,gltf=>attachRunner(gltf,0),undefined,soldierError=>{
       console.warn('Both rigged characters failed; using procedural fallback.',soldierError);
@@ -307,7 +322,7 @@ function update(dt){
   if(player.position.z<-90){finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You cleared Sky Starter with '+checkpoint+' checkpoints reached.';ui.result.classList.remove('hidden')}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/93.5*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
-  const moving=Math.abs(nx)+Math.abs(nz)>.08;const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.run?'run':(runnerActions.walk?'walk':'idle')));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
+  const moving=Math.abs(nx)+Math.abs(nz)>.08;const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.run?'run':(runnerActions.walk?'walk':'idle')));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.48:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.035);update(dt);renderer.render(scene,camera)}
 animate();
