@@ -182,7 +182,7 @@ function updateWaterSplashes(dt){
     const k=i*3,v=splashVelocities[i];
     splashPositions[k]+=v.x*dt;splashPositions[k+1]+=v.y*dt;splashPositions[k+2]+=v.z*dt;
     v.y-=7.8*dt;
-    if(splashLives[i]<=0||splashPositions[k+1]<.035){splashLives[i]=0;splashPositions[k+1]=.025}
+    if(splashLives[i]<=0||splashPositions[k+1]<.035){splashLives[i]=0;splashPositions[k+1]=-1000}
     changed=true;
   }
   if(changed)splashGeometry.attributes.position.needsUpdate=true;
