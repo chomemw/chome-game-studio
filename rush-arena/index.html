@@ -112,7 +112,7 @@ const mobileDevice=matchMedia('(max-width: 900px), (pointer: coarse)').matches;
 const renderer=new THREE.WebGLRenderer({antialias:!mobileDevice,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=!mobileDevice;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;root.appendChild(renderer.domElement);
 const hemisphere=new THREE.HemisphereLight(0xb8c8d8,0x202832,1.05);scene.add(hemisphere);
-const sun=new THREE.DirectionalLight(0xb7c8dc,1.75);sun.position.set(-18,34,22);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.bias=-0.00015;sun.shadow.camera.left=-28;sun.shadow.camera.right=28;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-110;scene.add(sun);
+const sun=new THREE.DirectionalLight(0xb7c8dc,1.75);sun.position.set(-18,34,22);sun.castShadow=true;sun.shadow.mapSize.set(mobileDevice?512:768,mobileDevice?512:768);sun.shadow.bias=-0.00015;sun.shadow.camera.left=-28;sun.shadow.camera.right=28;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-110;scene.add(sun);
 const mat=(color,roughness=.78,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
 // Permanent storm atmosphere: lightweight rain streaks follow the runner.
 const rainCount=mobileDevice?150:320,rainPositions=new Float32Array(rainCount*6),rainGeometry=new THREE.BufferGeometry();
@@ -127,7 +127,7 @@ const rainField=new THREE.LineSegments(rainGeometry,rainMaterial);rainField.frus
 const stormFlashLight=new THREE.PointLight(0xdcecff,0,95,1.5);scene.add(stormFlashLight);
 let lightningTimer=7+Math.random()*6,lightningFlash=0,thunderPending=0;
 const weatherLabel=document.createElement('div');weatherLabel.textContent='⛈  STORM CONDITIONS';
-Object.assign(weatherLabel.style,{position:'fixed',left:'12px',top:'12px',zIndex:'45',padding:'7px 10px',border:'1px solid rgba(173,204,224,.28)',borderRadius:'9px',background:'rgba(12,22,32,.58)',color:'#d8e8f4',font:'800 10px system-ui',letterSpacing:'.12em',pointerEvents:'none',backdropFilter:'blur(5px)'});
+Object.assign(weatherLabel.style,{position:'fixed',left:'12px',top:'54px',zIndex:'45',padding:'7px 10px',border:'1px solid rgba(173,204,224,.28)',borderRadius:'9px',background:'rgba(12,22,32,.58)',color:'#d8e8f4',font:'800 10px system-ui',letterSpacing:'.12em',pointerEvents:'none',backdropFilter:'blur(5px)'});
 document.body.appendChild(weatherLabel);
 function updateStorm(dt){
   const p=player.position,arr=rainGeometry.attributes.position.array;
@@ -469,7 +469,8 @@ function update(dt){
   const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.run?'run':(runnerActions.walk?'walk':'idle')));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 let lastRenderAt=0,frameAccumulator=0;
-function animate(now=0){requestAnimationFrame(animate);const frameDelta=clock.getDelta();if(document.hidden)return;frameAccumulator+=frameDelta;const frameInterval=mobileDevice?1/30:1/60;if(now-lastRenderAt<frameInterval*1000)return;lastRenderAt=now;const dt=Math.min(frameAccumulator,.05);frameAccumulator=0;update(dt);updateStorm(dt);updateWaterSplashes(dt);renderer.render(scene,camera)}
+function animate(now=0){requestAnimationFrame(animate);const frameDelta=clock.getDelta();if(document.hidden)return;if(!running||paused||finished)return;frameAccumulator+=frameDelta;const frameInterval=mobileDevice?1/30:1/60;if(now-lastRenderAt<frameInterval*1000)return;lastRenderAt=now;const dt=Math.min(frameAccumulator,.05);frameAccumulator=0;update(dt);updateStorm(dt);updateWaterSplashes(dt);renderer.render(scene,camera)}
+renderer.render(scene,camera);
 animate();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight)});
 </script>
