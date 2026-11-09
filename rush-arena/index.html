@@ -167,34 +167,55 @@ const fallbackLegs=[];
 for(const x of [-.16,.16]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.62,4,8),fallbackDark);leg.position.set(x,.48,0);leg.castShadow=true;body.add(leg);fallbackLegs.push(leg)}
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
-// Three.js example Soldier.glb is a skinned Mixamo humanoid with Idle/Walk/Run clips.
-// Its source asset is distributed with the MIT-licensed three.js examples.
+// Primary character: Male Athlete 03 (rigged sports character, 80-bone skeleton).
+// Asset page: https://models.codelove.in/models/sports-male-03/
+// MIT licence is embedded in the GLB; retain this source/credit reference with the project.
 (async()=>{
  try {
   const {GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
-  new GLTFLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',gltf=>{
-  const model=gltf.scene;
-  model.rotation.y=0; // Face forward along the course direction (-Z).
-  model.updateMatrixWorld(true);
-  const bounds=new THREE.Box3().setFromObject(model);
-  const height=Math.max(.01,bounds.max.y-bounds.min.y);
-  model.scale.setScalar(1.92/height);
-  model.position.y=-bounds.min.y*model.scale.y;
-  model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
-  body.clear();body.add(model);body.scale.set(1,1,1);body.position.set(0,0,0);
-  runnerMixer=new THREE.AnimationMixer(model);
-  for(const clip of gltf.animations){
-    const key=clip.name.toLowerCase();
-    if(key==='idle'||key==='walk'||key==='run'){
-      const action=runnerMixer.clipAction(clip);action.enabled=true;action.setEffectiveTimeScale(1);action.setEffectiveWeight(1);action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[key]=action;
+  const loader=new GLTFLoader();
+  const athleteUrl='https://models.codelove.in/models/sports-male-03.glb';
+  const soldierFallbackUrl='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb';
+  const attachRunner=(gltf,rotationY=Math.PI)=>{
+    const model=gltf.scene;
+    // Keep the same forward course heading as the existing player; verify model-specific facing in device test.
+    model.rotation.y=rotationY;
+    model.updateMatrixWorld(true);
+    const bounds=new THREE.Box3().setFromObject(model);
+    const height=Math.max(.01,bounds.max.y-bounds.min.y);
+    model.scale.setScalar(1.84/height);
+    model.position.y=-bounds.min.y*model.scale.y;
+    model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
+    body.clear();body.add(model);body.scale.set(1,1,1);body.position.set(0,0,0);
+    runnerMixer=new THREE.AnimationMixer(model);
+    runnerActions={};
+    for(const clip of gltf.animations||[]){
+      const key=clip.name.toLowerCase().replace(/[\\s_-]+/g,'');
+      let slot=null;
+      if(key.includes('idle'))slot='idle';
+      else if(key.includes('walk'))slot='walk';
+      else if(key.includes('run'))slot='run';
+      else if(key.includes('jump'))slot='jump';
+      else if(key.includes('slide')||key.includes('dive'))slot='slide';
+      if(slot&&!runnerActions[slot]){
+        const action=runnerMixer.clipAction(clip);
+        action.enabled=true;action.setEffectiveTimeScale(1);action.setEffectiveWeight(1);
+        action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;
+      }
     }
-  }
-  runnerModelLoaded=!!(runnerActions.run||runnerActions.walk||runnerActions.idle);
-  if(runnerModelLoaded){playRunnerAction('idle',0);}
-  else {body.clear();body.add(fallbackTorso,fallbackHead,...fallbackLegs);}
-},undefined,error=>{console.warn('Rigged Rush Arena character could not load; using fallback runner.',error)});
+    runnerModelLoaded=!!(runnerActions.run||runnerActions.walk||runnerActions.idle);
+    if(runnerModelLoaded)playRunnerAction('idle',0);
+    else throw new Error('Athlete model loaded without usable locomotion animations');
+    console.info('Rush Arena athlete loaded:',gltf.animations.map(a=>a.name));
+  };
+  loader.load(athleteUrl,attachRunner,undefined,athleteError=>{
+    console.warn('Athlete model unavailable; loading Soldier fallback.',athleteError);
+    loader.load(soldierFallbackUrl,gltf=>attachRunner(gltf,0),undefined,soldierError=>{
+      console.warn('Both rigged characters failed; using procedural fallback.',soldierError);
+    });
+  });
  } catch(error) {
-  console.warn('Optional character loader unavailable; using fallback runner.',error);
+  console.warn('Optional character loader unavailable; using procedural fallback.',error);
  }
 })();
 
@@ -286,7 +307,7 @@ function update(dt){
   if(player.position.z<-90){finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You cleared Sky Starter with '+checkpoint+' checkpoints reached.';ui.result.classList.remove('hidden')}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/93.5*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
-  const moving=Math.abs(nx)+Math.abs(nz)>.08;const desired=slideTimer>0?'walk':(!grounded?'run':(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.walk?'walk':'idle'));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
+  const moving=Math.abs(nx)+Math.abs(nz)>.08;const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.run?'run':(runnerActions.walk?'walk':'idle')));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.035);update(dt);renderer.render(scene,camera)}
 animate();
