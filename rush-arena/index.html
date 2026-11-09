@@ -169,7 +169,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
   const {GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
   new GLTFLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',gltf=>{
   const model=gltf.scene;
-  model.rotation.y=Math.PI;
+  model.rotation.y=0; // Face forward along the course direction (-Z).
   model.updateMatrixWorld(true);
   const bounds=new THREE.Box3().setFromObject(model);
   const height=Math.max(.01,bounds.max.y-bounds.min.y);
