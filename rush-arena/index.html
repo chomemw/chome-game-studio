@@ -155,6 +155,18 @@ obstacles.push({mesh:gate,x:0,z:-29,w:8,d:.55,h:1.51,clearance:1.08,type:'overhe
 const gatePostL=box(.22,1.5,.65,side,-4.05,.75,-29);
 const gatePostR=box(.22,1.5,.65,side,4.05,.75,-29);
 const spinner=new THREE.Group();spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
+// Red hazard beacons: visible from a distance and pulsed while the race is active.
+const hazardBeacons=[];
+obstacles.forEach((o,index)=>{
+  const rig=new THREE.Group();rig.position.set(0,0,o.z);
+  for(const x of [-4.05,4.05]){
+    const post=new THREE.Mesh(new THREE.CylinderGeometry(.055,.075,.95,8),side);post.position.set(x,.48,0);post.castShadow=true;rig.add(post);
+    const lamp=new THREE.Mesh(new THREE.SphereGeometry(.19,12,10),new THREE.MeshStandardMaterial({color:0xff2020,emissive:0xff0800,emissiveIntensity:1.8,roughness:.3}));
+    lamp.position.set(x,1.02,0);rig.add(lamp);
+    const light=new THREE.PointLight(0xff1717,1.5,5,2);light.position.copy(lamp.position);rig.add(light);
+  }
+  scene.add(rig);hazardBeacons.push({rig,lamps:rig.children.filter(child=>child.isMesh&&child.geometry.type==='SphereGeometry'),obstacle:o,index});
+});
 
 // Rigged humanoid runner. The old procedural body remains visible only as a
 // network-failure fallback; on successful GLB load it is replaced completely.
@@ -265,9 +277,34 @@ function sfxSlide(){soundNoise(.62,.16,1100);soundTone(90,42,.48,.08,'sawtooth')
 function sfxImpact(){soundNoise(.42,.2,360);soundTone(72,28,.55,.2,'sawtooth')}
 function sfxFinish(){soundTone(220,55,.85,.16,'triangle');soundTone(165,330,.7,.1,'sine',.3);soundNoise(.8,.1,900,.45)}
 function sfxFall(){soundTone(260,32,.7,.17,'sawtooth');soundNoise(.5,.14,260,.12)}
+function sfxWarning(){soundTone(740,330,.24,.13,'square');soundTone(520,210,.34,.11,'sawtooth',.16);soundNoise(.2,.045,1200,.05)}
+const dangerBanner=document.createElement('div');
+dangerBanner.textContent='⚠ DANGER AHEAD';
+Object.assign(dangerBanner.style,{position:'fixed',top:'58px',left:'50%',transform:'translateX(-50%)',zIndex:'49',padding:'11px 18px',border:'1px solid rgba(255,70,55,.8)',borderRadius:'12px',background:'rgba(55,5,8,.88)',boxShadow:'0 0 24px rgba(255,20,20,.35)',color:'#fff',font:'900 13px system-ui',letterSpacing:'.12em',textAlign:'center',whiteSpace:'nowrap',opacity:'0',transition:'opacity .12s',pointerEvents:'none'});
+document.body.appendChild(dangerBanner);
+let warnedHazards=new Set(),cameraShake=0;
+function updateHazardWarnings(dt){
+  let nearest=null,nearestDistance=Infinity;
+  for(const beacon of hazardBeacons){
+    const distance=player.position.z-beacon.obstacle.z;
+    const ahead=distance>0&&distance<20;
+    const pulse=.65+Math.max(0,Math.sin(elapsed*8+beacon.index))*.75;
+    beacon.lamps.forEach(lamp=>{lamp.material.emissiveIntensity=ahead?2.8*pulse:1.15*pulse;lamp.scale.setScalar(ahead?1.12+.18*pulse:1)});
+    beacon.rig.visible=distance>-2&&distance<26;
+    if(ahead&&distance<nearestDistance){nearest=beacon;nearestDistance=distance}
+    if(ahead&&distance<17&&!warnedHazards.has(beacon.index)){warnedHazards.add(beacon.index);sfxWarning()}
+  }
+  if(nearest){
+    const action=nearest.obstacle.type==='overhead'?'SLIDE UNDER':nearest.obstacle.type==='spinner'?'DODGE THE SWEEPER':'JUMP THE BLOCK';
+    dangerBanner.textContent='⚠ '+action+' · '+Math.ceil(nearestDistance)+'m';
+    dangerBanner.style.opacity='1';
+  }else dangerBanner.style.opacity='0';
+  cameraShake=Math.max(0,cameraShake-dt*2.8);
+}
+
 soundButton.addEventListener('click',()=>{rushAudioOn=!rushAudioOn;soundButton.textContent=rushAudioOn?'🔊 SOUND ON':'🔇 SOUND OFF';if(audioReady()){rushMaster.gain.setTargetAtTime(rushAudioOn?.72:0,rushAudio.currentTime,.06);if(rushAudioOn&&running)startHorrorAmbience()}});
 
-function reset(){audioReady();if(rushAudioOn){sfxStart();startHorrorAmbience()}player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/3';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden')}
+function reset(){audioReady();if(rushAudioOn){sfxStart();startHorrorAmbience()}warnedHazards.clear();cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/3';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden')}
 function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
 function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-94&&z<=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
@@ -319,7 +356,9 @@ function moveRunner(dx,dz){
 }
 function update(dt){
   spinner.rotation.y+=dt*1.55;
+  hazardBeacons.forEach(b=>{b.rig.rotation.y=Math.sin(elapsed*2+b.index)*.08});
   if(!running||paused||finished)return;
+  updateHazardWarnings(dt);
   elapsed+=dt;ui.time.textContent=fmt(elapsed);
   if(slideTimer>0){slideTimer=Math.max(0,slideTimer-dt);if(slideTimer===0){body.scale.set(1,1,1);body.position.y=0;body.rotation.x=0}}
   const ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+stickX;
@@ -339,7 +378,7 @@ function update(dt){
   let pushX=player.position.x-nearX,pushZ=player.position.z-nearZ;
   let pushLen=Math.hypot(pushX,pushZ);
   const sweeperVerticalOverlap=player.position.y<1.62&&player.position.y+2.15>1.28;
-  if(sweeperVerticalOverlap&&pushLen<.62){if(performance.now()-lastSweepSound>1100){sfxImpact();lastSweepSound=performance.now()}
+  if(sweeperVerticalOverlap&&pushLen<.62){if(performance.now()-lastSweepSound>1100){sfxImpact();lastSweepSound=performance.now()}cameraShake=Math.max(cameraShake,.48);
     if(pushLen<.001){pushX=-beamZ;pushZ=beamX;pushLen=1}
     player.position.x=nearX+pushX/pushLen*.62;
     player.position.z=nearZ+pushZ/pushLen*.62;
@@ -350,7 +389,7 @@ function update(dt){
   checkpoints.forEach((z,i)=>{if(checkpoint===i&&player.position.z<z){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/3'}});
   if(player.position.z<-90){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You cleared Sky Starter with '+checkpoint+' checkpoints reached.';ui.result.classList.remove('hidden')}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/93.5*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
-  const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
+  const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
   const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.run?'run':(runnerActions.walk?'walk':'idle')));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.035);update(dt);renderer.render(scene,camera)}
