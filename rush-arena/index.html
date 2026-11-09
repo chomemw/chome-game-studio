@@ -59,6 +59,7 @@
 </div>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 
 const root=document.getElementById('game');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xa9c2d0);scene.fog=new THREE.Fog(0xa9c2d0,48,165);
@@ -106,22 +107,40 @@ const gatePostL=box(.22,1.5,.65,side,-4.05,.75,-29);
 const gatePostR=box(.22,1.5,.65,side,4.05,.75,-29);
 const spinner=new THREE.Group();spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
 
-// Semi-realistic athletic runner: layered clothing, articulated limbs and restrained proportions.
+// Rigged humanoid runner. The old procedural body remains visible only as a
+// network-failure fallback; on successful GLB load it is replaced completely.
 const player=new THREE.Group();scene.add(player);player.position.set(0,.05,3.5);
 const body=new THREE.Group();player.add(body);
-const jacket=mat(0x263c50,.72,.08),pants=mat(0x202a33,.86),skin=mat(0xb98568,.82),shoe=mat(0x171d22,.7,.12),sole=mat(0xc5c2b7,.82),visor=mat(0x18232d,.3,.25),trim=mat(0xc18d4d,.38,.55);
-const capsule=(r,len,m,x,y,z,parent)=>{const o=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,4,8),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o};
-capsule(.31,.48,jacket,0,1.18,0,body);
-const chest=box(.58,.58,.34,jacket,0,1.22,0,body);chest.rotation.x=-.04;
-const head=sphere(.255,skin,0,1.92,.025,body);head.scale.set(.88,1.12,.9);
-const hair=mat(0x24272a,.92);const hairCap=sphere(.258,hair,0,2.08,-.005,body);hairCap.scale.set(.9,.45,.92);
-const eyeMat=mat(0x1c252b,.42);sphere(.025,eyeMat,-.09,1.96,.245,body);sphere(.025,eyeMat,.09,1.96,.245,body);
-const collar=box(.42,.09,.35,trim,0,1.57,.015,body);
-const backpack=box(.34,.48,.2,dark,0,1.22,-.25,body);
-const limbs=[];
-for(const x of [-.17,.17]){const leg=new THREE.Group();leg.position.set(x,.82,0);body.add(leg);capsule(.115,.48,pants,0,-.22,0,leg);const knee=sphere(.12,pants,0,-.47,.015,leg);const foot=box(.23,.13,.4,shoe,0,-.59,.11,leg);box(.235,.035,.4,sole,0,-.66,.11,leg);limbs.push(leg)}
-for(const x of [-.39,.39]){const arm=new THREE.Group();arm.position.set(x,1.42,0);body.add(arm);capsule(.085,.42,jacket,0,-.2,0,arm);sphere(.095,skin,0,-.46,.015,arm);limbs.push(arm)}
-const chestStripe=box(.045,.36,.018,trim,0,1.22,.18,body);
+const fallbackMat=mat(0x263c50,.72,.08),fallbackSkin=mat(0xb98568,.82),fallbackDark=mat(0x202a33,.86);
+const fallbackTorso=new THREE.Mesh(new THREE.CapsuleGeometry(.3,.55,4,8),fallbackMat);fallbackTorso.position.y=1.15;fallbackTorso.castShadow=true;body.add(fallbackTorso);
+const fallbackHead=new THREE.Mesh(new THREE.SphereGeometry(.23,16,12),fallbackSkin);fallbackHead.position.y=1.86;fallbackHead.castShadow=true;body.add(fallbackHead);
+const fallbackLegs=[];
+for(const x of [-.16,.16]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.62,4,8),fallbackDark);leg.position.set(x,.48,0);leg.castShadow=true;body.add(leg);fallbackLegs.push(leg)}
+let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
+function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
+// Three.js example Soldier.glb is a skinned Mixamo humanoid with Idle/Walk/Run clips.
+// Its source asset is distributed with the MIT-licensed three.js examples.
+new GLTFLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',gltf=>{
+  const model=gltf.scene;
+  model.rotation.y=Math.PI;
+  model.updateMatrixWorld(true);
+  const bounds=new THREE.Box3().setFromObject(model);
+  const height=Math.max(.01,bounds.max.y-bounds.min.y);
+  model.scale.setScalar(1.92/height);
+  model.position.y=-bounds.min.y*model.scale.y;
+  model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
+  body.clear();body.add(model);body.scale.set(1,1,1);body.position.set(0,0,0);
+  runnerMixer=new THREE.AnimationMixer(model);
+  for(const clip of gltf.animations){
+    const key=clip.name.toLowerCase();
+    if(key==='idle'||key==='walk'||key==='run'){
+      const action=runnerMixer.clipAction(clip);action.enabled=true;action.setEffectiveTimeScale(1);action.setEffectiveWeight(1);action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[key]=action;
+    }
+  }
+  runnerModelLoaded=!!(runnerActions.run||runnerActions.walk||runnerActions.idle);
+  if(runnerModelLoaded){playRunnerAction('idle',0);}
+  else {body.clear();body.add(fallbackTorso,fallbackHead,...fallbackLegs);}
+},undefined,error=>{console.warn('Rigged Rush Arena character could not load; using fallback runner.',error)});
 
 let running=false,finished=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,stickX=0,stickY=0,lastFrame=0,slideTimer=0;
 const keys={};let jumpQueued=false,diveQueued=false;
@@ -211,7 +230,7 @@ function update(dt){
   if(player.position.z<-90){finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You cleared Sky Starter with '+checkpoint+' checkpoints reached.';ui.result.classList.remove('hidden')}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/93.5*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
-  const moving=Math.abs(nx)+Math.abs(nz)>.08;const swing=moving?Math.sin(elapsed*13)*.55:0;limbs[0].rotation.x=swing;limbs[1].rotation.x=-swing;limbs[2].rotation.z=moving?-.16:0;limbs[3].rotation.z=moving?.16:0;body.position.y=slideTimer>0?-.48:(moving?Math.abs(Math.sin(elapsed*13))*.07:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
+  const moving=Math.abs(nx)+Math.abs(nz)>.08;const desired=slideTimer>0?'walk':(!grounded?'run':(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.walk?'walk':'idle'));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.035);update(dt);renderer.render(scene,camera)}
 animate();
