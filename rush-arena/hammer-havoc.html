@@ -254,7 +254,7 @@ addRoller(-59,0);addRoller(-65,1.4);
 addMovingBridge(-83,.4);addMovingBridge(-88,2);
 addSwingHammer(-108,.9);addHydraulicCrusher(-115,1.7);
 function updateHazards(dt){
- const t=elapsed;
+ const t=elapsed,runnerHeight=slide>0?0.88:2.05;
  let warningActive=false;
  for(const h of hazards){
   const phase=t*1.55+h.phase;
@@ -263,7 +263,7 @@ function updateHazards(dt){
    h.pivot.rotation.x=Math.sin(phase*.53)*.08;
    h.head.getWorldPosition(h._world||(h._world=new THREE.Vector3()));
    const p=h._world;
-   const near=Math.abs(player.position.z-h.z)<2.0&&Math.abs(player.position.x-p.x)<1.05&&player.position.y<2.15;
+   const near=Math.abs(player.position.z-h.z)<1.65&&Math.abs(player.position.x-p.x)<1.12&&player.position.y+runnerHeight>Math.max(.15,p.y-.48)&&player.position.y<p.y+.62;
    const warn=Math.abs(player.position.z-h.z)<8&&Math.abs(Math.sin(phase))>.62;
    if(near&&!h.hit){h.hit=true;onHazardHit('A swinging hammer struck you');}
    if(!near)h.hit=false;
@@ -273,7 +273,7 @@ function updateHazards(dt){
    const wave=(Math.sin(phase)+1)/2;
    const down=wave>.58?(wave-.58)/.42:0;
    h.ram.position.y=5.15-down*3.55;
-   const near=Math.abs(player.position.z-h.z)<1.45&&Math.abs(player.position.x)<2.55&&player.position.y<2.05&&h.ram.position.y<3.25;
+   const near=Math.abs(player.position.z-h.z)<1.35&&Math.abs(player.position.x)<2.55&&player.position.y+runnerHeight>h.ram.position.y-1.95&&h.ram.position.y<3.25;
    const warn=Math.abs(player.position.z-h.z)<8&&down>.12;
    if(near&&!h.hit){h.hit=true;onHazardHit('Hydraulic crusher impact');}
    if(!near)h.hit=false;
@@ -282,7 +282,7 @@ function updateHazards(dt){
   }else if(h.type==='roller'){
    h.roller.rotation.z=phase*1.8;
    for(const r of h.rings)r.rotation.z=phase*1.8;
-   const near=Math.abs(player.position.z-h.z)<1.45&&Math.abs(player.position.x)<2.7&&player.position.y<2.25;
+   const near=Math.abs(player.position.z-h.z)<1.25&&Math.abs(player.position.x)<2.7&&player.position.y+runnerHeight>0.45&&player.position.y<2.25;
    const warn=Math.abs(player.position.z-h.z)<7;
    if(near&&!h.hit){h.hit=true;onHazardHit('Rotating steel roller knocked you down');}
    if(!near)h.hit=false;
@@ -290,10 +290,9 @@ function updateHazards(dt){
    h.warn.beacon.intensity=warn?2.5:0.15;
   }else if(h.type==='bridge'){
    for(const p of h.parts){p.group.position.x=p.baseX+Math.sin(phase+p.phase)*.85;p.group.position.y=.35+Math.sin(phase*1.3+p.phase)*.22;}
-   const near=h.parts.some(p=>Math.abs(player.position.z-p.group.position.z)<1.65&&Math.abs(player.position.x-p.group.position.x)<1.35&&player.position.y<1.25);
+   // The bridge decks are moving traversal platforms, not damaging hazards.
+   // Do not reset a runner merely for standing near a deck; the factory floor remains safe.
    const warn=Math.abs(player.position.z-h.z)<7;
-   if(near&&!h.hit){h.hit=true;onHazardHit('Moving bridge platform caught you');}
-   if(!near)h.hit=false;
    if(warn)warningActive=true;
    h.warn.beacon.intensity=warn?2.4:.15;
   }
@@ -326,8 +325,8 @@ let started=false,finished=false,elapsed=0,checkpoint=0,vertical=0,grounded=true
 const $=id=>document.getElementById(id);
 function reset(){try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume()}catch(e){}hazardSound(220,.12);player.position.set(0,0,2);vertical=0;grounded=true;slide=0;elapsed=0;checkpoint=0;finished=false;started=true;$('finish').classList.add('hidden');$('welcome').classList.add('hidden');$('cp').textContent='0/4';}
 function jump(){if(started&&!finished&&grounded){vertical=8.3;grounded=false}}
-function dive(){if(started&&!finished&&grounded)slide=.65}
-$('start').addEventListener('click',()=>{});$('again').addEventListener('click',reset);$('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});$('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});
+function dive(){if(started&&!finished&&grounded)slide=.9}
+$('again').addEventListener('click',reset);$('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});$('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});
 window.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='Space'){e.preventDefault();jump()}if(e.code==='ShiftLeft'||e.code==='ShiftRight')dive()});
 window.addEventListener('keyup',e=>keys[e.code]=false);
 const stick=$('stick'),knob=$('knob');let pointer=null;
@@ -348,11 +347,11 @@ function update(dt){
  $('time').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');
 }
 let lastRenderAt=0,frameAccumulator=0;
-function animate(now=0){requestAnimationFrame(animate);const frameDelta=clock.getDelta();if(document.hidden)return;frameAccumulator+=frameDelta;const frameInterval=mobileDevice?1/30:1/60;if(now-lastRenderAt<frameInterval*1000)return;lastRenderAt=now;const dt=Math.min(frameAccumulator,.05);frameAccumulator=0;update(dt);if(runnerMixer)runnerMixer.update(dt);if(runnerModelLoaded&&started&&!finished)playRunnerAction(!grounded?'jump':(Math.abs(joy.x)+Math.abs(joy.y)>.12||keys.KeyW||keys.ArrowUp||keys.KeyS||keys.ArrowDown||keys.KeyA||keys.KeyD?'run':'idle'));
+function animate(now=0){requestAnimationFrame(animate);const frameDelta=clock.getDelta();if(document.hidden)return;if(!started||finished)return;frameAccumulator+=frameDelta;const frameInterval=mobileDevice?1/30:1/60;if(now-lastRenderAt<frameInterval*1000)return;lastRenderAt=now;const dt=Math.min(frameAccumulator,.05);frameAccumulator=0;update(dt);if(runnerMixer)runnerMixer.update(dt);if(runnerModelLoaded&&started&&!finished)playRunnerAction(!grounded?'jump':(Math.abs(joy.x)+Math.abs(joy.y)>.12||keys.KeyW||keys.ArrowUp||keys.KeyS||keys.ArrowDown||keys.KeyA||keys.KeyD?'run':'idle'));
  const target=new THREE.Vector3(player.position.x,player.position.y+1.25,player.position.z-1.0);camera.position.lerp(new THREE.Vector3(player.position.x*.65,player.position.y+4.2,player.position.z+7.5),1-Math.pow(.001,dt));camera.lookAt(target);
  if(started&&!finished&&player.position.z<=endZ){finished=true;$('result').textContent='Route time: '+$('time').textContent+'. You crossed the active machinery course.';$('finish').classList.remove('hidden')}
  renderer.render(scene,camera)}
-window.__hammerStart=reset;animate();
+window.__hammerStart=reset;renderer.render(scene,camera);animate();
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight)});
 </script>
 </body></html>
