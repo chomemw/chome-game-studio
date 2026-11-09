@@ -176,10 +176,10 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
   const loader=new GLTFLoader();
   const athleteUrl='https://models.codelove.in/models/sports-male-03.glb';
   const soldierFallbackUrl='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb';
-  const attachRunner=(gltf)=>{
+  const attachRunner=(gltf,rotationY=Math.PI)=>{
     const model=gltf.scene;
     // Keep the same forward course heading as the existing player; verify model-specific facing in device test.
-    model.rotation.y=Math.PI;
+    model.rotation.y=rotationY;
     model.updateMatrixWorld(true);
     const bounds=new THREE.Box3().setFromObject(model);
     const height=Math.max(.01,bounds.max.y-bounds.min.y);
@@ -210,7 +210,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
   };
   loader.load(athleteUrl,attachRunner,undefined,athleteError=>{
     console.warn('Athlete model unavailable; loading Soldier fallback.',athleteError);
-    loader.load(soldierFallbackUrl,attachRunner,undefined,soldierError=>{
+    loader.load(soldierFallbackUrl,gltf=>attachRunner(gltf,0),undefined,soldierError=>{
       console.warn('Both rigged characters failed; using procedural fallback.',soldierError);
     });
   });
