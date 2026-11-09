@@ -74,7 +74,7 @@ for(let z=1;z>-124;z-=10){
 // Long overhead pipe runs, flanges, valves and cable trays.
 for(let i=0;i<5;i++){
  const x=-8+i*4;
- cyl(.19,.19,126,steel,x,11.8,-60,Math.PI/2);
+ const pipeRun=cyl(.19,.19,126,steel,x,11.8,-60);pipeRun.rotation.x=Math.PI/2;
  for(let z=0;z>-126;z-=21){
   const flange=cyl(.29,.29,.12,darkSteel,x,11.8,z,Math.PI/2);flange.rotation.x=Math.PI/2;
   for(let b=0;b<6;b++){const a=b*Math.PI/3;sphere(.035,paintYellow,x+Math.cos(a)*.25,11.8+Math.sin(a)*.25,z-.1)}
