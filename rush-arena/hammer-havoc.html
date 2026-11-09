@@ -359,7 +359,7 @@ function update(dt){
   const within=Math.abs(player.position.x-p.group.position.x)<=p.halfX+.08&&Math.abs(player.position.z-p.group.position.z)<=p.halfZ+.08;
   if(within&&vertical<=0&&player.position.y<=top+.14&&player.position.y>=top-.65){if(!supported||top>supported.topNow)supported={part:p,topNow:top}}
  }}
- const inBridgeGap=player.position.z<-79.5&&player.position.z>-94.8;
+ const inBridgeGap=player.position.z<-81.25&&player.position.z>-94.0;
  if(supported){player.position.y=supported.topNow;vertical=0;grounded=true;playerSupport=supported.part;}
  else if(!inBridgeGap&&player.position.y<=0&&vertical<=0){player.position.y=0;vertical=0;grounded=true;playerSupport=null;}
  else {playerSupport=null;grounded=false;vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<-4){onHazardHit('You fell from the moving bridge');}}
