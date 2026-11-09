@@ -9,7 +9,7 @@
 :root{color-scheme:dark;--panel:#101820dc;--line:#d7e3ed35;--ink:#f2f5f7;--muted:#aab7c2;--red:#e44d3e;--amber:#f0b34b}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#151b20;color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;touch-action:none}button{font:inherit;color:inherit;cursor:pointer}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}
 .hud{position:fixed;inset:0;pointer-events:none;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);display:flex;flex-direction:column;justify-content:space-between}.top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-top:12px}.brand,.stat,.zone{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(12px);border-radius:12px;box-shadow:0 10px 30px #0005}.brand{padding:10px 13px;font-weight:950;letter-spacing:.12em;font-size:11px}.brand span{color:#f1b75b}.stats{display:flex;gap:7px}.stat{min-width:75px;padding:7px 10px;text-align:center}.stat small{display:block;color:var(--muted);font-size:8px;letter-spacing:.13em;font-weight:900}.stat b{display:block;font-size:17px;margin-top:2px}.zone{padding:10px 12px;font-size:9px;letter-spacing:.12em;font-weight:900;color:#f2c77f}.progress{position:absolute;top:83px;left:50%;transform:translateX(-50%);width:min(360px,56vw);padding:8px 10px;background:#101820bd;border:1px solid var(--line);border-radius:10px}.progress-head{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.12em;font-weight:900;margin-bottom:5px}.track{height:5px;background:#ffffff2a;border-radius:9px;overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,#e7a94b,#e95c43);transition:width .1s}.bottom{display:flex;align-items:flex-end;justify-content:space-between;padding:0 2px 16px}.hint{padding:9px 12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;color:#d2dbe1;font-size:9px;line-height:1.5}.stick{position:fixed;left:14px;bottom:18px;width:106px;height:106px;border:1px solid #ffffff55;border-radius:50%;background:#10182088;backdrop-filter:blur(7px);pointer-events:auto;touch-action:none}.stick:after{content:"";position:absolute;inset:27px;border:1px dashed #ffffff44;border-radius:50%}.knob{position:absolute;left:31px;top:31px;width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#f4f6f7,#9daab2);box-shadow:0 4px 15px #0009;pointer-events:none}.actions{display:flex;gap:9px;align-items:flex-end;pointer-events:auto}.action{width:65px;height:65px;border-radius:50%;border:2px solid #ffffff8a;background:linear-gradient(145deg,#e5a94b,#a84b32);font-weight:1000;font-size:10px;box-shadow:0 8px 24px #0008}.action.secondary{width:56px;height:56px;background:linear-gradient(145deg,#687c88,#35444d);font-size:9px}
-.overlay{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:18px;background:linear-gradient(180deg,#080d12b8,#080d12d9);backdrop-filter:blur(8px)}.dialog{width:min(470px,100%);padding:27px;border:1px solid #dbe4e84a;border-radius:20px;background:linear-gradient(145deg,#26343ceF,#10171df7);box-shadow:0 30px 90px #000b;text-align:center}.eyebrow{font-size:9px;letter-spacing:.24em;font-weight:1000;color:#f1b75b}.dialog h1{font-size:clamp(38px,9vw,58px);line-height:.92;letter-spacing:-.07em;margin:13px 0}.dialog h1 span{color:#f0b45a}.dialog p{color:#bac5cc;font-size:12px;line-height:1.7;margin:12px auto 20px;max-width:360px}.primary{border:0;border-radius:11px;padding:14px 22px;background:linear-gradient(100deg,#e4a84b,#c35b39);font-weight:1000;letter-spacing:.1em;box-shadow:0 10px 25px #a34d2d55}.small{display:block;color:#9caab2;font-size:9px;margin-top:12px}.hidden{display:none!important}
+.stick{z-index:4}.actions{z-index:4}.warning{position:fixed;left:50%;top:118px;transform:translateX(-50%);padding:8px 13px;border:1px solid #ff6c55aa;border-radius:8px;background:#481c1ddd;color:#ffd2c8;font-size:10px;font-weight:1000;letter-spacing:.13em;text-align:center;pointer-events:none;opacity:0;transition:opacity .12s}.warning.show{opacity:1}.overlay{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:18px;background:linear-gradient(180deg,#080d12b8,#080d12d9);backdrop-filter:blur(8px)}.dialog{width:min(470px,100%);padding:27px;border:1px solid #dbe4e84a;border-radius:20px;background:linear-gradient(145deg,#26343ceF,#10171df7);box-shadow:0 30px 90px #000b;text-align:center}.eyebrow{font-size:9px;letter-spacing:.24em;font-weight:1000;color:#f1b75b}.dialog h1{font-size:clamp(38px,9vw,58px);line-height:.92;letter-spacing:-.07em;margin:13px 0}.dialog h1 span{color:#f0b45a}.dialog p{color:#bac5cc;font-size:12px;line-height:1.7;margin:12px auto 20px;max-width:360px}.primary{border:0;border-radius:11px;padding:14px 22px;background:linear-gradient(100deg,#e4a84b,#c35b39);font-weight:1000;letter-spacing:.1em;box-shadow:0 10px 25px #a34d2d55}.small{display:block;color:#9caab2;font-size:9px;margin-top:12px}.hidden{display:none!important}
 @media(max-width:620px){.stats{gap:4px}.stat{min-width:60px;padding:7px 6px}.stat b{font-size:15px}.zone{display:none}.progress{top:79px;width:58vw}.hint{display:none}.stick{left:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:98px;height:98px}.knob{left:28px;top:28px}.action{width:62px;height:62px}.action.secondary{width:53px;height:53px}.bottom{padding-bottom:calc(10px + env(safe-area-inset-bottom))}}
 </style>
 </head>
@@ -18,10 +18,12 @@
 <div class="hud">
  <div class="top"><div class="brand">CHOME <span>· HAMMER HAVOC</span></div><div class="stats"><div class="stat"><small>TIME</small><b id="time">00:00</b></div><div class="stat"><small>CHECKPOINT</small><b id="cp">0/4</b></div></div><div class="zone">LEVEL 02 · INDUSTRIAL COMPLEX</div></div>
  <div class="progress"><div class="progress-head"><span>FACTORY PROGRESS</span><span id="pct">0%</span></div><div class="track"><div class="fill" id="fill"></div></div></div>
- <div class="bottom"><div class="hint">MOVE · WASD / ARROWS<br>JUMP · SPACE &nbsp; DIVE · SHIFT<br>Reach the marked end of each factory bay.</div><div class="actions"><button class="action secondary" id="dive">DIVE</button><button class="action" id="jump">JUMP</button></div></div>
+ <div class="bottom"><div class="hint">MOVE · WASD / ARROWS<br>JUMP · SPACE &nbsp; DIVE · SHIFT<br>Watch the warning beacons before crossing machinery.</div><div class="actions"><button class="action secondary" id="dive">DIVE</button><button class="action" id="jump">JUMP</button></div></div>
 </div>
+<div class="stick" id="stick" aria-label="Movement joystick"><div class="knob" id="knob"></div></div>
+<div class="warning" id="warning">MACHINERY ACTIVE — TIME YOUR CROSSING</div>
 <div class="overlay" id="welcome"><div class="dialog"><div class="eyebrow">CHOME RUSH ARENA · LEVEL 02</div><h1>HAMMER <span>HAVOC</span></h1><p>Enter a decommissioned heavy-industry plant. Cross five connected factory bays, climb the maintenance routes and reach the final crusher hall. This is Phase 1: the complete environment and course layout.</p><button class="primary" id="start">ENTER FACTORY</button><span class="small">Solo practice · Third-person camera · Semi-realistic industrial environment</span><span class="small" id="status">Preparing factory…</span></div></div>
-<div class="overlay hidden" id="finish"><div class="dialog"><div class="eyebrow">LEVEL 02 · ROUTE REACHED</div><h1>FACTORY <span>CROSSED</span></h1><p id="result">You reached the end of the Phase 1 course layout.</p><button class="primary" id="again">RUN AGAIN</button><span class="small">Moving hazards and collision gameplay arrive in Phase 2.</span></div></div>
+<div class="overlay hidden" id="finish"><div class="dialog"><div class="eyebrow">LEVEL 02 · ROUTE REACHED</div><h1>FACTORY <span>CROSSED</span></h1><p id="result">You reached the end of the Phase 1 course layout.</p><button class="primary" id="again">RUN AGAIN</button><span class="small">Phase 2 machinery active · Run again to improve your time.</span></div></div>
 <script>
 (() => {
  const start=document.getElementById('start'),status=document.getElementById('status');
@@ -195,13 +197,132 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
   loader.load(athleteUrl,attachAthlete,undefined,error=>console.warn('Rigged athlete unavailable; using fallback model',error));
  }catch(error){console.warn('Optional athlete loader unavailable; using fallback model',error)}
 })();
-// Four route checkpoints; collision and hazard gameplay are intentionally separate Phase 2 work.
+// Phase 2 hazards: articulated industrial machinery with timed motion and real player collision.
+const hazards=[];
+function addWarning(z,width=6){
+ const strip=box(width,.035,1.35,paintRed,0,.035,z);
+ for(let x=-width/2+.35;x<width/2;x+=.72){const mark=box(.24,.045,.9,paintYellow,x,.065,z);mark.rotation.y=.35}
+ const beacon=new THREE.PointLight(0xff3527,.25,9,2);beacon.position.set(0,2.6,z);scene.add(beacon);
+ return {z,beacon,strip};
+}
+function addSwingHammer(z,phase=0){
+ const pivot=new THREE.Group();pivot.position.set(0,4.9,z);scene.add(pivot);
+ const rod=box(.24,3.25,.24,steel,0,-1.62,0,pivot);
+ const collar=cyl(.34,.34,.28,darkSteel,0,-3.05,0,Math.PI/2,pivot);
+ const head=box(1.42,.72,1.05,darkSteel,0,-3.48,0,pivot);
+ box(1.48,.12,1.1,paintYellow,0,-3.88,0,pivot);
+ for(const x of [-.47,.47])cyl(.13,.13,.12,steel,x,-3.48,.56,Math.PI/2,pivot);
+ const warn=addWarning(z,7);
+ hazards.push({type:'hammer',z,pivot,head,warn,phase,hit:false});
+}
+function addHydraulicCrusher(z,phase=0){
+ const frame=new THREE.Group();frame.position.z=z;scene.add(frame);
+ for(const x of [-3.1,3.1]){box(.55,5.8,1.15,darkSteel,x,3,0,frame);box(.72,.18,1.3,paintYellow,x,5.85,0,frame)}
+ const top=box(6.6,.6,2.1,steel,0,6.15,0,frame);
+ const pistonL=cyl(.22,.22,2.1,steel,-2.15,5.05,0,0,frame),pistonR=cyl(.22,.22,2.1,steel,2.15,5.05,0,0,frame);
+ const ram=new THREE.Group();ram.position.set(0,5.15,0);frame.add(ram);
+ const shaft=cyl(.34,.34,2.5,steel,0,0,0,0,ram);
+ const plate=box(6.1,.72,1.75,darkSteel,0,-1.48,0,ram);
+ for(let x=-2.4;x<=2.4;x+=.8)box(.48,.09,1.8,paintYellow,x,-1.87,0,ram);
+ const warn=addWarning(z,7);
+ hazards.push({type:'crusher',z,frame,ram,plate,warn,phase,hit:false});
+}
+function addRoller(z,phase=0){
+ const base=box(7,.55,2.1,darkSteel,0,.28,z);
+ const roller=cyl(1.05,1.05,6.4,steel,0,1.45,z,Math.PI/2);
+ const rings=[];
+ for(const x of [-2.2,-1.1,0,1.1,2.2])rings.push(cyl(1.075,1.075,.12,darkSteel,x,1.45,z,Math.PI/2));
+ const warn=addWarning(z,7);
+ hazards.push({type:'roller',z,roller,rings,warn,phase,hit:false});
+}
+function addMovingBridge(z,phase=0){
+ const parts=[];
+ for(let i=0;i<3;i++){
+  const p=new THREE.Group();p.position.set((i-1)*2.65,0,z-i*2.2);scene.add(p);
+  const deck=box(2.35,.32,3.5,grate,0,.55,0,p);
+  for(const x of [-1.05,1.05])box(.12,.45,3.35,steel,x,.88,0,p);
+  box(2.25,.06,.12,paintYellow,0,.75,-1.55,p);
+  parts.push({group:p,baseX:p.position.x,phase:i*1.5});
+ }
+ const warn=addWarning(z,8);
+ hazards.push({type:'bridge',z,parts,warn,phase,hit:false});
+}
+addSwingHammer(-9,0);addSwingHammer(-15,1.8);
+addHydraulicCrusher(-33,.7);addHydraulicCrusher(-39,2.2);
+addRoller(-59,0);addRoller(-65,1.4);
+addMovingBridge(-83,.4);addMovingBridge(-88,2);
+addSwingHammer(-108,.9);addHydraulicCrusher(-115,1.7);
+function updateHazards(dt){
+ const t=elapsed;
+ let warningActive=false;
+ for(const h of hazards){
+  const phase=t*1.55+h.phase;
+  if(h.type==='hammer'){
+   h.pivot.rotation.z=Math.sin(phase)*.92;
+   h.pivot.rotation.x=Math.sin(phase*.53)*.08;
+   h.head.getWorldPosition(h._world||(h._world=new THREE.Vector3()));
+   const p=h._world;
+   const near=Math.abs(player.position.z-h.z)<2.0&&Math.abs(player.position.x-p.x)<1.05&&player.position.y<2.15;
+   const warn=Math.abs(player.position.z-h.z)<8&&Math.abs(Math.sin(phase))>.62;
+   if(near&&!h.hit){h.hit=true;onHazardHit('A swinging hammer struck you');}
+   if(!near)h.hit=false;
+   if(warn)warningActive=true;
+   h.warn.beacon.intensity=warn?2.8:0.2;
+  }else if(h.type==='crusher'){
+   const wave=(Math.sin(phase)+1)/2;
+   const down=wave>.58?(wave-.58)/.42:0;
+   h.ram.position.y=5.15-down*3.55;
+   const near=Math.abs(player.position.z-h.z)<1.45&&Math.abs(player.position.x)<3.0&&player.position.y<2.05&&h.ram.position.y<3.25;
+   const warn=Math.abs(player.position.z-h.z)<8&&down>.12;
+   if(near&&!h.hit){h.hit=true;onHazardHit('Hydraulic crusher impact');}
+   if(!near)h.hit=false;
+   if(warn)warningActive=true;
+   h.warn.beacon.intensity=warn?3:0.18;
+  }else if(h.type==='roller'){
+   h.roller.rotation.z=phase*1.8;
+   for(const r of h.rings)r.rotation.z=phase*1.8;
+   const near=Math.abs(player.position.z-h.z)<1.45&&Math.abs(player.position.x)<3.55&&player.position.y<2.25;
+   const warn=Math.abs(player.position.z-h.z)<7;
+   if(near&&!h.hit){h.hit=true;onHazardHit('Rotating steel roller knocked you down');}
+   if(!near)h.hit=false;
+   if(warn)warningActive=true;
+   h.warn.beacon.intensity=warn?2.5:0.15;
+  }else if(h.type==='bridge'){
+   for(const p of h.parts){p.group.position.x=p.baseX+Math.sin(phase+p.phase)*.85;p.group.position.y=.35+Math.sin(phase*1.3+p.phase)*.22;}
+   const near=Math.abs(player.position.z-h.z)<1.8&&Math.abs(player.position.x)<3.5&&player.position.y<1.1;
+   const warn=Math.abs(player.position.z-h.z)<7;
+   if(near&&!h.hit){h.hit=true;onHazardHit('Moving bridge platform caught you');}
+   if(!near)h.hit=false;
+   if(warn)warningActive=true;
+   h.warn.beacon.intensity=warn?2.4:.15;
+  }
+ }
+ $('warning').classList.toggle('show',warningActive);
+}
+let lastHit=0,audioCtx=null;
+function hazardSound(freq=105,duration=.22){
+ try{
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+  if(!audioCtx)audioCtx=new AC();if(audioCtx.state==='suspended')audioCtx.resume();
+  const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type='sawtooth';osc.frequency.setValueAtTime(freq,audioCtx.currentTime);osc.frequency.exponentialRampToValueAtTime(Math.max(35,freq*.48),audioCtx.currentTime+duration);
+  gain.gain.setValueAtTime(.0001,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.09,audioCtx.currentTime+.025);gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+duration);
+  osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+duration+.03);
+ }catch(e){}
+}
+function onHazardHit(message){
+ if(performance.now()-lastHit<950)return;lastHit=performance.now();hazardSound(82,.34);
+ $('warning').textContent=message.toUpperCase();$('warning').classList.add('show');
+ player.position.x=0;player.position.y=0;vertical=0;grounded=true;slide=0;
+ player.position.z=checkpoint>0?checkpointPositions[checkpoint-1]+3:2;
+ setTimeout(()=>{$('warning').textContent='MACHINERY ACTIVE — TIME YOUR CROSSING'},1300);
+}
+// Four route checkpoints; collision and hazard gameplay now run against these machinery volumes.
 const checkpointPositions=[-24,-48,-72,-96],checkpointRings=[];
 for(let i=0;i<4;i++){const z=checkpointPositions[i],g=new THREE.Group();for(const x of [-4.1,4.1])box(.22,3.2,.22,paintYellow,x,1.6,0,g);box(8.4,.24,.25,paintRed,0,3.15,0,g);g.position.z=z;scene.add(g);checkpointRings.push(g)}
 const endZ=-121;
 let started=false,finished=false,elapsed=0,checkpoint=0,vertical=0,grounded=true,slide=0,joy={x:0,y:0},keys={};
 const $=id=>document.getElementById(id);
-function reset(){player.position.set(0,0,2);vertical=0;grounded=true;slide=0;elapsed=0;checkpoint=0;finished=false;started=true;$('finish').classList.add('hidden');$('welcome').classList.add('hidden');$('cp').textContent='0/4';}
+function reset(){try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume()}catch(e){}hazardSound(220,.12);player.position.set(0,0,2);vertical=0;grounded=true;slide=0;elapsed=0;checkpoint=0;finished=false;started=true;$('finish').classList.add('hidden');$('welcome').classList.add('hidden');$('cp').textContent='0/4';}
 function jump(){if(started&&!finished&&grounded){vertical=8.3;grounded=false}}
 function dive(){if(started&&!finished&&grounded)slide=.65}
 $('start').addEventListener('click',()=>{});$('again').addEventListener('click',reset);$('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});$('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});
@@ -219,13 +340,14 @@ function update(dt){
  const speed=6.6;player.position.z-=Math.max(-1,Math.min(1,forward))*speed*dt;player.position.x+=Math.max(-1,Math.min(1,sideways))*speed*.78*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-3.25,3.25);
  if(!grounded){vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<=0){player.position.y=0;vertical=0;grounded=true}}
  if(slide>0)slide=Math.max(0,slide-dt);
+ updateHazards(dt);
  const progress=THREE.MathUtils.clamp((-player.position.z)/Math.abs(endZ),0,1);$('fill').style.width=(progress*100)+'%';$('pct').textContent=Math.round(progress*100)+'%';
  for(let i=checkpoint;i<4;i++){if(player.position.z<=checkpointPositions[i]){checkpoint=i+1;$('cp').textContent=checkpoint+'/4'}}
  $('time').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');
 }
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);update(dt);if(runnerMixer)runnerMixer.update(dt);if(runnerModelLoaded&&started&&!finished)playRunnerAction(!grounded?'jump':(Math.abs(joy.x)+Math.abs(joy.y)>.12||keys.KeyW||keys.ArrowUp||keys.KeyS||keys.ArrowDown||keys.KeyA||keys.KeyD?'run':'idle'));
- const target=new THREE.Vector3(player.position.x,player.position.y+1.25,player.position.z+7.5);camera.position.lerp(new THREE.Vector3(player.position.x*.65,player.position.y+4.2,player.position.z+10.5),1-Math.pow(.001,dt));camera.lookAt(target);
- if(started&&!finished&&player.position.z<=endZ){finished=true;$('result').textContent='Route time: '+$('time').textContent+'. The factory environment is in place; obstacle mechanics are the next phase.';$('finish').classList.remove('hidden')}
+ const target=new THREE.Vector3(player.position.x,player.position.y+1.25,player.position.z-1.0);camera.position.lerp(new THREE.Vector3(player.position.x*.65,player.position.y+4.2,player.position.z+7.5),1-Math.pow(.001,dt));camera.lookAt(target);
+ if(started&&!finished&&player.position.z<=endZ){finished=true;$('result').textContent='Route time: '+$('time').textContent+'. You crossed the active machinery course.';$('finish').classList.remove('hidden')}
  renderer.render(scene,camera)}
 window.__hammerStart=reset;animate();
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
