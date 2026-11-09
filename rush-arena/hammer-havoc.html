@@ -57,10 +57,10 @@ const beam=(a,b,r,m,parent=scene)=>{const d=new THREE.Vector3().subVectors(b,a),
 const sphere=(r,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),m);o.position.set(x,y,z);parent.add(o);return o};
 // Factory floor is split around the moving bridge so falling is physically possible.
 const floor=new THREE.Group();scene.add(floor);
-const floorNear=box(26,.8,79.5,concrete,0,-.52,-39.75,floor);floorNear.receiveShadow=true;
-box(26,.18,79.5,darkSteel,0,-1.02,-39.75,floor);
-const floorFar=box(26,.8,31.2,concrete,0,-.52,-110.4,floor);floorFar.receiveShadow=true;
-box(26,.18,31.2,darkSteel,0,-1.02,-110.4,floor);
+const floorNear=box(26,.8,81.25,concrete,0,-.52,-40.625,floor);floorNear.receiveShadow=true;
+box(26,.18,81.25,darkSteel,0,-1.02,-40.625,floor);
+const floorFar=box(26,.8,32,concrete,0,-.52,-110,floor);floorFar.receiveShadow=true;
+box(26,.18,32,darkSteel,0,-1.02,-110,floor);
 for(const x of [-13,13]){box(.7,14,126,concrete,x,6.5,-60);box(.18,14,126,steel,x+(x<0?.38:-.38),6.5,-60)}
 box(26,.55,126,darkSteel,0,14,-60);
 // Concrete wall pilasters, structural steel columns and overhead roof trusses.
