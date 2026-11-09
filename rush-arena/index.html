@@ -87,7 +87,23 @@
 }
 </script>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+// Load the 3D engine with a second CDN fallback. A failed first CDN must not
+// silently prevent the entire game module from starting.
+let THREE;
+try {
+  THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+} catch (primaryEngineError) {
+  try {
+    THREE = await import('https://unpkg.com/three@0.160.0/build/three.module.js');
+  } catch (fallbackEngineError) {
+    const detail = fallbackEngineError && (fallbackEngineError.message || String(fallbackEngineError));
+    const message = 'Could not load the 3D engine from either source. Check your connection and reload. ' + (detail || '');
+    const status = document.getElementById('bootStatus');
+    if (status) status.textContent = message;
+    window.__rushBootError = message;
+    throw new Error(message);
+  }
+}
 
 const root=document.getElementById('game');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xa9c2d0);scene.fog=new THREE.Fog(0xa9c2d0,48,165);
