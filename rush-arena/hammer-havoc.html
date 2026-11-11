@@ -371,11 +371,14 @@ function update(dt){
  $('time').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');
 }
 let lastRenderAt=0,frameAccumulator=0;
-function animate(now=0){requestAnimationFrame(animate);const frameDelta=clock.getDelta();if(document.hidden)return;if(!started||finished)return;frameAccumulator+=frameDelta;const frameInterval=mobileDevice?1/30:1/60;if(now-lastRenderAt<frameInterval*1000)return;lastRenderAt=now;const dt=Math.min(frameAccumulator,.05);frameAccumulator=0;update(dt);if(runnerMixer)runnerMixer.update(dt);if(runnerModelLoaded&&started&&!finished)playRunnerAction(!grounded?'jump':(Math.abs(joy.x)+Math.abs(joy.y)>.12||keys.KeyW||keys.ArrowUp||keys.KeyS||keys.ArrowDown||keys.KeyA||keys.KeyD?'run':'idle'));
- const target=new THREE.Vector3(player.position.x,player.position.y+1.25,player.position.z-1.0);camera.position.lerp(new THREE.Vector3(player.position.x*.65,player.position.y+4.2,player.position.z+7.5),1-Math.pow(.001,dt));camera.lookAt(target);
+function animate(now=0){requestAnimationFrame(animate);const frameDelta=clock.getDelta();if(document.hidden)return;frameAccumulator+=frameDelta;const frameInterval=mobileDevice?1/30:1/60;if(now-lastRenderAt<frameInterval*1000)return;lastRenderAt=now;const dt=Math.min(frameAccumulator,.05);frameAccumulator=0;
+ if(started&&!finished){update(dt);if(runnerMixer)runnerMixer.update(dt);if(runnerModelLoaded)playRunnerAction(!grounded?'jump':(Math.abs(joy.x)+Math.abs(joy.y)>.12||keys.KeyW||keys.ArrowUp||keys.KeyS||keys.ArrowDown||keys.KeyA||keys.KeyD?'run':'idle'));}
+ const target=new THREE.Vector3(player.position.x,player.position.y+1.25,player.position.z-1.0);camera.position.lerp(new THREE.Vector3(player.position.x*.65,player.position.y+4.2,player.position.z+7.5),1-Math.pow(.001,Math.max(dt,.001)));camera.lookAt(target);
  if(started&&!finished&&player.position.z<=endZ){finished=true;$('result').textContent='Route time: '+$('time').textContent+'. You crossed the active machinery course.';$('finish').classList.remove('hidden')}
  renderer.render(scene,camera)}
-window.__hammerStart=reset;renderer.render(scene,camera);animate();
+window.__hammerStart=reset;
+camera.position.set(0,4.2,7.5);camera.lookAt(0,1.25,1);
+renderer.render(scene,camera);animate();
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight)});
 </script>
 </body></html>
