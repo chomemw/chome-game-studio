@@ -252,11 +252,12 @@ function addMovingBridge(z,phase=0){
  const warn=addWarning(z,8);
  hazards.push({type:'bridge',z,parts,warn,phase,hit:false});
 }
-addSwingHammer(-9,0);addSwingHammer(-15,1.8);
-addHydraulicCrusher(-33,.7);addHydraulicCrusher(-39,2.2);
-addRoller(-59,0);addRoller(-65,1.4);
-addMovingBridge(-83,.4);addMovingBridge(-88,2);
-addSwingHammer(-108,.9);addHydraulicCrusher(-115,1.7);
+// One clear signature hazard per factory bay, with enough recovery space between challenges.
+addSwingHammer(-12,.4);
+addHydraulicCrusher(-36,1.1);
+addRoller(-60,.2);
+addMovingBridge(-86,.7);
+addSwingHammer(-109,1.3);
 function updateHazards(dt){
  const t=elapsed,runnerHeight=slide>0?0.88:2.05;
  let warningActive=false;
