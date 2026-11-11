@@ -51,8 +51,9 @@
     <div class="eyebrow">COURSE COMPLETE</div>
     <h1>YOU <span>MADE IT!</span></h1>
     <p id="resultText">You reached the finish line.</p>
-    <button class="primary" id="again">RUN AGAIN</button>
-    <span class="small">Practice prototype · No CHOX rewards or live multiplayer are connected yet.</span>
+    <button class="primary" id="again">REPLAY LEVEL</button>
+    <button class="primary" id="levelSelect" style="margin-top:10px;background:linear-gradient(100deg,#53647c,#34465e)">LEVEL SELECT</button>
+    <span class="small">CHOX is paid once on first completion. Game Points can be earned on every completed run.</span>
   </div>
 </div>
 <div class="overlay hidden" id="failed"><div class="dialog"><div class="eyebrow">RUN INTERRUPTED</div><h1>GAME <span>FAILED</span></h1><p id="failedText">You hit an obstacle.</p><button class="primary" id="continueRun">CONTINUE</button><button class="primary" id="restartFailed" style="margin-top:10px;background:linear-gradient(100deg,#53647c,#34465e)">START AGAIN</button><span class="small" id="continueNote">Continue rewards will be supported by an ad later.</span></div></div>
@@ -96,6 +97,7 @@
 <script type="module">
 // Load the 3D engine with a second CDN fallback. A failed first CDN must not
 // silently prevent the entire game module from starting.
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 let THREE;
 try {
   THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
@@ -113,6 +115,8 @@ try {
 }
 
 const root=document.getElementById('game');
+const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
+const level=Math.max(1,Math.min(250,Number(new URLSearchParams(location.search).get('level'))||1));
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
 const obstacleInspectionMode=true;
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xa9c2d0);scene.fog=new THREE.Fog(0xa9c2d0,42,155);
@@ -410,6 +414,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
 })();
 
 let running=false,finished=false,failed=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,stickX=0,stickY=0,lastFrame=0,slideTimer=0,points=0,chox=0;
+let rushSessionId=null,lastProgressReport=0,progressChain=Promise.resolve();
 const rewardedObstacles=new Set();
 const keys={};let jumpQueued=false,diveQueued=false;
 const ui={time:document.getElementById('time'),points:document.getElementById('points'),chox:document.getElementById('chox'),failed:document.getElementById('failed'),failedText:document.getElementById('failedText'),checkpoint:document.getElementById('checkpoint'),percent:document.getElementById('percent'),progress:document.getElementById('progress'),welcome:document.getElementById('welcome'),result:document.getElementById('result'),pause:document.getElementById('pause'),resultText:document.getElementById('resultText')};
@@ -525,15 +530,46 @@ function failRun(message){
   if(failed||finished)return;
   failed=true;running=false;paused=false;finished=false;
   sfxFall();dangerBanner.style.opacity='0';
-  ui.failedText.textContent=message+' You collected '+points+' points and '+chox+' CHOX.';
+  ui.failedText.textContent=message+' You collected '+points+' provisional Game Points. CHOX is only settled after a verified level completion.';
   ui.failed.classList.remove('hidden');
 }
-function reset(){audioReady();if(rushAudioOn){sfxStart();startHorrorAmbience()}activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent='OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');warnedHazards.clear();cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden')}
+async function reportRushProgress(distance){
+  if(!rushSessionId)return false;
+  progressChain=progressChain.catch(()=>false).then(async()=>{
+    try{
+      const {data,error}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'progress',session_id:rushSessionId,distance}});
+      if(error||!data?.ok){console.warn('Rush Arena progress checkpoint:',error?.message||data?.error);return false;}
+      return true;
+    }catch(error){console.warn('Rush Arena progress checkpoint failed:',error?.message||error);return false;}
+  });
+  return progressChain;
+}
+async function settleRushRun(){
+  const sessionId=rushSessionId;if(!sessionId)return;
+  await reportRushProgress(665);
+  const {data,error}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'finish',session_id:sessionId,elapsed_seconds:Math.floor(elapsed),obstacles_passed:rewardedObstacles.size,score:points}});
+  rushSessionId=null;
+  if(error||!data?.ok){ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Your finish is awaiting server verification: '+(error?.message||data?.error||'Please return to Level Select and try again.');return;}
+  chox=Number(data.chox_credited)||0;ui.chox.textContent=String(chox);
+  const pointsEarned=Number(data.points_credited)||0;
+  ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You earned '+pointsEarned+' Game Points and '+chox+' CHOX.'+(data.first_completion?' CHOX first-completion reward!':' Replay completed — no additional CHOX.');
+}
+async function reset(){
+  audioReady();running=false;
+  document.getElementById('bootStatus').textContent='Checking your CHOME account…';
+  const {data:authData,error:authError}=await supabase.auth.getSession();
+  if(authError||!authData?.session){document.getElementById('bootStatus').textContent='Please sign in to your CHOME player account before starting Rush Arena.';return;}
+  const {data:sessionData,error:sessionError}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'start',level}});
+  if(sessionError||!sessionData?.ok){document.getElementById('bootStatus').textContent=sessionError?.message||sessionData?.error||'Could not start this level. Please try again.';return;}
+  rushSessionId=sessionData.session_id;lastProgressReport=0;progressChain=Promise.resolve();
+  if(rushAudioOn){sfxStart();startHorrorAmbience()}
+  activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent='OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
+}
 function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
 function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z<=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
-window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';document.getElementById('again').addEventListener('click',reset);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
+window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 document.getElementById('restartFailed').addEventListener('click',reset);
 document.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
 addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
@@ -575,6 +611,7 @@ function update(dt){
   hazardBeacons.forEach(b=>{b.rig.rotation.y=Math.sin(elapsed*2+b.index)*.08});
   if(!running||paused||finished||failed)return;
   elapsed+=dt;ui.time.textContent=fmt(elapsed);
+  if(elapsed-lastProgressReport>=5){lastProgressReport=elapsed;void reportRushProgress(THREE.MathUtils.clamp(3.5-player.position.z,0,665));}
   updateCourseZone(dt);
   updateMovingHazards(dt);
   updateHazardWarnings(dt);
@@ -588,8 +625,8 @@ function update(dt){
   // Reward each obstacle once, only after the runner has safely passed it.
   obstacles.forEach((o,index)=>{
     if(!rewardedObstacles.has(index)&&player.position.z<o.z-o.d/2-.5){
-      rewardedObstacles.add(index);points+=100;chox+=5;
-      ui.points.textContent=String(points);ui.chox.textContent=String(chox);
+      rewardedObstacles.add(index);points+=100;
+      ui.points.textContent=String(points);
       soundTone(620,920,.16,.08,'sine');
     }
   });
@@ -612,7 +649,7 @@ function update(dt){
   }
   // Checkpoints store a safe respawn position.
   checkpoints.forEach((z,i)=>{if(checkpoint===i&&player.position.z<z){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/7'}});
-  if(player.position.z<-661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You earned '+points+' points and '+chox+' CHOX.';ui.result.classList.remove('hidden')}
+  if(player.position.z<-661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
   const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run?'run':(runnerActions.walk?'walk':'idle'));playRunnerAction(action);runnerMixer.update(dt);}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
