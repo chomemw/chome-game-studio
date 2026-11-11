@@ -36,6 +36,10 @@ Deno.serve(async (req: Request) => {
 
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const userId = authData.user.id;
+  // Rush Arena remains an admin-only preview until its player release is explicitly approved.
+  const { error: adminAccessError } = await authClient.rpc("get_chome_admin_overview");
+  if (adminAccessError) return reply(403, { error: "Rush Arena is currently available for admin testing only." });
+
   const { data: access, error: accessError } = await admin.rpc("service_get_player_access", { p_user_id: userId });
   if (accessError) return reply(503, { error: "Account access could not be verified." });
   if (access?.status === "restricted") return reply(403, { error: "Your CHOME account is restricted.", reason: access.reason || "", resolution_steps: access.resolution_steps || "" });
