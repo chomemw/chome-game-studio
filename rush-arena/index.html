@@ -422,7 +422,7 @@ function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;
 function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-133&&z<=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
-window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';if(window.__rushStartRequested){window.__rushStartRequested=false;reset()}document.getElementById('again').addEventListener('click',reset);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
+window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';document.getElementById('again').addEventListener('click',reset);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 document.getElementById('restartFailed').addEventListener('click',reset);
 document.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
 addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
@@ -525,6 +525,8 @@ function animate(now=0){
 renderer.render(scene,camera);
 animate();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight)});
+// Start only after every control, camera, renderer and animation loop is initialized.
+if(window.__rushStartRequested){window.__rushStartRequested=false;reset()}
 </script>
 </body>
 </html>
