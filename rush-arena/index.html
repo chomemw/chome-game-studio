@@ -535,10 +535,12 @@ function failRun(message){
 }
 async function reportRushProgress(distance){
   if(!rushSessionId)return false;
-  progressChain=progressChain.then(async()=>{
-    const {data,error}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'progress',session_id:rushSessionId,distance}});
-    if(error||!data?.ok){console.warn('Rush Arena progress checkpoint:',error?.message||data?.error);return false;}
-    return true;
+  progressChain=progressChain.catch(()=>false).then(async()=>{
+    try{
+      const {data,error}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'progress',session_id:rushSessionId,distance}});
+      if(error||!data?.ok){console.warn('Rush Arena progress checkpoint:',error?.message||data?.error);return false;}
+      return true;
+    }catch(error){console.warn('Rush Arena progress checkpoint failed:',error?.message||error);return false;}
   });
   return progressChain;
 }
