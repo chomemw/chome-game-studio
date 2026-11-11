@@ -248,7 +248,7 @@ addBoxInstances(white,.22,.025,1.5,shoulderMarks);
 for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-3.4,z+(Math.random()-.5)*1.8)}
 
 // Checkpoint arches.
-const checkpoints=[-31,-59,-79];const checkpointMeshes=[];
+const checkpoints=[-31,-59,-79,-190,-338,-471,-635];const checkpointMeshes=[];
 for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i];const g=new THREE.Group();box(.28,3,.3,gold,-3.8,1.45,0,g);box(.28,3,.3,gold,3.8,1.45,0,g);box(7.9,.3,.3,coral,0,2.95,0,g);g.position.z=z;scene.add(g);checkpointMeshes.push(g)}
 // Finish arch.
 const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.z=-662;scene.add(finish);
