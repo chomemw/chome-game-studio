@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#101a35">
+<title>CHOME Rush Arena — Prototype</title>
+<style>
+:root{color-scheme:dark;--ink:#f8fbff;--muted:#b9c6e2;--panel:#101a35dc;--line:#ffffff30;--purple:#8c70ff;--cyan:#65e4ef;--gold:#ffe18a}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#91d8f2;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}button{font:inherit;color:inherit;cursor:pointer}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}
+.hud{position:fixed;inset:0;pointer-events:none;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);display:flex;flex-direction:column;justify-content:space-between}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-top:12px}.brand,.stat,.race-pill{background:var(--panel);border:1px solid var(--line);box-shadow:0 12px 35px #0b173a35;backdrop-filter:blur(14px);border-radius:15px}
+.brand{padding:10px 14px;font-weight:1000;letter-spacing:.13em;font-size:12px}.brand span{color:#b8a8ff}.stats{display:flex;gap:8px}.stat{min-width:84px;padding:8px 12px;text-align:center}.stat small{display:block;color:var(--muted);font-size:9px;letter-spacing:.13em;font-weight:900}.stat b{display:block;font-size:19px;margin-top:2px}.race-pill{padding:10px 13px;font-size:10px;font-weight:950;letter-spacing:.1em;color:#d9faff}
+.progress-wrap{position:absolute;top:88px;left:50%;transform:translateX(-50%);width:min(390px,54vw);background:#101a35b8;border:1px solid var(--line);padding:8px 12px;border-radius:13px}.progress-label{display:flex;justify-content:space-between;font-size:9px;font-weight:900;letter-spacing:.1em;color:#e9f7ff;margin-bottom:6px}.progress-track{height:7px;border-radius:9px;background:#ffffff30;overflow:hidden}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#5ee8e0,#a5ffb6,#ffe17e);border-radius:9px;transition:width .12s}
+.bottom{display:flex;align-items:flex-end;justify-content:space-between;padding:0 2px 18px;gap:12px}.hint{max-width:260px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:10px 13px;color:#dbe8ff;font-size:10px;line-height:1.5}
+.controls{display:flex;align-items:flex-end;gap:12px;pointer-events:auto}.stick{position:fixed;left:14px;bottom:18px;z-index:3;width:112px;height:112px;border-radius:50%;border:1px solid #ffffff65;background:#101a356b;backdrop-filter:blur(8px);touch-action:none;box-shadow:0 10px 30px #0b173a40}.stick:after{content:"";position:absolute;inset:29px;border:1px dashed #ffffff55;border-radius:50%}.knob{position:absolute;width:44px;height:44px;left:33px;top:33px;border-radius:50%;background:linear-gradient(145deg,#fff,#b8d8ff);box-shadow:0 5px 15px #09152e88;pointer-events:none}.action-buttons{display:flex;gap:9px;align-items:flex-end}.action{width:70px;height:70px;border-radius:50%;border:2px solid #ffffff9c;background:linear-gradient(145deg,#a58cff,#6548d8);font-weight:1000;font-size:11px;letter-spacing:.07em;box-shadow:0 9px 25px #10113c70}.action.secondary{width:58px;height:58px;background:linear-gradient(145deg,#5fe7e2,#188da9);font-size:9px}
+.overlay{position:fixed;inset:0;display:grid;place-items:center;padding:18px;background:linear-gradient(180deg,#101b35a8,#101b35bd);backdrop-filter:blur(9px);z-index:5}.dialog{width:min(470px,100%);padding:28px;border:1px solid #ffffff45;border-radius:25px;background:linear-gradient(145deg,#1d3157f2,#111a35f5);box-shadow:0 30px 90px #06112c88;text-align:center}.eyebrow{font-size:10px;letter-spacing:.24em;font-weight:1000;color:#9ff2ee}.dialog h1{font-size:clamp(35px,9vw,55px);line-height:.92;letter-spacing:-.075em;margin:13px 0}.dialog h1 span{color:#a995ff}.dialog p{color:#c3d0e9;font-size:13px;line-height:1.7;margin:12px auto 22px;max-width:360px}.primary{border:0;border-radius:13px;padding:14px 22px;background:linear-gradient(100deg,#8d70ff,#5c8fff);font-weight:1000;letter-spacing:.1em;box-shadow:0 12px 28px #6c5ae955}.small{display:block;color:#aebbd5;font-size:10px;margin-top:13px}.hidden{display:none!important}
+@media(max-width:620px){.top{align-items:flex-start}.stats{gap:5px}.stat{min-width:64px;padding:7px 8px}.stat b{font-size:16px}.race-pill{display:none}.progress-wrap{top:82px;width:58vw}.hint{display:none}.bottom{padding-bottom:calc(12px + env(safe-area-inset-bottom))}.stick{left:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:100px;height:100px}.knob{left:28px;top:28px}.action{width:64px;height:64px}.action.secondary{width:54px;height:54px}}
+@media(min-width:900px){.hud{padding-left:26px;padding-right:26px}.bottom{padding-bottom:25px}.stick{left:26px;bottom:25px;opacity:.9}.controls{opacity:.75}}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div class="hud">
+  <div class="top">
+    <div class="brand">CHOME <span>RUSH ARENA</span></div>
+    <div class="stats"><div class="stat"><small>TIME</small><b id="time">00:00</b></div><div class="stat"><small>POINTS</small><b id="points">0</b></div><div class="stat"><small>CHOX</small><b id="chox">0</b></div><div class="stat"><small>CHECKPOINT</small><b id="checkpoint">0/7</b></div></div>
+    <div class="race-pill">SOLO PRACTICE · PROTOTYPE</div>
+  </div>
+  <div class="progress-wrap"><div class="progress-label"><span>COURSE PROGRESS</span><span id="percent">0%</span></div><div class="progress-track"><div class="progress-fill" id="progress"></div></div></div>
+  <div class="bottom">
+    <div class="hint">MOVE: WASD / ARROW KEYS<br>JUMP: SPACE · DIVE: SHIFT<br>Mobile: use the joystick and action buttons.</div>
+    <div class="controls">
+      <div class="stick" id="stick"><div class="knob" id="knob"></div></div>
+      <div class="action-buttons"><button class="action secondary" id="dive">DIVE</button><button class="action" id="jump">JUMP</button></div>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="welcome">
+  <div class="dialog">
+    <div class="eyebrow">CHOME GAME STUDIO PRESENTS</div>
+    <h1>RUSH <span>ARENA</span></h1>
+    <p>Take on a high-altitude race course with realistic surfaces, industrial track details and moving hazards. This is the first solo practice build.</p>
+    <button class="primary" id="start">START RUN</button>
+    <span class="small">Third-person camera · Semi-realistic 3D · Sky Starter</span>
+    <span class="small" id="bootStatus" role="status" aria-live="polite">Preparing 3D engine…</span>
+  </div>
+</div>
+<div class="overlay hidden" id="result">
+  <div class="dialog">
+    <div class="eyebrow">COURSE COMPLETE</div>
+    <h1>YOU <span>MADE IT!</span></h1>
+    <p id="resultText">You reached the finish line.</p>
+    <button class="primary" id="again">REPLAY LEVEL</button>
+    <button class="primary" id="levelSelect" style="margin-top:10px;background:linear-gradient(100deg,#53647c,#34465e)">LEVEL SELECT</button>
+    <span class="small">CHOX is paid once on first completion. Game Points can be earned on every completed run.</span>
+  </div>
+</div>
+<div class="overlay hidden" id="failed"><div class="dialog"><div class="eyebrow">RUN INTERRUPTED</div><h1>GAME <span>FAILED</span></h1><p id="failedText">You hit an obstacle.</p><button class="primary" id="continueRun">CONTINUE</button><button class="primary" id="restartFailed" style="margin-top:10px;background:linear-gradient(100deg,#53647c,#34465e)">START AGAIN</button><span class="small" id="continueNote">Continue rewards will be supported by an ad later.</span></div></div>
+<div class="overlay hidden" id="pause">
+  <div class="dialog"><div class="eyebrow">TAKE A BREATHER</div><h1>PAUSED</h1><p>Your run is waiting.</p><button class="primary" id="resume">RESUME</button></div>
+</div>
+<script>
+(() => {
+  const button = document.getElementById('start');
+  const status = document.getElementById('bootStatus');
+  const report = message => { if (status) status.textContent = message; };
+  window.__rushBootError = '';
+  button.addEventListener('click', () => {
+    if (typeof window.__rushStart === 'function') {
+      window.__rushStart();
+      return;
+    }
+    // Remember an early tap. The 3D module may still be downloading on mobile.
+    // It will start the run as soon as scene setup has completed.
+    window.__rushStartRequested = true;
+    report(window.__rushBootError || 'Loading the 3D course… your START RUN tap is queued.');
+  });
+  window.addEventListener('error', event => {
+    window.__rushBootError = 'Game startup failed: ' + (event.message || 'A script failed to load.');
+    report(window.__rushBootError);
+  });
+  window.addEventListener('unhandledrejection', event => {
+    const reason = event.reason && (event.reason.message || String(event.reason));
+    window.__rushBootError = 'Game startup failed: ' + (reason || 'A required resource could not load.');
+    report(window.__rushBootError);
+  });
+})();
+</script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+<script type="module">
+// Load the 3D engine with a second CDN fallback. A failed first CDN must not
+// silently prevent the entire game module from starting.
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+let THREE;
+try {
+  THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+} catch (primaryEngineError) {
+  try {
+    THREE = await import('https://unpkg.com/three@0.160.0/build/three.module.js');
+  } catch (fallbackEngineError) {
+    const detail = fallbackEngineError && (fallbackEngineError.message || String(fallbackEngineError));
+    const message = 'Could not load the 3D engine from either source. Check your connection and reload. ' + (detail || '');
+    const status = document.getElementById('bootStatus');
+    if (status) status.textContent = message;
+    window.__rushBootError = message;
+    throw new Error(message);
+  }
+}
+
+const root=document.getElementById('game');
+const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
+const level=2;
+const developmentPreview=true;
+// Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
+const obstacleInspectionMode=level===1;
+const scene=new THREE.Scene();scene.background=new THREE.Color(level===2?0xb9d9e9:0xa9c2d0);scene.fog=new THREE.Fog(level===2?0xb9d9e9:0xa9c2d0,level===2?58:42,level===2?190:155);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,260);
+const mobileDevice=matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+const renderer=new THREE.WebGLRenderer({antialias:!mobileDevice,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=!mobileDevice;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;root.appendChild(renderer.domElement);
+const hemisphere=new THREE.HemisphereLight(level===2?0xe1f4df:0xb8c8d8,level===2?0x435b3d:0x202832,level===2?1.45:1.05);scene.add(hemisphere);
+const sun=new THREE.DirectionalLight(level===2?0xffedc5:0xb7c8dc,level===2?2.0:1.75);sun.position.set(-18,34,22);sun.castShadow=true;sun.shadow.mapSize.set(mobileDevice?512:768,mobileDevice?512:768);sun.shadow.bias=-0.00015;sun.shadow.camera.left=-28;sun.shadow.camera.right=28;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-110;scene.add(sun);
+const mat=(color,roughness=.78,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+// Permanent storm atmosphere: lightweight rain streaks follow the runner.
+const rainCount=level===2?0:(mobileDevice?90:200),rainPositions=new Float32Array(rainCount*6),rainGeometry=new THREE.BufferGeometry();
+const rainSeed=[];
+for(let i=0;i<rainCount;i++){
+  rainSeed.push({x:(Math.random()-.5)*22,y:Math.random()*17,z:(Math.random()-.5)*38,v:12+Math.random()*9});
+}
+rainGeometry.setAttribute('position',new THREE.BufferAttribute(rainPositions,3));
+rainGeometry.setDrawRange(0,rainCount*2);
+const rainMaterial=new THREE.LineBasicMaterial({color:0xb8d8ed,transparent:true,opacity:.42,depthWrite:false});
+const rainField=new THREE.LineSegments(rainGeometry,rainMaterial);rainField.frustumCulled=false;scene.add(rainField);
+const stormFlashLight=new THREE.PointLight(0xdcecff,0,95,1.5);scene.add(stormFlashLight);
+let lightningTimer=level===2?99999:7+Math.random()*6,lightningFlash=0,thunderPending=0;
+const weatherLabel=document.createElement('div');weatherLabel.textContent=level===2?'🌲  MOUNTAIN FOREST':'⛈  STORM CONDITIONS';
+Object.assign(weatherLabel.style,{position:'fixed',left:'12px',top:'54px',zIndex:'45',padding:'7px 10px',border:'1px solid rgba(173,204,224,.28)',borderRadius:'9px',background:'rgba(12,22,32,.58)',color:'#d8e8f4',font:'800 10px system-ui',letterSpacing:'.12em',pointerEvents:'none',backdropFilter:'blur(5px)'});
+document.body.appendChild(weatherLabel);
+if(obstacleInspectionMode){const inspectionLabel=document.createElement('div');inspectionLabel.textContent='👁 INSPECTION MODE · COLLISIONS OFF';Object.assign(inspectionLabel.style,{position:'fixed',right:'12px',top:'54px',zIndex:'46',padding:'7px 10px',border:'1px solid rgba(120,235,190,.45)',borderRadius:'9px',background:'rgba(8,28,24,.72)',color:'#c8ffe8',font:'800 10px system-ui',letterSpacing:'.08em',pointerEvents:'none',backdropFilter:'blur(5px)'});document.body.appendChild(inspectionLabel)}
+function updateStorm(dt){
+  const p=player.position,arr=rainGeometry.attributes.position.array;
+  for(let i=0;i<rainCount;i++){
+    const r=rainSeed[i];r.y-=r.v*dt;
+    if(r.y<-.8){r.y=14+Math.random()*4;r.x=(Math.random()-.5)*22;r.z=(Math.random()-.5)*38}
+    const k=i*6,x=p.x+r.x,z=p.z+r.z;
+    arr[k]=x;arr[k+1]=r.y;arr[k+2]=z;
+    arr[k+3]=x-.22;arr[k+4]=r.y+.78;arr[k+5]=z+.08;
+  }
+  rainGeometry.attributes.position.needsUpdate=true;
+  rainField.position.set(0,0,0);
+  lightningTimer-=dt;
+  if(lightningTimer<=0){lightningFlash=.18;lightningTimer=9+Math.random()*11;thunderPending=.55+Math.random()*.65}
+  if(lightningFlash>0){
+    lightningFlash=Math.max(0,lightningFlash-dt);
+    const pulse=lightningFlash>.09?3.8:1.6;
+    stormFlashLight.position.set(p.x+1.5,7,p.z-7);
+    stormFlashLight.intensity=pulse;
+    renderer.toneMappingExposure=lightningFlash>.09?1.65:1.32;
+  }else{
+    stormFlashLight.intensity=0;
+    renderer.toneMappingExposure=1.08;
+  }
+  if(thunderPending>0){thunderPending-=dt;if(thunderPending<=0){soundNoise(1.15,.16,260);soundTone(58,32,1.35,.18,'sawtooth',.12)}}
+}
+
+
+// Lightweight rain-splash particle pool. Reuses buffers instead of creating meshes per step.
+const splashCount=mobileDevice?32:64,splashPositions=new Float32Array(splashCount*3),splashVelocities=Array.from({length:splashCount},()=>new THREE.Vector3()),splashLives=new Float32Array(splashCount);
+splashPositions.fill(-1000);
+const splashGeometry=new THREE.BufferGeometry();
+splashGeometry.setAttribute('position',new THREE.BufferAttribute(splashPositions,3));
+const splashMaterial=new THREE.PointsMaterial({color:0xc8eaff,size:.13,transparent:true,opacity:.82,depthWrite:false,sizeAttenuation:true});
+const splashField=new THREE.Points(splashGeometry,splashMaterial);splashField.frustumCulled=false;scene.add(splashField);
+let splashCursor=0;
+function spawnWaterSplash(x,z,count=10){
+  for(let n=0;n<count;n++){
+    const i=splashCursor++%splashCount,k=i*3;
+    splashPositions[k]=x+(Math.random()-.5)*.42;
+    splashPositions[k+1]=.09+Math.random()*.04;
+    splashPositions[k+2]=z+(Math.random()-.5)*.42;
+    const v=splashVelocities[i];v.set((Math.random()-.5)*2.7,.9+Math.random()*2.4,(Math.random()-.5)*2.7);
+    splashLives[i]=.28+Math.random()*.32;
+  }
+  splashGeometry.attributes.position.needsUpdate=true;
+}
+function updateWaterSplashes(dt){
+  let changed=false;
+  for(let i=0;i<splashCount;i++){
+    if(splashLives[i]<=0)continue;
+    splashLives[i]-=dt;
+    const k=i*3,v=splashVelocities[i];
+    splashPositions[k]+=v.x*dt;splashPositions[k+1]+=v.y*dt;splashPositions[k+2]+=v.z*dt;
+    v.y-=7.8*dt;
+    if(splashLives[i]<=0||splashPositions[k+1]<.035){splashLives[i]=0;splashPositions[k+1]=-1000}
+    changed=true;
+  }
+  if(changed)splashGeometry.attributes.position.needsUpdate=true;
+}
+
+function makeRoadTexture(){const c=document.createElement('canvas');c.width=256;c.height=256;const g=c.getContext('2d');g.fillStyle='#343b40';g.fillRect(0,0,256,256);for(let i=0;i<2400;i++){const v=35+Math.random()*45;g.fillStyle='rgba('+v+','+v+','+v+','+(Math.random()*.22)+')';g.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*2,1+Math.random()*2)}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,5);t.colorSpace=THREE.SRGBColorSpace;return t}
+const roadTexture=makeRoadTexture();
+const grass=mat(0x526b58,.96),grass2=mat(0x35483c,.98),side=mat(0x4b555b,.72,.22),path=new THREE.MeshStandardMaterial({map:roadTexture,color:0xb4c0c9,roughness:.58,metalness:.12}),path2=mat(0x777f84,.9),white=mat(0xe8e6dc,.55),gold=mat(0xb78b4d,.38,.62),coral=mat(0xb84f45,.48,.18),purple=mat(0x485c70,.55,.24),cyan=mat(0x8ca6ae,.42,.35),dark=mat(0x222a30,.82);
+const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o};
+const sphere=(r,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,18,14),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o};
+const cylinder=(rt,rb,h,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,16),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o};
+
+// Sky islands and clouds. Cloud puffs share one instanced draw call.
+const sky=new THREE.Mesh(new THREE.SphereGeometry(180,24,16),new THREE.MeshBasicMaterial({color:level===2?0xb9d9e9:0x8ed9f4,side:THREE.BackSide}));scene.add(sky);
+const cloudGeometry=new THREE.SphereGeometry(1,12,8);
+const cloudInstances=new THREE.InstancedMesh(cloudGeometry,white,120);
+const cloudDummy=new THREE.Object3D();let cloudIndex=0;
+for(let i=0;i<24;i++){
+  const x=(Math.random()-.5)*90,z=-Math.random()*112-8,y=10+Math.random()*22;
+  for(let j=0;j<5;j++){
+    cloudDummy.position.set(x+(j-2)*1.5,y+Math.random()*.7,z);
+    cloudDummy.scale.setScalar(1.4+Math.random()*1.4);
+    cloudDummy.updateMatrix();cloudInstances.setMatrixAt(cloudIndex++,cloudDummy.matrix);
+  }
+}
+cloudInstances.instanceMatrix.needsUpdate=true;cloudInstances.frustumCulled=true;scene.add(cloudInstances);
+for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new THREE.Group();const top=cylinder(2.6,3.8,2.5,grass2,0,-1,0,island);top.rotation.y=Math.random();const cap=cylinder(2.65,2.65,.28,grass,0,.32,0,island);cap.position.y=.32;island.position.set(x,-2.2,z);scene.add(island)}
+
+const obstacles=[];
+const spinner=new THREE.Group();
+let riverGaps=[];
+let checkpoints=[];
+if(level===1){
+// Floating course with three safe gaps that require a jump.
+const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,5);extensionRoadTexture.needsUpdate=true;
+const extensionPath=new THREE.MeshStandardMaterial({map:extensionRoadTexture,color:0xb4c0c9,roughness:.58,metalness:.12});
+const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40],[0,-399,536]];
+for(const [x,z,len] of floorSegments){
+  // Grass is the lower foundation; it must sit beneath the asphalt, not over it.
+  box(28,.22,len+.5,grass,x,-1.12,z);
+  box(9,.8,len,len>200?extensionPath:path,x,-.48,z);
+  box(9.35,.34,len+.25,side,x,-.99,z);
+}
+// Worn asphalt shoulders and repeated markings use instancing to reduce draw calls.
+function addBoxInstances(material,w,h,d,placements){
+  const mesh=new THREE.InstancedMesh(new THREE.BoxGeometry(w,h,d),material,placements.length);
+  const dummy=new THREE.Object3D();
+  placements.forEach((p,i)=>{dummy.position.set(p.x,p.y,p.z);dummy.rotation.y=p.ry||0;dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix)});
+  mesh.instanceMatrix.needsUpdate=true;mesh.frustumCulled=true;mesh.castShadow=false;mesh.receiveShadow=true;scene.add(mesh);return mesh;
+}
+const laneMarks=[];for(let z=-5;z>-666;z-=4){laneMarks.push({x:-1.5,y:.035,z},{x:1.5,y:.035,z})}
+addBoxInstances(white,.09,.018,.85,laneMarks);
+for(const x of [-4.52,4.52]){
+  box(.12,.12,134,side,x,.18,-64);box(.12,.12,134,gold,x,.34,-64);
+  box(.12,.12,536,side,x,.18,-399);box(.12,.12,536,gold,x,.34,-399);
+  const posts=[],caps=[];for(let z=-3;z>-666;z-=6){posts.push({x,y:.54,z});caps.push({x,y:.85,z})}
+  addBoxInstances(side,.18,.52,.16,posts);addBoxInstances(white,.2,.08,.2,caps);
+}
+const shoulderMarks=[];for(let z=-4;z>-666;z-=8)shoulderMarks.push({x:-4.1,y:.035,z},{x:4.1,y:.035,z});
+addBoxInstances(white,.22,.025,1.5,shoulderMarks);
+// Gaps: remove small sections of path with dark clouds beneath.
+for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-3.4,z+(Math.random()-.5)*1.8)}
+
+// Checkpoint arches.
+checkpoints=[-31,-59,-79,-190,-338,-471,-635];const checkpointMeshes=[];
+for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i];const g=new THREE.Group();box(.28,3,.3,gold,-3.8,1.45,0,g);box(.28,3,.3,gold,3.8,1.45,0,g);box(7.9,.3,.3,coral,0,2.95,0,g);g.position.z=z;scene.add(g);checkpointMeshes.push(g)}
+
+// Readable overhead zone signs mark each new 133m section.
+function addZoneSign(title,range,z,accent){
+  const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=160;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#101923';ctx.fillRect(0,0,1024,160);
+  ctx.fillStyle=accent;ctx.fillRect(0,0,16,160);ctx.fillRect(1008,0,16,160);
+  ctx.fillStyle='#f4f8fb';ctx.font='900 54px system-ui';ctx.textAlign='center';ctx.fillText(title,512,70);
+  ctx.fillStyle=accent;ctx.font='800 27px system-ui';ctx.fillText(range,512,119);
+  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
+  const board=new THREE.Mesh(new THREE.PlaneGeometry(8.6,1.35),new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide}));
+  board.position.set(0,4.85,z);scene.add(board);
+  box(8.9,.12,.18,accent,0,4.12,z);
+}
+addZoneSign('CONSTRUCTION ZONE','133m — 266m',-135,'#e0a34a');
+addZoneSign('UNDERGROUND TUNNEL','266m — 399m',-268,'#69a8c8');
+addZoneSign('CARGO YARD','399m — 532m',-401,'#d39a55');
+addZoneSign('FINAL SURVIVAL','532m — 665m',-534,'#d46b76');
+
+// Finish arch.
+const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.z=-662;scene.add(finish);
+
+// The new environments begin after the original opening; scenery stays outside the running lanes.
+function addCourseFrame(z,material=side,roofY=4.05){
+  box(.34,4,.42,material,-5.15,2,z);box(.34,4,.42,material,5.15,2,z);
+  box(10.6,.34,.48,material,0,roofY,z);
+}
+for(let z=-148;z>=-256;z-=27){addCourseFrame(z,gold,4.25);box(.18,2.4,.18,coral,-5.75,1.2,z-5);box(.18,2.4,.18,coral,5.75,1.2,z-5)}
+for(let z=-274;z>=-394;z-=20)addCourseFrame(z,purple,4.15);
+for(let z=-410;z>=-526;z-=38){box(3.2,3.4,12,side,-6.45,1.7,z);box(3.2,3.4,12,side,6.45,1.7,z-17)}
+for(let z=-548;z>=-650;z-=27){addCourseFrame(z,dark,4.35);box(.5,2.8,1.2,coral,-5.85,1.4,z-7);box(.5,2.8,1.2,coral,5.85,1.4,z-7)}
+// Obstacles: gates, bumpers and a rotating sweeper.
+
+for(const [z,x,w,h,d,color] of [[-11,0,2.4,1.25,1.1,coral],[-18,-2.3,1.3,1.6,1.1,purple],[-35,1.8,1.5,1.3,1.1,cyan],[-43,-1.8,1.5,1.5,1.1,coral],[-64,0,2.3,1.25,1.1,purple],[-84,2.1,1.2,1.5,1.1,cyan],[-103,-2.1,1.5,1.4,1.1,coral],[-119,2.2,1.4,1.5,1.1,purple]]){const o=box(w,h,d,color,x,h/2,z);obstacles.push({mesh:o,x,z,w,d,h,type:'block'})}
+// Low clearance gate: it physically blocks a standing runner; ground-dive to slide under.
+const gate=box(8,.34,.55,coral,0,1.34,-29);
+obstacles.push({mesh:gate,x:0,z:-29,w:8,d:.55,h:1.51,clearance:1.08,type:'overhead'});
+const gatePostL=box(.22,1.5,.65,side,-4.05,.75,-29);
+const gatePostR=box(.22,1.5,.65,side,4.05,.75,-29);
+// Progressive extension hazards: 8 per section, with clear recovery gaps and lane alternatives.
+function addExtendedBlock(z,x,w=1.55,h=1.35,d=1.15,color=coral){const mesh=box(w,h,d,color,x,h/2,z);obstacles.push({mesh,x,z,w,d,h,type:'block'})}
+function addExtendedOverhead(z,clearance=1.08){const mesh=box(8,.34,.55,coral,0,1.34,z);obstacles.push({mesh,x:0,z,w:8,d:.55,h:1.51,clearance,type:'overhead'})}
+function addMovingBlock(z,baseX,amplitude=2.1,phase=0,style='load'){
+  const mesh=new THREE.Group();let w=1.8,h=1.55,d=1.25,rotor=null;
+  if(style==='crane'){
+    w=2.15;h=2.15;d=1.65;
+    cylinder(.045,.045,1.05,side,0,2.05,0,mesh);
+    box(1.75,1.35,1.45,gold,0,1.0,0,mesh);
+    box(1.95,.16,1.6,coral,0,1.78,0,mesh);
+    box(.18,.18,.18,white,-.78,.28,-.75,mesh);box(.18,.18,.18,white,.78,.28,-.75,mesh);
+  }else if(style==='fan'){
+    w=2.45;h=2.65;d=.9;
+    box(2.55,2.8,.5,dark,0,1.4,0,mesh);
+    box(2.15,2.35,.12,side,0,1.4,-.32,mesh);
+    rotor=new THREE.Group();rotor.position.set(0,1.4,-.48);
+    cylinder(.25,.25,.28,gold,0,0,0,rotor).rotation.x=Math.PI/2;
+    box(1.85,.16,.12,coral,0,0,0,rotor);box(.16,1.85,.12,coral,0,0,0,rotor);
+    box(1.25,.13,.12,white,0,0,0,rotor).rotation.z=Math.PI/4;
+    mesh.add(rotor);
+  }else if(style==='forklift'){
+    w=2.35;h=2.15;d=2.15;
+    box(1.95,.58,1.55,gold,0,.62,0,mesh);
+    box(.9,1.18,1.0,side,-.42,1.45,-.05,mesh);
+    box(1.05,.13,1.12,white,-.42,2.1,-.05,mesh);
+    for(const x of [-.78,.78])for(const zz of [-.55,.55]){const wheel=cylinder(.28,.28,.2,dark,x,.3,zz,mesh);wheel.rotation.z=Math.PI/2}
+    box(.16,.14,1.0,coral,-.28,.28,-1.18,mesh);box(.16,.14,1.0,coral,.28,.28,-1.18,mesh);
+  }else if(style==='crusher'){
+    w=2.2;h=2.55;d=1.55;
+    box(2.35,.32,1.7,dark,0,.2,0,mesh);
+    box(.32,2.25,.38,side,-.88,1.3,0,mesh);box(.32,2.25,.38,side,.88,1.3,0,mesh);
+    box(2.0,.42,1.4,coral,0,2.25,0,mesh);
+    box(1.65,.2,1.15,gold,0,1.92,-.02,mesh);
+  }else{
+    box(1.8,1.35,1.25,cyan,0,.8,0,mesh);box(1.95,.16,1.4,gold,0,1.55,0,mesh);
+  }
+  mesh.position.set(baseX,0,z);scene.add(mesh);
+  obstacles.push({mesh,x:baseX,baseX,amplitude,phase,frequency:1.05,w,d,h,z,type:'movingBlock',style,rotor});
+}
+// Construction zone (133–266m).
+addExtendedBlock(-151,-2.25);addExtendedOverhead(-166);addMovingBlock(-181,2.15,2,.4,'crane');addExtendedBlock(-197,2.2,1.5,1.45,1.15,purple);
+addExtendedBlock(-213,-2.2,1.5,1.35,1.15,cyan);addExtendedOverhead(-229);addMovingBlock(-245,-2.15,2,1.2,'crane');addExtendedBlock(-258,2.2,1.5,1.4,1.15,coral);
+// Underground tunnel (266–399m).
+addExtendedOverhead(-280);addMovingBlock(-296,2.2,2,2.1,'fan');addExtendedBlock(-312,-2.2,1.5,1.45,1.15,purple);addExtendedBlock(-328,2.2,1.5,1.35,1.15,cyan);
+addExtendedOverhead(-344,.98);addMovingBlock(-360,-2.2,2,2.8,'fan');addExtendedBlock(-378,-2.2,1.55,1.45,1.15,coral);addExtendedBlock(-392,2.2,1.5,1.35,1.15,purple);
+// Cargo yard (399–532m).
+addMovingBlock(-414,0,2.75,.3,'forklift');addExtendedBlock(-430,-2.2,1.55,1.4,1.15,cyan);addExtendedOverhead(-446);addMovingBlock(-462,2.2,2,1.4,'forklift');
+addExtendedBlock(-478,2.2,1.5,1.4,1.15,coral);addExtendedBlock(-494,-2.2,1.5,1.45,1.15,purple);addExtendedOverhead(-510);addMovingBlock(-526,-2.2,2,2.4,'forklift');
+// Final survival zone (532–665m): paired hazards with short but fair recovery windows.
+addExtendedBlock(-548,2.2,1.5,1.4,1.15,coral);addMovingBlock(-562,-2.2,2,.8,'crusher');addExtendedOverhead(-578);addExtendedBlock(-594,-2.2,1.55,1.45,1.15,purple);
+addMovingBlock(-610,2.2,2,1.7,'crusher');addExtendedOverhead(-626,.98);addMovingBlock(-642,0,2.75,2.5,'crusher');addExtendedBlock(-656,2.2,1.5,1.4,1.15,coral);
+spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
+
+}else{
+// MOUNTAIN RUN — independent Level 2 environment (Level 1 remains unchanged).
+scene.background=new THREE.Color(0xb9d9e9);scene.fog=new THREE.Fog(0xb9d9e9,58,190);
+const mountainGrass=mat(0x477d42,.98),mountainGrassLight=mat(0x70a84f,.98),mountainDirt=mat(0x79583b,.96),mountainBark=mat(0x523a28,.96),mountainLeaves=mat(0x28623a,.92),mountainLeaves2=mat(0x3d8045,.94),mountainRock=mat(0x737b78,.96),mountainStone=mat(0x8b8c7c,.95),mountainWater=new THREE.MeshStandardMaterial({color:0x238da7,roughness:.2,metalness:.08,transparent:true,opacity:.9}),mountainFoam=new THREE.MeshStandardMaterial({color:0xc9f4ed,roughness:.3,transparent:true,opacity:.72});
+const dirtCanvas=document.createElement('canvas');dirtCanvas.width=256;dirtCanvas.height=256;const dirtCtx=dirtCanvas.getContext('2d');dirtCtx.fillStyle='#795b3d';dirtCtx.fillRect(0,0,256,256);
+for(let i=0;i<3200;i++){const shade=55+Math.random()*65;dirtCtx.fillStyle='rgba('+shade+','+(shade*.78)+','+(shade*.53)+','+(Math.random()*.28)+')';dirtCtx.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*3,1+Math.random()*2)}
+const dirtTexture=new THREE.CanvasTexture(dirtCanvas);dirtTexture.wrapS=dirtTexture.wrapT=THREE.RepeatWrapping;dirtTexture.repeat.set(1,16);dirtTexture.colorSpace=THREE.SRGBColorSpace;
+const mountainPath=new THREE.MeshStandardMaterial({map:dirtTexture,color:0xc2a078,roughness:.98});
+const ridgeGeometry=new THREE.ConeGeometry(1,1,7),ridgeMat=mat(0x637f72,.99),ridgeMat2=mat(0x82978a,.99);
+for(let i=0;i<26;i++){const sideSign=i%2?1:-1;const ridge=new THREE.Mesh(ridgeGeometry,i%3?ridgeMat:ridgeMat2);const height=19+(i%5)*5;ridge.scale.set(10+(i%4)*3,height,13+(i%3)*4);ridge.position.set(sideSign*(20+(i%4)*8),height*.48,-i*27-18);ridge.rotation.z=sideSign*.12;scene.add(ridge)}
+// Ground is split at three river gaps so the player must jump across the water.
+riverGaps.push({start:-281,end:-286},{start:-465,end:-470},{start:-605,end:-610});
+const groundSpans=[[5,-281],[-286,-465],[-470,-605],[-610,-665]];
+for(const [nearZ,farZ] of groundSpans){const len=Math.abs(nearZ-farZ),mid=(nearZ+farZ)/2;box(28,.24,len,mountainGrass,0,-1.12,mid);box(9,.8,len,mountainPath,0,-.48,mid);box(9.5,.18,len,mountainDirt,0,-.96,mid)}
+// Soft grassy shoulders and scattered low vegetation, instanced for mobile performance.
+const tuftMesh=new THREE.InstancedMesh(new THREE.ConeGeometry(.12,.42,4),mountainGrassLight,520),tuftDummy=new THREE.Object3D();
+for(let i=0;i<520;i++){const sideSign=i%2?1:-1,z=-4-(i*1.27)%655,x=sideSign*(5.1+((i*17)%53)/10);tuftDummy.position.set(x,-.72,z);tuftDummy.rotation.y=(i%7)*.7;tuftDummy.scale.set(.65+(i%4)*.15,.7+(i%5)*.12,.65+(i%3)*.18);tuftDummy.updateMatrix();tuftMesh.setMatrixAt(i,tuftDummy.matrix)}
+tuftMesh.instanceMatrix.needsUpdate=true;scene.add(tuftMesh);
+// Natural tree line: instanced trunks and layered green crowns, not placeholder cubes.
+const treeTrunks=new THREE.InstancedMesh(new THREE.CylinderGeometry(.16,.28,4.4,7),mountainBark,84),treeCrowns=new THREE.InstancedMesh(new THREE.ConeGeometry(1.35,3.25,7),mountainLeaves,168),treeCrowns2=new THREE.InstancedMesh(new THREE.ConeGeometry(1.08,2.55,7),mountainLeaves2,168),treeDummy=new THREE.Object3D();
+for(let i=0;i<84;i++){const sideSign=i%2?1:-1,z=-10-i*7.7,x=sideSign*(7.2+(i%5)*1.45),h=3.5+(i%4)*.42;treeDummy.position.set(x,h/2-.05,z);treeDummy.rotation.z=sideSign*((i%3)-1)*.035;treeDummy.scale.set(1,h/4.4,1);treeDummy.updateMatrix();treeTrunks.setMatrixAt(i,treeDummy.matrix);
+for(let layer=0;layer<2;layer++){const k=i*2+layer;treeDummy.position.set(x,2.1+layer*1.12,z);treeDummy.scale.set(1-layer*.13,1,1-layer*.13);treeDummy.rotation.set(0,(i%7)*.4,0);treeDummy.updateMatrix();(layer?treeCrowns2:treeCrowns).setMatrixAt(k,treeDummy.matrix)}}
+treeTrunks.instanceMatrix.needsUpdate=true;treeCrowns.instanceMatrix.needsUpdate=true;treeCrowns2.instanceMatrix.needsUpdate=true;scene.add(treeTrunks,treeCrowns,treeCrowns2);
+// Bushes along the outer edges.
+const bushes=new THREE.InstancedMesh(new THREE.SphereGeometry(1,8,6),mountainLeaves2,100),bushDummy=new THREE.Object3D();
+for(let i=0;i<100;i++){const sideSign=i%2?1:-1;bushDummy.position.set(sideSign*(5.7+(i%4)*1.15),-.12,-13-i*6.45);bushDummy.scale.set(1.15+(i%3)*.25,.48+(i%2)*.15,.72+(i%4)*.12);bushDummy.updateMatrix();bushes.setMatrixAt(i,bushDummy.matrix)}
+bushes.instanceMatrix.needsUpdate=true;scene.add(bushes);
+// Three visible river crossings with foaming edges and stepping stones below the jump line.
+for(const gap of riverGaps){const center=(gap.start+gap.end)/2,len=Math.abs(gap.start-gap.end)+2;box(20,.22,len,mountainRock,0,-1.05,center);box(19,.16,len,mountainWater,0,-.48,center);for(let i=0;i<5;i++){const stone=sphere(.72,mountainStone,(i-2)*1.35,-.2,center+(i%2?-.85:.85));stone.scale.set(1.25,.38,.78);const foam=sphere(.16,mountainFoam,(i-2)*1.35+.65,-.36,center+(i%2?-.85:.85)+.45);foam.scale.set(2,.2,.55)}for(const sideSign of [-1,1]){for(let i=0;i<4;i++){const rock=sphere(.62+i%2*.2,mountainRock,sideSign*(5.2+i*.45),-.18,center-2+i*1.25);rock.scale.set(1.4,.8,1.1)}}}
+// Small trail-side stones and mountain boulders.
+for(let i=0;i<70;i++){const sideSign=i%2?1:-1;const r=.35+(i%4)*.13;const rock=sphere(r,mountainRock,sideSign*(5.5+(i%4)*.8),-.65,-7-i*9.2);rock.scale.set(1.5,.8,1.2)}
+// Hazard builder helpers. Each obstacle has a matching collision volume.
+const obstacles=[];
+function addRoot(z,x){const mesh=cylinder(.22,.28,2.8,mountainBark,x,.13,z);mesh.rotation.z=Math.PI/2;obstacles.push({mesh,x,z,w:2.8,d:.62,h:.58,type:'block'})}
+function addFallenLog(z,x,len=3.3){const mesh=cylinder(.36,.43,len,mountainBark,x,.42,z);mesh.rotation.z=Math.PI/2;for(const end of [-1,1]){const cut=cylinder(.31,.31,.035,mountainStone,x+end*len/2,.42,z);cut.rotation.z=Math.PI/2}obstacles.push({mesh,x,z,w:len,d:.86,h:.9,type:'block'})}
+function addBoulder(z,x,size=1){const mesh=sphere(size,mountainRock,x,size*.72,z);mesh.scale.set(1.12,.92,1.02);mesh.rotation.set(.1,.3,.18);obstacles.push({mesh,x,z,w:size*2.15,d:size*1.9,h:size*1.55,type:'block'})}
+function addStoneBarrier(z,x){const mesh=box(1.9,1.25,1.45,mountainStone,x,.625,z);mesh.rotation.y=.08;const cap=box(1.35,.28,1.1,mountainRock,x,.88,z-.08);obstacles.push({mesh,x,z,w:1.9,d:1.45,h:1.25,type:'block'})}
+function addParallelLogs(z){for(const x of [-1.85,1.85]){const mesh=cylinder(.25,.3,7.2,mountainBark,x,.31,z);mesh.rotation.x=Math.PI/2;obstacles.push({mesh,x,z,w:.62,d:7.2,h:.72,type:'block'})}}
+function addSpikes(z,x){const base=box(1.9,.18,1.3,mountainRock,x,.12,z);for(let i=0;i<4;i++){const spike=new THREE.Mesh(new THREE.ConeGeometry(.22,.72,5),mat(0x9aa5a1,.6,.35));spike.position.set(x-.66+i*.44,.55,z);spike.castShadow=true;scene.add(spike)}obstacles.push({mesh:base,x,z,w:1.9,d:1.3,h:1.25,type:'block'})}
+// Balanced, varied obstacle placement with at least one clear route through every arrangement.
+addRoot(-24,-1.7);addFallenLog(-43,2.15);addBoulder(-67,-2.25,.9);addStoneBarrier(-91,.7);addParallelLogs(-116);addRoot(-143,2.15);addFallenLog(-168,-2.15);addBoulder(-194,2.25,1.05);addStoneBarrier(-220,-2.15);addRoot(-247,1.75);
+addFallenLog(-311,-2.1);addStoneBarrier(-337,2.15);addParallelLogs(-363);addBoulder(-389,-2.25,1.05);addRoot(-414,2.15);addSpikes(-438,-2.1);
+addFallenLog(-491,2.15);addBoulder(-516,-2.2,.95);addStoneBarrier(-542,2.1);addParallelLogs(-565);addRoot(-587,-2.1);
+addFallenLog(-626,-2.15);addBoulder(-648,2.2,1.0);addStoneBarrier(-657,-2.15);
+// Trail checkpoint arches.
+checkpoints=[-70,-170,-275,-390,-440,-575,-645];
+for(const z of checkpoints){const g=new THREE.Group();box(.22,2.8,.24,mountainBark,-3.8,1.35,0,g);box(.22,2.8,.24,mountainBark,3.8,1.35,0,g);box(7.8,.22,.28,mountainLeaves2,0,2.72,0,g);g.position.z=z;scene.add(g)}
+function addZoneSign(title,range,z,accent){const c=document.createElement('canvas');c.width=1024;c.height=160;const g=c.getContext('2d');g.fillStyle='#183b2b';g.fillRect(0,0,1024,160);g.fillStyle=accent;g.fillRect(0,0,16,160);g.fillRect(1008,0,16,160);g.fillStyle='#f3fff1';g.font='900 54px system-ui';g.textAlign='center';g.fillText(title,512,70);g.fillStyle=accent;g.font='800 27px system-ui';g.fillText(range,512,119);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;const board=new THREE.Mesh(new THREE.PlaneGeometry(8.6,1.35),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));board.position.set(0,4.85,z);scene.add(board)}
+addZoneSign('FOREST TRAIL','0m — 133m',-10,'#9edb84');addZoneSign('ROOTS & FALLEN TREES','133m — 266m',-135,'#c4a47a');addZoneSign('RIVER CROSSING','266m — 399m',-268,'#73d4df');addZoneSign('ROCKY FOREST','399m — 532m',-401,'#b5c99a');addZoneSign('MOUNTAIN SUMMIT','532m — 665m',-534,'#e3d6a1');
+const finish=new THREE.Group();box(.32,3.6,.4,mountainBark,-3.7,1.8,0,finish);box(.32,3.6,.4,mountainBark,3.7,1.8,0,finish);box(7.7,.28,.42,mountainLeaves2,0,3.55,0,finish);finish.position.z=-662;scene.add(finish);
+spinner.position.set(100,-100,100);
+
+}
+// Red hazard beacons: visible from a distance and pulsed while the race is active.
+const hazardBeacons=[];
+obstacles.forEach((o,index)=>{
+  const rig=new THREE.Group();rig.position.set(0,0,o.z);
+  for(const x of [-4.05,4.05]){
+    const post=new THREE.Mesh(new THREE.CylinderGeometry(.055,.075,.95,8),side);post.position.set(x,.48,0);post.castShadow=true;rig.add(post);
+    const lamp=new THREE.Mesh(new THREE.SphereGeometry(.19,12,10),new THREE.MeshStandardMaterial({color:0xff2020,emissive:0xff0800,emissiveIntensity:1.8,roughness:.3}));
+    lamp.position.set(x,1.02,0);rig.add(lamp);
+  }
+  scene.add(rig);hazardBeacons.push({rig,lamps:rig.children.filter(child=>child.isMesh&&child.geometry.type==='SphereGeometry'),obstacle:o,index});
+});
+
+// The Soldier GLB is the only player character. No procedural placeholder
+// or alternate athlete model is created while the Soldier asset loads.
+const player=new THREE.Group();scene.add(player);player.position.set(0,.05,3.5);
+const body=new THREE.Group();player.add(body);
+let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
+function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
+(async()=>{
+ try {
+  const {GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
+  const loader=new GLTFLoader();
+  const soldierUrl='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb';
+  loader.load(soldierUrl,gltf=>{
+    const model=gltf.scene;
+    model.rotation.y=0;
+    model.updateMatrixWorld(true);
+    const bounds=new THREE.Box3().setFromObject(model);
+    const height=Math.max(.01,bounds.max.y-bounds.min.y);
+    model.scale.setScalar(1.84/height);
+    model.position.y=-bounds.min.y*model.scale.y;
+    model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
+    body.clear();body.add(model);
+    runnerMixer=new THREE.AnimationMixer(model);
+    runnerActions={};
+    for(const clip of gltf.animations||[]){
+      const key=clip.name.toLowerCase().replace(/[\\s_-]+/g,'');
+      let slot=null;
+      if(key.includes('idle'))slot='idle';
+      else if(key.includes('walk'))slot='walk';
+      else if(key.includes('run'))slot='run';
+      if(slot&&!runnerActions[slot]){
+        const action=runnerMixer.clipAction(clip);
+        action.enabled=true;action.setEffectiveTimeScale(1);action.setEffectiveWeight(1);
+        action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;
+      }
+    }
+    runnerModelLoaded=Object.keys(runnerActions).length>0;
+    if(runnerActions.idle)playRunnerAction('idle',0);
+    else if(runnerActions.run)playRunnerAction('run',0);
+    console.info('Rush Arena Soldier loaded:',gltf.animations.map(a=>a.name));
+  },undefined,error=>{
+    console.error('Soldier character failed to load:',error);
+    const status=document.getElementById('bootStatus');
+    if(status)status.textContent='Soldier model could not load. Check your connection and reload.';
+  });
+ } catch(error) {
+  console.error('Soldier loader unavailable:',error);
+  const status=document.getElementById('bootStatus');
+  if(status)status.textContent='Soldier model loader could not start. Reload the game.';
+ }
+})();
+
+let running=false,finished=false,failed=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,stickX=0,stickY=0,lastFrame=0,slideTimer=0,points=0,chox=0;
+let rushSessionId=null,lastProgressReport=0,progressChain=Promise.resolve();
+const rewardedObstacles=new Set();
+const keys={};let jumpQueued=false,diveQueued=false;
+const ui={time:document.getElementById('time'),points:document.getElementById('points'),chox:document.getElementById('chox'),failed:document.getElementById('failed'),failedText:document.getElementById('failedText'),checkpoint:document.getElementById('checkpoint'),percent:document.getElementById('percent'),progress:document.getElementById('progress'),welcome:document.getElementById('welcome'),result:document.getElementById('result'),pause:document.getElementById('pause'),resultText:document.getElementById('resultText')};
+
+const zoneBadge=document.createElement('div');
+Object.assign(zoneBadge.style,{position:'fixed',top:'128px',left:'50%',transform:'translateX(-50%)',zIndex:'44',padding:'7px 13px',border:'1px solid rgba(255,255,255,.35)',borderRadius:'10px',background:'rgba(9,18,30,.78)',color:'#fff',font:'900 10px system-ui',letterSpacing:'.13em',textAlign:'center',whiteSpace:'nowrap',backdropFilter:'blur(8px)',pointerEvents:'none'});
+document.body.appendChild(zoneBadge);
+const zoneBanner=document.createElement('div');
+Object.assign(zoneBanner.style,{position:'fixed',top:'37%',left:'50%',transform:'translate(-50%,-50%) scale(.96)',zIndex:'48',padding:'18px 25px',minWidth:'min(320px,84vw)',border:'1px solid rgba(255,255,255,.45)',borderRadius:'18px',background:'linear-gradient(145deg,rgba(9,18,30,.94),rgba(27,43,58,.9))',boxShadow:'0 18px 55px rgba(0,0,0,.4)',color:'#fff',font:'1000 19px system-ui',letterSpacing:'.1em',textAlign:'center',opacity:'0',transition:'opacity .25s, transform .25s',pointerEvents:'none'});
+document.body.appendChild(zoneBanner);
+const courseZones=developmentPreview?[
+  {start:0,end:133,name:'FOREST TRAIL',sub:'0m — 133m',bg:0xb9d9e9,fog:0xb9d9e9,accent:'#9edb84'},
+  {start:133,end:266,name:'ROOTS & FALLEN TREES',sub:'133m — 266m',bg:0x9fc7a4,fog:0x9fc7a4,accent:'#c4a47a'},
+  {start:266,end:399,name:'RIVER CROSSING',sub:'266m — 399m',bg:0x91c8d1,fog:0x91c8d1,accent:'#73d4df'},
+  {start:399,end:532,name:'ROCKY FOREST',sub:'399m — 532m',bg:0xa9c8a1,fog:0xa9c8a1,accent:'#b5c99a'},
+  {start:532,end:665,name:'MOUNTAIN SUMMIT',sub:'532m — 665m',bg:0xb7cbb8,fog:0xb7cbb8,accent:'#e3d6a1'}
+]:[
+  {start:0,end:133,name:'OPENING COURSE',sub:'0m — 133m',bg:0xa9c2d0,fog:0xa9c2d0,accent:'#9ec7d7'},
+  {start:133,end:266,name:'CONSTRUCTION ZONE',sub:'133m — 266m',bg:0x8b9aa0,fog:0x8b9aa0,accent:'#e0a34a'},
+  {start:266,end:399,name:'UNDERGROUND TUNNEL',sub:'266m — 399m',bg:0x34414e,fog:0x34414e,accent:'#69a8c8'},
+  {start:399,end:532,name:'CARGO YARD',sub:'399m — 532m',bg:0x7b8585,fog:0x7b8585,accent:'#d39a55'},
+  {start:532,end:665,name:'FINAL SURVIVAL',sub:'532m — 665m',bg:0x443a43,fog:0x443a43,accent:'#d46b76'}
+];
+let activeZone=-1,zoneBannerTimer=0;
+function updateCourseZone(dt){
+  const distance=THREE.MathUtils.clamp(3.5-player.position.z,0,665);
+  let index=courseZones.findIndex((z,i)=>distance>=z.start&&(distance<z.end||(i===courseZones.length-1&&distance<=z.end)));
+  if(index<0)index=courseZones.length-1;
+  const zone=courseZones[index];
+  if(index!==activeZone){
+    activeZone=index;zoneBannerTimer=3.4;
+    zoneBadge.textContent=zone.name+'  •  '+zone.sub;
+    zoneBadge.style.borderColor=zone.accent;
+    zoneBanner.innerHTML=zone.name+'<div style="font:800 11px system-ui;letter-spacing:.16em;color:'+zone.accent+';margin-top:8px">'+zone.sub+'</div>';
+    zoneBanner.style.opacity='1';zoneBanner.style.transform='translate(-50%,-50%) scale(1)';
+    scene.background.setHex(zone.bg);scene.fog.color.setHex(zone.fog);
+  }else if(zoneBannerTimer>0){
+    zoneBannerTimer=Math.max(0,zoneBannerTimer-dt);
+    if(zoneBannerTimer===0){zoneBanner.style.opacity='0';zoneBanner.style.transform='translate(-50%,-50%) scale(.96)'}
+  }
+}
+
+function fmt(t){const s=Math.floor(t);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+// Procedural horror soundscape: generated locally with Web Audio (no external audio files).
+let rushAudio=null,rushMaster=null,rushDrone=null,rushWind=null,rushAudioOn=true,lastFootstep=0,lastSweepSound=0;
+const soundButton=document.createElement('button');
+soundButton.type='button';soundButton.textContent='🔊 SOUND ON';
+soundButton.setAttribute('aria-label','Toggle game sound');
+Object.assign(soundButton.style,{position:'fixed',top:'12px',right:'12px',zIndex:'50',padding:'10px 13px',border:'1px solid rgba(255,255,255,.28)',borderRadius:'22px',background:'rgba(8,14,22,.78)',color:'#fff',font:'700 11px system-ui',letterSpacing:'.08em',backdropFilter:'blur(8px)'});
+document.body.appendChild(soundButton);
+function audioReady(){
+  if(!rushAudio){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;rushAudio=new AC();rushMaster=rushAudio.createGain();rushMaster.gain.value=rushAudioOn?.72:0;const comp=rushAudio.createDynamicsCompressor();comp.threshold.value=-22;comp.knee.value=18;comp.ratio.value=4;comp.attack.value=.012;comp.release.value=.24;rushMaster.connect(comp);comp.connect(rushAudio.destination)}
+  if(rushAudio.state==='suspended')rushAudio.resume();
+  return true;
+}
+function soundTone(freq,endFreq,duration,volume=.12,type='sine',delay=0){
+  if(!rushAudioOn||!audioReady())return;
+  const t=rushAudio.currentTime+delay,osc=rushAudio.createOscillator(),gain=rushAudio.createGain();
+  osc.type=type;osc.frequency.setValueAtTime(Math.max(20,freq),t);osc.frequency.exponentialRampToValueAtTime(Math.max(20,endFreq),t+duration);
+  gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(volume,t+.025);gain.gain.exponentialRampToValueAtTime(.0001,t+duration);
+  osc.connect(gain);gain.connect(rushMaster);osc.start(t);osc.stop(t+duration+.03);
+}
+function soundNoise(duration,volume=.1,filter=700,delay=0){
+  if(!rushAudioOn||!audioReady())return;
+  const t=rushAudio.currentTime+delay,n=Math.ceil(rushAudio.sampleRate*duration),buffer=rushAudio.createBuffer(1,n,rushAudio.sampleRate),data=buffer.getChannelData(0);
+  for(let i=0;i<n;i++)data[i]=(Math.random()*2-1)*(1-i/n);
+  const src=rushAudio.createBufferSource(),low=rushAudio.createBiquadFilter(),gain=rushAudio.createGain();
+  src.buffer=buffer;low.type='lowpass';low.frequency.value=filter;gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(volume,t+.025);gain.gain.exponentialRampToValueAtTime(.0001,t+duration);
+  src.connect(low);low.connect(gain);gain.connect(rushMaster);src.start(t);src.stop(t+duration+.02);
+}
+function startHorrorAmbience(){
+  if(!audioReady()||rushDrone)return;
+  const ctx=rushAudio,now=ctx.currentTime;
+  rushDrone=ctx.createGain();rushDrone.gain.value=.24;rushDrone.connect(rushMaster);
+  [43.65,46.2,65.4].forEach((hz,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type=i===2?'triangle':'sine';o.frequency.value=hz;g.gain.value=i===2?.12:.24;o.connect(g);g.connect(rushDrone);o.start()});
+  const lfo=ctx.createOscillator(),lfoGain=ctx.createGain();lfo.frequency.value=.12;lfoGain.gain.value=.09;lfo.connect(lfoGain);lfoGain.connect(rushDrone.gain);lfo.start();
+  const len=ctx.sampleRate*3,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+  const wind=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),wg=ctx.createGain();wind.buffer=buf;wind.loop=true;filter.type='lowpass';filter.frequency.value=360;wg.gain.value=.035;wind.connect(filter);filter.connect(wg);wg.connect(rushMaster);wind.start();rushWind={wind,filter,wg};
+}
+function sfxStart(){startHorrorAmbience();soundTone(180,48,.9,.18,'sawtooth');soundTone(92,38,1.25,.2,'triangle',.12);soundNoise(.75,.11,500,.2)}
+function sfxJump(){soundNoise(.32,.13,1500);soundTone(125,390,.24,.09,'sine')}
+function sfxSlide(){soundNoise(.62,.16,1100);soundTone(90,42,.48,.08,'sawtooth')}
+function sfxImpact(){soundNoise(.42,.2,360);soundTone(72,28,.55,.2,'sawtooth')}
+function sfxFinish(){soundTone(220,55,.85,.16,'triangle');soundTone(165,330,.7,.1,'sine',.3);soundNoise(.8,.1,900,.45)}
+function sfxFall(){soundTone(260,32,.7,.17,'sawtooth');soundNoise(.5,.14,260,.12)}
+function sfxWarning(){soundTone(740,330,.24,.13,'square');soundTone(520,210,.34,.11,'sawtooth',.16);soundNoise(.2,.045,1200,.05)}
+const dangerBanner=document.createElement('div');
+dangerBanner.textContent='⚠ DANGER AHEAD';
+Object.assign(dangerBanner.style,{position:'fixed',top:'58px',left:'50%',transform:'translateX(-50%)',zIndex:'49',padding:'11px 18px',border:'1px solid rgba(255,70,55,.8)',borderRadius:'12px',background:'rgba(55,5,8,.88)',boxShadow:'0 0 24px rgba(255,20,20,.35)',color:'#fff',font:'900 13px system-ui',letterSpacing:'.12em',textAlign:'center',whiteSpace:'nowrap',opacity:'0',transition:'opacity .12s',pointerEvents:'none'});
+document.body.appendChild(dangerBanner);
+let warnedHazards=new Set(),cameraShake=0;
+function updateHazardWarnings(dt){
+  let nearest=null,nearestDistance=Infinity;
+  for(const beacon of hazardBeacons){
+    const distance=player.position.z-beacon.obstacle.z;
+    const ahead=distance>0&&distance<20;
+    const pulse=.65+Math.max(0,Math.sin(elapsed*8+beacon.index))*.75;
+    beacon.lamps.forEach(lamp=>{lamp.material.emissiveIntensity=ahead?2.8*pulse:1.15*pulse;lamp.scale.setScalar(ahead?1.12+.18*pulse:1)});
+    beacon.rig.visible=distance>-2&&distance<26;
+    if(ahead&&distance<nearestDistance){nearest=beacon;nearestDistance=distance}
+    if(ahead&&distance<17&&!warnedHazards.has(beacon.index)){warnedHazards.add(beacon.index);sfxWarning()}
+  }
+  if(nearest){
+    const action=nearest.obstacle.type==='overhead'?'SLIDE UNDER':nearest.obstacle.type==='spinner'?'DODGE THE SWEEPER':nearest.obstacle.type==='movingBlock'?(nearest.obstacle.style==='forklift'?'DODGE FORKLIFT':nearest.obstacle.style==='fan'?'AVOID ROTOR':nearest.obstacle.style==='crane'?'CLEAR CRANE LOAD':nearest.obstacle.style==='crusher'?'DODGE CRUSHER':'DODGE MOVING LOAD'):'JUMP THE BLOCK';
+    dangerBanner.textContent='⚠ '+action+' · '+Math.ceil(nearestDistance)+'m';
+    dangerBanner.style.opacity='1';
+  }else dangerBanner.style.opacity='0';
+  cameraShake=Math.max(0,cameraShake-dt*2.8);
+}
+
+soundButton.addEventListener('click',()=>{rushAudioOn=!rushAudioOn;soundButton.textContent=rushAudioOn?'🔊 SOUND ON':'🔇 SOUND OFF';if(audioReady()){rushMaster.gain.setTargetAtTime(rushAudioOn?.72:0,rushAudio.currentTime,.06);if(rushAudioOn&&running)startHorrorAmbience()}});
+
+function updateMovingHazards(dt){
+  for(const o of obstacles){if(o.type!=='movingBlock')continue;o.x=o.baseX+Math.sin(elapsed*o.frequency+o.phase)*o.amplitude;o.mesh.position.x=o.x;if(o.rotor)o.rotor.rotation.z+=dt*3.4;}
+}
+function failRun(message){
+  // Inspection mode must never interrupt the run with a game-over overlay.
+  if(obstacleInspectionMode)return;
+  if(failed||finished)return;
+  failed=true;running=false;paused=false;finished=false;
+  sfxFall();dangerBanner.style.opacity='0';
+  ui.failedText.textContent=developmentPreview?message+' Mountain Run is an admin preview; no player rewards are issued.':message+' You collected '+points+' provisional Game Points. CHOX is only settled after a verified level completion.';
+  ui.failed.classList.remove('hidden');
+}
+async function reportRushProgress(distance){
+  if(!rushSessionId)return false;
+  progressChain=progressChain.catch(()=>false).then(async()=>{
+    try{
+      const {data,error}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'progress',session_id:rushSessionId,distance}});
+      if(error||!data?.ok){console.warn('Rush Arena progress checkpoint:',error?.message||data?.error);return false;}
+      return true;
+    }catch(error){console.warn('Rush Arena progress checkpoint failed:',error?.message||error);return false;}
+  });
+  return progressChain;
+}
+async function settleRushRun(){
+  const sessionId=rushSessionId;if(developmentPreview){ui.resultText.textContent='Mountain Run preview complete · '+fmt(elapsed)+'. This admin test build does not issue CHOX or save player rewards.';return;}if(!sessionId)return;
+  await reportRushProgress(665);
+  const {data,error}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'finish',session_id:sessionId,elapsed_seconds:Math.floor(elapsed),obstacles_passed:rewardedObstacles.size,score:points}});
+  rushSessionId=null;
+  if(error||!data?.ok){ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Your finish is awaiting server verification: '+(error?.message||data?.error||'Please return to Level Select and try again.');return;}
+  chox=Number(data.chox_credited)||0;ui.chox.textContent=String(chox);
+  const pointsEarned=Number(data.points_credited)||0;
+  ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You earned '+pointsEarned+' Game Points and '+chox+' CHOX.'+(data.first_completion?' CHOX first-completion reward!':' Replay completed — no additional CHOX.');
+}
+async function reset(){
+  audioReady();running=false;
+  document.getElementById('bootStatus').textContent='Checking your CHOME account…';
+  const {data:authData,error:authError}=await supabase.auth.getSession();
+  if(authError||!authData?.session){document.getElementById('bootStatus').textContent='Please sign in with your CHOME administrator account before starting Mountain Run.';return;}
+  if(developmentPreview){const {error:adminError}=await supabase.rpc('get_chome_admin_overview');if(adminError){document.getElementById('bootStatus').textContent='Administrator access required for the Mountain Run development preview.';return;}rushSessionId=null;}
+  else{const {data:sessionData,error:sessionError}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'start',level}});if(sessionError||!sessionData?.ok){document.getElementById('bootStatus').textContent=sessionError?.message||sessionData?.error||'Could not start this level. Please try again.';return;}rushSessionId=sessionData.session_id;}
+  lastProgressReport=0;progressChain=Promise.resolve();
+  if(rushAudioOn){sfxStart();startHorrorAmbience()}
+  activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'FOREST TRAIL  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
+}
+function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
+function onTrack(x,z){if(developmentPreview){const inRiver=riverGaps.some(g=>z<=g.start&&z>=g.end);return Math.abs(x)<=4.05&&!inRiver&&z<=5&&z>=-665}return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z<=-74))}
+function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
+function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
+window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';
+if(developmentPreview){document.title='CHOME Rush Arena — Mountain Run Level 2 Preview';document.querySelector('.brand').innerHTML='CHOME <span>RUSH ARENA · LEVEL 2</span>';document.querySelector('.race-pill').textContent='ADMIN DEVELOPMENT PREVIEW';document.querySelector('#welcome .dialog h1').innerHTML='MOUNTAIN <span>RUN</span>';document.querySelector('#welcome .dialog p').textContent='Run through a green mountain forest with river jumps, fallen trees, tree roots, rocks, stone barriers and natural trail hazards. Admin development preview only.';document.querySelector('#welcome .dialog .small').textContent='665m mountain course · Third-person camera · Semi-realistic 3D';document.querySelector('#result .eyebrow').textContent='MOUNTAIN RUN PREVIEW';document.querySelector('#result .small').textContent='Admin preview only · No player rewards are issued';document.getElementById('chox').closest('.stat').style.display='none';document.querySelector('.brand').style.letterSpacing='.08em';}document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
+document.getElementById('restartFailed').addEventListener('click',reset);
+document.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
+addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
+addEventListener('keyup',e=>{keys[e.code]=false});
+const stick=document.getElementById('stick'),knob=document.getElementById('knob');let stickPointer=null;
+stick.addEventListener('pointerdown',e=>{stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);updateStick(e)});
+stick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer)updateStick(e)});
+function updateStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=r.width*.34,len=Math.hypot(dx,dy)||1;if(len>max){dx=dx/len*max;dy=dy/len*max}stickX=dx/max;stickY=dy/max;knob.style.transform='translate('+dx+'px,'+dy+'px)'}
+function releaseStick(e){if(e.pointerId===stickPointer){stickPointer=null;stickX=0;stickY=0;knob.style.transform='translate(0,0)'}}
+stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);stick.addEventListener('lostpointercapture',e=>{if(e.pointerId===stickPointer){stickPointer=null;stickX=0;stickY=0;knob.style.transform='translate(0,0)'}});
+
+// Camera follows from behind and eases toward the runner.
+camera.position.set(0,6,13);camera.lookAt(0,1,-2);
+const clock=new THREE.Clock();
+// Collision uses the runner's actual action state. A normal runner cannot pass
+// through a block; jumping clears it only after the feet rise above its top.
+// Ground-diving lowers the hitbox so the runner can pass beneath a low clearance gate.
+function moveRunner(dx,dz){
+  const nextX=THREE.MathUtils.clamp(player.position.x+dx,-4.05,4.05);
+  const nextZ=player.position.z+dz;
+  if(!obstacleInspectionMode){
+  const radius=.4,runnerHeight=slideTimer>0?.96:2.15;
+  for(const o of obstacles){
+    if(o.type==='spinner')continue;
+    const verticalBlocked=(o.type==='block'||o.type==='movingBlock')?player.position.y<o.h-.02:(o.type==='overhead'&&runnerHeight>o.clearance);
+    if(!verticalBlocked)continue;
+    const halfX=o.w/2+radius,halfZ=o.d/2+radius;
+    if(Math.abs(nextX-o.x)<halfX&&Math.abs(nextZ-o.z)<halfZ){
+      failRun('You collided with an obstacle. Your run has ended.');
+      return false;
+    }
+  }
+  }
+  player.position.x=nextX;player.position.z=nextZ;
+  return true;
+}
+function update(dt){
+  spinner.rotation.y+=dt*1.55;
+  hazardBeacons.forEach(b=>{b.rig.rotation.y=Math.sin(elapsed*2+b.index)*.08});
+  if(!running||paused||finished||failed)return;
+  elapsed+=dt;ui.time.textContent=fmt(elapsed);
+  if(elapsed-lastProgressReport>=5){lastProgressReport=elapsed;void reportRushProgress(THREE.MathUtils.clamp(3.5-player.position.z,0,665));}
+  updateCourseZone(dt);
+  updateMovingHazards(dt);
+  updateHazardWarnings(dt);
+  if(slideTimer>0){slideTimer=Math.max(0,slideTimer-dt);if(slideTimer===0){body.scale.set(1,1,1);body.position.y=0;body.rotation.x=0}}
+  const ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+stickX;
+  const iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0)+stickY;
+  const len=Math.hypot(ix,iz);const nx=len>1?ix/len:ix,nz=len>1?iz/len:iz;
+  const speed=7.0,dx=nx*speed*dt,dz=(-Math.max(0,-nz)+Math.max(0,nz)*.52)*speed*dt;
+  if(!moveRunner(dx,dz))return;
+  player.position.z=Math.max(player.position.z,-665);
+  // Reward each obstacle once, only after the runner has safely passed it.
+  obstacles.forEach((o,index)=>{
+    if(!rewardedObstacles.has(index)&&player.position.z<o.z-o.d/2-.5){
+      rewardedObstacles.add(index);points+=100;
+      ui.points.textContent=String(points);
+      soundTone(620,920,.16,.08,'sine');
+    }
+  });
+  if(jumpQueued){jump();jumpQueued=false}if(diveQueued){dive();diveQueued=false}
+  if(grounded&&!onTrack(player.position.x,player.position.z)){grounded=false;vertical=0}
+  if(!grounded){vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<=.05&&onTrack(player.position.x,player.position.z)){player.position.y=.05;vertical=0;grounded=true;body.rotation.x=0;spawnWaterSplash(player.position.x,player.position.z,18)}if(player.position.y<-5){sfxFall();respawn()}}
+  // Resolve the rotating sweeper as a solid capsule in the track plane.
+  const beamX=Math.cos(spinner.rotation.y),beamZ=-Math.sin(spinner.rotation.y);
+  const relX=player.position.x-spinner.position.x,relZ=player.position.z-spinner.position.z;
+  const along=THREE.MathUtils.clamp(relX*beamX+relZ*beamZ,-3.7,3.7);
+  const nearX=spinner.position.x+along*beamX,nearZ=spinner.position.z+along*beamZ;
+  let pushX=player.position.x-nearX,pushZ=player.position.z-nearZ;
+  let pushLen=Math.hypot(pushX,pushZ);
+  const sweeperVerticalOverlap=player.position.y<1.62&&player.position.y+2.15>1.28;
+  if(!obstacleInspectionMode&&sweeperVerticalOverlap&&pushLen<.72){
+    if(performance.now()-lastSweepSound>1100){sfxImpact();lastSweepSound=performance.now()}
+    cameraShake=Math.max(cameraShake,.48);
+    failRun('The moving sweeper hit you. Your run has ended.');
+    return;
+  }
+  // Checkpoints store a safe respawn position.
+  checkpoints.forEach((z,i)=>{if(checkpoint===i&&player.position.z<z){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/7'}});
+  if(player.position.z<-661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
+  const pct=THREE.MathUtils.clamp((3.5-player.position.z)/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
+  const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
+  const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run?'run':(runnerActions.walk?'walk':'idle'));playRunnerAction(action);runnerMixer.update(dt);}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
+}
+let lastRenderAt=0,frameAccumulator=0;
+function animate(now=0){
+  requestAnimationFrame(animate);
+  const frameDelta=clock.getDelta();
+  if(document.hidden||!running||paused||finished){frameAccumulator=0;return}
+  frameAccumulator+=Math.min(frameDelta,.12);
+  const step=mobileDevice?1/30:1/60,frameInterval=step*1000;
+  if(now-lastRenderAt<frameInterval)return;
+  lastRenderAt=now;
+  // Fixed simulation steps prevent the runner and timer from falling into slow motion
+  // when a device briefly misses a render frame.
+  let steps=0;
+  while(frameAccumulator>=step&&steps<4){
+    update(step);updateStorm(step);updateWaterSplashes(step);
+    frameAccumulator-=step;steps++;
+  }
+  // Avoid a long catch-up spiral on severely overloaded devices.
+  if(steps===4&&frameAccumulator>step*2)frameAccumulator=step*2;
+  renderer.render(scene,camera);
+}
+renderer.render(scene,camera);
+animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight)});
+// Start only after every control, camera, renderer and animation loop is initialized.
+if(window.__rushStartRequested){window.__rushStartRequested=false;reset()}
+</script>
+</body>
+</html>
