@@ -230,6 +230,7 @@ for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new 
 const obstacles=[];
 const spinner=new THREE.Group();
 let riverGaps=[];
+let checkpoints=[];
 if(level===1){
 // Floating course with three safe gaps that require a jump.
 const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,5);extensionRoadTexture.needsUpdate=true;
@@ -262,7 +263,7 @@ addBoxInstances(white,.22,.025,1.5,shoulderMarks);
 for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-3.4,z+(Math.random()-.5)*1.8)}
 
 // Checkpoint arches.
-const checkpoints=[-31,-59,-79,-190,-338,-471,-635];const checkpointMeshes=[];
+checkpoints=[-31,-59,-79,-190,-338,-471,-635];const checkpointMeshes=[];
 for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i];const g=new THREE.Group();box(.28,3,.3,gold,-3.8,1.45,0,g);box(.28,3,.3,gold,3.8,1.45,0,g);box(7.9,.3,.3,coral,0,2.95,0,g);g.position.z=z;scene.add(g);checkpointMeshes.push(g)}
 
 // Readable overhead zone signs mark each new 133m section.
@@ -402,7 +403,7 @@ addFallenLog(-311,-2.1);addStoneBarrier(-337,2.15);addParallelLogs(-363);addBoul
 addFallenLog(-491,2.15);addBoulder(-516,-2.2,.95);addStoneBarrier(-542,2.1);addParallelLogs(-565);addRoot(-587,-2.1);
 addFallenLog(-626,-2.15);addBoulder(-648,2.2,1.0);addStoneBarrier(-657,-2.15);
 // Trail checkpoint arches.
-const checkpoints=[-70,-170,-275,-390,-440,-575,-645];
+checkpoints=[-70,-170,-275,-390,-440,-575,-645];
 for(const z of checkpoints){const g=new THREE.Group();box(.22,2.8,.24,mountainBark,-3.8,1.35,0,g);box(.22,2.8,.24,mountainBark,3.8,1.35,0,g);box(7.8,.22,.28,mountainLeaves2,0,2.72,0,g);g.position.z=z;scene.add(g)}
 function addZoneSign(title,range,z,accent){const c=document.createElement('canvas');c.width=1024;c.height=160;const g=c.getContext('2d');g.fillStyle='#183b2b';g.fillRect(0,0,1024,160);g.fillStyle=accent;g.fillRect(0,0,16,160);g.fillRect(1008,0,16,160);g.fillStyle='#f3fff1';g.font='900 54px system-ui';g.textAlign='center';g.fillText(title,512,70);g.fillStyle=accent;g.font='800 27px system-ui';g.fillText(range,512,119);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;const board=new THREE.Mesh(new THREE.PlaneGeometry(8.6,1.35),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));board.position.set(0,4.85,z);scene.add(board)}
 addZoneSign('FOREST TRAIL','0m — 133m',-10,'#9edb84');addZoneSign('ROOTS & FALLEN TREES','133m — 266m',-135,'#c4a47a');addZoneSign('RIVER CROSSING','266m — 399m',-268,'#73d4df');addZoneSign('ROCKY FOREST','399m — 532m',-401,'#b5c99a');addZoneSign('MOUNTAIN SUMMIT','532m — 665m',-534,'#e3d6a1');
@@ -596,7 +597,7 @@ function failRun(message){
   if(failed||finished)return;
   failed=true;running=false;paused=false;finished=false;
   sfxFall();dangerBanner.style.opacity='0';
-  ui.failedText.textContent=message+' You collected '+points+' provisional Game Points. CHOX is only settled after a verified level completion.';
+  ui.failedText.textContent=developmentPreview?message+' Mountain Run is an admin preview; no player rewards are issued.':message+' You collected '+points+' provisional Game Points. CHOX is only settled after a verified level completion.';
   ui.failed.classList.remove('hidden');
 }
 async function reportRushProgress(distance){
@@ -636,7 +637,7 @@ function onTrack(x,z){if(developmentPreview){const inRiver=riverGaps.some(g=>z<=
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
 window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';
-if(developmentPreview){document.title='CHOME Rush Arena — Mountain Run Level 2 Preview';document.querySelector('.brand').innerHTML='CHOME <span>RUSH ARENA · LEVEL 2</span>';document.querySelector('.race-pill').textContent='ADMIN DEVELOPMENT PREVIEW';document.querySelector('#welcome .dialog h1').innerHTML='MOUNTAIN <span>RUN</span>';document.querySelector('#welcome .dialog p').textContent='Run through a green mountain forest with river jumps, fallen trees, tree roots, rocks, stone barriers and natural trail hazards. Admin development preview only.';document.querySelector('#welcome .dialog .small').textContent='665m mountain course · Third-person camera · Semi-realistic 3D';document.querySelector('#result .eyebrow').textContent='MOUNTAIN RUN PREVIEW';document.querySelector('#result .small').textContent='Admin preview only · No player rewards are issued';document.querySelector('.brand').style.letterSpacing='.08em';}document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
+if(developmentPreview){document.title='CHOME Rush Arena — Mountain Run Level 2 Preview';document.querySelector('.brand').innerHTML='CHOME <span>RUSH ARENA · LEVEL 2</span>';document.querySelector('.race-pill').textContent='ADMIN DEVELOPMENT PREVIEW';document.querySelector('#welcome .dialog h1').innerHTML='MOUNTAIN <span>RUN</span>';document.querySelector('#welcome .dialog p').textContent='Run through a green mountain forest with river jumps, fallen trees, tree roots, rocks, stone barriers and natural trail hazards. Admin development preview only.';document.querySelector('#welcome .dialog .small').textContent='665m mountain course · Third-person camera · Semi-realistic 3D';document.querySelector('#result .eyebrow').textContent='MOUNTAIN RUN PREVIEW';document.querySelector('#result .small').textContent='Admin preview only · No player rewards are issued';document.getElementById('chox').closest('.stat').style.display='none';document.querySelector('.brand').style.letterSpacing='.08em';}document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 document.getElementById('restartFailed').addEventListener('click',reset);
 document.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
 addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
