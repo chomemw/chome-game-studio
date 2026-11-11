@@ -365,7 +365,6 @@ const dirtCanvas=document.createElement('canvas');dirtCanvas.width=256;dirtCanva
 for(let i=0;i<3200;i++){const shade=55+Math.random()*65;dirtCtx.fillStyle='rgba('+shade+','+(shade*.78)+','+(shade*.53)+','+(Math.random()*.28)+')';dirtCtx.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*3,1+Math.random()*2)}
 const dirtTexture=new THREE.CanvasTexture(dirtCanvas);dirtTexture.wrapS=dirtTexture.wrapT=THREE.RepeatWrapping;dirtTexture.repeat.set(1,16);dirtTexture.colorSpace=THREE.SRGBColorSpace;
 const mountainPath=new THREE.MeshStandardMaterial({map:dirtTexture,color:0xc2a078,roughness:.98});
-const mountainSky=new THREE.Mesh(new THREE.SphereGeometry(180,24,16),new THREE.MeshBasicMaterial({color:0xb9d9e9,side:THREE.BackSide}));scene.add(mountainSky);
 const ridgeGeometry=new THREE.ConeGeometry(1,1,7),ridgeMat=mat(0x637f72,.99),ridgeMat2=mat(0x82978a,.99);
 for(let i=0;i<26;i++){const sideSign=i%2?1:-1;const ridge=new THREE.Mesh(ridgeGeometry,i%3?ridgeMat:ridgeMat2);const height=19+(i%5)*5;ridge.scale.set(10+(i%4)*3,height,13+(i%3)*4);ridge.position.set(sideSign*(20+(i%4)*8),height*.48,-i*27-18);ridge.rotation.z=sideSign*.12;scene.add(ridge)}
 // Ground is split at three river gaps so the player must jump across the water.
