@@ -220,7 +220,7 @@ cloudInstances.instanceMatrix.needsUpdate=true;cloudInstances.frustumCulled=true
 for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new THREE.Group();const top=cylinder(2.6,3.8,2.5,grass2,0,-1,0,island);top.rotation.y=Math.random();const cap=cylinder(2.65,2.65,.28,grass,0,.32,0,island);cap.position.y=.32;island.position.set(x,-2.2,z);scene.add(island)}
 
 // Floating course with three safe gaps that require a jump.
-const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40]];
+const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40],[0,-199.5,133],[0,-332.5,133],[0,-465.5,133],[0,-598.5,133]];
 for(const [x,z,len] of floorSegments){
   // Grass is the lower foundation; it must sit beneath the asphalt, not over it.
   box(28,.22,len+.5,grass,x,-1.12,z);
@@ -234,14 +234,15 @@ function addBoxInstances(material,w,h,d,placements){
   placements.forEach((p,i)=>{dummy.position.set(p.x,p.y,p.z);dummy.rotation.y=p.ry||0;dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix)});
   mesh.instanceMatrix.needsUpdate=true;mesh.frustumCulled=true;mesh.castShadow=false;mesh.receiveShadow=true;scene.add(mesh);return mesh;
 }
-const laneMarks=[];for(let z=-5;z>-136;z-=4){laneMarks.push({x:-1.5,y:.035,z},{x:1.5,y:.035,z})}
+const laneMarks=[];for(let z=-5;z>-666;z-=4){laneMarks.push({x:-1.5,y:.035,z},{x:1.5,y:.035,z})}
 addBoxInstances(white,.09,.018,.85,laneMarks);
 for(const x of [-4.52,4.52]){
   box(.12,.12,134,side,x,.18,-64);box(.12,.12,134,gold,x,.34,-64);
-  const posts=[],caps=[];for(let z=-3;z>-132;z-=6){posts.push({x,y:.54,z});caps.push({x,y:.85,z})}
+  box(.12,.12,532,side,x,.18,-399);box(.12,.12,532,gold,x,.34,-399);
+  const posts=[],caps=[];for(let z=-3;z>-666;z-=6){posts.push({x,y:.54,z});caps.push({x,y:.85,z})}
   addBoxInstances(side,.18,.52,.16,posts);addBoxInstances(white,.2,.08,.2,caps);
 }
-const shoulderMarks=[];for(let z=-4;z>-134;z-=8)shoulderMarks.push({x:-4.1,y:.035,z},{x:4.1,y:.035,z});
+const shoulderMarks=[];for(let z=-4;z>-666;z-=8)shoulderMarks.push({x:-4.1,y:.035,z},{x:4.1,y:.035,z});
 addBoxInstances(white,.22,.025,1.5,shoulderMarks);
 // Gaps: remove small sections of path with dark clouds beneath.
 for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-3.4,z+(Math.random()-.5)*1.8)}
@@ -250,7 +251,7 @@ for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-
 const checkpoints=[-31,-59,-79];const checkpointMeshes=[];
 for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i];const g=new THREE.Group();box(.28,3,.3,gold,-3.8,1.45,0,g);box(.28,3,.3,gold,3.8,1.45,0,g);box(7.9,.3,.3,coral,0,2.95,0,g);g.position.z=z;scene.add(g);checkpointMeshes.push(g)}
 // Finish arch.
-const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.z=-130;scene.add(finish);
+const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.z=-662;scene.add(finish);
 
 // The new environments begin after the original opening; scenery stays outside the running lanes.
 function addCourseFrame(z,material=side,roofY=4.05){
@@ -433,9 +434,9 @@ function failRun(message){
   ui.failedText.textContent=message+' You collected '+points+' points and '+chox+' CHOX.';
   ui.failed.classList.remove('hidden');
 }
-function reset(){audioReady();if(rushAudioOn){sfxStart();startHorrorAmbience()}warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');warnedHazards.clear();cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/3';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden')}
+function reset(){audioReady();if(rushAudioOn){sfxStart();startHorrorAmbience()}warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');warnedHazards.clear();cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden')}
 function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
-function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-133&&z<=-74))}
+function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z<=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
 window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';document.getElementById('again').addEventListener('click',reset);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
@@ -486,7 +487,7 @@ function update(dt){
   const len=Math.hypot(ix,iz);const nx=len>1?ix/len:ix,nz=len>1?iz/len:iz;
   const speed=7.0,dx=nx*speed*dt,dz=(-Math.max(0,-nz)+Math.max(0,nz)*.52)*speed*dt;
   if(!moveRunner(dx,dz))return;
-  player.position.z=Math.max(player.position.z,-133);
+  player.position.z=Math.max(player.position.z,-665);
   // Reward each obstacle once, only after the runner has safely passed it.
   obstacles.forEach((o,index)=>{
     if(!rewardedObstacles.has(index)&&player.position.z<o.z-o.d/2-.5){
@@ -513,9 +514,9 @@ function update(dt){
     return;
   }
   // Checkpoints store a safe respawn position.
-  checkpoints.forEach((z,i)=>{if(checkpoint===i&&player.position.z<z){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/3'}});
-  if(player.position.z<-129){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You earned '+points+' points and '+chox+' CHOX.';ui.result.classList.remove('hidden')}
-  const pct=THREE.MathUtils.clamp((3.5-player.position.z)/133.5*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
+  checkpoints.forEach((z,i)=>{if(checkpoint===i&&player.position.z<z){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/7'}});
+  if(player.position.z<-661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You earned '+points+' points and '+chox+' CHOX.';ui.result.classList.remove('hidden')}
+  const pct=THREE.MathUtils.clamp((3.5-player.position.z)/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
   const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run?'run':(runnerActions.walk?'walk':'idle'));playRunnerAction(action);runnerMixer.update(dt);}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
