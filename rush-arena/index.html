@@ -330,7 +330,8 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
  }
 })();
 
-let running=false,finished=false,failed=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,stickX=0,stickY=0,lastFrame=0,slideTimer=0,points=0,chox=0;\nconst rewardedObstacles=new Set();
+let running=false,finished=false,failed=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,stickX=0,stickY=0,lastFrame=0,slideTimer=0,points=0,chox=0;
+const rewardedObstacles=new Set();
 const keys={};let jumpQueued=false,diveQueued=false;
 const ui={time:document.getElementById('time'),points:document.getElementById('points'),chox:document.getElementById('chox'),failed:document.getElementById('failed'),failedText:document.getElementById('failedText'),checkpoint:document.getElementById('checkpoint'),percent:document.getElementById('percent'),progress:document.getElementById('progress'),welcome:document.getElementById('welcome'),result:document.getElementById('result'),pause:document.getElementById('pause'),resultText:document.getElementById('resultText')};
 function fmt(t){const s=Math.floor(t);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
@@ -415,7 +416,9 @@ function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;
 function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-133&&z<=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
-window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';document.getElementById('again').addEventListener('click',reset);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});\ndocument.getElementById('restartFailed').addEventListener('click',reset);\ndocument.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
+window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';document.getElementById('again').addEventListener('click',reset);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
+document.getElementById('restartFailed').addEventListener('click',reset);
+document.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
 addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
 addEventListener('keyup',e=>{keys[e.code]=false});
 const stick=document.getElementById('stick'),knob=document.getElementById('knob');let stickPointer=null;
