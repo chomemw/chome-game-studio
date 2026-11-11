@@ -24,7 +24,7 @@
 <div class="hud">
   <div class="top">
     <div class="brand">CHOME <span>RUSH ARENA</span></div>
-    <div class="stats"><div class="stat"><small>TIME</small><b id="time">00:00</b></div><div class="stat"><small>CHECKPOINT</small><b id="checkpoint">0/3</b></div></div>
+    <div class="stats"><div class="stat"><small>TIME</small><b id="time">00:00</b></div><div class="stat"><small>POINTS</small><b id="points">0</b></div><div class="stat"><small>CHOX</small><b id="chox">0</b></div><div class="stat"><small>CHECKPOINT</small><b id="checkpoint">0/3</b></div></div>
     <div class="race-pill">SOLO PRACTICE · PROTOTYPE</div>
   </div>
   <div class="progress-wrap"><div class="progress-label"><span>COURSE PROGRESS</span><span id="percent">0%</span></div><div class="progress-track"><div class="progress-fill" id="progress"></div></div></div>
@@ -55,6 +55,7 @@
     <span class="small">Practice prototype · No CHOX rewards or live multiplayer are connected yet.</span>
   </div>
 </div>
+<div class="overlay hidden" id="failed"><div class="dialog"><div class="eyebrow">RUN INTERRUPTED</div><h1>GAME <span>FAILED</span></h1><p id="failedText">You hit an obstacle.</p><button class="primary" id="continueRun">CONTINUE</button><button class="primary" id="restartFailed" style="margin-top:10px;background:linear-gradient(100deg,#53647c,#34465e)">START AGAIN</button><span class="small" id="continueNote">Continue rewards will be supported by an ad later.</span></div></div>
 <div class="overlay hidden" id="pause">
   <div class="dialog"><div class="eyebrow">TAKE A BREATHER</div><h1>PAUSED</h1><p>Your run is waiting.</p><button class="primary" id="resume">RESUME</button></div>
 </div>
@@ -213,7 +214,7 @@ cloudInstances.instanceMatrix.needsUpdate=true;cloudInstances.frustumCulled=true
 for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new THREE.Group();const top=cylinder(2.6,3.8,2.5,grass2,0,-1,0,island);top.rotation.y=Math.random();const cap=cylinder(2.65,2.65,.28,grass,0,.32,0,island);cap.position.y=.32;island.position.set(x,-2.2,z);scene.add(island)}
 
 // Floating course with three safe gaps that require a jump.
-const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20]];
+const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40]];
 for(const [x,z,len] of floorSegments){
   // Grass is the lower foundation; it must sit beneath the asphalt, not over it.
   box(28,.22,len+.5,grass,x,-1.12,z);
@@ -227,14 +228,14 @@ function addBoxInstances(material,w,h,d,placements){
   placements.forEach((p,i)=>{dummy.position.set(p.x,p.y,p.z);dummy.rotation.y=p.ry||0;dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix)});
   mesh.instanceMatrix.needsUpdate=true;mesh.frustumCulled=true;mesh.castShadow=false;mesh.receiveShadow=true;scene.add(mesh);return mesh;
 }
-const laneMarks=[];for(let z=-5;z>-96;z-=4){laneMarks.push({x:-1.5,y:.035,z},{x:1.5,y:.035,z})}
+const laneMarks=[];for(let z=-5;z>-136;z-=4){laneMarks.push({x:-1.5,y:.035,z},{x:1.5,y:.035,z})}
 addBoxInstances(white,.09,.018,.85,laneMarks);
 for(const x of [-4.52,4.52]){
-  box(.12,.12,94,side,x,.18,-44);box(.12,.12,94,gold,x,.34,-44);
-  const posts=[],caps=[];for(let z=-3;z>-92;z-=6){posts.push({x,y:.54,z});caps.push({x,y:.85,z})}
+  box(.12,.12,134,side,x,.18,-64);box(.12,.12,134,gold,x,.34,-64);
+  const posts=[],caps=[];for(let z=-3;z>-132;z-=6){posts.push({x,y:.54,z});caps.push({x,y:.85,z})}
   addBoxInstances(side,.18,.52,.16,posts);addBoxInstances(white,.2,.08,.2,caps);
 }
-const shoulderMarks=[];for(let z=-4;z>-94;z-=8)shoulderMarks.push({x:-4.1,y:.035,z},{x:4.1,y:.035,z});
+const shoulderMarks=[];for(let z=-4;z>-134;z-=8)shoulderMarks.push({x:-4.1,y:.035,z},{x:4.1,y:.035,z});
 addBoxInstances(white,.22,.025,1.5,shoulderMarks);
 // Gaps: remove small sections of path with dark clouds beneath.
 for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-3.4,z+(Math.random()-.5)*1.8)}
@@ -243,11 +244,11 @@ for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-
 const checkpoints=[-31,-59,-79];const checkpointMeshes=[];
 for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i];const g=new THREE.Group();box(.28,3,.3,gold,-3.8,1.45,0,g);box(.28,3,.3,gold,3.8,1.45,0,g);box(7.9,.3,.3,coral,0,2.95,0,g);g.position.z=z;scene.add(g);checkpointMeshes.push(g)}
 // Finish arch.
-const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.z=-91;scene.add(finish);
+const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.z=-130;scene.add(finish);
 
 // Obstacles: gates, bumpers and a rotating sweeper.
 const obstacles=[];
-for(const [z,x,w,h,d,color] of [[-11,0,2.4,1.25,1.1,coral],[-18,-2.3,1.3,1.6,1.1,purple],[-35,1.8,1.5,1.3,1.1,cyan],[-43,-1.8,1.5,1.5,1.1,coral],[-64,0,2.3,1.25,1.1,purple],[-84,2.1,1.2,1.5,1.1,cyan]]){const o=box(w,h,d,color,x,h/2,z);obstacles.push({mesh:o,x,z,w,d,h,type:'block'})}
+for(const [z,x,w,h,d,color] of [[-11,0,2.4,1.25,1.1,coral],[-18,-2.3,1.3,1.6,1.1,purple],[-35,1.8,1.5,1.3,1.1,cyan],[-43,-1.8,1.5,1.5,1.1,coral],[-64,0,2.3,1.25,1.1,purple],[-84,2.1,1.2,1.5,1.1,cyan],[-103,-2.1,1.5,1.4,1.1,coral],[-119,2.2,1.4,1.5,1.1,purple]]){const o=box(w,h,d,color,x,h/2,z);obstacles.push({mesh:o,x,z,w,d,h,type:'block'})}
 // Low clearance gate: it physically blocks a standing runner; ground-dive to slide under.
 const gate=box(8,.34,.55,coral,0,1.34,-29);
 obstacles.push({mesh:gate,x:0,z:-29,w:8,d:.55,h:1.51,clearance:1.08,type:'overhead'});
@@ -329,9 +330,9 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
  }
 })();
 
-let running=false,finished=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,stickX=0,stickY=0,lastFrame=0,slideTimer=0;
+let running=false,finished=false,failed=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,stickX=0,stickY=0,lastFrame=0,slideTimer=0,points=0,chox=0;\nconst rewardedObstacles=new Set();
 const keys={};let jumpQueued=false,diveQueued=false;
-const ui={time:document.getElementById('time'),checkpoint:document.getElementById('checkpoint'),percent:document.getElementById('percent'),progress:document.getElementById('progress'),welcome:document.getElementById('welcome'),result:document.getElementById('result'),pause:document.getElementById('pause'),resultText:document.getElementById('resultText')};
+const ui={time:document.getElementById('time'),points:document.getElementById('points'),chox:document.getElementById('chox'),failed:document.getElementById('failed'),failedText:document.getElementById('failedText'),checkpoint:document.getElementById('checkpoint'),percent:document.getElementById('percent'),progress:document.getElementById('progress'),welcome:document.getElementById('welcome'),result:document.getElementById('result'),pause:document.getElementById('pause'),resultText:document.getElementById('resultText')};
 function fmt(t){const s=Math.floor(t);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 // Procedural horror soundscape: generated locally with Web Audio (no external audio files).
 let rushAudio=null,rushMaster=null,rushDrone=null,rushWind=null,rushAudioOn=true,lastFootstep=0,lastSweepSound=0;
@@ -402,12 +403,19 @@ function updateHazardWarnings(dt){
 
 soundButton.addEventListener('click',()=>{rushAudioOn=!rushAudioOn;soundButton.textContent=rushAudioOn?'🔊 SOUND ON':'🔇 SOUND OFF';if(audioReady()){rushMaster.gain.setTargetAtTime(rushAudioOn?.72:0,rushAudio.currentTime,.06);if(rushAudioOn&&running)startHorrorAmbience()}});
 
-function reset(){audioReady();if(rushAudioOn){sfxStart();startHorrorAmbience()}warnedHazards.clear();cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/3';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden')}
+function failRun(message){
+  if(failed||finished)return;
+  failed=true;running=false;paused=false;finished=false;
+  sfxFall();dangerBanner.style.opacity='0';
+  ui.failedText.textContent=message+' You collected '+points+' points and '+chox+' CHOX.';
+  ui.failed.classList.remove('hidden');
+}
+function reset(){audioReady();if(rushAudioOn){sfxStart();startHorrorAmbience()}warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');warnedHazards.clear();cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/3';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden')}
 function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
-function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-94&&z<=-74))}
+function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-133&&z<=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
-window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';document.getElementById('again').addEventListener('click',reset);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
+window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';document.getElementById('again').addEventListener('click',reset);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});\ndocument.getElementById('restartFailed').addEventListener('click',reset);\ndocument.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
 addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
 addEventListener('keyup',e=>{keys[e.code]=false});
 const stick=document.getElementById('stick'),knob=document.getElementById('knob');let stickPointer=null;
@@ -424,38 +432,26 @@ const clock=new THREE.Clock();
 // through a block; jumping clears it only after the feet rise above its top.
 // Ground-diving lowers the hitbox so the runner can pass beneath a low clearance gate.
 function moveRunner(dx,dz){
-  const radius=.38,runnerHeight=slideTimer>0?.96:2.15;
-  const feet=player.position.y;
-  const blocked=obstacles.filter(o=>{
-    if(o.type==='block')return feet<o.h-.02;
-    if(o.type==='overhead')return runnerHeight>o.clearance;
-    return false;
-  });
-  let nextX=player.position.x+dx;
-  for(const o of blocked){
+  const radius=.4,runnerHeight=slideTimer>0?.96:2.15;
+  const nextX=THREE.MathUtils.clamp(player.position.x+dx,-4.05,4.05);
+  const nextZ=player.position.z+dz;
+  for(const o of obstacles){
+    if(o.type==='spinner')continue;
+    const verticalBlocked=o.type==='block'?player.position.y<o.h-.02:(o.type==='overhead'&&runnerHeight>o.clearance);
+    if(!verticalBlocked)continue;
     const halfX=o.w/2+radius,halfZ=o.d/2+radius;
-    const zOverlap=Math.abs(player.position.z-o.z)<halfZ;
-    const crossedX=(player.position.x-o.x)*(nextX-o.x)<=0||Math.abs(nextX-o.x)<halfX;
-    if(zOverlap&&crossedX&&Math.abs(nextX-o.x)<halfX){
-      nextX=dx>0?Math.min(nextX,o.x-halfX):dx<0?Math.max(nextX,o.x+halfX):player.position.x;
+    if(Math.abs(nextX-o.x)<halfX&&Math.abs(nextZ-o.z)<halfZ){
+      failRun('You collided with an obstacle. Your run has ended.');
+      return false;
     }
   }
-  player.position.x=nextX;
-  let nextZ=player.position.z+dz;
-  for(const o of blocked){
-    const halfX=o.w/2+radius,halfZ=o.d/2+radius;
-    const xOverlap=Math.abs(player.position.x-o.x)<halfX;
-    const crossedZ=(player.position.z-o.z)*(nextZ-o.z)<=0||Math.abs(nextZ-o.z)<halfZ;
-    if(xOverlap&&crossedZ&&Math.abs(nextZ-o.z)<halfZ){
-      nextZ=dz<0?Math.max(nextZ,o.z+halfZ):dz>0?Math.min(nextZ,o.z-halfZ):player.position.z;
-    }
-  }
-  player.position.z=nextZ;
+  player.position.x=nextX;player.position.z=nextZ;
+  return true;
 }
 function update(dt){
   spinner.rotation.y+=dt*1.55;
   hazardBeacons.forEach(b=>{b.rig.rotation.y=Math.sin(elapsed*2+b.index)*.08});
-  if(!running||paused||finished)return;
+  if(!running||paused||finished||failed)return;
   updateHazardWarnings(dt);
   elapsed+=dt;ui.time.textContent=fmt(elapsed);
   if(slideTimer>0){slideTimer=Math.max(0,slideTimer-dt);if(slideTimer===0){body.scale.set(1,1,1);body.position.y=0;body.rotation.x=0}}
@@ -463,8 +459,16 @@ function update(dt){
   const iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0)+stickY;
   const len=Math.hypot(ix,iz);const nx=len>1?ix/len:ix,nz=len>1?iz/len:iz;
   const speed=7.0,dx=nx*speed*dt,dz=(-Math.max(0,-nz)+Math.max(0,nz)*.52)*speed*dt;
-  moveRunner(dx,dz);
-  player.position.x=THREE.MathUtils.clamp(player.position.x,-4.05,4.05);player.position.z=Math.max(player.position.z,-94);
+  if(!moveRunner(dx,dz))return;
+  player.position.z=Math.max(player.position.z,-133);
+  // Reward each obstacle once, only after the runner has safely passed it.
+  obstacles.forEach((o,index)=>{
+    if(!rewardedObstacles.has(index)&&player.position.z<o.z-o.d/2-.5){
+      rewardedObstacles.add(index);points+=100;chox+=5;
+      ui.points.textContent=String(points);ui.chox.textContent=String(chox);
+      soundTone(620,920,.16,.08,'sine');
+    }
+  });
   if(jumpQueued){jump();jumpQueued=false}if(diveQueued){dive();diveQueued=false}
   if(grounded&&!onTrack(player.position.x,player.position.z)){grounded=false;vertical=0}
   if(!grounded){vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<=.05&&onTrack(player.position.x,player.position.z)){player.position.y=.05;vertical=0;grounded=true;body.rotation.x=0;spawnWaterSplash(player.position.x,player.position.z,18)}if(player.position.y<-5){sfxFall();respawn()}}
@@ -476,17 +480,16 @@ function update(dt){
   let pushX=player.position.x-nearX,pushZ=player.position.z-nearZ;
   let pushLen=Math.hypot(pushX,pushZ);
   const sweeperVerticalOverlap=player.position.y<1.62&&player.position.y+2.15>1.28;
-  if(sweeperVerticalOverlap&&pushLen<.62){if(performance.now()-lastSweepSound>1100){sfxImpact();lastSweepSound=performance.now()}cameraShake=Math.max(cameraShake,.48);
-    if(pushLen<.001){pushX=-beamZ;pushZ=beamX;pushLen=1}
-    player.position.x=nearX+pushX/pushLen*.62;
-    player.position.z=nearZ+pushZ/pushLen*.62;
-    vertical=Math.max(vertical,1.8);
-    body.rotation.z=pushX<0?-.22:.22;
+  if(sweeperVerticalOverlap&&pushLen<.72){
+    if(performance.now()-lastSweepSound>1100){sfxImpact();lastSweepSound=performance.now()}
+    cameraShake=Math.max(cameraShake,.48);
+    failRun('The moving sweeper hit you. Your run has ended.');
+    return;
   }
   // Checkpoints store a safe respawn position.
   checkpoints.forEach((z,i)=>{if(checkpoint===i&&player.position.z<z){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/3'}});
-  if(player.position.z<-90){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You cleared Sky Starter with '+checkpoint+' checkpoints reached.';ui.result.classList.remove('hidden')}
-  const pct=THREE.MathUtils.clamp((3.5-player.position.z)/93.5*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
+  if(player.position.z<-129){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You earned '+points+' points and '+chox+' CHOX.';ui.result.classList.remove('hidden')}
+  const pct=THREE.MathUtils.clamp((3.5-player.position.z)/133.5*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
   const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.run?'run':(runnerActions.walk?'walk':'idle')));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
