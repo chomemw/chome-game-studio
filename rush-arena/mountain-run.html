@@ -116,8 +116,8 @@ try {
 
 const root=document.getElementById('game');
 const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
-const level=Math.max(1,Math.min(250,Number(new URLSearchParams(location.search).get('level'))||1));
-const developmentPreview=level===2;
+const level=2;
+const developmentPreview=true;
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
 const obstacleInspectionMode=level===1;
 const scene=new THREE.Scene();scene.background=new THREE.Color(level===2?0xb9d9e9:0xa9c2d0);scene.fog=new THREE.Fog(level===2?0xb9d9e9:0xa9c2d0,level===2?58:42,level===2?190:155);
@@ -624,7 +624,7 @@ async function reset(){
   audioReady();running=false;
   document.getElementById('bootStatus').textContent='Checking your CHOME account…';
   const {data:authData,error:authError}=await supabase.auth.getSession();
-  if(authError||!authData?.session){document.getElementById('bootStatus').textContent='Please sign in to your CHOME player account before starting Rush Arena.';return;}
+  if(authError||!authData?.session){document.getElementById('bootStatus').textContent='Please sign in with your CHOME administrator account before starting Mountain Run.';return;}
   if(developmentPreview){const {error:adminError}=await supabase.rpc('get_chome_admin_overview');if(adminError){document.getElementById('bootStatus').textContent='Administrator access required for the Mountain Run development preview.';return;}rushSessionId=null;}
   else{const {data:sessionData,error:sessionError}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'start',level}});if(sessionError||!sessionData?.ok){document.getElementById('bootStatus').textContent=sessionError?.message||sessionData?.error||'Could not start this level. Please try again.';return;}rushSessionId=sessionData.session_id;}
   lastProgressReport=0;progressChain=Promise.resolve();
