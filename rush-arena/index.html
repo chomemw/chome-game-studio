@@ -273,37 +273,27 @@ obstacles.forEach((o,index)=>{
   scene.add(rig);hazardBeacons.push({rig,lamps:rig.children.filter(child=>child.isMesh&&child.geometry.type==='SphereGeometry'),obstacle:o,index});
 });
 
-// Rigged humanoid runner. The old procedural body remains visible only as a
-// network-failure fallback; on successful GLB load it is replaced completely.
+// The Soldier GLB is the only player character. No procedural placeholder
+// or alternate athlete model is created while the Soldier asset loads.
 const player=new THREE.Group();scene.add(player);player.position.set(0,.05,3.5);
 const body=new THREE.Group();player.add(body);
-const fallbackMat=mat(0x263c50,.72,.08),fallbackSkin=mat(0xb98568,.82),fallbackDark=mat(0x202a33,.86);
-const fallbackTorso=new THREE.Mesh(new THREE.CapsuleGeometry(.3,.55,4,8),fallbackMat);fallbackTorso.position.y=1.15;fallbackTorso.castShadow=true;body.add(fallbackTorso);
-const fallbackHead=new THREE.Mesh(new THREE.SphereGeometry(.23,16,12),fallbackSkin);fallbackHead.position.y=1.86;fallbackHead.castShadow=true;body.add(fallbackHead);
-const fallbackLegs=[];
-for(const x of [-.16,.16]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.62,4,8),fallbackDark);leg.position.set(x,.48,0);leg.castShadow=true;body.add(leg);fallbackLegs.push(leg)}
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
-// Primary character: Male Athlete 03 (rigged sports character, 80-bone skeleton).
-// Asset page: https://models.codelove.in/models/sports-male-03/
-// MIT licence is embedded in the GLB; retain this source/credit reference with the project.
 (async()=>{
  try {
   const {GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
   const loader=new GLTFLoader();
-  const athleteUrl='https://models.codelove.in/models/sports-male-03.glb';
-  const soldierFallbackUrl='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb';
-  const attachRunner=(gltf,rotationY=Math.PI)=>{
+  const soldierUrl='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb';
+  loader.load(soldierUrl,gltf=>{
     const model=gltf.scene;
-    // Keep the same forward course heading as the existing player; verify model-specific facing in device test.
-    model.rotation.y=rotationY;
+    model.rotation.y=0;
     model.updateMatrixWorld(true);
     const bounds=new THREE.Box3().setFromObject(model);
     const height=Math.max(.01,bounds.max.y-bounds.min.y);
     model.scale.setScalar(1.84/height);
     model.position.y=-bounds.min.y*model.scale.y;
     model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
-    body.clear();body.add(model);body.scale.set(1,1,1);body.position.set(0,0,0);
+    body.clear();body.add(model);
     runnerMixer=new THREE.AnimationMixer(model);
     runnerActions={};
     for(const clip of gltf.animations||[]){
@@ -312,27 +302,25 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
       if(key.includes('idle'))slot='idle';
       else if(key.includes('walk'))slot='walk';
       else if(key.includes('run'))slot='run';
-      else if(key.includes('jump'))slot='jump';
-      else if(key.includes('slide')||key.includes('dive'))slot='slide';
       if(slot&&!runnerActions[slot]){
         const action=runnerMixer.clipAction(clip);
         action.enabled=true;action.setEffectiveTimeScale(1);action.setEffectiveWeight(1);
         action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;
       }
     }
-    runnerModelLoaded=!!(runnerActions.run||runnerActions.walk||runnerActions.idle);
-    if(runnerModelLoaded)playRunnerAction('idle',0);
-    else throw new Error('Athlete model loaded without usable locomotion animations');
-    console.info('Rush Arena athlete loaded:',gltf.animations.map(a=>a.name));
-  };
-  loader.load(athleteUrl,attachRunner,undefined,athleteError=>{
-    console.warn('Athlete model unavailable; loading Soldier fallback.',athleteError);
-    loader.load(soldierFallbackUrl,gltf=>attachRunner(gltf,0),undefined,soldierError=>{
-      console.warn('Both rigged characters failed; using procedural fallback.',soldierError);
-    });
+    runnerModelLoaded=Object.keys(runnerActions).length>0;
+    if(runnerActions.idle)playRunnerAction('idle',0);
+    else if(runnerActions.run)playRunnerAction('run',0);
+    console.info('Rush Arena Soldier loaded:',gltf.animations.map(a=>a.name));
+  },undefined,error=>{
+    console.error('Soldier character failed to load:',error);
+    const status=document.getElementById('bootStatus');
+    if(status)status.textContent='Soldier model could not load. Check your connection and reload.';
   });
  } catch(error) {
-  console.warn('Optional character loader unavailable; using procedural fallback.',error);
+  console.error('Soldier loader unavailable:',error);
+  const status=document.getElementById('bootStatus');
+  if(status)status.textContent='Soldier model loader could not start. Reload the game.';
  }
 })();
 
@@ -500,7 +488,7 @@ function update(dt){
   if(player.position.z<-129){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You earned '+points+' points and '+chox+' CHOX.';ui.result.classList.remove('hidden')}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/133.5*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
-  const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){playRunnerAction(runnerActions[desired]?desired:(runnerActions.run?'run':(runnerActions.walk?'walk':'idle')));runnerMixer.update(dt);}else{const swing=moving?Math.sin(elapsed*13)*.55:0;fallbackLegs[0].rotation.x=swing;fallbackLegs[1].rotation.x=-swing;}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
+  const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run?'run':(runnerActions.walk?'walk':'idle'));playRunnerAction(action);runnerMixer.update(dt);}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 let lastRenderAt=0,frameAccumulator=0;
 function animate(now=0){
