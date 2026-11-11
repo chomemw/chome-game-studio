@@ -113,7 +113,7 @@ try {
 }
 
 const root=document.getElementById('game');
-const scene=new THREE.Scene();scene.background=new THREE.Color(0xa9c2d0);scene.fog=new THREE.Fog(0xa9c2d0,48,165);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xa9c2d0);scene.fog=new THREE.Fog(0xa9c2d0,42,155);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,260);
 const mobileDevice=matchMedia('(max-width: 900px), (pointer: coarse)').matches;
 const renderer=new THREE.WebGLRenderer({antialias:!mobileDevice,powerPreference:'high-performance'});
@@ -220,11 +220,13 @@ cloudInstances.instanceMatrix.needsUpdate=true;cloudInstances.frustumCulled=true
 for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new THREE.Group();const top=cylinder(2.6,3.8,2.5,grass2,0,-1,0,island);top.rotation.y=Math.random();const cap=cylinder(2.65,2.65,.28,grass,0,.32,0,island);cap.position.y=.32;island.position.set(x,-2.2,z);scene.add(island)}
 
 // Floating course with three safe gaps that require a jump.
-const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40],[0,-199.5,133],[0,-332.5,133],[0,-465.5,133],[0,-598.5,133]];
+const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,20);extensionRoadTexture.needsUpdate=true;
+const extensionPath=new THREE.MeshStandardMaterial({map:extensionRoadTexture,color:0xb4c0c9,roughness:.58,metalness:.12});
+const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40],[0,-399,532]];
 for(const [x,z,len] of floorSegments){
   // Grass is the lower foundation; it must sit beneath the asphalt, not over it.
   box(28,.22,len+.5,grass,x,-1.12,z);
-  box(9,.8,len,path,x,-.48,z);
+  box(9,.8,len,len>200?extensionPath:path,x,-.48,z);
   box(9.35,.34,len+.25,side,x,-.99,z);
 }
 // Worn asphalt shoulders and repeated markings use instancing to reduce draw calls.
@@ -250,6 +252,25 @@ for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-
 // Checkpoint arches.
 const checkpoints=[-31,-59,-79,-190,-338,-471,-635];const checkpointMeshes=[];
 for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i];const g=new THREE.Group();box(.28,3,.3,gold,-3.8,1.45,0,g);box(.28,3,.3,gold,3.8,1.45,0,g);box(7.9,.3,.3,coral,0,2.95,0,g);g.position.z=z;scene.add(g);checkpointMeshes.push(g)}
+
+// Readable overhead zone signs mark each new 133m section.
+function addZoneSign(title,range,z,accent){
+  const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=160;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#101923';ctx.fillRect(0,0,1024,160);
+  ctx.fillStyle=accent;ctx.fillRect(0,0,16,160);ctx.fillRect(1008,0,16,160);
+  ctx.fillStyle='#f4f8fb';ctx.font='900 54px system-ui';ctx.textAlign='center';ctx.fillText(title,512,70);
+  ctx.fillStyle=accent;ctx.font='800 27px system-ui';ctx.fillText(range,512,119);
+  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
+  const board=new THREE.Mesh(new THREE.PlaneGeometry(8.6,1.35),new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide}));
+  board.position.set(0,4.85,z);scene.add(board);
+  box(8.9,.12,.18,accent,0,4.12,z);
+}
+addZoneSign('CONSTRUCTION ZONE','133m — 266m',-135,'#e0a34a');
+addZoneSign('UNDERGROUND TUNNEL','266m — 399m',-268,'#69a8c8');
+addZoneSign('CARGO YARD','399m — 532m',-401,'#d39a55');
+addZoneSign('FINAL SURVIVAL','532m — 665m',-534,'#d46b76');
+
 // Finish arch.
 const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.z=-662;scene.add(finish);
 
@@ -389,6 +410,39 @@ let running=false,finished=false,failed=false,paused=false,elapsed=0,vertical=0,
 const rewardedObstacles=new Set();
 const keys={};let jumpQueued=false,diveQueued=false;
 const ui={time:document.getElementById('time'),points:document.getElementById('points'),chox:document.getElementById('chox'),failed:document.getElementById('failed'),failedText:document.getElementById('failedText'),checkpoint:document.getElementById('checkpoint'),percent:document.getElementById('percent'),progress:document.getElementById('progress'),welcome:document.getElementById('welcome'),result:document.getElementById('result'),pause:document.getElementById('pause'),resultText:document.getElementById('resultText')};
+
+const zoneBadge=document.createElement('div');
+Object.assign(zoneBadge.style,{position:'fixed',top:'128px',left:'50%',transform:'translateX(-50%)',zIndex:'44',padding:'7px 13px',border:'1px solid rgba(255,255,255,.35)',borderRadius:'10px',background:'rgba(9,18,30,.78)',color:'#fff',font:'900 10px system-ui',letterSpacing:'.13em',textAlign:'center',whiteSpace:'nowrap',backdropFilter:'blur(8px)',pointerEvents:'none'});
+document.body.appendChild(zoneBadge);
+const zoneBanner=document.createElement('div');
+Object.assign(zoneBanner.style,{position:'fixed',top:'37%',left:'50%',transform:'translate(-50%,-50%) scale(.96)',zIndex:'48',padding:'18px 25px',minWidth:'min(320px,84vw)',border:'1px solid rgba(255,255,255,.45)',borderRadius:'18px',background:'linear-gradient(145deg,rgba(9,18,30,.94),rgba(27,43,58,.9))',boxShadow:'0 18px 55px rgba(0,0,0,.4)',color:'#fff',font:'1000 19px system-ui',letterSpacing:'.1em',textAlign:'center',opacity:'0',transition:'opacity .25s, transform .25s',pointerEvents:'none'});
+document.body.appendChild(zoneBanner);
+const courseZones=[
+  {start:0,end:133,name:'OPENING COURSE',sub:'0m — 133m',bg:0xa9c2d0,fog:0xa9c2d0,accent:'#9ec7d7'},
+  {start:133,end:266,name:'CONSTRUCTION ZONE',sub:'133m — 266m',bg:0x8b9aa0,fog:0x8b9aa0,accent:'#e0a34a'},
+  {start:266,end:399,name:'UNDERGROUND TUNNEL',sub:'266m — 399m',bg:0x34414e,fog:0x34414e,accent:'#69a8c8'},
+  {start:399,end:532,name:'CARGO YARD',sub:'399m — 532m',bg:0x7b8585,fog:0x7b8585,accent:'#d39a55'},
+  {start:532,end:665,name:'FINAL SURVIVAL',sub:'532m — 665m',bg:0x443a43,fog:0x443a43,accent:'#d46b76'}
+];
+let activeZone=-1,zoneBannerTimer=0;
+function updateCourseZone(dt){
+  const distance=THREE.MathUtils.clamp(3.5-player.position.z,0,665);
+  let index=courseZones.findIndex((z,i)=>distance>=z.start&&(distance<z.end||(i===courseZones.length-1&&distance<=z.end)));
+  if(index<0)index=courseZones.length-1;
+  const zone=courseZones[index];
+  if(index!==activeZone){
+    activeZone=index;zoneBannerTimer=3.4;
+    zoneBadge.textContent=zone.name+'  •  '+zone.sub;
+    zoneBadge.style.borderColor=zone.accent;
+    zoneBanner.innerHTML=zone.name+'<div style="font:800 11px system-ui;letter-spacing:.16em;color:'+zone.accent+';margin-top:8px">'+zone.sub+'</div>';
+    zoneBanner.style.opacity='1';zoneBanner.style.transform='translate(-50%,-50%) scale(1)';
+    scene.background.setHex(zone.bg);scene.fog.color.setHex(zone.fog);
+  }else if(zoneBannerTimer>0){
+    zoneBannerTimer=Math.max(0,zoneBannerTimer-dt);
+    if(zoneBannerTimer===0){zoneBanner.style.opacity='0';zoneBanner.style.transform='translate(-50%,-50%) scale(.96)'}
+  }
+}
+
 function fmt(t){const s=Math.floor(t);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 // Procedural horror soundscape: generated locally with Web Audio (no external audio files).
 let rushAudio=null,rushMaster=null,rushDrone=null,rushWind=null,rushAudioOn=true,lastFootstep=0,lastSweepSound=0;
@@ -469,7 +523,7 @@ function failRun(message){
   ui.failedText.textContent=message+' You collected '+points+' points and '+chox+' CHOX.';
   ui.failed.classList.remove('hidden');
 }
-function reset(){audioReady();if(rushAudioOn){sfxStart();startHorrorAmbience()}warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');warnedHazards.clear();cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden')}
+function reset(){audioReady();if(rushAudioOn){sfxStart();startHorrorAmbience()}activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent='OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');warnedHazards.clear();cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden')}
 function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
 function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z<=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
@@ -514,6 +568,7 @@ function update(dt){
   hazardBeacons.forEach(b=>{b.rig.rotation.y=Math.sin(elapsed*2+b.index)*.08});
   if(!running||paused||finished||failed)return;
   elapsed+=dt;ui.time.textContent=fmt(elapsed);
+  updateCourseZone(dt);
   updateMovingHazards(dt);
   updateHazardWarnings(dt);
   if(slideTimer>0){slideTimer=Math.max(0,slideTimer-dt);if(slideTimer===0){body.scale.set(1,1,1);body.position.y=0;body.rotation.x=0}}
