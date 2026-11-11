@@ -229,7 +229,7 @@ for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new 
 
 const obstacles=[];
 const spinner=new THREE.Group();
-const riverGaps=[];
+let riverGaps=[];
 if(level===1){
 // Floating course with three safe gaps that require a jump.
 const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,5);extensionRoadTexture.needsUpdate=true;
@@ -354,7 +354,7 @@ addExtendedBlock(-478,2.2,1.5,1.4,1.15,coral);addExtendedBlock(-494,-2.2,1.5,1.4
 // Final survival zone (532–665m): paired hazards with short but fair recovery windows.
 addExtendedBlock(-548,2.2,1.5,1.4,1.15,coral);addMovingBlock(-562,-2.2,2,.8,'crusher');addExtendedOverhead(-578);addExtendedBlock(-594,-2.2,1.55,1.45,1.15,purple);
 addMovingBlock(-610,2.2,2,1.7,'crusher');addExtendedOverhead(-626,.98);addMovingBlock(-642,0,2.75,2.5,'crusher');addExtendedBlock(-656,2.2,1.5,1.4,1.15,coral);
-spinner=new THREE.Group();spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
+spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
 
 }else{
 // MOUNTAIN RUN — independent Level 2 environment (Level 1 remains unchanged).
@@ -368,7 +368,7 @@ const mountainSky=new THREE.Mesh(new THREE.SphereGeometry(180,24,16),new THREE.M
 const ridgeGeometry=new THREE.ConeGeometry(1,1,7),ridgeMat=mat(0x637f72,.99),ridgeMat2=mat(0x82978a,.99);
 for(let i=0;i<26;i++){const sideSign=i%2?1:-1;const ridge=new THREE.Mesh(ridgeGeometry,i%3?ridgeMat:ridgeMat2);const height=19+(i%5)*5;ridge.scale.set(10+(i%4)*3,height,13+(i%3)*4);ridge.position.set(sideSign*(20+(i%4)*8),height*.48,-i*27-18);ridge.rotation.z=sideSign*.12;scene.add(ridge)}
 // Ground is split at three river gaps so the player must jump across the water.
-const riverGaps=[{start:-281,end:-286},{start:-465,end:-470},{start:-605,end:-610}];
+riverGaps.push({start:-281,end:-286},{start:-465,end:-470},{start:-605,end:-610});
 const groundSpans=[[5,-281],[-286,-465],[-470,-605],[-610,-665]];
 for(const [nearZ,farZ] of groundSpans){const len=Math.abs(nearZ-farZ),mid=(nearZ+farZ)/2;box(28,.24,len,mountainGrass,0,-1.12,mid);box(9,.8,len,mountainPath,0,-.48,mid);box(9.5,.18,len,mountainDirt,0,-.96,mid)}
 // Soft grassy shoulders and scattered low vegetation, instanced for mobile performance.
