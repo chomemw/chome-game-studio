@@ -46,14 +46,38 @@
 </div>
 <div class="section"><h2>Weekly tournament schedule</h2><div id="weeklyTournamentsTable" class="table-wrap"></div></div>
 </section>
-<section id="view-development" class="hidden"><div class="eyebrow">PRIVATE BUILD WORKSPACE</div><h1>Game Development</h1><p class="muted">Manage games while they are being built. Development previews are listed here for administrator testing; do not publish a game to players until it passes the release checks and receives approval.</p>
-<div class="status">DEVELOPMENT POLICY · Admin testing first. Player visibility stays off until the game is ready and release is approved.</div>
-<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
-<div class="card"><div class="eyebrow">LEVEL 1 · SKY STARTER</div><h2 style="margin:10px 0">CHOME Rush Arena</h2><p class="muted">Semi-realistic 3D runner · Third-person camera · Solo practice</p><p><span class="pill">IN DEVELOPMENT</span> <span class="pill">NOT RELEASED</span></p><a class="btn" style="display:inline-block" href="rush-arena/index.html" target="_blank" rel="noopener">Open admin preview ↗</a></div>
-<div class="card"><div class="eyebrow">LEVEL 2 · FACTORY COURSE</div><h2 style="margin:10px 0">Hammer Havoc</h2><p class="muted">Industrial obstacle course · Moving machinery · Checkpoints</p><p><span class="pill">IN DEVELOPMENT</span> <span class="pill">NOT RELEASED</span></p><a class="btn" style="display:inline-block" href="rush-arena/hammer-havoc.html" target="_blank" rel="noopener">Open admin preview ↗</a></div>
+<section id="view-development" class="hidden">
+<div class="eyebrow">PRIVATE BUILD WORKSPACE & GAME LIBRARY</div>
+<h1>Game Development</h1>
+<p class="muted">Your complete CHOME game catalogue in one place. Open playable games for review, continue prototypes, and test any Rush Arena level directly. Players only see games that have been approved for release.</p>
+<div class="status">ADMIN ACCESS · This catalogue includes playable/released games and unfinished builds. A game's presence here does not publish it to players. Use the public release process only after testing and your approval.</div>
+
+<div class="section">
+<div class="toolbar"><div><h2 style="margin:0">Playable games</h2><p class="muted" style="margin:5px 0 0">Games currently marked PLAY NOW / available on the studio site.</p></div><span class="pill">4 GAMES</span></div>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+<div class="card"><div class="eyebrow">PUZZLE · PLAY NOW</div><h2 style="margin:10px 0">Fruit Fancy</h2><p class="muted">Fruit-matching puzzle adventure with levels and cloud-save support.</p><p><span class="pill">PLAYABLE</span> <span class="pill">STUDIO LISTED</span></p><a class="btn" style="display:inline-block" href="fruit-fancy.html" target="_blank" rel="noopener">Open game ↗</a></div>
+<div class="card"><div class="eyebrow">PUZZLE · PLAY NOW</div><h2 style="margin:10px 0">CHOME Blocks</h2><p class="muted">Block placement and line-clearing puzzle game.</p><p><span class="pill">PLAYABLE</span> <span class="pill">STUDIO LISTED</span></p><a class="btn" style="display:inline-block" href="chome-blocks.html" target="_blank" rel="noopener">Open game ↗</a></div>
+<div class="card"><div class="eyebrow">PUZZLE · NEW</div><h2 style="margin:10px 0">Candy Trail Saga</h2><p class="muted">Match-three candy adventure with combos and level targets.</p><p><span class="pill">PLAYABLE</span> <span class="pill">STUDIO LISTED</span></p><a class="btn" style="display:inline-block" href="candy-trail.html" target="_blank" rel="noopener">Open game ↗</a></div>
+<div class="card"><div class="eyebrow">SPEAKING · NEW</div><h2 style="margin:10px 0">CHOME SAY IT FAST</h2><p class="muted">Picture naming and timed speaking challenge.</p><p><span class="pill">PLAYABLE</span> <span class="pill">STUDIO LISTED</span></p><a class="btn" style="display:inline-block" href="chome-say-it-fast.html" target="_blank" rel="noopener">Open game ↗</a></div>
 </div>
-<div class="section"><h2>Release readiness checklist</h2><p class="muted">Complete these checks before approving any game for player access.</p><div style="display:grid;gap:12px;color:#dce5f5"><label><input type="checkbox"> Core gameplay starts, runs and finishes reliably</label><label><input type="checkbox"> Obstacles, collisions, scoring and checkpoints behave correctly</label><label><input type="checkbox"> Performance tested on mobile and desktop</label><label><input type="checkbox"> Controls, sound, loading and recovery tested</label><label><input type="checkbox"> No critical bugs remain</label><label><input type="checkbox"> Admin approval given for public release</label></div></div>
-<div class="section"><h2>Development workflow</h2><p class="muted">Build privately → test in admin preview → fix bugs → complete release checks → approve → publish to players. This panel is an admin workspace and preview directory; the preview URLs themselves still need server-side/admin authentication protection before they can be considered inaccessible to non-admins.</p></div>
+</div>
+
+<div class="section">
+<div class="toolbar"><div><h2 style="margin:0">Prototypes and active builds</h2><p class="muted" style="margin:5px 0 0">Available for admin testing; not represented as finished public releases.</p></div><span class="pill">3 PROJECTS</span></div>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+<div class="card"><div class="eyebrow">STRATEGY · PROTOTYPE</div><h2 style="margin:10px 0">CHOME Tycoon</h2><p class="muted">Build and manage a business empire. Prototype status is shown on the studio homepage.</p><p><span class="pill">PROTOTYPE</span></p><a class="btn" style="display:inline-block" href="chome-tycoon.html" target="_blank" rel="noopener">Open admin preview ↗</a></div>
+<div class="card"><div class="eyebrow">3D SIMULATION · REPOSITORY BUILD</div><h2 style="margin:10px 0">Coffee Shop 3D</h2><p class="muted">Standalone 3D coffee shop project present in the game repository. Review its current build before assigning a public release status.</p><p><span class="pill">ADMIN REVIEW</span> <span class="pill">NOT PUBLICLY LISTED</span></p><a class="btn" style="display:inline-block" href="coffee-shop-3d.html" target="_blank" rel="noopener">Open admin preview ↗</a></div>
+<div class="card"><div class="eyebrow">ACTION · 3D RUNNER</div><h2 style="margin:10px 0">CHOME Rush Arena</h2><p class="muted">One connected game with sequential player progression. Admins can jump into any level to test it.</p><p><span class="pill">PLAYABLE PROTOTYPE</span> <span class="pill">ADMIN LEVEL SELECT</span></p>
+<div style="display:grid;gap:9px;margin-top:12px">
+<div style="padding:12px;border:1px solid var(--line);border-radius:10px"><strong>Level 1 · Sky Starter</strong><p class="muted" style="margin:4px 0 9px">Floating sky course</p><a class="btn" style="display:inline-block" href="rush-arena/index.html" target="_blank" rel="noopener">Test Level 1 ↗</a></div>
+<div style="padding:12px;border:1px solid var(--line);border-radius:10px"><strong>Level 2 · Hammer Havoc</strong><p class="muted" style="margin:4px 0 9px">Industrial factory course</p><a class="btn" style="display:inline-block" href="rush-arena/hammer-havoc.html" target="_blank" rel="noopener">Test Level 2 ↗</a></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="section"><h2>Release readiness checklist</h2><p class="muted">Use this before approving any game for player access.</p><div style="display:grid;gap:12px;color:#dce5f5"><label><input type="checkbox"> Core gameplay starts, runs and finishes reliably</label><label><input type="checkbox"> Obstacles, scoring, collisions and progression behave correctly</label><label><input type="checkbox"> Performance tested on mobile and desktop</label><label><input type="checkbox"> Controls, sound, loading and recovery tested</label><label><input type="checkbox"> No critical bugs remain</label><label><input type="checkbox"> Admin approval given for public release</label></div></div>
+<div class="section"><h2>Development workflow</h2><p class="muted">All games remain visible in this admin catalogue regardless of status. Build privately → test in admin preview → fix issues → complete release checks → approve → publish to players. Rush Arena is managed as one game with multiple levels, not as separate games.</p></div>
 </section>
 <section id="view-activity" class="hidden"><div class="eyebrow">SECURITY & ACCOUNTABILITY</div><h1>Admin Activity</h1><p class="muted">Recent administrator actions, reasons, affected players and timestamps.</p><div class="section"><div id="auditTable" class="table-wrap"></div></div></section>
 </div><div class="toolbar"><span class="muted" id="lastUpdated"></span><button id="refresh" class="btn hidden">↻ Refresh data</button></div>
