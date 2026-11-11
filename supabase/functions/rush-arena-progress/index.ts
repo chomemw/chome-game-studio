@@ -55,6 +55,19 @@ Deno.serve(async (req: Request) => {
     return reply(200, data);
   }
 
+  if (body.action === "progress") {
+    const sessionId = String(body.session_id || "");
+    const distance = Number(body.distance);
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(sessionId)
+      || !Number.isFinite(distance)) return reply(400, { error: "Invalid Rush Arena progress checkpoint." });
+    const { data, error } = await admin.rpc("service_rush_arena_checkpoint", {
+      p_user_id: userId, p_session_id: sessionId, p_distance: distance,
+    });
+    if (error) return reply(500, { error: "Rush Arena progress could not be saved." });
+    if (!data?.ok) return reply(400, { error: data?.error || "Progress checkpoint was rejected." });
+    return reply(200, data);
+  }
+
   if (body.action === "finish") {
     const sessionId = String(body.session_id || "");
     const elapsed = Number(body.elapsed_seconds);
