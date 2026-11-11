@@ -113,6 +113,8 @@ try {
 }
 
 const root=document.getElementById('game');
+// Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
+const obstacleInspectionMode=true;
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xa9c2d0);scene.fog=new THREE.Fog(0xa9c2d0,42,155);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,260);
 const mobileDevice=matchMedia('(max-width: 900px), (pointer: coarse)').matches;
@@ -136,6 +138,7 @@ let lightningTimer=7+Math.random()*6,lightningFlash=0,thunderPending=0;
 const weatherLabel=document.createElement('div');weatherLabel.textContent='⛈  STORM CONDITIONS';
 Object.assign(weatherLabel.style,{position:'fixed',left:'12px',top:'54px',zIndex:'45',padding:'7px 10px',border:'1px solid rgba(173,204,224,.28)',borderRadius:'9px',background:'rgba(12,22,32,.58)',color:'#d8e8f4',font:'800 10px system-ui',letterSpacing:'.12em',pointerEvents:'none',backdropFilter:'blur(5px)'});
 document.body.appendChild(weatherLabel);
+if(obstacleInspectionMode){const inspectionLabel=document.createElement('div');inspectionLabel.textContent='👁 INSPECTION MODE · COLLISIONS OFF';Object.assign(inspectionLabel.style,{position:'fixed',right:'12px',top:'54px',zIndex:'46',padding:'7px 10px',border:'1px solid rgba(120,235,190,.45)',borderRadius:'9px',background:'rgba(8,28,24,.72)',color:'#c8ffe8',font:'800 10px system-ui',letterSpacing:'.08em',pointerEvents:'none',backdropFilter:'blur(5px)'});document.body.appendChild(inspectionLabel)}
 function updateStorm(dt){
   const p=player.position,arr=rainGeometry.attributes.position.array;
   for(let i=0;i<rainCount;i++){
@@ -547,9 +550,10 @@ const clock=new THREE.Clock();
 // through a block; jumping clears it only after the feet rise above its top.
 // Ground-diving lowers the hitbox so the runner can pass beneath a low clearance gate.
 function moveRunner(dx,dz){
-  const radius=.4,runnerHeight=slideTimer>0?.96:2.15;
   const nextX=THREE.MathUtils.clamp(player.position.x+dx,-4.05,4.05);
   const nextZ=player.position.z+dz;
+  if(!obstacleInspectionMode){
+  const radius=.4,runnerHeight=slideTimer>0?.96:2.15;
   for(const o of obstacles){
     if(o.type==='spinner')continue;
     const verticalBlocked=(o.type==='block'||o.type==='movingBlock')?player.position.y<o.h-.02:(o.type==='overhead'&&runnerHeight>o.clearance);
@@ -559,6 +563,7 @@ function moveRunner(dx,dz){
       failRun('You collided with an obstacle. Your run has ended.');
       return false;
     }
+  }
   }
   player.position.x=nextX;player.position.z=nextZ;
   return true;
@@ -597,7 +602,7 @@ function update(dt){
   let pushX=player.position.x-nearX,pushZ=player.position.z-nearZ;
   let pushLen=Math.hypot(pushX,pushZ);
   const sweeperVerticalOverlap=player.position.y<1.62&&player.position.y+2.15>1.28;
-  if(sweeperVerticalOverlap&&pushLen<.72){
+  if(!obstacleInspectionMode&&sweeperVerticalOverlap&&pushLen<.72){
     if(performance.now()-lastSweepSound>1100){sfxImpact();lastSweepSound=performance.now()}
     cameraShake=Math.max(cameraShake,.48);
     failRun('The moving sweeper hit you. Your run has ended.');
