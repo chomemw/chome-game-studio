@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a1020">
+<title>Rush Arena — Choose a Level | CHOME</title>
+<style>
+:root{color-scheme:dark;--bg:#0a1020;--panel:#121d34;--line:#ffffff20;--muted:#9ba9c2;--purple:#8c70ff;--cyan:#65e4ef;--green:#66e6b0;--gold:#ffe18a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#2a3564 0,transparent 48%),var(--bg);color:#f7f8ff;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+.shell{width:min(1120px,calc(100% - 32px));margin:auto;padding:26px 0 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0 22px;border-bottom:1px solid var(--line)}
+.brand{font-size:13px;font-weight:950;letter-spacing:.14em}.brand span{color:#b6a6ff}
+.back{color:#d7ddf0;text-decoration:none;border:1px solid var(--line);padding:10px 13px;border-radius:11px;font-size:12px;font-weight:800}
+.hero{padding:34px 0 22px}.eyebrow{font-size:10px;letter-spacing:.22em;font-weight:950;color:var(--cyan)}
+h1{font-size:clamp(36px,7vw,58px);line-height:.98;letter-spacing:-.07em;margin:12px 0}
+.intro{color:var(--muted);font-size:14px;line-height:1.7;max-width:650px;margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+.stat{padding:16px;border:1px solid var(--line);border-radius:15px;background:#111a2d}
+.stat small{display:block;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.15em}.stat strong{display:block;font-size:25px;margin-top:6px}
+.progress{height:7px;background:#ffffff18;border-radius:20px;overflow:hidden;margin-top:13px}.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--cyan))}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:32px 0 15px}.section-head h2{font-size:20px;margin:0;letter-spacing:-.04em}.section-head p{color:var(--muted);font-size:11px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px}
+.level{position:relative;min-height:126px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,#172440,#10192c);padding:14px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+.level.completed{border-color:#66e6b055;background:linear-gradient(145deg,#173a3b,#101d2d)}
+.level.unlocked{border-color:#8c70ff88;background:linear-gradient(145deg,#30275a,#121c34)}
+.level.locked{opacity:.68}
+.level-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.level-no{font-size:24px;font-weight:1000;letter-spacing:-.06em}
+.status{font-size:8px;font-weight:950;letter-spacing:.08em;border-radius:99px;padding:6px 8px;background:#ffffff12;color:#c8d2e7;white-space:nowrap}
+.completed .status{color:var(--green);background:#66e6b01a}.unlocked .status{color:#c4b8ff;background:#8c70ff24}
+.level-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.level-note{font-size:9px;color:var(--muted);line-height:1.4}
+.play{border:0;border-radius:9px;background:var(--purple);color:white;padding:9px 10px;font-size:9px;font-weight:950;letter-spacing:.07em;white-space:nowrap}
+.play:disabled{background:#28344a;color:#8f9db4;cursor:not-allowed}
+.message{margin:24px 0;padding:18px;border:1px solid var(--line);border-radius:14px;background:#111a2d;color:var(--muted);font-size:13px;line-height:1.65}
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:20px;color:var(--muted);font-size:10px}.legend span{display:inline-flex;align-items:center;gap:7px}.dot{width:8px;height:8px;border-radius:50%;background:#68758c}.dot.green{background:var(--green)}.dot.purple{background:var(--purple)}
+@media(max-width:900px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:620px){.shell{width:calc(100% - 24px);padding-top:14px}.stats{gap:7px}.stat{padding:12px}.stat strong{font-size:20px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.level{min-height:116px;padding:12px}.section-head{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header><div class="brand">CHOME <span>RUSH ARENA</span></div><a class="back" href="../dashboard.html">← PLAYER DASHBOARD</a></header>
+<section class="hero">
+<div class="eyebrow">CHOOSE YOUR CHALLENGE</div>
+<h1>THE LEVEL<br><span style="color:#a995ff">JOURNEY</span></h1>
+<p class="intro">Complete levels to unlock the next challenge. Revisit completed levels whenever you want. Your progress and first-completion CHOX rewards are saved to your CHOME account.</p>
+<div class="stats">
+ <div class="stat"><small>COMPLETED</small><strong id="completedCount">—</strong><div class="progress"><span id="completedBar"></span></div></div>
+ <div class="stat"><small>NEXT UNLOCKED</small><strong id="nextLevel">—</strong></div>
+ <div class="stat"><small>TOTAL LEVELS</small><strong>250</strong></div>
+</div>
+</section>
+<div class="section-head"><h2>All Rush Arena Levels</h2><p id="summary">Loading your saved progress…</p></div>
+<div id="levelGrid" class="grid" aria-live="polite"></div>
+<div id="message" class="message">Checking your CHOME account…</div>
+<div class="legend"><span><i class="dot green"></i> Completed</span><span><i class="dot purple"></i> Unlocked</span><span><i class="dot"></i> Locked</span></div>
+</div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
+const TOTAL_LEVELS=250;
+const PLAYABLE_LEVELS=new Set([1]);
+const $=id=>document.getElementById(id);
+function makeLevel(level,status){
+ const card=document.createElement('article');card.className='level '+status;
+ const top=document.createElement('div');top.className='level-top';
+ const number=document.createElement('div');number.className='level-no';number.textContent=String(level);
+ const badge=document.createElement('span');badge.className='status';
+ badge.textContent=status==='completed'?'✓ COMPLETED':status==='unlocked'?'UNLOCKED':'🔒 LOCKED';
+ top.append(number,badge);
+ const bottom=document.createElement('div');bottom.className='level-bottom';
+ const note=document.createElement('div');note.className='level-note';
+ const button=document.createElement('button');button.className='play';
+ if(status==='completed'){note.textContent='Best result saved';button.textContent=PLAYABLE_LEVELS.has(level)?'REPLAY':'IN DEVELOPMENT';button.disabled=!PLAYABLE_LEVELS.has(level)}
+ else if(status==='unlocked'){note.textContent=PLAYABLE_LEVELS.has(level)?'Ready to play':'Next challenge';button.textContent=PLAYABLE_LEVELS.has(level)?'PLAY LEVEL':'COMING SOON';button.disabled=!PLAYABLE_LEVELS.has(level)}
+ else{note.textContent='Complete the previous level';button.textContent='LOCKED';button.disabled=true}
+ if(!button.disabled)button.addEventListener('click',()=>location.href='index.html?level='+level);
+ bottom.append(note,button);card.append(top,bottom);return card;
+}
+async function load(){
+ const {data:{session}}=await supabase.auth.getSession();
+ if(!session){$('message').textContent='Please sign in to view and save your Rush Arena progress.';const a=document.createElement('a');a.href='../dashboard.html';a.textContent='Open player dashboard to sign in';a.style.color='#c4b8ff';$('message').append(' ',a);$('summary').textContent='Sign-in required';return}
+ const {data,error}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'list'}});
+ if(error||!data?.ok){$('message').textContent=error?.message||data?.error||'Could not load your level progress. Refresh to try again.';$('summary').textContent='Progress unavailable';return}
+ const progress=data.progress||{},completed=new Set(Array.isArray(progress.completed_levels)?progress.completed_levels.map(Number):[]);
+ const unlocked=Math.max(1,Number(progress.highest_unlocked)||1);
+ $('completedCount').textContent=completed.size+' / '+TOTAL_LEVELS;
+ $('completedBar').style.width=(completed.size/TOTAL_LEVELS*100)+'%';
+ $('nextLevel').textContent=String(Math.min(TOTAL_LEVELS,unlocked));
+ $('summary').textContent=completed.size+' completed · Level '+unlocked+' unlocked';
+ const grid=$('levelGrid');grid.replaceChildren();
+ for(let level=1;level<=TOTAL_LEVELS;level++){
+  const status=completed.has(level)?'completed':level<=unlocked?'unlocked':'locked';
+  grid.append(makeLevel(level,status));
+ }
+ $('message').textContent='Your progress is saved to your CHOME account. Complete a level once to receive its CHOX reward; replays can still earn Game Points. Levels that are unlocked but still being built will be marked Coming Soon.';
+}
+load().catch(error=>{$('message').textContent='Unable to load levels: '+(error?.message||'Please refresh.');});
+</script>
+</body>
+</html>
