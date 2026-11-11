@@ -24,7 +24,7 @@
 <div class="hud">
   <div class="top">
     <div class="brand">CHOME <span>RUSH ARENA</span></div>
-    <div class="stats"><div class="stat"><small>TIME</small><b id="time">00:00</b></div><div class="stat"><small>POINTS</small><b id="points">0</b></div><div class="stat"><small>CHOX</small><b id="chox">0</b></div><div class="stat"><small>CHECKPOINT</small><b id="checkpoint">0/3</b></div></div>
+    <div class="stats"><div class="stat"><small>TIME</small><b id="time">00:00</b></div><div class="stat"><small>POINTS</small><b id="points">0</b></div><div class="stat"><small>CHOX</small><b id="chox">0</b></div><div class="stat"><small>CHECKPOINT</small><b id="checkpoint">0/7</b></div></div>
     <div class="race-pill">SOLO PRACTICE · PROTOTYPE</div>
   </div>
   <div class="progress-wrap"><div class="progress-label"><span>COURSE PROGRESS</span><span id="percent">0%</span></div><div class="progress-track"><div class="progress-fill" id="progress"></div></div></div>
@@ -414,7 +414,7 @@ function updateHazardWarnings(dt){
     if(ahead&&distance<17&&!warnedHazards.has(beacon.index)){warnedHazards.add(beacon.index);sfxWarning()}
   }
   if(nearest){
-    const action=nearest.obstacle.type==='overhead'?'SLIDE UNDER':nearest.obstacle.type==='spinner'?'DODGE THE SWEEPER':'JUMP THE BLOCK';
+    const action=nearest.obstacle.type==='overhead'?'SLIDE UNDER':nearest.obstacle.type==='spinner'?'DODGE THE SWEEPER':nearest.obstacle.type==='movingBlock'?'DODGE MOVING LOAD':'JUMP THE BLOCK';
     dangerBanner.textContent='⚠ '+action+' · '+Math.ceil(nearestDistance)+'m';
     dangerBanner.style.opacity='1';
   }else dangerBanner.style.opacity='0';
@@ -423,6 +423,9 @@ function updateHazardWarnings(dt){
 
 soundButton.addEventListener('click',()=>{rushAudioOn=!rushAudioOn;soundButton.textContent=rushAudioOn?'🔊 SOUND ON':'🔇 SOUND OFF';if(audioReady()){rushMaster.gain.setTargetAtTime(rushAudioOn?.72:0,rushAudio.currentTime,.06);if(rushAudioOn&&running)startHorrorAmbience()}});
 
+function updateMovingHazards(){
+  for(const o of obstacles){if(o.type!=='movingBlock')continue;o.x=o.baseX+Math.sin(elapsed*o.frequency+o.phase)*o.amplitude;o.mesh.position.x=o.x;}
+}
 function failRun(message){
   if(failed||finished)return;
   failed=true;running=false;paused=false;finished=false;
@@ -459,7 +462,7 @@ function moveRunner(dx,dz){
   const nextZ=player.position.z+dz;
   for(const o of obstacles){
     if(o.type==='spinner')continue;
-    const verticalBlocked=o.type==='block'?player.position.y<o.h-.02:(o.type==='overhead'&&runnerHeight>o.clearance);
+    const verticalBlocked=(o.type==='block'||o.type==='movingBlock')?player.position.y<o.h-.02:(o.type==='overhead'&&runnerHeight>o.clearance);
     if(!verticalBlocked)continue;
     const halfX=o.w/2+radius,halfZ=o.d/2+radius;
     if(Math.abs(nextX-o.x)<halfX&&Math.abs(nextZ-o.z)<halfZ){
@@ -474,8 +477,9 @@ function update(dt){
   spinner.rotation.y+=dt*1.55;
   hazardBeacons.forEach(b=>{b.rig.rotation.y=Math.sin(elapsed*2+b.index)*.08});
   if(!running||paused||finished||failed)return;
-  updateHazardWarnings(dt);
   elapsed+=dt;ui.time.textContent=fmt(elapsed);
+  updateMovingHazards();
+  updateHazardWarnings(dt);
   if(slideTimer>0){slideTimer=Math.max(0,slideTimer-dt);if(slideTimer===0){body.scale.set(1,1,1);body.position.y=0;body.rotation.x=0}}
   const ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+stickX;
   const iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0)+stickY;
