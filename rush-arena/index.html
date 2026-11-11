@@ -520,6 +520,8 @@ function updateMovingHazards(dt){
   for(const o of obstacles){if(o.type!=='movingBlock')continue;o.x=o.baseX+Math.sin(elapsed*o.frequency+o.phase)*o.amplitude;o.mesh.position.x=o.x;if(o.rotor)o.rotor.rotation.z+=dt*3.4;}
 }
 function failRun(message){
+  // Inspection mode must never interrupt the run with a game-over overlay.
+  if(obstacleInspectionMode)return;
   if(failed||finished)return;
   failed=true;running=false;paused=false;finished=false;
   sfxFall();dangerBanner.style.opacity='0';
