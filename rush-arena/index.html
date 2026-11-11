@@ -223,9 +223,9 @@ cloudInstances.instanceMatrix.needsUpdate=true;cloudInstances.frustumCulled=true
 for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new THREE.Group();const top=cylinder(2.6,3.8,2.5,grass2,0,-1,0,island);top.rotation.y=Math.random();const cap=cylinder(2.65,2.65,.28,grass,0,.32,0,island);cap.position.y=.32;island.position.set(x,-2.2,z);scene.add(island)}
 
 // Floating course with three safe gaps that require a jump.
-const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,20);extensionRoadTexture.needsUpdate=true;
+const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,5);extensionRoadTexture.needsUpdate=true;
 const extensionPath=new THREE.MeshStandardMaterial({map:extensionRoadTexture,color:0xb4c0c9,roughness:.58,metalness:.12});
-const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40],[0,-399,532]];
+const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40],[0,-399,536]];
 for(const [x,z,len] of floorSegments){
   // Grass is the lower foundation; it must sit beneath the asphalt, not over it.
   box(28,.22,len+.5,grass,x,-1.12,z);
@@ -243,7 +243,7 @@ const laneMarks=[];for(let z=-5;z>-666;z-=4){laneMarks.push({x:-1.5,y:.035,z},{x
 addBoxInstances(white,.09,.018,.85,laneMarks);
 for(const x of [-4.52,4.52]){
   box(.12,.12,134,side,x,.18,-64);box(.12,.12,134,gold,x,.34,-64);
-  box(.12,.12,532,side,x,.18,-399);box(.12,.12,532,gold,x,.34,-399);
+  box(.12,.12,536,side,x,.18,-399);box(.12,.12,536,gold,x,.34,-399);
   const posts=[],caps=[];for(let z=-3;z>-666;z-=6){posts.push({x,y:.54,z});caps.push({x,y:.85,z})}
   addBoxInstances(side,.18,.52,.16,posts);addBoxInstances(white,.2,.08,.2,caps);
 }
