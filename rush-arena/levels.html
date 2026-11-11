@@ -61,22 +61,37 @@ h1{font-size:clamp(36px,7vw,58px);line-height:.98;letter-spacing:-.07em;margin:1
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
 const TOTAL_LEVELS=250;
-const PLAYABLE_LEVELS=new Set([1]);
+const LEVEL_ROUTES=new Map([[1,'index.html?level=1&v=18'],[2,'mountain-run.html?level=2']]);
+const ADMIN_PREVIEW_LEVELS=new Set([2]);
 const $=id=>document.getElementById(id);
 function makeLevel(level,status){
  const card=document.createElement('article');card.className='level '+status;
  const top=document.createElement('div');top.className='level-top';
  const number=document.createElement('div');number.className='level-no';number.textContent=String(level);
  const badge=document.createElement('span');badge.className='status';
- badge.textContent=status==='completed'?'✓ COMPLETED':status==='unlocked'?'UNLOCKED':'🔒 LOCKED';
+ badge.textContent=ADMIN_PREVIEW_LEVELS.has(level)?'ADMIN PREVIEW':status==='completed'?'✓ COMPLETED':status==='unlocked'?'UNLOCKED':'🔒 LOCKED';
  top.append(number,badge);
  const bottom=document.createElement('div');bottom.className='level-bottom';
  const note=document.createElement('div');note.className='level-note';
  const button=document.createElement('button');button.className='play';
- if(status==='completed'){note.textContent='Best result saved';button.textContent=PLAYABLE_LEVELS.has(level)?'REPLAY':'IN DEVELOPMENT';button.disabled=!PLAYABLE_LEVELS.has(level)}
- else if(status==='unlocked'){note.textContent=PLAYABLE_LEVELS.has(level)?'Ready to play':'Next challenge';button.textContent=PLAYABLE_LEVELS.has(level)?'PLAY LEVEL':'COMING SOON';button.disabled=!PLAYABLE_LEVELS.has(level)}
- else{note.textContent='Complete the previous level';button.textContent='LOCKED';button.disabled=true}
- if(!button.disabled)button.addEventListener('click',()=>location.href='index.html?level='+level+'&v=18');
+ if(ADMIN_PREVIEW_LEVELS.has(level)){
+  note.textContent='Mountain Run · admin testing only';
+  button.textContent='TEST LEVEL 2';
+  button.disabled=false;
+ }else if(status==='completed'){
+  note.textContent='Best result saved';
+  button.textContent=LEVEL_ROUTES.has(level)?'REPLAY':'IN DEVELOPMENT';
+  button.disabled=!LEVEL_ROUTES.has(level);
+ }else if(status==='unlocked'){
+  note.textContent=LEVEL_ROUTES.has(level)?'Ready to play':'Next challenge';
+  button.textContent=LEVEL_ROUTES.has(level)?'PLAY LEVEL':'COMING SOON';
+  button.disabled=!LEVEL_ROUTES.has(level);
+ }else{
+  note.textContent='Complete the previous level';
+  button.textContent='LOCKED';
+  button.disabled=true;
+ }
+ if(!button.disabled)button.addEventListener('click',()=>location.href=LEVEL_ROUTES.get(level));
  bottom.append(note,button);card.append(top,bottom);return card;
 }
 async function load(){
@@ -97,7 +112,7 @@ async function load(){
   const status=completed.has(level)?'completed':level<=unlocked?'unlocked':'locked';
   grid.append(makeLevel(level,status));
  }
- $('message').textContent='Administrator testing view only. Level 1 is available for testing; Level 2 is Mountain Run and remains an admin-only development preview. Player progression and rewards remain disabled for unreleased levels.';
+ $('message').textContent='Admin testing: Level 1 opens Sky Starter. Level 2 opens Mountain Run directly as a separate admin-only preview. Level 2 player progression and rewards remain disabled until release approval.';
 }
 load().catch(error=>{$('message').textContent='Unable to load levels: '+(error?.message||'Please refresh.');});
 </script>
