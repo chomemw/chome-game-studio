@@ -42,9 +42,9 @@ scene.background=new THREE.Color(0x20282d);scene.fog=new THREE.FogExp2(0x20282d,
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,260);
 const mobileDevice=matchMedia('(max-width: 900px), (pointer: coarse)').matches;
 const renderer=new THREE.WebGLRenderer({antialias:!mobileDevice,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=!mobileDevice;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;root.appendChild(renderer.domElement);
+renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?0.75:1.0));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=false;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;root.appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0x9baab4,0x15191b,.62));
-const key=new THREE.DirectionalLight(0xffd5a0,1.35);key.position.set(-18,28,14);key.castShadow=true;key.shadow.mapSize.set(mobileDevice?512:768,mobileDevice?512:768);key.shadow.camera.left=-30;key.shadow.camera.right=30;key.shadow.camera.top=35;key.shadow.camera.bottom=-125;key.shadow.bias=-.00018;scene.add(key);
+const key=new THREE.DirectionalLight(0xffd5a0,1.35);key.position.set(-18,28,14);key.castShadow=false;key.shadow.mapSize.set(mobileDevice?512:768,mobileDevice?512:768);key.shadow.camera.left=-30;key.shadow.camera.right=30;key.shadow.camera.top=35;key.shadow.camera.bottom=-125;key.shadow.bias=-.00018;scene.add(key);
 const fillLight=new THREE.DirectionalLight(0x91a9bb,.45);fillLight.position.set(14,12,-45);scene.add(fillLight);
 const mat=(color,rough=.75,metal=0)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});
 function noiseTexture(base,accent,repeat=4){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');g.fillStyle=base;g.fillRect(0,0,256,256);for(let i=0;i<6200;i++){const a=Math.random()*.12;g.fillStyle=accent;g.globalAlpha=a;const s=Math.random()*2.4;g.fillRect(Math.random()*256,Math.random()*256,s,s)}g.globalAlpha=1;for(let i=0;i<28;i++){g.strokeStyle='#000';g.globalAlpha=.035;g.lineWidth=1;g.beginPath();g.moveTo(Math.random()*256,Math.random()*256);g.lineTo(Math.random()*256,Math.random()*256);g.stroke()}g.globalAlpha=1;const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(repeat,repeat);t.colorSpace=THREE.SRGBColorSpace;return t}
@@ -64,7 +64,7 @@ box(26,.18,32,darkSteel,0,-1.02,-110,floor);
 for(const x of [-13,13]){box(.7,14,126,concrete,x,6.5,-60);box(.18,14,126,steel,x+(x<0?.38:-.38),6.5,-60)}
 box(26,.55,126,darkSteel,0,14,-60);
 // Concrete wall pilasters, structural steel columns and overhead roof trusses.
-for(let z=1;z>-124;z-=10){
+for(let z=1;z>-124;z-=(mobileDevice?20:10)){
  for(const x of [-11.8,11.8]){
   box(.72,13,.9,darkSteel,x,6.5,z);
   box(.9,.18,1.1,steel,x,12.9,z);
@@ -78,17 +78,17 @@ for(let z=1;z>-124;z-=10){
  beam(new THREE.Vector3(0,10.7,z),new THREE.Vector3(11.5,13.2,z-4),.09,darkSteel);
 }
 // Long overhead pipe runs, flanges, valves and cable trays.
-for(let i=0;i<5;i++){
+for(let i=0;i<(mobileDevice?3:5);i++){
  const x=-8+i*4;
  const pipeRun=cyl(.19,.19,126,steel,x,11.8,-60);pipeRun.rotation.x=Math.PI/2;
- for(let z=0;z>-126;z-=21){
+ for(let z=0;z>-126;z-=(mobileDevice?42:21)){
   const flange=cyl(.29,.29,.12,darkSteel,x,11.8,z,Math.PI/2);flange.rotation.x=Math.PI/2;
-  for(let b=0;b<6;b++){const a=b*Math.PI/3;sphere(.035,paintYellow,x+Math.cos(a)*.25,11.8+Math.sin(a)*.25,z-.1)}
+  for(let b=0;b<(mobileDevice?3:6);b++){const a=b*Math.PI/3;sphere(.035,paintYellow,x+Math.cos(a)*.25,11.8+Math.sin(a)*.25,z-.1)}
  }
 }
 for(const x of [-9.2,9.2]){box(.5,.35,126,grate,x,10.2,-60);for(let z=0;z>-126;z-=2.5)box(.04,.08,.12,steel,x,10.4,z)}
 // Wall-mounted industrial windows and service doors.
-for(let z=-8;z>-122;z-=20){
+for(let z=-8;z>-122;z-=(mobileDevice?30:20)){
  for(const x of [-12.58,12.58]){
   box(.08,3.4,5.8,darkSteel,x,8.2,z);
   box(.1,2.9,5.2,glass,x+(x<0?.07:-.07),8.2,z);
@@ -104,15 +104,15 @@ for(const z of [-12,-36,-60,-84,-108]){
 }
 // Industrial work lights and red emergency beacons.
 const practicalLights=[];
-for(let z=-4;z>-124;z-=10){
+for(let z=-4;z>-124;z-=(mobileDevice?20:10)){
  const g=new THREE.Group();box(.8,.12,.35,darkSteel,0,0,0,g);box(.56,.07,.18,lampMat,0,-.09,0,g);g.position.set(0,12.5,z);scene.add(g);
  const l=new THREE.PointLight(0xffb86a,1.25,13,2);l.position.set(0,11.9,z);scene.add(l);practicalLights.push(l);
  for(const x of [-12.1,12.1]){const beacon=new THREE.PointLight(0xe44737,.7,5,2);beacon.position.set(x,5,z);scene.add(beacon)}
 }
 // Floor drain channels, expansion joints, worn yellow edge lines and oil-stained patches.
 for(const x of [-10.6,10.6]){box(.16,.02,124,paintYellow,x,-.08,-60);box(.12,.035,124,darkSteel,x+Math.sign(x)*.25,-.06,-60)}
-for(let z=-4;z>-124;z-=8){box(24,.025,.07,darkSteel,0,-.085,z);for(const x of [-8,-4,0,4,8])box(.045,.025,.7,steel,x,-.065,z)}
-for(let i=0;i<40;i++){const s=1+Math.random()*2.8;const stain=new THREE.Mesh(new THREE.CircleGeometry(s,24),new THREE.MeshBasicMaterial({color:0x202421,transparent:true,opacity:.10+Math.random()*.08,depthWrite:false}));stain.rotation.x=-Math.PI/2;stain.position.set((Math.random()-.5)*20,-.105,-Math.random()*124);scene.add(stain)}
+for(let z=-4;z>-124;z-=(mobileDevice?16:8)){box(24,.025,.07,darkSteel,0,-.085,z);for(const x of [-8,-4,0,4,8])box(.045,.025,.7,steel,x,-.065,z)}
+for(let i=0;i<(mobileDevice?12:40);i++){const s=1+Math.random()*2.8;const stain=new THREE.Mesh(new THREE.CircleGeometry(s,24),new THREE.MeshBasicMaterial({color:0x202421,transparent:true,opacity:.10+Math.random()*.08,depthWrite:false}));stain.rotation.x=-Math.PI/2;stain.position.set((Math.random()-.5)*20,-.105,-Math.random()*124);scene.add(stain)}
 // Maintenance walkways and access stairs along the sides.
 for(const z of [-18,-42,-66,-90,-114]){
  for(const sideSign of [-1,1]){
@@ -120,14 +120,14 @@ for(const z of [-18,-42,-66,-90,-114]){
   box(5,.24,7,grate,x,3.5,z);
   box(.15,1.1,7,steel,x+sideSign*2.35,4.1,z);
   box(.15,1.1,7,steel,x-sideSign*2.35,4.1,z);
-  for(let q=-3;q<=3;q+=.5)box(4.7,.045,.045,steel,x,4.65,z+q);
-  for(let q=0;q<7;q++){const step=box(.95,.22,.72,grate,x+sideSign*(2.8-q*.38),.45+q*.43,z+4.3+q*.35);step.rotation.z=sideSign*-.32}
+  for(let q=-3;q<=3;q+=(mobileDevice?1:.5))box(4.7,.045,.045,steel,x,4.65,z+q);
+  for(let q=0;q<(mobileDevice?4:7);q++){const step=box(.95,.22,.72,grate,x+sideSign*(2.8-q*.38),.45+q*.43,z+4.3+q*.35);step.rotation.z=sideSign*-.32}
  }
 }
 // Main route lane and five large factory bays.
 const route=box(8.4,.08,122,mat(0x30383c,.86,.18),0,-.06,-60);
 for(const x of [-4.25,4.25])box(.13,.035,122,paintYellow,x,.01,-60);
-for(let z=-1;z>-123;z-=2.5)box(.045,.02,.85,mat(0xb7b9b1,.82),0,.03,z);
+for(let z=-1;z>-123;z-=(mobileDevice?5:2.5))box(.045,.02,.85,mat(0xb7b9b1,.82),0,.03,z);
 const bayNames=['01 · HAMMER ENTRANCE','02 · CRUSHING CORRIDOR','03 · MACHINE ROOM','04 · BROKEN BRIDGE','05 · FINAL CRUSHER'];
 const bayZ=[-10,-34,-58,-82,-106],bayLabels=[];
 for(let i=0;i<5;i++){
@@ -168,7 +168,7 @@ for(const z of [-16,-40,-64,-88,-112]){
  }
 }
 // Dusty volumetric-looking haze: soft translucent layers rather than heavy particle simulation.
-for(let i=0;i<15;i++){const puff=new THREE.Mesh(new THREE.SphereGeometry(1,12,10),new THREE.MeshBasicMaterial({color:0x879096,transparent:true,opacity:.035,depthWrite:false}));puff.scale.set(3+Math.random()*3,.7+Math.random(),1.8+Math.random()*2);puff.position.set((Math.random()-.5)*15,2+Math.random()*5,-Math.random()*120);scene.add(puff)}
+for(let i=0;i<(mobileDevice?6:15);i++){const puff=new THREE.Mesh(new THREE.SphereGeometry(1,12,10),new THREE.MeshBasicMaterial({color:0x879096,transparent:true,opacity:.035,depthWrite:false}));puff.scale.set(3+Math.random()*3,.7+Math.random(),1.8+Math.random()*2);puff.position.set((Math.random()-.5)*15,2+Math.random()*5,-Math.random()*120);scene.add(puff)}
 // Reuse the rigged, textured Rush Arena athlete rather than leaving a primitive mannequin.
 const player=new THREE.Group();scene.add(player);
 const body=new THREE.Group();player.add(body);
@@ -371,8 +371,8 @@ function update(dt){
  $('time').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');
 }
 let lastRenderAt=0,frameAccumulator=0;
-function animate(now=0){requestAnimationFrame(animate);const frameDelta=clock.getDelta();if(document.hidden)return;frameAccumulator+=frameDelta;const frameInterval=mobileDevice?1/30:1/60;if(now-lastRenderAt<frameInterval*1000)return;lastRenderAt=now;const dt=Math.min(frameAccumulator,.05);frameAccumulator=0;
- if(started&&!finished){update(dt);if(runnerMixer)runnerMixer.update(dt);if(runnerModelLoaded)playRunnerAction(!grounded?'jump':(Math.abs(joy.x)+Math.abs(joy.y)>.12||keys.KeyW||keys.ArrowUp||keys.KeyS||keys.ArrowDown||keys.KeyA||keys.KeyD?'run':'idle'));}
+function animate(now=0){requestAnimationFrame(animate);const frameDelta=clock.getDelta();if(document.hidden){frameAccumulator=0;return;}frameAccumulator=Math.min(frameAccumulator+frameDelta,.16);const frameInterval=mobileDevice?1/30:1/60;if(now-lastRenderAt<frameInterval*1000)return;lastRenderAt=now;const step=1/30;let steps=0;
+ if(started&&!finished){while(frameAccumulator>=step&&steps<5){update(step);if(runnerMixer)runnerMixer.update(step);frameAccumulator-=step;steps++;}if(runnerModelLoaded)playRunnerAction(!grounded?'jump':(Math.abs(joy.x)+Math.abs(joy.y)>.12||keys.KeyW||keys.ArrowUp||keys.KeyS||keys.ArrowDown||keys.KeyA||keys.KeyD?'run':'idle'));}else{frameAccumulator=0;}const dt=Math.min(frameDelta,.1);
  const target=new THREE.Vector3(player.position.x,player.position.y+1.25,player.position.z-1.0);camera.position.lerp(new THREE.Vector3(player.position.x*.65,player.position.y+4.2,player.position.z+7.5),1-Math.pow(.001,Math.max(dt,.001)));camera.lookAt(target);
  if(started&&!finished&&player.position.z<=endZ){finished=true;$('result').textContent='Route time: '+$('time').textContent+'. You crossed the active machinery course.';$('finish').classList.remove('hidden')}
  renderer.render(scene,camera)}
