@@ -273,19 +273,54 @@ const gatePostR=box(.22,1.5,.65,side,4.05,.75,-29);
 // Progressive extension hazards: 8 per section, with clear recovery gaps and lane alternatives.
 function addExtendedBlock(z,x,w=1.55,h=1.35,d=1.15,color=coral){const mesh=box(w,h,d,color,x,h/2,z);obstacles.push({mesh,x,z,w,d,h,type:'block'})}
 function addExtendedOverhead(z,clearance=1.08){const mesh=box(8,.34,.55,coral,0,1.34,z);obstacles.push({mesh,x:0,z,w:8,d:.55,h:1.51,clearance,type:'overhead'})}
-function addMovingBlock(z,baseX,amplitude=2.1,phase=0){const w=1.7,h=1.42,d=1.2;const mesh=box(w,h,d,cyan,baseX,h/2,z);obstacles.push({mesh,x:baseX,baseX,amplitude,phase,frequency:1.05,w,d,h,z,type:'movingBlock'})}
+function addMovingBlock(z,baseX,amplitude=2.1,phase=0,style='load'){
+  const mesh=new THREE.Group();let w=1.8,h=1.55,d=1.25,rotor=null;
+  if(style==='crane'){
+    w=2.15;h=2.15;d=1.65;
+    cylinder(.045,.045,1.05,side,0,2.05,0,mesh);
+    box(1.75,1.35,1.45,gold,0,1.0,0,mesh);
+    box(1.95,.16,1.6,coral,0,1.78,0,mesh);
+    box(.18,.18,.18,white,-.78,.28,-.75,mesh);box(.18,.18,.18,white,.78,.28,-.75,mesh);
+  }else if(style==='fan'){
+    w=2.45;h=2.65;d=.9;
+    box(2.55,2.8,.5,dark,0,1.4,0,mesh);
+    box(2.15,2.35,.12,side,0,1.4,-.32,mesh);
+    rotor=new THREE.Group();rotor.position.set(0,1.4,-.48);
+    cylinder(.25,.25,.28,gold,0,0,0,rotor).rotation.x=Math.PI/2;
+    box(1.85,.16,.12,coral,0,0,0,rotor);box(.16,1.85,.12,coral,0,0,0,rotor);
+    box(1.25,.13,.12,white,0,0,0,rotor).rotation.z=Math.PI/4;
+    mesh.add(rotor);
+  }else if(style==='forklift'){
+    w=2.35;h=2.15;d=2.15;
+    box(1.95,.58,1.55,gold,0,.62,0,mesh);
+    box(.9,1.18,1.0,side,-.42,1.45,-.05,mesh);
+    box(1.05,.13,1.12,white,-.42,2.1,-.05,mesh);
+    for(const x of [-.78,.78])for(const zz of [-.55,.55]){const wheel=cylinder(.28,.28,.2,dark,x,.3,zz,mesh);wheel.rotation.z=Math.PI/2}
+    box(.16,.14,1.0,coral,-.28,.28,-1.18,mesh);box(.16,.14,1.0,coral,.28,.28,-1.18,mesh);
+  }else if(style==='crusher'){
+    w=2.2;h=2.55;d=1.55;
+    box(2.35,.32,1.7,dark,0,.2,0,mesh);
+    box(.32,2.25,.38,side,-.88,1.3,0,mesh);box(.32,2.25,.38,side,.88,1.3,0,mesh);
+    box(2.0,.42,1.4,coral,0,2.25,0,mesh);
+    box(1.65,.2,1.15,gold,0,1.92,-.02,mesh);
+  }else{
+    box(1.8,1.35,1.25,cyan,0,.8,0,mesh);box(1.95,.16,1.4,gold,0,1.55,0,mesh);
+  }
+  mesh.position.set(baseX,0,z);scene.add(mesh);
+  obstacles.push({mesh,x:baseX,baseX,amplitude,phase,frequency:1.05,w,d,h,z,type:'movingBlock',style,rotor});
+}
 // Construction zone (133–266m).
-addExtendedBlock(-151,-2.25);addExtendedOverhead(-166);addMovingBlock(-181,2.15,2,.4);addExtendedBlock(-197,2.2,1.5,1.45,1.15,purple);
-addExtendedBlock(-213,-2.2,1.5,1.35,1.15,cyan);addExtendedOverhead(-229);addMovingBlock(-245,-2.15,2,1.2);addExtendedBlock(-258,2.2,1.5,1.4,1.15,coral);
+addExtendedBlock(-151,-2.25);addExtendedOverhead(-166);addMovingBlock(-181,2.15,2,.4,'crane');addExtendedBlock(-197,2.2,1.5,1.45,1.15,purple);
+addExtendedBlock(-213,-2.2,1.5,1.35,1.15,cyan);addExtendedOverhead(-229);addMovingBlock(-245,-2.15,2,1.2,'crane');addExtendedBlock(-258,2.2,1.5,1.4,1.15,coral);
 // Underground tunnel (266–399m).
-addExtendedOverhead(-280);addMovingBlock(-296,2.2,2,2.1);addExtendedBlock(-312,-2.2,1.5,1.45,1.15,purple);addExtendedBlock(-328,2.2,1.5,1.35,1.15,cyan);
-addExtendedOverhead(-344,.98);addMovingBlock(-360,-2.2,2,2.8);addExtendedBlock(-378,-2.2,1.55,1.45,1.15,coral);addExtendedBlock(-392,2.2,1.5,1.35,1.15,purple);
+addExtendedOverhead(-280);addMovingBlock(-296,2.2,2,2.1,'fan');addExtendedBlock(-312,-2.2,1.5,1.45,1.15,purple);addExtendedBlock(-328,2.2,1.5,1.35,1.15,cyan);
+addExtendedOverhead(-344,.98);addMovingBlock(-360,-2.2,2,2.8,'fan');addExtendedBlock(-378,-2.2,1.55,1.45,1.15,coral);addExtendedBlock(-392,2.2,1.5,1.35,1.15,purple);
 // Cargo yard (399–532m).
-addMovingBlock(-414,0,2.75,.3);addExtendedBlock(-430,-2.2,1.55,1.4,1.15,cyan);addExtendedOverhead(-446);addMovingBlock(-462,2.2,2,1.4);
-addExtendedBlock(-478,2.2,1.5,1.4,1.15,coral);addExtendedBlock(-494,-2.2,1.5,1.45,1.15,purple);addExtendedOverhead(-510);addMovingBlock(-526,-2.2,2,2.4);
+addMovingBlock(-414,0,2.75,.3,'forklift');addExtendedBlock(-430,-2.2,1.55,1.4,1.15,cyan);addExtendedOverhead(-446);addMovingBlock(-462,2.2,2,1.4,'forklift');
+addExtendedBlock(-478,2.2,1.5,1.4,1.15,coral);addExtendedBlock(-494,-2.2,1.5,1.45,1.15,purple);addExtendedOverhead(-510);addMovingBlock(-526,-2.2,2,2.4,'forklift');
 // Final survival zone (532–665m): paired hazards with short but fair recovery windows.
-addExtendedBlock(-548,2.2,1.5,1.4,1.15,coral);addMovingBlock(-562,-2.2,2,.8);addExtendedOverhead(-578);addExtendedBlock(-594,-2.2,1.55,1.45,1.15,purple);
-addMovingBlock(-610,2.2,2,1.7);addExtendedOverhead(-626,.98);addMovingBlock(-642,0,2.75,2.5);addExtendedBlock(-656,2.2,1.5,1.4,1.15,coral);
+addExtendedBlock(-548,2.2,1.5,1.4,1.15,coral);addMovingBlock(-562,-2.2,2,.8,'crusher');addExtendedOverhead(-578);addExtendedBlock(-594,-2.2,1.55,1.45,1.15,purple);
+addMovingBlock(-610,2.2,2,1.7,'crusher');addExtendedOverhead(-626,.98);addMovingBlock(-642,0,2.75,2.5,'crusher');addExtendedBlock(-656,2.2,1.5,1.4,1.15,coral);
 const spinner=new THREE.Group();spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
 // Red hazard beacons: visible from a distance and pulsed while the race is active.
 const hazardBeacons=[];
@@ -415,7 +450,7 @@ function updateHazardWarnings(dt){
     if(ahead&&distance<17&&!warnedHazards.has(beacon.index)){warnedHazards.add(beacon.index);sfxWarning()}
   }
   if(nearest){
-    const action=nearest.obstacle.type==='overhead'?'SLIDE UNDER':nearest.obstacle.type==='spinner'?'DODGE THE SWEEPER':nearest.obstacle.type==='movingBlock'?'DODGE MOVING LOAD':'JUMP THE BLOCK';
+    const action=nearest.obstacle.type==='overhead'?'SLIDE UNDER':nearest.obstacle.type==='spinner'?'DODGE THE SWEEPER':nearest.obstacle.type==='movingBlock'?(nearest.obstacle.style==='forklift'?'DODGE FORKLIFT':nearest.obstacle.style==='fan'?'AVOID ROTOR':nearest.obstacle.style==='crane'?'CLEAR CRANE LOAD':nearest.obstacle.style==='crusher'?'DODGE CRUSHER':'DODGE MOVING LOAD'):'JUMP THE BLOCK';
     dangerBanner.textContent='⚠ '+action+' · '+Math.ceil(nearestDistance)+'m';
     dangerBanner.style.opacity='1';
   }else dangerBanner.style.opacity='0';
@@ -424,8 +459,8 @@ function updateHazardWarnings(dt){
 
 soundButton.addEventListener('click',()=>{rushAudioOn=!rushAudioOn;soundButton.textContent=rushAudioOn?'🔊 SOUND ON':'🔇 SOUND OFF';if(audioReady()){rushMaster.gain.setTargetAtTime(rushAudioOn?.72:0,rushAudio.currentTime,.06);if(rushAudioOn&&running)startHorrorAmbience()}});
 
-function updateMovingHazards(){
-  for(const o of obstacles){if(o.type!=='movingBlock')continue;o.x=o.baseX+Math.sin(elapsed*o.frequency+o.phase)*o.amplitude;o.mesh.position.x=o.x;}
+function updateMovingHazards(dt){
+  for(const o of obstacles){if(o.type!=='movingBlock')continue;o.x=o.baseX+Math.sin(elapsed*o.frequency+o.phase)*o.amplitude;o.mesh.position.x=o.x;if(o.rotor)o.rotor.rotation.z+=dt*3.4;}
 }
 function failRun(message){
   if(failed||finished)return;
@@ -479,7 +514,7 @@ function update(dt){
   hazardBeacons.forEach(b=>{b.rig.rotation.y=Math.sin(elapsed*2+b.index)*.08});
   if(!running||paused||finished||failed)return;
   elapsed+=dt;ui.time.textContent=fmt(elapsed);
-  updateMovingHazards();
+  updateMovingHazards(dt);
   updateHazardWarnings(dt);
   if(slideTimer>0){slideTimer=Math.max(0,slideTimer-dt);if(slideTimer===0){body.scale.set(1,1,1);body.position.y=0;body.rotation.x=0}}
   const ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+stickX;
