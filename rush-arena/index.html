@@ -252,6 +252,15 @@ for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i];const g=new THREE.G
 // Finish arch.
 const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.z=-130;scene.add(finish);
 
+// The new environments begin after the original opening; scenery stays outside the running lanes.
+function addCourseFrame(z,material=side,roofY=4.05){
+  box(.34,4,.42,material,-5.15,2,z);box(.34,4,.42,material,5.15,2,z);
+  box(10.6,.34,.48,material,0,roofY,z);
+}
+for(let z=-148;z>=-256;z-=27){addCourseFrame(z,gold,4.25);box(.18,2.4,.18,coral,-5.75,1.2,z-5);box(.18,2.4,.18,coral,5.75,1.2,z-5)}
+for(let z=-274;z>=-394;z-=20)addCourseFrame(z,purple,4.15);
+for(let z=-410;z>=-526;z-=38){box(3.2,3.4,12,side,-6.45,1.7,z);box(3.2,3.4,12,side,6.45,1.7,z-17)}
+for(let z=-548;z>=-650;z-=27){addCourseFrame(z,dark,4.35);box(.5,2.8,1.2,coral,-5.85,1.4,z-7);box(.5,2.8,1.2,coral,5.85,1.4,z-7)}
 // Obstacles: gates, bumpers and a rotating sweeper.
 const obstacles=[];
 for(const [z,x,w,h,d,color] of [[-11,0,2.4,1.25,1.1,coral],[-18,-2.3,1.3,1.6,1.1,purple],[-35,1.8,1.5,1.3,1.1,cyan],[-43,-1.8,1.5,1.5,1.1,coral],[-64,0,2.3,1.25,1.1,purple],[-84,2.1,1.2,1.5,1.1,cyan],[-103,-2.1,1.5,1.4,1.1,coral],[-119,2.2,1.4,1.5,1.1,purple]]){const o=box(w,h,d,color,x,h/2,z);obstacles.push({mesh:o,x,z,w,d,h,type:'block'})}
@@ -260,6 +269,22 @@ const gate=box(8,.34,.55,coral,0,1.34,-29);
 obstacles.push({mesh:gate,x:0,z:-29,w:8,d:.55,h:1.51,clearance:1.08,type:'overhead'});
 const gatePostL=box(.22,1.5,.65,side,-4.05,.75,-29);
 const gatePostR=box(.22,1.5,.65,side,4.05,.75,-29);
+// Progressive extension hazards: 8 per section, with clear recovery gaps and lane alternatives.
+function addExtendedBlock(z,x,w=1.55,h=1.35,d=1.15,color=coral){const mesh=box(w,h,d,color,x,h/2,z);obstacles.push({mesh,x,z,w,d,h,type:'block'})}
+function addExtendedOverhead(z,clearance=1.08){const mesh=box(8,.34,.55,coral,0,1.34,z);obstacles.push({mesh,x:0,z,w:8,d:.55,h:1.51,clearance,type:'overhead'})}
+function addMovingBlock(z,baseX,amplitude=2.1,phase=0){const w=1.7,h=1.42,d=1.2;const mesh=box(w,h,d,cyan,baseX,h/2,z);obstacles.push({mesh,x:baseX,baseX,amplitude,phase,frequency:1.05,w,d,h,z,type:'movingBlock'})}
+// Construction zone (133–266m).
+addExtendedBlock(-151,-2.25);addExtendedOverhead(-166);addMovingBlock(-181,2.15,2,.4);addExtendedBlock(-197,2.2,1.5,1.45,1.15,purple);
+addExtendedBlock(-213,-2.2,1.5,1.35,1.15,cyan);addExtendedOverhead(-229);addMovingBlock(-245,-2.15,2,1.2);addExtendedBlock(-258,2.2,1.5,1.4,1.15,coral);
+// Underground tunnel (266–399m).
+addExtendedOverhead(-280);addMovingBlock(-296,2.2,2,2.1);addExtendedBlock(-312,-2.2,1.5,1.45,1.15,purple);addExtendedBlock(-328,2.2,1.5,1.35,1.15,cyan);
+addExtendedOverhead(-344,.98);addMovingBlock(-360,-2.2,2,2.8);addExtendedBlock(-378,-2.2,1.55,1.45,1.15,coral);addExtendedBlock(-392,2.2,1.5,1.35,1.15,purple);
+// Cargo yard (399–532m).
+addMovingBlock(-414,0,2.75,.3);addExtendedBlock(-430,-2.2,1.55,1.4,1.15,cyan);addExtendedOverhead(-446);addMovingBlock(-462,2.2,2,1.4);
+addExtendedBlock(-478,2.2,1.5,1.4,1.15,coral);addExtendedBlock(-494,-2.2,1.5,1.45,1.15,purple);addExtendedOverhead(-510);addMovingBlock(-526,-2.2,2,2.4);
+// Final survival zone (532–665m): paired hazards with short but fair recovery windows.
+addExtendedBlock(-548,2.2,1.5,1.4,1.15,coral);addMovingBlock(-562,-2.2,2,.8);addExtendedOverhead(-578);addExtendedBlock(-594,-2.2,1.55,1.45,1.15,purple);
+addMovingBlock(-610,2.2,2,1.7);addExtendedOverhead(-626,.98);addMovingBlock(-642,0,2.75,2.5);addExtendedBlock(-656,2.2,1.5,1.4,1.15,coral);
 const spinner=new THREE.Group();spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
 // Red hazard beacons: visible from a distance and pulsed while the race is active.
 const hazardBeacons=[];
