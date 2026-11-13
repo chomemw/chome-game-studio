@@ -141,7 +141,7 @@ const rainMaterial=new THREE.LineBasicMaterial({color:0xb8d8ed,transparent:true,
 const rainField=new THREE.LineSegments(rainGeometry,rainMaterial);rainField.frustumCulled=false;scene.add(rainField);
 const stormFlashLight=new THREE.PointLight(0xdcecff,0,95,1.5);scene.add(stormFlashLight);
 let lightningTimer=level===2?99999:7+Math.random()*6,lightningFlash=0,thunderPending=0;
-const weatherLabel=document.createElement('div');weatherLabel.textContent=level===2?'🌲  MOUNTAIN FOREST':'⛈  STORM CONDITIONS';
+const weatherLabel=document.createElement('div');weatherLabel.textContent=level===2?'🌲  MOUNTAIN FOREST · POLY HAVEN ASSETS':'⛈  STORM CONDITIONS';
 Object.assign(weatherLabel.style,{position:'fixed',left:'12px',top:'54px',zIndex:'45',padding:'7px 10px',border:'1px solid rgba(173,204,224,.28)',borderRadius:'9px',background:'rgba(12,22,32,.58)',color:'#d8e8f4',font:'800 10px system-ui',letterSpacing:'.12em',pointerEvents:'none',backdropFilter:'blur(5px)'});
 document.body.appendChild(weatherLabel);
 if(obstacleInspectionMode){const inspectionLabel=document.createElement('div');inspectionLabel.textContent='👁 INSPECTION MODE · COLLISIONS OFF';Object.assign(inspectionLabel.style,{position:'fixed',right:'12px',top:'54px',zIndex:'46',padding:'7px 10px',border:'1px solid rgba(120,235,190,.45)',borderRadius:'9px',background:'rgba(8,28,24,.72)',color:'#c8ffe8',font:'800 10px system-ui',letterSpacing:'.08em',pointerEvents:'none',backdropFilter:'blur(5px)'});document.body.appendChild(inspectionLabel)}
