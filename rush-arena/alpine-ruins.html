@@ -42,7 +42,7 @@
     <h1>RUSH <span>ARENA</span></h1>
     <p>Sprint through a winding mountain-temple trail: dodge ruins, leap bridges, slide beneath fallen stonework and collect golden medallions. Level 3 is an administrator-only visual and gameplay preview.</p>
     <button class="primary" id="start">START RUN</button>
-    <span class="small">Alpine Ruins · Level 3 · Semi-realistic 3D</span>
+    <span class="small">Temple Trail · Level 3 · Jungle runner 3D</span>
     <span class="small" id="bootStatus" role="status" aria-live="polite">Preparing 3D engine…</span>
   </div>
 </div>
@@ -366,125 +366,78 @@ addMovingBlock(-610,2.2,2,1.7,'crusher');addExtendedOverhead(-626,.98);addMoving
 spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
 
 }else{
- // LEVEL 3 — ALPINE RUINS. A distinct high-altitude citadel course with its own architecture and hazards.
- scene.background=new THREE.Color(0xa9c9b0);scene.fog=new THREE.Fog(0xa9c9b0,62,205);
- const ruinRock=mat(0x68757a,.96),ruinStone=mat(0x9b9a88,.94),ruinDark=mat(0x454e52,.98),ruinMoss=mat(0x526d5b,.98),ruinBronze=mat(0x96764c,.55,.48),ruinIce=mat(0xa9dce7,.24,.12),ruinWater=new THREE.MeshStandardMaterial({color:0x247f9a,roughness:.2,metalness:.08,transparent:true,opacity:.92}),ruinFoam=new THREE.MeshStandardMaterial({color:0xe1f5f2,roughness:.28,transparent:true,opacity:.82});
- const snow=mat(0x71836b,.94),stonePath=mat(0x79634a,.98),stoneEdge=mat(0x454d3d,.98);
- // A high alpine skyline made from fractured rock walls and snow shelves.
- function makeCliff(seed){
-   const g=new THREE.DodecahedronGeometry(1,2),p=g.attributes.position;
-   for(let i=0;i<p.count;i++){const n=Math.sin((i+1)*12.9898+seed*78.233)*43758.5453;p.setY(i,p.getY(i)*(1.15+(n-Math.floor(n))*.8))}
-   g.computeVertexNormals();return g;
+ // LEVEL 3 — TEMPLE TRAIL. Original jungle-runner environment inspired by the
+ // reference footage: a narrow winding forest trail, dense canopy and natural hazards.
+ scene.background=new THREE.Color(0x8dbb82);scene.fog=new THREE.Fog(0x8dbb82,48,158);
+ const jungleSoil=mat(0x443b2a,.99),trailDirt=mat(0x766044,.98),trailCenter=mat(0x92764d,.98),trailEdge=mat(0x3a3827,.98),bark=mat(0x493326,.98),barkLight=mat(0x694832,.98),leafDark=mat(0x183d25,.98),leafMid=mat(0x286039,.98),leafBright=mat(0x477d3d,.98),fernMat=mat(0x39743a,.98),rootMat=mat(0x59432c,.98),riverMat=new THREE.MeshStandardMaterial({color:0x258f9b,roughness:.22,metalness:.08,transparent:true,opacity:.9}),riverFoam=new THREE.MeshStandardMaterial({color:0xc6f2db,roughness:.3,transparent:true,opacity:.8});
+ // Narrow dirt-and-root trail follows the same winding route as the runner.
+ const roadVerts=[],roadIdx=[],edgeVerts=[],edgeIdx=[];
+ const samples=665,half=2.75;
+ for(let n=0;n<=samples;n++){
+   const z=5-n, cx=curveX(z), a=curveX(z-0.5)-curveX(z+0.5), len=Math.hypot(a,1), nx=1/len, nz=a/len;
+   for(const sideSign of [-1,1]){
+     const x=cx+sideSign*half*nx, rz=z+sideSign*half*nz;
+     roadVerts.push(x,-.12,rz);
+     const ex=cx+sideSign*3.18*nx,ez=z+sideSign*3.18*nz;
+     edgeVerts.push(ex,-.19,ez);
+   }
+   if(n<samples){const i=n*2;roadIdx.push(i,i+1,i+2,i+1,i+3,i+2);edgeIdx.push(i,i+2,i+1,i+1,i+2,i+3)}
  }
- for(let i=0;i<30;i++){
-   const sideSign=i%2?1:-1,z=-12-i*22.1,rock=new THREE.Mesh(makeCliff(i),i%4===0?snow:ruinRock);
-   rock.position.set(sideSign*(14+(i%4)*3),2+(i%5)*1.4,z);rock.scale.set(7+(i%3)*2,9+(i%6)*2,12+(i%4)*3);rock.rotation.set((i%5)*.04,(i%7)*.31,(i%3)*.06);rock.receiveShadow=false;scene.add(rock);
-   if(i%3===0){const shelf=new THREE.Mesh(new THREE.DodecahedronGeometry(1,1),snow);shelf.position.set(rock.position.x-sideSign*1.2,rock.position.y+rock.scale.y*.45,z-2);shelf.scale.set(5,1.1,7);scene.add(shelf)}
+ const roadGeo=new THREE.BufferGeometry();roadGeo.setAttribute('position',new THREE.Float32BufferAttribute(roadVerts,3));roadGeo.setIndex(roadIdx);roadGeo.computeVertexNormals();
+ const trail=new THREE.Mesh(roadGeo,new THREE.MeshStandardMaterial({map:roadTexture,color:0xb99a6c,roughness:1,metalness:0}));trail.receiveShadow=true;scene.add(trail);
+ const edgeGeo=new THREE.BufferGeometry();edgeGeo.setAttribute('position',new THREE.Float32BufferAttribute(edgeVerts,3));edgeGeo.setIndex(edgeIdx);edgeGeo.computeVertexNormals();const edges=new THREE.Mesh(edgeGeo,trailEdge);edges.receiveShadow=true;scene.add(edges);
+ // Deep jungle floor and layered forest walls.
+ const floor=box(90,.6,690,jungleSoil,0,-1.1,-330);floor.receiveShadow=true;
+ const trunkGeo=new THREE.CylinderGeometry(.22,.48,7.5,8),canopyGeo=new THREE.IcosahedronGeometry(1,1),leafGeo=new THREE.SphereGeometry(1,8,6),rootGeo=new THREE.CylinderGeometry(.08,.2,1,6);
+ const trunks=new THREE.InstancedMesh(trunkGeo,bark,250),canopiesA=new THREE.InstancedMesh(canopyGeo,leafDark,250),canopiesB=new THREE.InstancedMesh(canopyGeo,leafMid,250),canopiesC=new THREE.InstancedMesh(leafGeo,leafBright,250),roots=new THREE.InstancedMesh(rootGeo,rootMat,500),forestDummy=new THREE.Object3D();
+ let treeCount=0,rootCount=0;
+ for(let z=-9;z>=-655;z-=5.25)for(const sideSign of [-1,1]){
+   const wobble=Math.sin((Math.abs(z)+treeCount*7)*.19)*1.15,offset=5.15+(treeCount%4)*1.28+wobble,x=curveX(z)+sideSign*offset;
+   forestDummy.position.set(x,3.5,z);forestDummy.rotation.set(0,(treeCount%9)*.37,sideSign*.025);forestDummy.scale.set(.82+(treeCount%5)*.13,1.0+(treeCount%4)*.18,.82+(treeCount%5)*.13);forestDummy.updateMatrix();trunks.setMatrixAt(treeCount,forestDummy.matrix);
+   for(const [mesh,y,scale] of [[canopiesA,7.2,3.4],[canopiesB,9.2,2.8],[canopiesC,10.7,2.2]]){forestDummy.position.set(x+sideSign*.5,y,z);forestDummy.rotation.set(.12,(treeCount%7)*.42,.08);forestDummy.scale.set(scale,scale*.82,scale);forestDummy.updateMatrix();mesh.setMatrixAt(treeCount,forestDummy.matrix)}
+   for(let r=0;r<2;r++){forestDummy.position.set(x-sideSign*(.5+r*.5),.02,z+(r?-.5:.5));forestDummy.rotation.set(0,sideSign*(.8+r*.5),Math.PI/2);forestDummy.scale.set(.24,.24,2.5+r);forestDummy.updateMatrix();roots.setMatrixAt(rootCount++,forestDummy.matrix)}
+   treeCount++;
  }
- // Four curved stone causeway spans leave three ravines for bridge crossings.
+ for(const inst of [trunks,canopiesA,canopiesB,canopiesC,roots]){inst.count=inst===roots?rootCount:treeCount;inst.instanceMatrix.needsUpdate=true;inst.castShadow=!mobileDevice;inst.receiveShadow=true;scene.add(inst)}
+ // Low shrubs and ferns frame the path without blocking the running lane.
+ const bushGeo=new THREE.IcosahedronGeometry(1,1),bushes=new THREE.InstancedMesh(bushGeo,fernMat,260),ferns=new THREE.InstancedMesh(new THREE.ConeGeometry(.32,1.15,5),leafBright,360);let bushN=0,fernN=0;
+ for(let z=-8;z>=-655;z-=5.1)for(const sideSign of [-1,1]){
+   const x=curveX(z)+sideSign*(3.65+(bushN%4)*.34);
+   forestDummy.position.set(x,.35,z);forestDummy.rotation.set(.1,bushN*.7,.08);forestDummy.scale.set(1.15,.7,1.1);forestDummy.updateMatrix();bushes.setMatrixAt(bushN++,forestDummy.matrix);
+   for(let q=0;q<2;q++){forestDummy.position.set(x+sideSign*q*.55,.48,z-q*.7);forestDummy.rotation.set(.2,fernN*.91,sideSign*.35);forestDummy.scale.set(.75,1,.72);forestDummy.updateMatrix();ferns.setMatrixAt(fernN++,forestDummy.matrix)}
+ }
+ bushes.count=bushN;ferns.count=fernN;for(const inst of [bushes,ferns]){inst.instanceMatrix.needsUpdate=true;inst.castShadow=false;scene.add(inst)}
+ // Hanging vines and broad leaves overhead create the enclosed jungle tunnel.
+ const vineMat=mat(0x28552d,.98),vineGeo=new THREE.CylinderGeometry(.035,.055,1,5),vines=new THREE.InstancedMesh(vineGeo,vineMat,180);let vineN=0;
+ for(let z=-18;z>=-650;z-=14)for(let sideSign of [-1,1]){forestDummy.position.set(curveX(z)+sideSign*(4.2+(vineN%3)*.7),7.3,z);forestDummy.rotation.set(0,0,sideSign*.12);forestDummy.scale.set(1,1.5+(vineN%4)*.65,1);forestDummy.updateMatrix();vines.setMatrixAt(vineN++,forestDummy.matrix)}
+ vines.count=vineN;vines.instanceMatrix.needsUpdate=true;scene.add(vines);
+ // Natural ravines and short timber bridges. The trail remains safely traversable in preview.
  riverGaps.push({start:-184,end:-190},{start:-392,end:-398},{start:-574,end:-580});
- const causewaySpans=[[5,-184],[-190,-392],[-398,-574],[-580,-665]];
- for(const [nearZ,farZ] of causewaySpans){
-   const pieces=Math.ceil(Math.abs(nearZ-farZ)/17);
-   for(let n=0;n<pieces;n++){
-     const z1=nearZ+(farZ-nearZ)*n/pieces,z2=nearZ+(farZ-nearZ)*(n+1)/pieces,z=(z1+z2)/2,len=Math.abs(z2-z1)+.45,angle=curveAngle(z),cx=curveX(z);
-     const base=box(27,.42,len,ruinDark,cx,-1.18,z);base.rotation.y=angle;
-     const path=box(9,.78,len,stonePath,cx,-.49,z);path.rotation.y=angle;
-     const trim=box(9.45,.2,len,ruinStone,cx,-.91,z);trim.rotation.y=angle;
-     for(const sideSign of [-1,1]){const curb=box(.22,.38,len,ruinBronze,cx+sideSign*4.62,-.27,z);curb.rotation.y=angle}
-   }
- }
- // Ancient bridges cross the ravines; stone arches and bronze braces are unique to this level.
- for(const gap of riverGaps){
-   const center=(gap.start+gap.end)/2,span=Math.abs(gap.start-gap.end)+3,cx=curveX(center),angle=curveAngle(center);
-   const deck=box(9.35,.42,span,ruinStone,cx,-.12,center);deck.rotation.y=angle;
-   for(let k=0;k<Math.ceil(span/1.15);k++){const z=center-span/2+.55+k*1.15;const seam=box(9.1,.07,.12,ruinDark,cx,-.0,z);seam.rotation.y=angle}
-   for(const sideSign of [-1,1]){
-     const rail=box(.32,.82,span,ruinDark,cx+sideSign*4.42,.42,center);rail.rotation.y=angle;
-     for(let p=0;p<=Math.ceil(span/1.6);p++){const z=center-span/2+p*1.6;const post=cylinder(.16,.22,1.45,ruinBronze,cx+sideSign*4.42,.55,z);post.rotation.z=sideSign*.025}
-     const arch=cylinder(.28,.28,span*.9,ruinRock,cx+sideSign*2.9,-1.05,center);arch.rotation.x=Math.PI/2;arch.rotation.z=angle;
-   }
-   const water=box(19,.22,span+5,ruinWater,cx,-2.1,center);water.rotation.y=angle;
-   for(let n=0;n<13;n++){const foam=sphere(.12+Math.random()*.16,ruinFoam,cx+(Math.random()-.5)*13,-1.91,center+(Math.random()-.5)*span);foam.scale.set(2,.35,.8)}
- }
- // Ice-blue waterfalls descend from the cliff faces into the ravines.
- function addIcefall(sideSign,z,height){
-   const x=curveX(z)+sideSign*10.8;
-   const fall=box(3.1,height,.22,ruinIce,x,height/2-1.3,z);fall.rotation.z=sideSign*.035;
-   const pool=sphere(1.35,ruinWater,x,-1.78,z+1.3);pool.scale.set(3.5,.16,1.6);
-   for(let i=0;i<8;i++){const splash=sphere(.1+Math.random()*.1,ruinFoam,x+(Math.random()-.5)*3,-1.58,z+(Math.random()-.5)*2);splash.scale.set(1.8,.3,.8)}
- }
- addIcefall(-1,-186,8);addIcefall(1,-395,10);addIcefall(-1,-577,9);
- // Monumental gates, collapsed columns and carved lintels create the temple-citadel identity.
- function addCitadelGate(z,broken=false){
-   const cx=curveX(z);
-   for(const sideSign of [-1,1]){
-     const x=cx+sideSign*5.25;
-     const column=cylinder(.62,.82,5.2,ruinStone,x,2.05,z);column.rotation.z=sideSign*.025;
-     cylinder(.9,.9,.32,ruinDark,x,4.68,z);cylinder(.88,.88,.3,ruinDark,x,-.48,z);
-     const capital=box(1.5,.55,1.35,ruinBronze,x,4.82,z);capital.rotation.y=sideSign*.08;
-     if(broken&&sideSign===1){const fallen=box(2.5,.55,1.1,ruinStone,x+1,.18,z+1.5);fallen.rotation.set(.15,.35,.62)}
-   }
-   const lintel=box(12,.72,1.25,ruinStone,cx,5.12,z);
-   const crest=new THREE.Mesh(new THREE.OctahedronGeometry(.85,1),ruinBronze);crest.position.set(cx,6.05,z);crest.scale.set(1.6,.8,.5);scene.add(crest);
- }
- addCitadelGate(-92,true);addCitadelGate(-305,false);addCitadelGate(-506,true);addCitadelGate(-642,false);
- // Ruined sanctuary terraces and a monumental statue plinth in the final section.
- for(let i=0;i<7;i++){
-   const z=-430-i*5.8,cx=curveX(z),sideSign=i%2?1:-1;
-   const terrace=box(3.8,.62,4.6,ruinStone,cx+sideSign*7.4,-.38,z);terrace.rotation.y=curveAngle(z);
-   const column=cylinder(.42,.58,3.5,ruinDark,cx+sideSign*7.4,1.55,z);column.rotation.z=.04*sideSign;
-   const cap=box(1.45,.35,1.45,ruinBronze,cx+sideSign*7.4,3.38,z);
-   if(i%2===0){const shard=new THREE.Mesh(new THREE.TetrahedronGeometry(1.1,0),ruinStone);shard.position.set(cx+sideSign*8.1,4.35,z);shard.rotation.set(.2,.5,.18);scene.add(shard)}
- }
- // Broken statues, rune stones and weathered monoliths decorate the outer edges.
- for(let i=0;i<34;i++){
-   const sideSign=i%2?1:-1,z=-18-i*19.1,cx=curveX(z),x=cx+sideSign*(6.3+(i%4)*.62);
-   const monolith=box(.85+(i%3)*.18,2.2+(i%5)*.5,.72, i%4===0?ruinBronze:ruinStone,x,.1+(i%5)*.12,z);monolith.rotation.set(.02*(i%3),.1*(i%5),sideSign*.035);
-   const rune=sphere(.12,ruinIce,x,1.05+(i%5)*.12,z-.38);rune.scale.set(1,.6,.22);
- }
- // Lush mountain-temple scenery: original pine forest, broadleaf undergrowth and cliffside boulders.
- const forestTrunk=mat(0x493b2b,.98),forestPine=mat(0x234c37,.96),forestPineLight=mat(0x326347,.96),forestLeaf=mat(0x4c7549,.96),forestRock=mat(0x59645b,.98);
- const treeTrunkGeo=new THREE.CylinderGeometry(.16,.28,2.5,7),pineGeo=new THREE.ConeGeometry(1,2.8,7),bushGeo=new THREE.IcosahedronGeometry(1,1),boulderGeo=new THREE.DodecahedronGeometry(1,1);
- const trunkInstances=new THREE.InstancedMesh(treeTrunkGeo,forestTrunk,170),pineLow=new THREE.InstancedMesh(pineGeo,forestPine,170),pineMid=new THREE.InstancedMesh(pineGeo,forestPineLight,170),pineTop=new THREE.InstancedMesh(pineGeo,forestLeaf,170),bushInstances=new THREE.InstancedMesh(bushGeo,ruinMoss,220),rockInstances=new THREE.InstancedMesh(boulderGeo,forestRock,110);
- const forestDummy=new THREE.Object3D();let treeN=0,bushN=0,rockN=0;
- for(let z=-12;z>=-656;z-=7.6)for(const sideSign of [-1,1]){
-   const jitter=Math.sin((Math.abs(z)+treeN*13)*.71)*1.35,offset=8.8+(treeN%5)*1.55+jitter,x=curveX(z)+sideSign*offset;
-   forestDummy.position.set(x,1.15,z);forestDummy.rotation.set(0,(treeN%7)*.31,sideSign*.035);forestDummy.scale.setScalar(.82+(treeN%4)*.13);forestDummy.updateMatrix();trunkInstances.setMatrixAt(treeN,forestDummy.matrix);
-   for(const [mesh,levelY,scale] of [[pineLow,2.0,1.0],[pineMid,3.0,.78],[pineTop,3.9,.56]]){forestDummy.position.set(x,levelY,z);forestDummy.rotation.set(0,(treeN%7)*.31,0);forestDummy.scale.set(scale*(.9+(treeN%3)*.12),scale,scale*(.9+(treeN%3)*.12));forestDummy.updateMatrix();mesh.setMatrixAt(treeN,forestDummy.matrix)}
-   if(treeN%2===0){forestDummy.position.set(x-sideSign*.8,.1,z-2.2);forestDummy.rotation.set(.1,treeN*.7,.08);forestDummy.scale.set(1.25,.65,1.1);forestDummy.updateMatrix();bushInstances.setMatrixAt(bushN++,forestDummy.matrix)}
-   if(treeN%3===0){forestDummy.position.set(x+sideSign*1.2,-.35,z-1.6);forestDummy.rotation.set(.2,treeN*.4,.1);forestDummy.scale.set(1.15,.8,1.45);forestDummy.updateMatrix();rockInstances.setMatrixAt(rockN++,forestDummy.matrix)}
-   treeN++;
- }
- for(const inst of [trunkInstances,pineLow,pineMid,pineTop,bushInstances,rockInstances]){inst.count=inst===bushInstances?bushN:inst===rockInstances?rockN:treeN;inst.instanceMatrix.needsUpdate=true;inst.castShadow=!mobileDevice;inst.receiveShadow=true;scene.add(inst)}
- const fernGeo=new THREE.ConeGeometry(.34,1.25,5),ferns=new THREE.InstancedMesh(fernGeo,forestLeaf,240);let fernN=0;
- for(let z=-8;z>=-660;z-=5.4)for(const sideSign of [-1,1]){forestDummy.position.set(curveX(z)+sideSign*(5.9+(fernN%4)*.22),.48,z);forestDummy.rotation.set(.2,fernN*.73,sideSign*.3);forestDummy.scale.set(.7,1,.7);forestDummy.updateMatrix();ferns.setMatrixAt(fernN++,forestDummy.matrix)}
- ferns.instanceMatrix.needsUpdate=true;ferns.castShadow=false;scene.add(ferns);
- // Gold medallions form collectible trails through the bends.
+ function addJungleBridge(center){const span=9.5,cx=curveX(center),angle=curveAngle(center);const deck=box(5.55,.24,span,rootMat,cx,-.02,center);deck.rotation.y=angle;for(let i=0;i<9;i++){const plank=box(5.42,.12,.72,trailCenter,cx,-.16,center-span/2+.55+i*1.05);plank.rotation.y=angle}for(const sideSign of [-1,1]){const rail=box(.16,.72,span,bark,cx+sideSign*2.62,.28,center);rail.rotation.y=angle;for(let i=0;i<5;i++)cylinder(.09,.13,.95,bark,cx+sideSign*2.62,.34,center-span/2+i*2.2)}}
+ for(const z of [-187,-395,-577]){addJungleBridge(z);const cx=curveX(z);const water=box(20,.18,15,riverMat,cx,-2.25,z);water.rotation.y=curveAngle(z);for(let n=0;n<12;n++){const ripple=sphere(.12+Math.random()*.17,riverFoam,cx+(Math.random()-.5)*13,-2.08,z+(Math.random()-.5)*9);ripple.scale.set(2,.2,.7)}}
+ // Waterfall curtains and pools sit beside the path, visible from the running camera.
+ function addWaterfall(z,sideSign){const x=curveX(z)+sideSign*9.2,fall=box(2.6,8,.18,riverMat,x,2.2,z);fall.rotation.z=sideSign*.05;const pool=sphere(1.1,riverMat,x,-1.7,z+1);pool.scale.set(3.2,.18,1.8);for(let i=0;i<10;i++){const spray=sphere(.08+Math.random()*.13,riverFoam,x+(Math.random()-.5)*2.5,-1.45,z+(Math.random()-.5)*2);spray.scale.set(1.5,.25,.8)}}
+ addWaterfall(-188,-1);addWaterfall(-396,1);addWaterfall(-578,-1);
+ // Massive exposed roots, fallen logs and mossy stones make the course feel organic.
+ for(let i=0;i<48;i++){const z=-15-i*13.2,sideSign=i%2?1:-1,x=curveX(z)+sideSign*(3.45+(i%3)*.3);const log=cylinder(.22,.34,3.6,barkLight,x,.28,z);log.rotation.set(.12,curveAngle(z),sideSign*.13);if(i%3===0){const b=sphere(.72,jungleSoil,x+sideSign*.7,.05,z-1.2);b.scale.set(1.5,.7,1.2)}}
+ // Gold relics follow the centerline and alternate between safe lanes.
  const coinMaterial=new THREE.MeshStandardMaterial({color:0xffd45b,metalness:.78,roughness:.22,emissive:0x6d3d08,emissiveIntensity:.22}),coinGeometry=new THREE.TorusGeometry(.34,.105,8,18);
- for(let z=-20;z>=-650;z-=9.5){const lanePattern=Math.floor(Math.abs(z)/28)%3,offset=[-2.45,0,2.45][lanePattern],coin=new THREE.Mesh(coinGeometry,coinMaterial);coin.position.set(curveX(z)+offset,1.15,z);coin.rotation.y=Math.PI/2;coin.castShadow=true;scene.add(coin);coins.push({mesh:coin,x:coin.position.x,z,collected:false})}
- // Level-specific hazards: cracked pillars, rolling stone blocks, ice spires and fallen lintels.
- function addRuinPillar(z,x,h=2.4){const wx=curveX(z)+x,shaft=cylinder(.42,.58,h,ruinStone,wx,h/2-.08,z);shaft.rotation.z=.04;const cap=box(1.2,.28,1.05,ruinBronze,wx,h-.08,z);obstacles.push({mesh:shaft,x:wx,z,w:1.15,d:1.05,h:h+.2,type:'block'})}
- function addFallenLintel(z,x){const wx=curveX(z)+x,mesh=box(3.3,.82,1.25,ruinStone,wx,.42,z);mesh.rotation.z=.1;obstacles.push({mesh,x:wx,z,w:3.3,d:1.25,h:1.0,type:'block'})}
- function addIceSpire(z,x,h=2.1){const wx=curveX(z)+x,mesh=new THREE.Mesh(new THREE.ConeGeometry(.72,h,6),ruinIce);mesh.position.set(wx,h/2,z);mesh.rotation.z=.08;scene.add(mesh);obstacles.push({mesh,x:wx,z,w:1.35,d:1.25,h,type:'block'})}
- function addRuneGate(z,openingSide=1){const wx=curveX(z),beam=box(1.2,.5,.85,ruinBronze,wx-openingSide*2.25,2.25,z);const left=cylinder(.24,.34,3.5,ruinStone,wx-4.1,1.6,z),right=cylinder(.24,.34,3.5,ruinStone,wx+4.1,1.6,z);obstacles.push({mesh:beam,x:wx-openingSide*2.25,z,w:1.35,d:1.1,h:2.5,type:'block'});for(const p of [left,right])p.rotation.z=.02}
- addFallenLintel(-34,-1.9);addRuinPillar(-58,2.1,2.6);addIceSpire(-78,-2.2,2.1);addRuneGate(-118,1);
- addRuinPillar(-146,-2.1,2.8);addFallenLintel(-166,2.1);addIceSpire(-207,2.15,2.5);addRuinPillar(-229,-2.2,2.4);addRuneGate(-252,-1);
- addFallenLintel(-278,-2.0);addIceSpire(-326,2.15,2.3);addRuinPillar(-350,-2.2,2.8);addFallenLintel(-371,2.0);
- addRuneGate(-414,1);addIceSpire(-442,-2.2,2.5);addRuinPillar(-466,2.1,2.6);addFallenLintel(-486,-2.1);addIceSpire(-524,2.1,2.2);
- addRuinPillar(-548,-2.15,2.8);addRuneGate(-596,-1);addFallenLintel(-616,2.0);addIceSpire(-632,-2.1,2.4);addRuinPillar(-654,2.15,2.7);
- // Checkpoint arches and named regions are unique to the ruined alpine citadel.
+ for(let z=-20;z>=-650;z-=9.5){const lanePattern=Math.floor(Math.abs(z)/28)%3,offset=[-1.75,0,1.75][lanePattern],coin=new THREE.Mesh(coinGeometry,coinMaterial);coin.position.set(curveX(z)+offset,1.15,z);coin.rotation.y=Math.PI/2;coin.castShadow=true;scene.add(coin);coins.push({mesh:coin,x:coin.position.x,z,collected:false})}
+ // Jungle hazards: fallen logs, hanging roots, thorn clusters and leaning trunks.
+ function addFallenLog(z,x){const wx=curveX(z)+x,mesh=cylinder(.42,.48,3.25,barkLight,wx,.48,z);mesh.rotation.z=Math.PI/2;mesh.rotation.y=curveAngle(z);obstacles.push({mesh,x:wx,z,w:3.1,d:1.05,h:.98,type:'block'})}
+ function addRootCluster(z,x){const wx=curveX(z)+x,mesh=box(1.55,1.25,1.05,rootMat,wx,.62,z);for(let q=-1;q<=1;q++){const root=cylinder(.09,.2,1.5,rootMat,wx+q*.48,.15,z);root.rotation.z=q*.35}obstacles.push({mesh,x:wx,z,w:1.65,d:1.15,h:1.3,type:'block'})}
+ function addHangingRoot(z,x){const wx=curveX(z)+x,mesh=cylinder(.12,.22,2.15,rootMat,wx,2.45,z);obstacles.push({mesh,x:wx,z,w:.7,d:.9,h:2.9,type:'overhead',clearance:1.05})}
+ addFallenLog(-34,-1.8);addRootCluster(-58,2.0);addHangingRoot(-78,-2.0);addFallenLog(-118,1.8);
+ addRootCluster(-146,-2.0);addFallenLog(-166,1.9);addHangingRoot(-207,2.0);addRootCluster(-229,-2.0);addFallenLog(-252,1.8);
+ addRootCluster(-278,-1.9);addHangingRoot(-326,2.0);addFallenLog(-350,-2.0);addRootCluster(-371,1.9);
+ addHangingRoot(-414,-2.0);addFallenLog(-442,1.9);addRootCluster(-466,2.0);addFallenLog(-486,-1.9);addHangingRoot(-524,2.0);
+ addRootCluster(-548,-2.0);addHangingRoot(-596,1.9);addFallenLog(-616,2.0);addRootCluster(-632,-2.0);addFallenLog(-654,1.9);
  checkpoints=[-72,-172,-272,-372,-472,-572,-642];
- function addRuinSign(title,range,z,accent){
-   const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=160;const ctx=canvas.getContext('2d');
-   ctx.fillStyle='#202b31';ctx.fillRect(0,0,1024,160);ctx.fillStyle=accent;ctx.fillRect(0,0,18,160);ctx.fillRect(1006,0,18,160);
-   ctx.fillStyle='#f4f7f2';ctx.font='900 54px system-ui';ctx.textAlign='center';ctx.fillText(title,512,70);ctx.fillStyle=accent;ctx.font='800 27px system-ui';ctx.fillText(range,512,119);
-   const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;const board=new THREE.Mesh(new THREE.PlaneGeometry(8.8,1.4),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));board.position.set(curveX(z),5.6,z);scene.add(board);
- }
- const ruinZones=[['JUNGLE APPROACH','0m — 133m',-12,'#79c58b'],['OVERGROWN AQUEDUCT','133m — 266m',-145,'#c6a77a'],['WATERFALL RAVINE','266m — 399m',-278,'#8bd8e8'],['LOST TEMPLE','399m — 532m',-411,'#b8a77b'],['CANOPY SUMMIT','532m — 665m',-544,'#d9e5e1']];
- for(const [title,range,z,color] of ruinZones)addRuinSign(title,range,z,color);
- for(const z of checkpoints){const g=new THREE.Group(),cx=curveX(z);box(.3,3.3,.34,ruinBronze,cx-3.9,1.55,0,g);box(.3,3.3,.34,ruinBronze,cx+3.9,1.55,0,g);box(8.2,.3,.42,ruinStone,cx,3.15,0,g);g.position.z=z;scene.add(g)}
- const finish=new THREE.Group(),finishX=curveX(-662);box(.38,4.1,.48,ruinBronze,finishX-3.8,2.05,0,finish);box(.38,4.1,.48,ruinBronze,finishX+3.8,2.05,0,finish);box(8.2,.42,.55,ruinStone,finishX,4.05,0,finish);const crown=new THREE.Mesh(new THREE.OctahedronGeometry(1.1,1),ruinIce);crown.position.set(finishX,5.15,0);crown.scale.set(1.5,.8,.55);finish.add(crown);finish.position.z=-662;scene.add(finish);
+ function addTrailSign(title,range,z){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=160;const ctx=canvas.getContext('2d');ctx.fillStyle='#173c25';ctx.fillRect(0,0,1024,160);ctx.fillStyle='#9bc66d';ctx.fillRect(0,0,16,160);ctx.fillRect(1008,0,16,160);ctx.fillStyle='#f5f4d8';ctx.font='900 54px system-ui';ctx.textAlign='center';ctx.fillText(title,512,70);ctx.fillStyle='#b8d98b';ctx.font='800 27px system-ui';ctx.fillText(range,512,119);const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;const board=new THREE.Mesh(new THREE.PlaneGeometry(8,1.25),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));board.position.set(curveX(z),5.2,z);scene.add(board)}
+ const jungleZones=[['JUNGLE TRAIL','0m — 133m',-12],['ROOT BRIDGES','133m — 266m',-145],['WATERFALL RUN','266m — 399m',-278],['ANCIENT CANOPY','399m — 532m',-411],['DEEP FOREST','532m — 665m',-544]];
+ for(const [title,range,z] of jungleZones)addTrailSign(title,range,z);
+ for(const z of checkpoints){const g=new THREE.Group(),cx=curveX(z);const left=cylinder(.13,.22,3.1,rootMat,cx-2.6,1.45,0,g),right=cylinder(.13,.22,3.1,rootMat,cx+2.6,1.45,0,g);box(5.4,.22,.35,barkLight,cx,2.9,0,g);g.position.z=z;scene.add(g)}
+ const finish=new THREE.Group(),finishX=curveX(-662);cylinder(.18,.3,4,bark,finishX-2.55,2,0,finish);cylinder(.18,.3,4,bark,finishX+2.55,2,0,finish);box(5.5,.28,.4,rootMat,finishX,3.9,0,finish);finish.position.z=-662;scene.add(finish);
  spinner.position.set(100,-100,100);
 }
 // Red hazard beacons: visible from a distance and pulsed while the race is active.
@@ -673,7 +626,7 @@ function failRun(message){
   if(failed||finished)return;
   failed=true;running=false;paused=false;finished=false;
   sfxFall();dangerBanner.style.opacity='0';
-  ui.failedText.textContent=developmentPreview?message+' Alpine Ruins is an admin preview; no player rewards are issued.':message+' You collected '+points+' provisional Game Points. CHOX is only settled after a verified level completion.';
+  ui.failedText.textContent=developmentPreview?message+' Temple Trail is an admin preview; no player rewards are issued.':message+' You collected '+points+' provisional Game Points. CHOX is only settled after a verified level completion.';
   ui.failed.classList.remove('hidden');
 }
 async function reportRushProgress(distance){
@@ -688,7 +641,7 @@ async function reportRushProgress(distance){
   return progressChain;
 }
 async function settleRushRun(){
-  const sessionId=rushSessionId;if(developmentPreview){ui.resultText.textContent='Alpine Ruins preview complete · '+fmt(elapsed)+'. This admin test build does not issue CHOX or save player rewards.';return;}if(!sessionId)return;
+  const sessionId=rushSessionId;if(developmentPreview){ui.resultText.textContent='Temple Trail preview complete · '+fmt(elapsed)+'. This admin test build does not issue CHOX or save player rewards.';return;}if(!sessionId)return;
   await reportRushProgress(665);
   const {data,error}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'finish',session_id:sessionId,elapsed_seconds:Math.floor(elapsed),obstacles_passed:rewardedObstacles.size,score:points}});
   rushSessionId=null;
@@ -701,19 +654,19 @@ async function reset(){
   audioReady();running=false;
   document.getElementById('bootStatus').textContent='Checking your CHOME account…';
   const {data:authData,error:authError}=await supabase.auth.getSession();
-  if(authError||!authData?.session){document.getElementById('bootStatus').textContent='Please sign in with your CHOME administrator account before starting Alpine Ruins.';return;}
-  if(developmentPreview){const {error:adminError}=await supabase.rpc('get_chome_admin_overview');if(adminError){document.getElementById('bootStatus').textContent='Administrator access required for the Alpine Ruins development preview.';return;}rushSessionId=null;}
+  if(authError||!authData?.session){document.getElementById('bootStatus').textContent='Please sign in with your CHOME administrator account before starting Temple Trail.';return;}
+  if(developmentPreview){const {error:adminError}=await supabase.rpc('get_chome_admin_overview');if(adminError){document.getElementById('bootStatus').textContent='Administrator access required for the Temple Trail development preview.';return;}rushSessionId=null;}
   else{const {data:sessionData,error:sessionError}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'start',level}});if(sessionError||!sessionData?.ok){document.getElementById('bootStatus').textContent=sessionError?.message||sessionData?.error||'Could not start this level. Please try again.';return;}rushSessionId=sessionData.session_id;}
   lastProgressReport=0;progressChain=Promise.resolve();
   if(rushAudioOn){sfxStart();startHorrorAmbience()}
   activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'JUNGLE APPROACH  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(curveX(3.5),.05,3.5);coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
 }
 function respawn(){player.position.set(curveX(respawnZ),.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
-function onTrack(x,z){const localX=x-curveX(z);if(developmentPreview){return Math.abs(localX)<=4.05&&z<=5&&z>=-665}return Math.abs(localX)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z>=-74))}
+function onTrack(x,z){const localX=x-curveX(z);if(developmentPreview){return Math.abs(localX)<=2.85&&z<=5&&z>=-665}return Math.abs(localX)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z>=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
 window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';
-if(developmentPreview){document.title='CHOME Rush Arena — Temple Trail Level 3 Preview';document.querySelector('.brand').innerHTML='CHOME <span>RUSH ARENA · LEVEL 3</span>';document.querySelector('.race-pill').textContent='ADMIN DEVELOPMENT PREVIEW';document.querySelector('#welcome .dialog h1').innerHTML='TEMPLE <span>TRAIL</span>';document.querySelector('#welcome .dialog p').textContent='Auto-run through a winding mountain-temple adventure with dense forest, waterfalls, stone bridges, ancient ruins, jumps, slides and collectible medallions. Level 3 is an administrator-only preview.';document.querySelector('#welcome .dialog .small').textContent='Temple Trail · 665m winding auto-run · Third-person camera';document.querySelector('#result .eyebrow').textContent='TEMPLE TRAIL PREVIEW';document.querySelector('#result .small').textContent='Admin preview only · No player rewards are issued';document.getElementById('chox').closest('.stat').style.display='none';document.querySelector('.brand').style.letterSpacing='.08em';}document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
+if(developmentPreview){document.title='CHOME Rush Arena — Temple Trail Level 3 Preview';document.querySelector('.brand').innerHTML='CHOME <span>RUSH ARENA · LEVEL 3</span>';document.querySelector('.race-pill').textContent='ADMIN DEVELOPMENT PREVIEW';document.querySelector('#welcome .dialog h1').innerHTML='TEMPLE <span>TRAIL</span>';document.querySelector('#welcome .dialog p').textContent='Auto-run through a narrow winding jungle trail with towering trees, dense canopy, exposed roots, fallen logs, waterfalls, wooden bridges, jumps, slides and collectible relics. Level 3 is an administrator-only preview.';document.querySelector('#welcome .dialog .small').textContent='Temple Trail · 665m jungle auto-run · Third-person camera';document.querySelector('#result .eyebrow').textContent='TEMPLE TRAIL PREVIEW';document.querySelector('#result .small').textContent='Admin preview only · No player rewards are issued';document.getElementById('chox').closest('.stat').style.display='none';document.querySelector('.brand').style.letterSpacing='.08em';}document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 document.getElementById('restartFailed').addEventListener('click',reset);
 document.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
 addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
@@ -734,7 +687,7 @@ const clock=new THREE.Clock();
 function moveRunner(dx,dz){
   const nextZ=player.position.z+dz;
   const nextCenter=curveX(nextZ);
-  const nextX=nextCenter+THREE.MathUtils.clamp(player.position.x+dx-nextCenter,-4.05,4.05);
+  const nextX=nextCenter+THREE.MathUtils.clamp(player.position.x+dx-nextCenter,-2.45,2.45);
   if(!obstacleInspectionMode){
   const radius=.42,runnerHeight=slideTimer>0?1.02:2.3;
   for(const o of obstacles){
