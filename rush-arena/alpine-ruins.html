@@ -400,7 +400,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  }
  for(const inst of [trunks,canopiesA,canopiesB,canopiesC,roots]){inst.count=inst===roots?rootCount:treeCount;inst.instanceMatrix.needsUpdate=true;inst.castShadow=!mobileDevice;inst.receiveShadow=true;scene.add(inst)}
  // Low shrubs and ferns frame the path without blocking the running lane.
- const bushGeo=new THREE.IcosahedronGeometry(1,1),bushes=new THREE.InstancedMesh(bushGeo,fernMat,260),ferns=new THREE.InstancedMesh(new THREE.ConeGeometry(.32,1.15,5),leafBright,360);let bushN=0,fernN=0;
+ const bushGeo=new THREE.IcosahedronGeometry(1,1),bushes=new THREE.InstancedMesh(bushGeo,fernMat,260),ferns=new THREE.InstancedMesh(new THREE.ConeGeometry(.32,1.15,5),leafBright,520);let bushN=0,fernN=0;
  for(let z=-8;z>=-655;z-=5.1)for(const sideSign of [-1,1]){
    const x=curveX(z)+sideSign*(3.65+(bushN%4)*.34);
    forestDummy.position.set(x,.35,z);forestDummy.rotation.set(.1,bushN*.7,.08);forestDummy.scale.set(1.15,.7,1.1);forestDummy.updateMatrix();bushes.setMatrixAt(bushN++,forestDummy.matrix);
