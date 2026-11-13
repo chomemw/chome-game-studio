@@ -438,6 +438,17 @@ async function loadPolyHavenModel(assetId){
   const gltf=await forestLoader.loadAsync(modelUrl);
   return gltf.scene;
 }
+function selectForestLod(source){
+  const model=source.clone(true),lodNodes=[];
+  model.traverse(node=>{const match=node.name&&node.name.match(/_LOD(\\d+)/i);if(match)lodNodes.push({node,level:Number(match[1])})});
+  if(lodNodes.length){
+    const preferred=Math.max(...lodNodes.map(item=>item.level));
+    for(const item of lodNodes)item.node.visible=item.level===preferred;
+  }
+  let triangles=0;
+  model.traverse(node=>{if(node.isMesh&&node.visible){const index=node.geometry.index;triangles+=index?index.count/3:(node.geometry.attributes.position?.count||0)/3}});
+  return {model,triangles,lod:lodNodes.length?Math.max(...lodNodes.map(item=>item.level)):null};
+}
 function normalizeForestModel(source,targetHeight){
   const model=source.clone(true),bounds=new THREE.Box3().setFromObject(model),size=bounds.getSize(new THREE.Vector3());
   const scale=targetHeight/Math.max(.001,size.y);model.scale.setScalar(scale);
@@ -448,9 +459,14 @@ function normalizeForestModel(source,targetHeight){
 async function buildNaturalForest(){
   const specs=[{id:'tree_small_02',height:6.2},{id:'fir_tree_01',height:8.4}];
   const loaded=await Promise.allSettled(specs.map(spec=>loadPolyHavenModel(spec.id)));
-  const available=loaded.map((result,index)=>result.status==='fulfilled'?{...specs[index],model:result.value}:null).filter(Boolean);
-  if(!available.length){console.error('CHOME natural forest assets could not be loaded',loaded.map(x=>x.reason));return;}
-  const perSide=mobileDevice?19:29;
+  const available=loaded.map((result,index)=>{
+    if(result.status!=='fulfilled')return null;
+    const prepared=selectForestLod(result.value);
+    if(prepared.triangles>260000){console.warn('Skipping forest model above real-time triangle budget:',specs[index].id,prepared.triangles);return null;}
+    return {...specs[index],model:prepared.model,triangles:prepared.triangles,lod:prepared.lod};
+  }).filter(Boolean);
+  if(!available.length){console.error('No forest model passed the real-time LOD budget. The course remains playable.',loaded.map(x=>x.reason||x.status));return;}
+  const perSide=mobileDevice?7:12;
   for(let sideIndex=0;sideIndex<2;sideIndex++){
     const sideSign=sideIndex===0?-1:1;
     for(let i=0;i<perSide;i++){
@@ -462,6 +478,7 @@ async function buildNaturalForest(){
       scene.add(tree);
     }
   }
+  console.info('CHOME mountain forest loaded:',available.map(item=>({asset:item.id,triangles:item.triangles,lod:item.lod})));
 }
 void buildNaturalForest().catch(error=>console.error('CHOME forest build failed:',error));
 // Three visible river crossings with foaming edges and stepping stones below the jump line.
