@@ -75,7 +75,7 @@ function makeLevel(level,status){
  const note=document.createElement('div');note.className='level-note';
  const button=document.createElement('button');button.className='play';
  if(ADMIN_PREVIEW_LEVELS.has(level)){
-  note.textContent=level===2?'Mountain Run · admin testing only':'Alpine Ruins · forest, bridges, waterfalls and ruins';
+  note.textContent=level===2?'Mountain Run · admin testing only':'Temple Trail · auto-run, forest, waterfalls, bridges and coins';
   button.textContent='TEST LEVEL '+level;
   button.disabled=false;
  }else if(status==='completed'){
@@ -112,7 +112,7 @@ async function load(){
   const status=completed.has(level)?'completed':level<=unlocked?'unlocked':'locked';
   grid.append(makeLevel(level,status));
  }
- $('message').textContent='Admin testing: Level 1 opens Sky Starter. Level 2 opens Mountain Run and Level 3 opens Alpine Ruins as separate admin-only previews. New-level player progression and rewards remain disabled until release approval.';
+ $('message').textContent='Admin testing: Level 1 opens Sky Starter. Level 2 opens Mountain Run and Level 3 opens Temple Trail as a separate admin-only preview. New-level player progression and rewards remain disabled until release approval.';
 }
 load().catch(error=>{$('message').textContent='Unable to load levels: '+(error?.message||'Please refresh.');});
 </script>
