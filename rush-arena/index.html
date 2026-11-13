@@ -268,16 +268,16 @@ for(const [x,z,len] of floorSegments){
     if(z<-266 && z>-399) continue;
     for(const sideSign of [-1,1]){
       const x=sideSign*(7.2+rand()*5.1), height=4.8+rand()*3.5;
-      trunkData.push({x,y:-.50,z,scale:[.78+rand()*.42,height,.78+rand()*.42],ry:rand()*6.28});
+      trunkData.push({x,y:-1.01+height*.5,z,scale:[.78+rand()*.42,height,.78+rand()*.42],ry:rand()*6.28});
       for(let b=0;b<3;b++){
         const angle=rand()*Math.PI*2, level=.48+b*.16;
-        branchData.push({x:x+Math.cos(angle)*.30,y:-.50+height*level,z:z+Math.sin(angle)*.30,
+        branchData.push({x:x+Math.cos(angle)*.30,y:-1.01+height*level,z:z+Math.sin(angle)*.30,
           scale:[.72+rand()*.48,.58+rand()*.55,.72+rand()*.48],
           ry:angle,tilt:Math.PI/2+(rand()-.5)*.45});
       }
       for(let c=0;c<5;c++){
         const angle=c*2.399+rand()*.35, radius=rand()*.85;
-        crownData.push({x:x+Math.cos(angle)*radius,y:-.50+height*(.72+rand()*.20),z:z+Math.sin(angle)*radius,
+        crownData.push({x:x+Math.cos(angle)*radius,y:-1.01+height*(.72+rand()*.20),z:z+Math.sin(angle)*radius,
           scale:[1.05+rand()*.65,.95+rand()*.70,1.0+rand()*.62],ry:rand()*6.28,
           color:[0x294b2d,0x365b32,0x456b39,0x587844]});
       }
