@@ -524,7 +524,7 @@ function addWaterfall(x,z,height=8,width=3.4,sideSign=1){
   geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
   geo.setIndex(indices);geo.computeVertexNormals();
   const curtain=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x72c8d5,roughness:.18,metalness:.04,transparent:true,opacity:.82,side:THREE.DoubleSide,depthWrite:false}));
-  curtain.position.set(x,height/2,z);curtain.rotation.y=sideSign*.12;scene.add(curtain);
+  curtain.position.set(x,0,z);curtain.rotation.y=sideSign*.12;scene.add(curtain);
   const cliff=new THREE.Mesh(new THREE.DodecahedronGeometry(1,1),ancientStoneDark);
   cliff.scale.set(width*.95,height*.7,1.8);cliff.position.set(x+sideSign*.5,height*.45,z-.55);cliff.rotation.set(.12,.3,.18);scene.add(cliff);
   const pool=sphere(1.1,mountainFoam,x,-.22,z+.25);pool.scale.set(2.5,.18,1.1);
