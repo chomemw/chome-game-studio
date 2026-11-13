@@ -236,6 +236,103 @@ for(const [x,z,len] of floorSegments){
   box(9,.8,len,len>200?extensionPath:path,x,-.48,z);
   box(9.35,.34,len+.25,side,x,-.99,z);
 }
+
+// NATURAL ENVIRONMENT PASS — instanced vegetation and terrain dressing.
+// All scenery is placed outside the playable track and does not alter course,
+// obstacle, player, camera, collision, reward, or progression data.
+{
+  const bark = mat(0x594331,.96), barkLight = mat(0x79583a,.94);
+  const leafMat = new THREE.MeshStandardMaterial({color:0xffffff,roughness:.96,vertexColors:true});
+  const shrubMat = new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,vertexColors:true});
+  const grassMats = [mat(0x536b3e,1),mat(0x71834a,1),mat(0x394f32,1)];
+  const rockMats = [mat(0x686b63,.98),mat(0x858276,.98),mat(0x4e5852,.98)];
+  const trunkGeo = new THREE.CylinderGeometry(.16,.34,1,9,2);
+  const branchGeo = new THREE.CylinderGeometry(.045,.13,1,7,1);
+  const crownGeo = new THREE.IcosahedronGeometry(1,2);
+  const shrubGeo = new THREE.IcosahedronGeometry(1,1);
+  const bladeGeo = new THREE.BufferGeometry();
+  bladeGeo.setAttribute('position',new THREE.Float32BufferAttribute([
+    0,0,0, -.10,.52,0, .015,.22,.025,
+    0,0,0, .015,.22,.025, .10,.58,0,
+    0,0,0, .10,.58,0, .02,.25,-.025
+  ],3));
+  bladeGeo.computeVertexNormals();
+  const rockGeo = new THREE.DodecahedronGeometry(1,0);
+  const dummy = new THREE.Object3D();
+  const trunkData=[], branchData=[], crownData=[], shrubData=[], grassData=[], rockData=[];
+  let seed=87123;
+  const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+  const tint=(mesh,i,colors)=>mesh.setColorAt(i,new THREE.Color(colors[Math.floor(rand()*colors.length)]));
+  // Two forest edges frame the 665m course. The underground tunnel stays clear.
+  for(let z=-8;z>-665;z-=10.5){
+    if(z<-266 && z>-399) continue;
+    for(const sideSign of [-1,1]){
+      const x=sideSign*(7.2+rand()*5.1), height=4.8+rand()*3.5;
+      trunkData.push({x,y:-.50,z,scale:[.78+rand()*.42,height,.78+rand()*.42],ry:rand()*6.28});
+      for(let b=0;b<3;b++){
+        const angle=rand()*Math.PI*2, level=.48+b*.16;
+        branchData.push({x:x+Math.cos(angle)*.30,y:-.50+height*level,z:z+Math.sin(angle)*.30,
+          scale:[.72+rand()*.48,.58+rand()*.55,.72+rand()*.48],
+          ry:angle,tilt:Math.PI/2+(rand()-.5)*.45});
+      }
+      for(let c=0;c<5;c++){
+        const angle=c*2.399+rand()*.35, radius=rand()*.85;
+        crownData.push({x:x+Math.cos(angle)*radius,y:-.50+height*(.72+rand()*.20),z:z+Math.sin(angle)*radius,
+          scale:[1.05+rand()*.65,.95+rand()*.70,1.0+rand()*.62],ry:rand()*6.28,
+          color:[0x294b2d,0x365b32,0x456b39,0x587844]});
+      }
+      for(let q=0;q<3;q++){
+        const angle=rand()*6.28, radius=1.2+rand()*.8;
+        shrubData.push({x:x+Math.cos(angle)*radius,y:-.78,z:z+Math.sin(angle)*radius,
+          scale:[.65+rand()*.6,.45+rand()*.45,.65+rand()*.6],ry:rand()*6.28,
+          color:[0x3c5935,0x526d3c,0x687e45]});
+      }
+    }
+  }
+  // Low shrubs, grass tufts and scattered stones fill the ground margins.
+  for(let i=0;i<340;i++){
+    const z=-8-rand()*650;
+    if(z<-266 && z>-399) continue;
+    const sideSign=rand()<.5?-1:1,x=sideSign*(5.35+rand()*8.2);
+    shrubData.push({x,y:-.82,z,scale:[.35+rand()*.6,.25+rand()*.42,.35+rand()*.6],ry:rand()*6.28,
+      color:[0x3c5935,0x526d3c,0x687e45]});
+  }
+  for(let i=0;i<4200;i++){
+    const z=-6-rand()*655;
+    if(z<-266 && z>-399) continue;
+    const sideSign=rand()<.5?-1:1,x=sideSign*(4.85+rand()*9.0);
+    grassData.push({x,y:-.99,z,scale:[.55+rand()*.9,.55+rand()*1.25,.55+rand()*.9],ry:rand()*6.28,
+      color:[0x526b3e,0x71834a,0x394f32]});
+  }
+  for(let i=0;i<210;i++){
+    const z=-8-rand()*650;
+    if(z<-266 && z>-399) continue;
+    const sideSign=rand()<.5?-1:1,x=sideSign*(5.0+rand()*8.5);
+    rockData.push({x,y:-.72,z,scale:[.18+rand()*.48,.13+rand()*.32,.2+rand()*.52],ry:rand()*6.28});
+  }
+  function addInstances(geometry,material,items,{colors=false,tilt=false}={}){
+    if(!items.length)return null;
+    const mesh=new THREE.InstancedMesh(geometry,material,items.length);
+    items.forEach((p,i)=>{
+      dummy.position.set(p.x,p.y,p.z);
+      dummy.rotation.set(0,p.ry||0,tilt?(p.tilt||0):0);
+      dummy.scale.set(...(p.scale||[1,1,1]));
+      dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);
+      if(colors&&p.color)tint(mesh,i,p.color);
+    });
+    mesh.instanceMatrix.needsUpdate=true;
+    if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;
+    mesh.castShadow=false;mesh.receiveShadow=true;mesh.frustumCulled=true;
+    scene.add(mesh);return mesh;
+  }
+  addInstances(trunkGeo,bark,trunkData);
+  addInstances(branchGeo,barkLight,branchData,{tilt:true});
+  addInstances(crownGeo,leafMat,crownData,{colors:true});
+  addInstances(shrubGeo,shrubMat,shrubData,{colors:true});
+  addInstances(bladeGeo,new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,side:THREE.DoubleSide,roughness:1}),grassData,{colors:true});
+  addInstances(rockGeo,rockMats[0],rockData);
+}
+
 // Worn asphalt shoulders and repeated markings use instancing to reduce draw calls.
 function addBoxInstances(material,w,h,d,placements){
   const mesh=new THREE.InstancedMesh(new THREE.BoxGeometry(w,h,d),material,placements.length);
