@@ -118,20 +118,23 @@ try {
 const root=document.getElementById('game');
 const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
 // Reuse the proven mountain scene profile while keeping this as a separate Level 3 preview.
-const level=2;
+const level=3;
 const developmentPreview=true;
+// Level 3 follows a gentle S-shaped alpine trail; player X is world-space.
+const curveX=z=>2.05*Math.sin((z+28)/92)+0.42*Math.sin((z+12)/31);
+const curveAngle=z=>Math.atan2(curveX(z-2)-curveX(z+2),-4);
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
 const obstacleInspectionMode=level===1;
-const scene=new THREE.Scene();scene.background=new THREE.Color(level===2?0xb9d9e9:0xa9c2d0);scene.fog=new THREE.Fog(level===2?0xb9d9e9:0xa9c2d0,level===2?58:42,level===2?190:155);
+const scene=new THREE.Scene();scene.background=new THREE.Color(level>=2?0xb9d9e9:0xa9c2d0);scene.fog=new THREE.Fog(level>=2?0xb9d9e9:0xa9c2d0,level>=2?58:42,level>=2?190:155);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,260);
 const mobileDevice=matchMedia('(max-width: 900px), (pointer: coarse)').matches;
 const renderer=new THREE.WebGLRenderer({antialias:!mobileDevice,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=!mobileDevice;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;root.appendChild(renderer.domElement);
-const hemisphere=new THREE.HemisphereLight(level===2?0xe1f4df:0xb8c8d8,level===2?0x435b3d:0x202832,level===2?1.45:1.05);scene.add(hemisphere);
-const sun=new THREE.DirectionalLight(level===2?0xffedc5:0xb7c8dc,level===2?2.0:1.75);sun.position.set(-18,34,22);sun.castShadow=true;sun.shadow.mapSize.set(mobileDevice?512:768,mobileDevice?512:768);sun.shadow.bias=-0.00015;sun.shadow.camera.left=-28;sun.shadow.camera.right=28;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-110;scene.add(sun);
+const hemisphere=new THREE.HemisphereLight(level>=2?0xe1f4df:0xb8c8d8,level>=2?0x435b3d:0x202832,level>=2?1.45:1.05);scene.add(hemisphere);
+const sun=new THREE.DirectionalLight(level>=2?0xffedc5:0xb7c8dc,level>=2?2.0:1.75);sun.position.set(-18,34,22);sun.castShadow=true;sun.shadow.mapSize.set(mobileDevice?512:768,mobileDevice?512:768);sun.shadow.bias=-0.00015;sun.shadow.camera.left=-28;sun.shadow.camera.right=28;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-110;scene.add(sun);
 const mat=(color,roughness=.78,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
 // Permanent storm atmosphere: lightweight rain streaks follow the runner.
-const rainCount=level===2?0:(mobileDevice?90:200),rainPositions=new Float32Array(rainCount*6),rainGeometry=new THREE.BufferGeometry();
+const rainCount=level>=2?0:(mobileDevice?90:200),rainPositions=new Float32Array(rainCount*6),rainGeometry=new THREE.BufferGeometry();
 const rainSeed=[];
 for(let i=0;i<rainCount;i++){
   rainSeed.push({x:(Math.random()-.5)*22,y:Math.random()*17,z:(Math.random()-.5)*38,v:12+Math.random()*9});
@@ -141,8 +144,8 @@ rainGeometry.setDrawRange(0,rainCount*2);
 const rainMaterial=new THREE.LineBasicMaterial({color:0xb8d8ed,transparent:true,opacity:.42,depthWrite:false});
 const rainField=new THREE.LineSegments(rainGeometry,rainMaterial);rainField.frustumCulled=false;scene.add(rainField);
 const stormFlashLight=new THREE.PointLight(0xdcecff,0,95,1.5);scene.add(stormFlashLight);
-let lightningTimer=level===2?99999:7+Math.random()*6,lightningFlash=0,thunderPending=0;
-const weatherLabel=document.createElement('div');weatherLabel.textContent=level===2?'🌿  ALPINE RUINS · FOREST / RIVERS / WATERFALLS':'⛈  STORM CONDITIONS';
+let lightningTimer=level>=2?99999:7+Math.random()*6,lightningFlash=0,thunderPending=0;
+const weatherLabel=document.createElement('div');weatherLabel.textContent=level>=2?'🌿  ALPINE RUINS · FOREST / RIVERS / WATERFALLS':'⛈  STORM CONDITIONS';
 Object.assign(weatherLabel.style,{position:'fixed',left:'12px',top:'54px',zIndex:'45',padding:'7px 10px',border:'1px solid rgba(173,204,224,.28)',borderRadius:'9px',background:'rgba(12,22,32,.58)',color:'#d8e8f4',font:'800 10px system-ui',letterSpacing:'.12em',pointerEvents:'none',backdropFilter:'blur(5px)'});
 document.body.appendChild(weatherLabel);
 if(obstacleInspectionMode){const inspectionLabel=document.createElement('div');inspectionLabel.textContent='👁 INSPECTION MODE · COLLISIONS OFF';Object.assign(inspectionLabel.style,{position:'fixed',right:'12px',top:'54px',zIndex:'46',padding:'7px 10px',border:'1px solid rgba(120,235,190,.45)',borderRadius:'9px',background:'rgba(8,28,24,.72)',color:'#c8ffe8',font:'800 10px system-ui',letterSpacing:'.08em',pointerEvents:'none',backdropFilter:'blur(5px)'});document.body.appendChild(inspectionLabel)}
@@ -214,7 +217,7 @@ const sphere=(r,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.SphereG
 const cylinder=(rt,rb,h,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,16),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o};
 
 // Sky islands and clouds. Cloud puffs share one instanced draw call.
-const sky=new THREE.Mesh(new THREE.SphereGeometry(180,24,16),new THREE.MeshBasicMaterial({color:level===2?0xb9d9e9:0x8ed9f4,side:THREE.BackSide}));scene.add(sky);
+const sky=new THREE.Mesh(new THREE.SphereGeometry(180,24,16),new THREE.MeshBasicMaterial({color:level>=2?0xb9d9e9:0x8ed9f4,side:THREE.BackSide}));scene.add(sky);
 const cloudGeometry=new THREE.SphereGeometry(1,12,8);
 const cloudInstances=new THREE.InstancedMesh(cloudGeometry,white,120);
 const cloudDummy=new THREE.Object3D();let cloudIndex=0;
@@ -266,7 +269,7 @@ for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-
 
 // Checkpoint arches.
 checkpoints=[-31,-59,-79,-190,-338,-471,-635];const checkpointMeshes=[];
-for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i];const g=new THREE.Group();box(.28,3,.3,gold,-3.8,1.45,0,g);box(.28,3,.3,gold,3.8,1.45,0,g);box(7.9,.3,.3,coral,0,2.95,0,g);g.position.z=z;scene.add(g);checkpointMeshes.push(g)}
+for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i];const g=new THREE.Group();box(.28,3,.3,gold,-3.8,1.45,0,g);box(.28,3,.3,gold,3.8,1.45,0,g);box(7.9,.3,.3,coral,0,2.95,0,g);g.position.set(curveX(z),0,z);scene.add(g);checkpointMeshes.push(g)}
 
 // Readable overhead zone signs mark each new 133m section.
 function addZoneSign(title,range,z,accent){
@@ -278,7 +281,7 @@ function addZoneSign(title,range,z,accent){
   ctx.fillStyle=accent;ctx.font='800 27px system-ui';ctx.fillText(range,512,119);
   const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
   const board=new THREE.Mesh(new THREE.PlaneGeometry(8.6,1.35),new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide}));
-  board.position.set(0,4.85,z);scene.add(board);
+  board.position.set(curveX(z),4.85,z);scene.add(board);
   box(8.9,.12,.18,accent,0,4.12,z);
 }
 addZoneSign('CONSTRUCTION ZONE','133m — 266m',-135,'#e0a34a');
@@ -287,7 +290,7 @@ addZoneSign('CARGO YARD','399m — 532m',-401,'#d39a55');
 addZoneSign('FINAL SURVIVAL','532m — 665m',-534,'#d46b76');
 
 // Finish arch.
-const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.z=-662;scene.add(finish);
+const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.set(curveX(-662),0,-662);scene.add(finish);
 
 // The new environments begin after the original opening; scenery stays outside the running lanes.
 function addCourseFrame(z,material=side,roofY=4.05){
@@ -360,7 +363,7 @@ addMovingBlock(-610,2.2,2,1.7,'crusher');addExtendedOverhead(-626,.98);addMoving
 spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
 
 }else{
-// MOUNTAIN RUN — independent Level 2 environment (Level 1 remains unchanged).
+// MOUNTAIN RUN — independent Level 3 environment (Level 1 remains unchanged).
 scene.background=new THREE.Color(0xb9d9e9);scene.fog=new THREE.Fog(0xb9d9e9,58,190);
 const mountainGrass=mat(0x477d42,.98),mountainGrassLight=mat(0x70a84f,.98),mountainDirt=mat(0x79583b,.96),mountainBark=mat(0x523a28,.96),mountainLeaves=mat(0x28623a,.92),mountainLeaves2=mat(0x3d8045,.94),mountainRock=mat(0x737b78,.96),mountainStone=mat(0x8b8c7c,.95),mountainWater=new THREE.MeshStandardMaterial({color:0x238da7,roughness:.2,metalness:.08,transparent:true,opacity:.9}),mountainFoam=new THREE.MeshStandardMaterial({color:0xc9f4ed,roughness:.3,transparent:true,opacity:.72});
 const dirtCanvas=document.createElement('canvas');dirtCanvas.width=256;dirtCanvas.height=256;const dirtCtx=dirtCanvas.getContext('2d');dirtCtx.fillStyle='#795b3d';dirtCtx.fillRect(0,0,256,256);
@@ -401,7 +404,7 @@ for(let i=0;i<22;i++){
 // Ground is split at three river gaps so the player must jump across the water.
 riverGaps.push({start:-281,end:-286},{start:-465,end:-470},{start:-605,end:-610});
 const groundSpans=[[5,-281],[-286,-465],[-470,-605],[-610,-665]];
-for(const [nearZ,farZ] of groundSpans){const len=Math.abs(nearZ-farZ),mid=(nearZ+farZ)/2;box(28,.24,len,mountainGrass,0,-1.12,mid);box(9,.8,len,mountainPath,0,-.48,mid);box(9.5,.18,len,mountainDirt,0,-.96,mid)}
+for(const [nearZ,farZ] of groundSpans){const len=Math.abs(nearZ-farZ),pieces=Math.ceil(len/18);for(let piece=0;piece<pieces;piece++){const z1=nearZ+(farZ-nearZ)*piece/pieces,z2=nearZ+(farZ-nearZ)*(piece+1)/pieces,mid=(z1+z2)/2,sectionLength=Math.abs(z2-z1)+.35,angle=curveAngle(mid),center=curveX(mid);for(const [width,height,depth,material,y] of [[28,.24,sectionLength,mountainGrass,-1.12],[9,.8,sectionLength,mountainPath,-.48],[9.5,.18,sectionLength,mountainDirt,-.96]]){const segment=box(width,height,depth,material,center,y,mid);segment.rotation.y=angle;}}}
 // Natural grass tufts: curved, tapered blade meshes instanced for low draw-call cost.
 function makeGrassTuftGeometry(){
   const positions=[],normals=[];
@@ -423,7 +426,7 @@ function makeGrassTuftGeometry(){
 const grassTufts=new THREE.InstancedMesh(makeGrassTuftGeometry(),mountainGrassLight,mobileDevice?150:260),grassDummy=new THREE.Object3D();
 for(let i=0;i<(mobileDevice?150:260);i++){
   const sideSign=i%2?1:-1,z=-4-(i*2.55)%655,x=sideSign*(5.05+((i*17)%65)/10);
-  grassDummy.position.set(x,-.98,z);grassDummy.rotation.y=(i%11)*.57;
+  grassDummy.position.set(x+curveX(z),-.98,z);grassDummy.rotation.y=curveAngle(z)+(i%11)*.57;
   const scale=.72+(i%5)*.13;grassDummy.scale.set(scale,scale,scale);grassDummy.updateMatrix();grassTufts.setMatrixAt(i,grassDummy.matrix);
 }
 grassTufts.instanceMatrix.needsUpdate=true;scene.add(grassTufts);
@@ -475,7 +478,7 @@ async function buildNaturalForest(){
       const tree=normalizeForestModel(source.model,source.height*(.82+((i*7+sideIndex*3)%9)*.045));
       const z=-9-i*(646/perSide)+((i*13+sideIndex*5)%7)-3.2;
       const x=sideSign*(7.2+((i*11+sideIndex*3)%9)*.78);
-      tree.position.x=x;tree.position.z=z;tree.rotation.y=((i*17+sideIndex*29)%628)/100;
+      tree.position.x=x+curveX(z);tree.position.z=z;tree.rotation.y=curveAngle(z)+((i*17+sideIndex*29)%628)/100;
       scene.add(tree);
     }
   }
@@ -493,20 +496,20 @@ const ancientStoneDark=new THREE.MeshStandardMaterial({color:0x4b514d,roughness:
 // and their rails remain outside the runner's collision corridor.
 for(const gap of riverGaps){
   const center=(gap.start+gap.end)/2,span=Math.abs(gap.start-gap.end)+2.8;
-  box(9.55,.22,span,bridgeWood,0,-.17,center);
+  const bridgeX=curveX(center),bridgeAngle=curveAngle(center);const deck=box(9.55,.22,span,bridgeWood,bridgeX,-.17,center);deck.rotation.y=bridgeAngle;
   for(let plank=0;plank<Math.ceil(span/.48);plank++){
     const z=center-span/2+.24+plank*.48;
-    box(9.42,.075,.39,plank%3===0?bridgeWoodLight:bridgeWood,0,-.025,z);
+    const plankMesh=box(9.42,.075,.39,plank%3===0?bridgeWoodLight:bridgeWood,bridgeX,-.025,z);plankMesh.rotation.y=bridgeAngle;
   }
   for(const sideSign of [-1,1]){
-    box(.18,.18,span,bridgeWood,sideSign*4.42,.28,center);
-    box(.16,.16,span,bridgeWoodLight,sideSign*4.42,1.04,center);
+    const rail=box(.18,.18,span,bridgeWood,bridgeX+sideSign*4.42,.28,center);rail.rotation.y=bridgeAngle;
+    const topRail=box(.16,.16,span,bridgeWoodLight,bridgeX+sideSign*4.42,1.04,center);topRail.rotation.y=bridgeAngle;
     for(let post=0;post<=Math.ceil(span/1.35);post++){
       const z=center-span/2+post*1.35;
-      box(.2,1.05,.2,bridgeWoodLight,sideSign*4.42,.54,z);
+      const postMesh=box(.2,1.05,.2,bridgeWoodLight,bridgeX+sideSign*4.42,.54,z);postMesh.rotation.y=bridgeAngle;
     }
     for(const supportZ of [center-span*.28,center+span*.28]){
-      const pier=cylinder(.24,.34,1.65,mountainRock,sideSign*3.8,-.82,supportZ);
+      const pier=cylinder(.24,.34,1.65,mountainRock,bridgeX+sideSign*3.8,-.82,supportZ);
       pier.rotation.z=(sideSign*.035);
     }
   }
@@ -524,12 +527,12 @@ function addWaterfall(x,z,height=8,width=3.4,sideSign=1){
   geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
   geo.setIndex(indices);geo.computeVertexNormals();
   const curtain=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x72c8d5,roughness:.18,metalness:.04,transparent:true,opacity:.82,side:THREE.DoubleSide,depthWrite:false}));
-  curtain.position.set(x,0,z);curtain.rotation.y=sideSign*.12;scene.add(curtain);
+  curtain.position.set(x+curveX(z),0,z);curtain.rotation.y=sideSign*.12;scene.add(curtain);
   const cliff=new THREE.Mesh(new THREE.DodecahedronGeometry(1,1),ancientStoneDark);
-  cliff.scale.set(width*.95,height*.7,1.8);cliff.position.set(x+sideSign*.5,height*.45,z-.55);cliff.rotation.set(.12,.3,.18);scene.add(cliff);
-  const pool=sphere(1.1,mountainFoam,x,-.22,z+.25);pool.scale.set(2.5,.18,1.1);
+  cliff.scale.set(width*.95,height*.7,1.8);cliff.position.set(x+curveX(z)+sideSign*.5,height*.45,z-.55);cliff.rotation.set(.12,.3,.18);scene.add(cliff);
+  const pool=sphere(1.1,mountainFoam,x+curveX(z),-.22,z+.25);pool.scale.set(2.5,.18,1.1);
   for(let i=0;i<5;i++){
-    const splash=sphere(.12,mountainFoam,x+(Math.random()-.5)*2.6,-.08,z+(Math.random()-.5)*1.1);
+    const splash=sphere(.12,mountainFoam,x+curveX(z)+(Math.random()-.5)*2.6,-.08,z+(Math.random()-.5)*1.1);
     splash.scale.set(1.7,.35,.7);
   }
 }
@@ -538,7 +541,7 @@ addWaterfall(11.2,-535,9.5,4.2,1);
 // Ancient mountain-trail gateways and broken stonework sit beyond the safe path edges.
 function addRuinGate(z,brokenSide=1){
   for(const sideSign of [-1,1]){
-    const x=sideSign*5.35;
+    const x=curveX(z)+sideSign*5.35;
     const shaft=cylinder(.38,.52,4.1,ancientStone,x,1.95,z);
     shaft.rotation.z=sideSign*.025;
     cylinder(.58,.58,.28,ancientStoneDark,x,4.08,z);
@@ -546,13 +549,13 @@ function addRuinGate(z,brokenSide=1){
     const capital=box(1.05,.32,.95,ancientStone,x,4.25,z);
     capital.rotation.y=sideSign*.04;
   }
-  const lintel=box(11,.62,.9,ancientStone,0,4.35,z);
+  const lintel=box(11,.62,.9,ancientStone,curveX(z),4.35,z);
   lintel.rotation.z=.012;
   if(brokenSide<0){
-    const fallen=box(2.2,.48,.72,ancientStoneDark,-6.0,.28,z-1.4);
+    const fallen=box(2.2,.48,.72,ancientStoneDark,curveX(z)-6.0,.28,z-1.4);
     fallen.rotation.set(.12,.28,.24);
   }else{
-    const fallen=box(2.1,.5,.72,ancientStoneDark,6.0,.26,z+1.2);
+    const fallen=box(2.1,.5,.72,ancientStoneDark,curveX(z)+6.0,.26,z+1.2);
     fallen.rotation.set(-.1,-.25,-.18);
   }
 }
@@ -562,22 +565,21 @@ addRuinGate(-555,1);
 for(let i=0;i<24;i++){
   const sideSign=i%2?1:-1,z=-28-i*25.2,x=sideSign*(6.1+(i%4)*.55);
   const boulder=new THREE.Mesh(new THREE.DodecahedronGeometry(.75+(i%3)*.2,1),i%3===0?ancientStone:mountainRock);
-  boulder.position.set(x,-.34,z);boulder.scale.set(1.35,.78,1.1);boulder.rotation.set(i*.07,i*.31,i*.11);
+  boulder.position.set(x+curveX(z),-.34,z);boulder.scale.set(1.35,.78,1.1);boulder.rotation.set(i*.07,i*.31,i*.11);
   boulder.castShadow=!mobileDevice;boulder.receiveShadow=false;scene.add(boulder);
 }
 
 // Three visible river crossings with foaming edges and stepping stones below the jump line.
-for(const gap of riverGaps){const center=(gap.start+gap.end)/2,len=Math.abs(gap.start-gap.end)+2;box(20,.22,len,mountainRock,0,-1.05,center);box(19,.16,len,mountainWater,0,-.48,center);for(let i=0;i<5;i++){const stone=sphere(.72,mountainStone,(i-2)*1.35,-.2,center+(i%2?-.85:.85));stone.scale.set(1.25,.38,.78);const foam=sphere(.16,mountainFoam,(i-2)*1.35+.65,-.36,center+(i%2?-.85:.85)+.45);foam.scale.set(2,.2,.55)}for(const sideSign of [-1,1]){for(let i=0;i<4;i++){const rock=sphere(.62+i%2*.2,mountainRock,sideSign*(5.2+i*.45),-.18,center-2+i*1.25);rock.scale.set(1.4,.8,1.1)}}}
+for(const gap of riverGaps){const center=(gap.start+gap.end)/2,len=Math.abs(gap.start-gap.end)+2;box(20,.22,len,mountainRock,curveX(center),-1.05,center);box(19,.16,len,mountainWater,curveX(center),-.48,center);for(let i=0;i<5;i++){const stone=sphere(.72,mountainStone,curveX(center)+(i-2)*1.35,-.2,center+(i%2?-.85:.85));stone.scale.set(1.25,.38,.78);const foam=sphere(.16,mountainFoam,curveX(center)+(i-2)*1.35+.65,-.36,center+(i%2?-.85:.85)+.45);foam.scale.set(2,.2,.55)}for(const sideSign of [-1,1]){for(let i=0;i<4;i++){const rock=sphere(.62+i%2*.2,mountainRock,curveX(center)+sideSign*(5.2+i*.45),-.18,center-2+i*1.25);rock.scale.set(1.4,.8,1.1)}}}
 // Small trail-side stones and mountain boulders.
 for(let i=0;i<70;i++){const sideSign=i%2?1:-1;const r=.35+(i%4)*.13;const rock=sphere(r,mountainRock,sideSign*(5.5+(i%4)*.8),-.65,-7-i*9.2);rock.scale.set(1.5,.8,1.2)}
 // Hazard builder helpers. Each obstacle has a matching collision volume.
-const obstacles=[];
-function addRoot(z,x){const mesh=cylinder(.22,.28,2.8,mountainBark,x,.13,z);mesh.rotation.z=Math.PI/2;obstacles.push({mesh,x,z,w:2.8,d:.62,h:.58,type:'block'})}
-function addFallenLog(z,x,len=3.3){const mesh=cylinder(.36,.43,len,mountainBark,x,.42,z);mesh.rotation.z=Math.PI/2;for(const end of [-1,1]){const cut=cylinder(.31,.31,.035,mountainStone,x+end*len/2,.42,z);cut.rotation.z=Math.PI/2}obstacles.push({mesh,x,z,w:len,d:.86,h:.9,type:'block'})}
-function addBoulder(z,x,size=1){const mesh=sphere(size,mountainRock,x,size*.72,z);mesh.scale.set(1.12,.92,1.02);mesh.rotation.set(.1,.3,.18);obstacles.push({mesh,x,z,w:size*2.15,d:size*1.9,h:size*1.55,type:'block'})}
-function addStoneBarrier(z,x){const mesh=box(1.9,1.25,1.45,mountainStone,x,.625,z);mesh.rotation.y=.08;const cap=box(1.35,.28,1.1,mountainRock,x,.88,z-.08);obstacles.push({mesh,x,z,w:1.9,d:1.45,h:1.25,type:'block'})}
-function addParallelLogs(z){for(const x of [-1.85,1.85]){const mesh=cylinder(.25,.3,7.2,mountainBark,x,.31,z);mesh.rotation.x=Math.PI/2;obstacles.push({mesh,x,z,w:.62,d:7.2,h:.72,type:'block'})}}
-function addSpikes(z,x){const base=box(1.9,.18,1.3,mountainRock,x,.12,z);for(let i=0;i<4;i++){const spike=new THREE.Mesh(new THREE.ConeGeometry(.22,.72,5),mat(0x9aa5a1,.6,.35));spike.position.set(x-.66+i*.44,.55,z);spike.castShadow=true;scene.add(spike)}obstacles.push({mesh:base,x,z,w:1.9,d:1.3,h:1.25,type:'block'})}
+function addRoot(z,x){const worldX=x+curveX(z),mesh=cylinder(.22,.28,2.8,mountainBark,worldX,.13,z);mesh.rotation.z=Math.PI/2;obstacles.push({mesh,x:worldX,z,w:2.8,d:.62,h:.58,type:'block'})}
+function addFallenLog(z,x,len=3.3){const worldX=x+curveX(z),mesh=cylinder(.36,.43,len,mountainBark,worldX,.42,z);mesh.rotation.z=Math.PI/2;for(const end of [-1,1]){const cut=cylinder(.31,.31,.035,mountainStone,worldX+end*len/2,.42,z);cut.rotation.z=Math.PI/2}obstacles.push({mesh,x:worldX,z,w:len,d:.86,h:.9,type:'block'})}
+function addBoulder(z,x,size=1){const worldX=x+curveX(z),mesh=sphere(size,mountainRock,worldX,size*.72,z);mesh.scale.set(1.12,.92,1.02);mesh.rotation.set(.1,.3,.18);obstacles.push({mesh,x:worldX,z,w:size*2.15,d:size*1.9,h:size*1.55,type:'block'})}
+function addStoneBarrier(z,x){const worldX=x+curveX(z),mesh=box(1.9,1.25,1.45,mountainStone,worldX,.625,z);mesh.rotation.y=.08;const cap=box(1.35,.28,1.1,mountainRock,worldX,.88,z-.08);obstacles.push({mesh,x:worldX,z,w:1.9,d:1.45,h:1.25,type:'block'})}
+function addParallelLogs(z){for(const x of [-1.85,1.85]){const worldX=x+curveX(z),mesh=cylinder(.25,.3,7.2,mountainBark,worldX,.31,z);mesh.rotation.x=Math.PI/2;obstacles.push({mesh,x:worldX,z,w:.62,d:7.2,h:.72,type:'block'})}}
+function addSpikes(z,x){const worldX=x+curveX(z),base=box(1.9,.18,1.3,mountainRock,worldX,.12,z);for(let i=0;i<4;i++){const spike=new THREE.Mesh(new THREE.ConeGeometry(.22,.72,5),mat(0x9aa5a1,.6,.35));spike.position.set(worldX-.66+i*.44,.55,z);spike.castShadow=true;scene.add(spike)}obstacles.push({mesh:base,x:worldX,z,w:1.9,d:1.3,h:1.25,type:'block'})}
 // Balanced, varied obstacle placement with at least one clear route through every arrangement.
 addRoot(-24,-1.7);addFallenLog(-43,2.15);addBoulder(-67,-2.25,.9);addStoneBarrier(-91,.7);addParallelLogs(-116);addRoot(-143,2.15);addFallenLog(-168,-2.15);addBoulder(-194,2.25,1.05);addStoneBarrier(-220,-2.15);addRoot(-247,1.75);
 addFallenLog(-311,-2.1);addStoneBarrier(-337,2.15);addParallelLogs(-363);addBoulder(-389,-2.25,1.05);addRoot(-414,2.15);addSpikes(-438,-2.1);
@@ -595,7 +597,7 @@ spinner.position.set(100,-100,100);
 // Red hazard beacons: visible from a distance and pulsed while the race is active.
 const hazardBeacons=[];
 obstacles.forEach((o,index)=>{
-  const rig=new THREE.Group();rig.position.set(0,0,o.z);
+  const rig=new THREE.Group();rig.position.set(curveX(o.z),0,o.z);
   for(const x of [-4.05,4.05]){
     const post=new THREE.Mesh(new THREE.CylinderGeometry(.055,.075,.95,8),side);post.position.set(x,.48,0);post.castShadow=true;rig.add(post);
     const lamp=new THREE.Mesh(new THREE.SphereGeometry(.19,12,10),new THREE.MeshStandardMaterial({color:0xff2020,emissive:0xff0800,emissiveIntensity:1.8,roughness:.3}));
@@ -606,7 +608,7 @@ obstacles.forEach((o,index)=>{
 
 // The Soldier GLB is the only player character. No procedural placeholder
 // or alternate athlete model is created while the Soldier asset loads.
-const player=new THREE.Group();scene.add(player);player.position.set(0,.05,3.5);
+const player=new THREE.Group();scene.add(player);player.position.set(curveX(3.5),.05,3.5);
 const body=new THREE.Group();player.add(body);
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
@@ -811,14 +813,14 @@ async function reset(){
   else{const {data:sessionData,error:sessionError}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'start',level}});if(sessionError||!sessionData?.ok){document.getElementById('bootStatus').textContent=sessionError?.message||sessionData?.error||'Could not start this level. Please try again.';return;}rushSessionId=sessionData.session_id;}
   lastProgressReport=0;progressChain=Promise.resolve();
   if(rushAudioOn){sfxStart();startHorrorAmbience()}
-  activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'FOREST TRAIL  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
+  activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'FOREST TRAIL  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(curveX(3.5),.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
 }
 function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
-function onTrack(x,z){if(developmentPreview){const inRiver=riverGaps.some(g=>z<=g.start&&z>=g.end);return Math.abs(x)<=4.05&&!inRiver&&z<=5&&z>=-665}return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z<=-74))}
+function onTrack(x,z){const localX=x-curveX(z);if(developmentPreview){const inRiver=riverGaps.some(g=>z<=g.start&&z>=g.end);return Math.abs(localX)<=4.05&&!inRiver&&z<=5&&z>=-665}return Math.abs(localX)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z>=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
 window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';
-if(developmentPreview){document.title='CHOME Rush Arena — Mountain Run Level 2 Preview';document.querySelector('.brand').innerHTML='CHOME <span>RUSH ARENA · LEVEL 2</span>';document.querySelector('.race-pill').textContent='ADMIN DEVELOPMENT PREVIEW';document.querySelector('#welcome .dialog h1').innerHTML='MOUNTAIN <span>RUN</span>';document.querySelector('#welcome .dialog p').textContent='Run through a green mountain forest with river jumps, fallen trees, tree roots, rocks, stone barriers and natural trail hazards. Admin development preview only.';document.querySelector('#welcome .dialog .small').textContent='665m mountain course · Third-person camera · Semi-realistic 3D';document.querySelector('#result .eyebrow').textContent='MOUNTAIN RUN PREVIEW';document.querySelector('#result .small').textContent='Admin preview only · No player rewards are issued';document.getElementById('chox').closest('.stat').style.display='none';document.querySelector('.brand').style.letterSpacing='.08em';}document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
+if(developmentPreview){document.title='CHOME Rush Arena — Mountain Run Level 3 Preview';document.querySelector('.brand').innerHTML='CHOME <span>RUSH ARENA · LEVEL 3</span>';document.querySelector('.race-pill').textContent='ADMIN DEVELOPMENT PREVIEW';document.querySelector('#welcome .dialog h1').innerHTML='MOUNTAIN <span>RUN</span>';document.querySelector('#welcome .dialog p').textContent='Run through a green mountain forest with river jumps, fallen trees, tree roots, rocks, stone barriers and natural trail hazards. Admin development preview only.';document.querySelector('#welcome .dialog .small').textContent='665m mountain course · Third-person camera · Semi-realistic 3D';document.querySelector('#result .eyebrow').textContent='MOUNTAIN RUN PREVIEW';document.querySelector('#result .small').textContent='Admin preview only · No player rewards are issued';document.getElementById('chox').closest('.stat').style.display='none';document.querySelector('.brand').style.letterSpacing='.08em';}document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 document.getElementById('restartFailed').addEventListener('click',reset);
 document.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
 addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
@@ -837,8 +839,9 @@ const clock=new THREE.Clock();
 // through a block; jumping clears it only after the feet rise above its top.
 // Ground-diving lowers the hitbox so the runner can pass beneath a low clearance gate.
 function moveRunner(dx,dz){
-  const nextX=THREE.MathUtils.clamp(player.position.x+dx,-4.05,4.05);
   const nextZ=player.position.z+dz;
+  const nextCenter=curveX(nextZ);
+  const nextX=nextCenter+THREE.MathUtils.clamp(player.position.x+dx-nextCenter,-4.05,4.05);
   if(!obstacleInspectionMode){
   const radius=.42,runnerHeight=slideTimer>0?1.02:2.3;
   for(const o of obstacles){
