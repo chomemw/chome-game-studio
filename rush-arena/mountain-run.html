@@ -98,6 +98,7 @@
 // Load the 3D engine with a second CDN fallback. A failed first CDN must not
 // silently prevent the entire game module from starting.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 let THREE;
 try {
   THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
@@ -365,25 +366,104 @@ const dirtCanvas=document.createElement('canvas');dirtCanvas.width=256;dirtCanva
 for(let i=0;i<3200;i++){const shade=55+Math.random()*65;dirtCtx.fillStyle='rgba('+shade+','+(shade*.78)+','+(shade*.53)+','+(Math.random()*.28)+')';dirtCtx.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*3,1+Math.random()*2)}
 const dirtTexture=new THREE.CanvasTexture(dirtCanvas);dirtTexture.wrapS=dirtTexture.wrapT=THREE.RepeatWrapping;dirtTexture.repeat.set(1,16);dirtTexture.colorSpace=THREE.SRGBColorSpace;
 const mountainPath=new THREE.MeshStandardMaterial({map:dirtTexture,color:0xc2a078,roughness:.98});
-const ridgeGeometry=new THREE.ConeGeometry(1,1,7),ridgeMat=mat(0x637f72,.99),ridgeMat2=mat(0x82978a,.99);
-for(let i=0;i<26;i++){const sideSign=i%2?1:-1;const ridge=new THREE.Mesh(ridgeGeometry,i%3?ridgeMat:ridgeMat2);const height=19+(i%5)*5;ridge.scale.set(10+(i%4)*3,height,13+(i%3)*4);ridge.position.set(sideSign*(20+(i%4)*8),height*.48,-i*27-18);ridge.rotation.z=sideSign*.12;scene.add(ridge)}
+// Distant mountain shoulders: irregular terrain meshes, not repeated cone-shaped props.
+function makeMountainRidge(seed){
+  const segments=18,rings=9,positions=[],colors=[],indices=[];
+  const rand=n=>{const v=Math.sin((n+1)*127.1+seed*311.7)*43758.5453;return v-Math.floor(v)};
+  for(let r=0;r<=rings;r++){
+    const radius=r/rings;
+    for(let a=0;a<=segments;a++){
+      const angle=a/segments*Math.PI*2;
+      const edgeNoise=(rand(r*71+a*13)-.5)*.12;
+      const radial=radius*(1+edgeNoise);
+      const x=Math.cos(angle)*radial,z=Math.sin(angle)*radial;
+      const base=Math.max(0,1-radial);
+      const ridges=.72+.18*Math.sin(angle*3+seed)+.1*Math.cos(angle*5+seed*.7);
+      const peak=base*base*ridges;
+      const y=peak*(.78+.22*rand(r*29+a*7));
+      positions.push(x,y,z);
+      const shade=.31+peak*.2+rand(r*41+a*17)*.045;
+      colors.push(shade*.83,shade,shade*.88);
+      if(r<rings&&a<segments){const p=r*(segments+1)+a,q=p+segments+1;indices.push(p,q,p+1,q,q+1,p+1)}
+    }
+  }
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setIndex(indices);g.computeVertexNormals();return g;
+}
+const ridgeMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.98,flatShading:false});
+for(let i=0;i<22;i++){
+  const sideSign=i%2?1:-1,height=20+(i%5)*5,width=13+(i%4)*4,depth=18+(i%3)*5;
+  const ridge=new THREE.Mesh(makeMountainRidge(i),ridgeMat);
+  ridge.scale.set(width,height,depth);
+  ridge.position.set(sideSign*(19+(i%4)*7),-1.2,-i*31-18);
+  ridge.rotation.y=(i%7)*.31;ridge.receiveShadow=false;scene.add(ridge);
+}
 // Ground is split at three river gaps so the player must jump across the water.
 riverGaps.push({start:-281,end:-286},{start:-465,end:-470},{start:-605,end:-610});
 const groundSpans=[[5,-281],[-286,-465],[-470,-605],[-610,-665]];
 for(const [nearZ,farZ] of groundSpans){const len=Math.abs(nearZ-farZ),mid=(nearZ+farZ)/2;box(28,.24,len,mountainGrass,0,-1.12,mid);box(9,.8,len,mountainPath,0,-.48,mid);box(9.5,.18,len,mountainDirt,0,-.96,mid)}
-// Soft grassy shoulders and scattered low vegetation, instanced for mobile performance.
-const tuftMesh=new THREE.InstancedMesh(new THREE.ConeGeometry(.12,.42,4),mountainGrassLight,520),tuftDummy=new THREE.Object3D();
-for(let i=0;i<520;i++){const sideSign=i%2?1:-1,z=-4-(i*1.27)%655,x=sideSign*(5.1+((i*17)%53)/10);tuftDummy.position.set(x,-.72,z);tuftDummy.rotation.y=(i%7)*.7;tuftDummy.scale.set(.65+(i%4)*.15,.7+(i%5)*.12,.65+(i%3)*.18);tuftDummy.updateMatrix();tuftMesh.setMatrixAt(i,tuftDummy.matrix)}
-tuftMesh.instanceMatrix.needsUpdate=true;scene.add(tuftMesh);
-// Natural tree line: instanced trunks and layered green crowns, not placeholder cubes.
-const treeTrunks=new THREE.InstancedMesh(new THREE.CylinderGeometry(.16,.28,4.4,7),mountainBark,84),treeCrowns=new THREE.InstancedMesh(new THREE.ConeGeometry(1.35,3.25,7),mountainLeaves,168),treeCrowns2=new THREE.InstancedMesh(new THREE.ConeGeometry(1.08,2.55,7),mountainLeaves2,168),treeDummy=new THREE.Object3D();
-for(let i=0;i<84;i++){const sideSign=i%2?1:-1,z=-10-i*7.7,x=sideSign*(7.2+(i%5)*1.45),h=3.5+(i%4)*.42;treeDummy.position.set(x,h/2-.05,z);treeDummy.rotation.z=sideSign*((i%3)-1)*.035;treeDummy.scale.set(1,h/4.4,1);treeDummy.updateMatrix();treeTrunks.setMatrixAt(i,treeDummy.matrix);
-for(let layer=0;layer<2;layer++){const k=i*2+layer;treeDummy.position.set(x,2.1+layer*1.12,z);treeDummy.scale.set(1-layer*.13,1,1-layer*.13);treeDummy.rotation.set(0,(i%7)*.4,0);treeDummy.updateMatrix();(layer?treeCrowns2:treeCrowns).setMatrixAt(k,treeDummy.matrix)}}
-treeTrunks.instanceMatrix.needsUpdate=true;treeCrowns.instanceMatrix.needsUpdate=true;treeCrowns2.instanceMatrix.needsUpdate=true;scene.add(treeTrunks,treeCrowns,treeCrowns2);
-// Bushes along the outer edges.
-const bushes=new THREE.InstancedMesh(new THREE.SphereGeometry(1,8,6),mountainLeaves2,100),bushDummy=new THREE.Object3D();
-for(let i=0;i<100;i++){const sideSign=i%2?1:-1;bushDummy.position.set(sideSign*(5.7+(i%4)*1.15),-.12,-13-i*6.45);bushDummy.scale.set(1.15+(i%3)*.25,.48+(i%2)*.15,.72+(i%4)*.12);bushDummy.updateMatrix();bushes.setMatrixAt(i,bushDummy.matrix)}
-bushes.instanceMatrix.needsUpdate=true;scene.add(bushes);
+// Natural grass tufts: curved, tapered blade meshes instanced for low draw-call cost.
+function makeGrassTuftGeometry(){
+  const positions=[],normals=[];
+  for(let blade=0;blade<5;blade++){
+    const angle=blade/5*Math.PI*2,lean=.12+(blade%3)*.035;
+    const bx=Math.cos(angle)*.045,bz=Math.sin(angle)*.045;
+    const wx=-Math.sin(angle)*.035,wz=Math.cos(angle)*.035;
+    const base=positions.length/3;
+    for(let row=0;row<4;row++){
+      const t=row/3,width=(1-t)*.5+.035;
+      const cx=bx+Math.cos(angle)*lean*t*t,cz=bz+Math.sin(angle)*lean*t*t;
+      const cy=t*.48;
+      positions.push(cx-wx*width,cy,cz-wz*width,cx+wx*width,cy,cz+wz*width);
+    }
+    for(let row=0;row<3;row++){const a=base+row*2,b=a+2;normals.push(a,b,a+1,b,b+1,a+1)}
+  }
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setIndex(normals);g.computeVertexNormals();return g;
+}
+const grassTufts=new THREE.InstancedMesh(makeGrassTuftGeometry(),mountainGrassLight,mobileDevice?150:260),grassDummy=new THREE.Object3D();
+for(let i=0;i<(mobileDevice?150:260);i++){
+  const sideSign=i%2?1:-1,z=-4-(i*2.55)%655,x=sideSign*(5.05+((i*17)%65)/10);
+  grassDummy.position.set(x,-.98,z);grassDummy.rotation.y=(i%11)*.57;
+  const scale=.72+(i%5)*.13;grassDummy.scale.set(scale,scale,scale);grassDummy.updateMatrix();grassTufts.setMatrixAt(i,grassDummy.matrix);
+}
+grassTufts.instanceMatrix.needsUpdate=true;scene.add(grassTufts);
+// CC0 scanned forest assets from Poly Haven are loaded asynchronously. The run can
+// start immediately; the models stream in without blocking the game or its controls.
+const forestLoader=new GLTFLoader();
+async function loadPolyHavenModel(assetId){
+  const response=await fetch('https://api.polyhaven.com/files/'+assetId,{mode:'cors'});
+  if(!response.ok)throw new Error('Poly Haven asset lookup failed for '+assetId+' ('+response.status+')');
+  const manifest=await response.json(),entry=manifest?.gltf?.['1k']?.gltf;
+  const modelUrl=typeof entry==='string'?entry:entry?.url;
+  if(!modelUrl)throw new Error('No 1K glTF model URL returned for '+assetId);
+  const gltf=await forestLoader.loadAsync(modelUrl);
+  return gltf.scene;
+}
+function normalizeForestModel(source,targetHeight){
+  const model=source.clone(true),bounds=new THREE.Box3().setFromObject(model),size=bounds.getSize(new THREE.Vector3());
+  const scale=targetHeight/Math.max(.001,size.y);model.scale.setScalar(scale);
+  model.position.y=-bounds.min.y*scale;
+  model.traverse(node=>{if(node.isMesh){node.castShadow=!mobileDevice;node.receiveShadow=false;node.frustumCulled=true;}});
+  return model;
+}
+async function buildNaturalForest(){
+  const specs=[{id:'tree_small_02',height:6.2},{id:'fir_tree_01',height:8.4}];
+  const loaded=await Promise.allSettled(specs.map(spec=>loadPolyHavenModel(spec.id)));
+  const available=loaded.map((result,index)=>result.status==='fulfilled'?{...specs[index],model:result.value}:null).filter(Boolean);
+  if(!available.length){console.error('CHOME natural forest assets could not be loaded',loaded.map(x=>x.reason));return;}
+  const perSide=mobileDevice?19:29;
+  for(let sideIndex=0;sideIndex<2;sideIndex++){
+    const sideSign=sideIndex===0?-1:1;
+    for(let i=0;i<perSide;i++){
+      const source=available[(i+sideIndex)%available.length];
+      const tree=normalizeForestModel(source.model,source.height*(.82+((i*7+sideIndex*3)%9)*.045));
+      const z=-9-i*(646/perSide)+((i*13+sideIndex*5)%7)-3.2;
+      const x=sideSign*(7.2+((i*11+sideIndex*3)%9)*.78);
+      tree.position.x=x;tree.position.z=z;tree.rotation.y=((i*17+sideIndex*29)%628)/100;
+      scene.add(tree);
+    }
+  }
+}
+void buildNaturalForest().catch(error=>console.error('CHOME forest build failed:',error));
 // Three visible river crossings with foaming edges and stepping stones below the jump line.
 for(const gap of riverGaps){const center=(gap.start+gap.end)/2,len=Math.abs(gap.start-gap.end)+2;box(20,.22,len,mountainRock,0,-1.05,center);box(19,.16,len,mountainWater,0,-.48,center);for(let i=0;i<5;i++){const stone=sphere(.72,mountainStone,(i-2)*1.35,-.2,center+(i%2?-.85:.85));stone.scale.set(1.25,.38,.78);const foam=sphere(.16,mountainFoam,(i-2)*1.35+.65,-.36,center+(i%2?-.85:.85)+.45);foam.scale.set(2,.2,.55)}for(const sideSign of [-1,1]){for(let i=0;i<4;i++){const rock=sphere(.62+i%2*.2,mountainRock,sideSign*(5.2+i*.45),-.18,center-2+i*1.25);rock.scale.set(1.4,.8,1.1)}}}
 // Small trail-side stones and mountain boulders.
