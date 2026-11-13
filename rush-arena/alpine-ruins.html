@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#101a35">
-<title>CHOME Rush Arena — Level 3 Alpine Ruins Preview</title>
+<title>CHOME Rush Arena — Level 3 Temple Trail Preview</title>
 <style>
 :root{color-scheme:dark;--ink:#f8fbff;--muted:#b9c6e2;--panel:#101a35dc;--line:#ffffff30;--purple:#8c70ff;--cyan:#65e4ef;--gold:#ffe18a}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#91d8f2;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}button{font:inherit;color:inherit;cursor:pointer}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}
@@ -235,6 +235,7 @@ cloudInstances.instanceMatrix.needsUpdate=true;cloudInstances.frustumCulled=true
 if(level===1){for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new THREE.Group();const top=cylinder(2.6,3.8,2.5,grass2,0,-1,0,island);top.rotation.y=Math.random();const cap=cylinder(2.65,2.65,.28,grass,0,.32,0,island);cap.position.y=.32;island.position.set(x,-2.2,z);scene.add(island)}}
 
 const obstacles=[];
+const coins=[];
 const spinner=new THREE.Group();
 let riverGaps=[];
 let checkpoints=[];
@@ -460,7 +461,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  for(let z=-8;z>=-660;z-=5.4)for(const sideSign of [-1,1]){forestDummy.position.set(curveX(z)+sideSign*(5.9+(fernN%4)*.22),.48,z);forestDummy.rotation.set(.2,fernN*.73,sideSign*.3);forestDummy.scale.set(.7,1,.7);forestDummy.updateMatrix();ferns.setMatrixAt(fernN++,forestDummy.matrix)}
  ferns.instanceMatrix.needsUpdate=true;ferns.castShadow=false;scene.add(ferns);
  // Gold medallions form collectible trails through the bends.
- const coinMaterial=new THREE.MeshStandardMaterial({color:0xffd45b,metalness:.78,roughness:.22,emissive:0x6d3d08,emissiveIntensity:.22}),coinGeometry=new THREE.TorusGeometry(.34,.105,8,18),coins=[];
+ const coinMaterial=new THREE.MeshStandardMaterial({color:0xffd45b,metalness:.78,roughness:.22,emissive:0x6d3d08,emissiveIntensity:.22}),coinGeometry=new THREE.TorusGeometry(.34,.105,8,18);
  for(let z=-20;z>=-650;z-=9.5){const lanePattern=Math.floor(Math.abs(z)/28)%3,offset=[-2.45,0,2.45][lanePattern],coin=new THREE.Mesh(coinGeometry,coinMaterial);coin.position.set(curveX(z)+offset,1.15,z);coin.rotation.y=Math.PI/2;coin.castShadow=true;scene.add(coin);coins.push({mesh:coin,x:coin.position.x,z,collected:false})}
  // Level-specific hazards: cracked pillars, rolling stone blocks, ice spires and fallen lintels.
  function addRuinPillar(z,x,h=2.4){const wx=curveX(z)+x,shaft=cylinder(.42,.58,h,ruinStone,wx,h/2-.08,z);shaft.rotation.z=.04;const cap=box(1.2,.28,1.05,ruinBronze,wx,h-.08,z);obstacles.push({mesh:shaft,x:wx,z,w:1.15,d:1.05,h:h+.2,type:'block'})}
