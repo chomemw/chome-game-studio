@@ -61,8 +61,8 @@ h1{font-size:clamp(36px,7vw,58px);line-height:.98;letter-spacing:-.07em;margin:1
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
 const TOTAL_LEVELS=250;
-const LEVEL_ROUTES=new Map([[1,'index.html?level=1&v=18'],[2,'mountain-run.html?level=2']]);
-const ADMIN_PREVIEW_LEVELS=new Set([2]);
+const LEVEL_ROUTES=new Map([[1,'index.html?level=1&v=18'],[2,'mountain-run.html?level=2'],[3,'alpine-ruins.html?level=3']]);
+const ADMIN_PREVIEW_LEVELS=new Set([2,3]);
 const $=id=>document.getElementById(id);
 function makeLevel(level,status){
  const card=document.createElement('article');card.className='level '+status;
@@ -75,8 +75,8 @@ function makeLevel(level,status){
  const note=document.createElement('div');note.className='level-note';
  const button=document.createElement('button');button.className='play';
  if(ADMIN_PREVIEW_LEVELS.has(level)){
-  note.textContent='Mountain Run · admin testing only';
-  button.textContent='TEST LEVEL 2';
+  note.textContent=level===2?'Mountain Run · admin testing only':'Alpine Ruins · forest, bridges, waterfalls and ruins';
+  button.textContent='TEST LEVEL '+level;
   button.disabled=false;
  }else if(status==='completed'){
   note.textContent='Best result saved';
@@ -112,7 +112,7 @@ async function load(){
   const status=completed.has(level)?'completed':level<=unlocked?'unlocked':'locked';
   grid.append(makeLevel(level,status));
  }
- $('message').textContent='Admin testing: Level 1 opens Sky Starter. Level 2 opens Mountain Run directly as a separate admin-only preview. Level 2 player progression and rewards remain disabled until release approval.';
+ $('message').textContent='Admin testing: Level 1 opens Sky Starter. Level 2 opens Mountain Run and Level 3 opens Alpine Ruins as separate admin-only previews. New-level player progression and rewards remain disabled until release approval.';
 }
 load().catch(error=>{$('message').textContent='Unable to load levels: '+(error?.message||'Please refresh.');});
 </script>
