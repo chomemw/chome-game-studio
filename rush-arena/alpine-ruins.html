@@ -125,16 +125,16 @@ const curveX=z=>2.05*Math.sin((z+28)/92)+0.42*Math.sin((z+12)/31);
 const curveAngle=z=>Math.atan2(curveX(z-2)-curveX(z+2),-4);
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
 const obstacleInspectionMode=level===1;
-const scene=new THREE.Scene();scene.background=new THREE.Color(level===3?0xb9d9e9:0xa9c2d0);scene.fog=new THREE.Fog(level>=2?0xb9d9e9:0xa9c2d0,level>=2?58:42,level>=2?190:155);
+const scene=new THREE.Scene();scene.background=new THREE.Color(level===3?0xb9d9e9:0xa9c2d0);scene.fog=new THREE.Fog(level===3?0xb9d9e9:0xa9c2d0,level===3?58:42,level===3?190:155);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,260);
 const mobileDevice=matchMedia('(max-width: 900px), (pointer: coarse)').matches;
 const renderer=new THREE.WebGLRenderer({antialias:!mobileDevice,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=!mobileDevice;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;root.appendChild(renderer.domElement);
-const hemisphere=new THREE.HemisphereLight(level>=2?0xe1f4df:0xb8c8d8,level>=2?0x435b3d:0x202832,level>=2?1.45:1.05);scene.add(hemisphere);
-const sun=new THREE.DirectionalLight(level>=2?0xffedc5:0xb7c8dc,level>=2?2.0:1.75);sun.position.set(-18,34,22);sun.castShadow=true;sun.shadow.mapSize.set(mobileDevice?512:768,mobileDevice?512:768);sun.shadow.bias=-0.00015;sun.shadow.camera.left=-28;sun.shadow.camera.right=28;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-110;scene.add(sun);
+const hemisphere=new THREE.HemisphereLight(level===3?0xe1f4df:0xb8c8d8,level===3?0x435b3d:0x202832,level===3?1.45:1.05);scene.add(hemisphere);
+const sun=new THREE.DirectionalLight(level===3?0xffedc5:0xb7c8dc,level===3?2.0:1.75);sun.position.set(-18,34,22);sun.castShadow=true;sun.shadow.mapSize.set(mobileDevice?512:768,mobileDevice?512:768);sun.shadow.bias=-0.00015;sun.shadow.camera.left=-28;sun.shadow.camera.right=28;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-110;scene.add(sun);
 const mat=(color,roughness=.78,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
 // Permanent storm atmosphere: lightweight rain streaks follow the runner.
-const rainCount=level>=2?0:(mobileDevice?90:200),rainPositions=new Float32Array(rainCount*6),rainGeometry=new THREE.BufferGeometry();
+const rainCount=level===3?0:(mobileDevice?90:200),rainPositions=new Float32Array(rainCount*6),rainGeometry=new THREE.BufferGeometry();
 const rainSeed=[];
 for(let i=0;i<rainCount;i++){
   rainSeed.push({x:(Math.random()-.5)*22,y:Math.random()*17,z:(Math.random()-.5)*38,v:12+Math.random()*9});
@@ -144,8 +144,8 @@ rainGeometry.setDrawRange(0,rainCount*2);
 const rainMaterial=new THREE.LineBasicMaterial({color:0xb8d8ed,transparent:true,opacity:.42,depthWrite:false});
 const rainField=new THREE.LineSegments(rainGeometry,rainMaterial);rainField.frustumCulled=false;scene.add(rainField);
 const stormFlashLight=new THREE.PointLight(0xdcecff,0,95,1.5);scene.add(stormFlashLight);
-let lightningTimer=level>=2?99999:7+Math.random()*6,lightningFlash=0,thunderPending=0;
-const weatherLabel=document.createElement('div');weatherLabel.textContent=level>=2?'🌿  ALPINE RUINS · FOREST / RIVERS / WATERFALLS':'⛈  STORM CONDITIONS';
+let lightningTimer=level===3?99999:7+Math.random()*6,lightningFlash=0,thunderPending=0;
+const weatherLabel=document.createElement('div');weatherLabel.textContent=level===3?'❄  ALPINE RUINS · CITADEL / ICEFALLS / STONE BRIDGES':'⛈  STORM CONDITIONS';
 Object.assign(weatherLabel.style,{position:'fixed',left:'12px',top:'54px',zIndex:'45',padding:'7px 10px',border:'1px solid rgba(173,204,224,.28)',borderRadius:'9px',background:'rgba(12,22,32,.58)',color:'#d8e8f4',font:'800 10px system-ui',letterSpacing:'.12em',pointerEvents:'none',backdropFilter:'blur(5px)'});
 document.body.appendChild(weatherLabel);
 if(obstacleInspectionMode){const inspectionLabel=document.createElement('div');inspectionLabel.textContent='👁 INSPECTION MODE · COLLISIONS OFF';Object.assign(inspectionLabel.style,{position:'fixed',right:'12px',top:'54px',zIndex:'46',padding:'7px 10px',border:'1px solid rgba(120,235,190,.45)',borderRadius:'9px',background:'rgba(8,28,24,.72)',color:'#c8ffe8',font:'800 10px system-ui',letterSpacing:'.08em',pointerEvents:'none',backdropFilter:'blur(5px)'});document.body.appendChild(inspectionLabel)}
@@ -217,7 +217,7 @@ const sphere=(r,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.SphereG
 const cylinder=(rt,rb,h,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,16),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o};
 
 // Sky islands and clouds. Cloud puffs share one instanced draw call.
-const sky=new THREE.Mesh(new THREE.SphereGeometry(180,24,16),new THREE.MeshBasicMaterial({color:level>=2?0xb9d9e9:0x8ed9f4,side:THREE.BackSide}));scene.add(sky);
+const sky=new THREE.Mesh(new THREE.SphereGeometry(180,24,16),new THREE.MeshBasicMaterial({color:level===3?0xb9d9e9:0x8ed9f4,side:THREE.BackSide}));scene.add(sky);
 const cloudGeometry=new THREE.SphereGeometry(1,12,8);
 const cloudInstances=new THREE.InstancedMesh(cloudGeometry,white,120);
 const cloudDummy=new THREE.Object3D();let cloudIndex=0;
@@ -363,7 +363,7 @@ addMovingBlock(-610,2.2,2,1.7,'crusher');addExtendedOverhead(-626,.98);addMoving
 spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
 
 }else{
- // LEVEL 3 — ALPINE RUINS. A distinct high-altitude citadel course, not the Level 2 forest route.
+ // LEVEL 3 — ALPINE RUINS. A distinct high-altitude citadel course with its own architecture and hazards.
  scene.background=new THREE.Color(0xb7cbd8);scene.fog=new THREE.Fog(0xb7cbd8,62,205);
  const ruinRock=mat(0x68757a,.96),ruinStone=mat(0x9b9a88,.94),ruinDark=mat(0x454e52,.98),ruinMoss=mat(0x526d5b,.98),ruinBronze=mat(0x96764c,.55,.48),ruinIce=mat(0xa9dce7,.24,.12),ruinWater=new THREE.MeshStandardMaterial({color:0x247f9a,roughness:.2,metalness:.08,transparent:true,opacity:.92}),ruinFoam=new THREE.MeshStandardMaterial({color:0xe1f5f2,roughness:.28,transparent:true,opacity:.82});
  const snow=mat(0xd8e5e4,.92),stonePath=mat(0x8d9692,.96),stoneEdge=mat(0x535e62,.98);
