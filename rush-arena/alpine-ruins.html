@@ -129,7 +129,7 @@ const curveAngle=z=>Math.atan2(curveX(z-2)-curveX(z+2),-4);
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
 const obstacleInspectionMode=level===1;
 const scene=new THREE.Scene();scene.background=new THREE.Color(level===3?0xb9d9e9:0xa9c2d0);scene.fog=new THREE.Fog(level===3?0xb9d9e9:0xa9c2d0,level===3?58:42,level===3?190:155);
-const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,260);
+const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,300);
 const mobileDevice=matchMedia('(max-width: 900px), (pointer: coarse)').matches;
 const renderer=new THREE.WebGLRenderer({antialias:!mobileDevice,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=!mobileDevice;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;root.appendChild(renderer.domElement);
@@ -424,9 +424,9 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  const trunks=new THREE.InstancedMesh(trunkGeo,bark,250),canopiesA=new THREE.InstancedMesh(canopyGeo,leafDark,250),canopiesB=new THREE.InstancedMesh(canopyGeo,leafMid,250),canopiesC=new THREE.InstancedMesh(leafGeo,leafBright,250),roots=new THREE.InstancedMesh(rootGeo,rootMat,500),forestDummy=new THREE.Object3D();
  let treeCount=0,rootCount=0;
  for(let z=-9;z>=-655;z-=5.25)for(const sideSign of [-1,1]){
-   const wobble=Math.sin((Math.abs(z)+treeCount*7)*.19)*1.15,offset=5.15+(treeCount%4)*1.28+wobble,x=curveX(z)+sideSign*offset;
+   const wobble=Math.sin((Math.abs(z)+treeCount*7)*.19)*.8,offset=8.2+(treeCount%4)*1.05+wobble,x=curveX(z)+sideSign*offset;
    forestDummy.position.set(x,routeY(z)+3.5,z);forestDummy.rotation.set(0,(treeCount%9)*.37,sideSign*.025);forestDummy.scale.set(.82+(treeCount%5)*.13,1.0+(treeCount%4)*.18,.82+(treeCount%5)*.13);forestDummy.updateMatrix();trunks.setMatrixAt(treeCount,forestDummy.matrix);
-   for(const [mesh,y,scale] of [[canopiesA,7.2,3.4],[canopiesB,9.2,2.8],[canopiesC,10.7,2.2]]){forestDummy.position.set(x+sideSign*.5,routeY(z)+y,z);forestDummy.rotation.set(.12,(treeCount%7)*.42,.08);forestDummy.scale.set(scale,scale*.82,scale);forestDummy.updateMatrix();mesh.setMatrixAt(treeCount,forestDummy.matrix)}
+   for(const [mesh,y,scale] of [[canopiesA,7.2,2.65],[canopiesB,9.2,2.25],[canopiesC,10.7,1.8]]){forestDummy.position.set(x+sideSign*.5,routeY(z)+y,z);forestDummy.rotation.set(.12,(treeCount%7)*.42,.08);forestDummy.scale.set(scale,scale*.82,scale);forestDummy.updateMatrix();mesh.setMatrixAt(treeCount,forestDummy.matrix)}
    for(let r=0;r<2;r++){forestDummy.position.set(x-sideSign*(.5+r*.5),routeY(z)+.02,z+(r?-.5:.5));forestDummy.rotation.set(0,sideSign*(.8+r*.5),Math.PI/2);forestDummy.scale.set(.24,.24,2.5+r);forestDummy.updateMatrix();roots.setMatrixAt(rootCount++,forestDummy.matrix)}
    treeCount++;
  }
@@ -434,14 +434,14 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  // Low shrubs and ferns frame the path without blocking the running lane.
  const bushGeo=new THREE.IcosahedronGeometry(1,1),bushes=new THREE.InstancedMesh(bushGeo,fernMat,260),ferns=new THREE.InstancedMesh(new THREE.ConeGeometry(.32,1.15,5),leafBright,520);let bushN=0,fernN=0;
  for(let z=-8;z>=-655;z-=5.1)for(const sideSign of [-1,1]){
-   const x=curveX(z)+sideSign*(3.65+(bushN%4)*.34);
+   const x=curveX(z)+sideSign*(4.15+(bushN%4)*.38);
    forestDummy.position.set(x,routeY(z)+.35,z);forestDummy.rotation.set(.1,bushN*.7,.08);forestDummy.scale.set(1.15,.7,1.1);forestDummy.updateMatrix();bushes.setMatrixAt(bushN++,forestDummy.matrix);
    for(let q=0;q<2;q++){forestDummy.position.set(x+sideSign*q*.55,routeY(z)+.48,z-q*.7);forestDummy.rotation.set(.2,fernN*.91,sideSign*.35);forestDummy.scale.set(.75,1,.72);forestDummy.updateMatrix();ferns.setMatrixAt(fernN++,forestDummy.matrix)}
  }
  bushes.count=bushN;ferns.count=fernN;for(const inst of [bushes,ferns]){inst.instanceMatrix.needsUpdate=true;inst.castShadow=false;scene.add(inst)}
- // Hanging vines and broad leaves overhead create the enclosed jungle tunnel.
+ // Keep the overhead camera corridor clear so foliage never masks the runner or route.
  const vineMat=mat(0x28552d,.98),vineGeo=new THREE.CylinderGeometry(.035,.055,1,5),vines=new THREE.InstancedMesh(vineGeo,vineMat,180);let vineN=0;
- for(let z=-18;z>=-650;z-=14)for(let sideSign of [-1,1]){forestDummy.position.set(curveX(z)+sideSign*(4.2+(vineN%3)*.7),routeY(z)+7.3,z);forestDummy.rotation.set(0,0,sideSign*.12);forestDummy.scale.set(1,1.5+(vineN%4)*.65,1);forestDummy.updateMatrix();vines.setMatrixAt(vineN++,forestDummy.matrix)}
+ for(let z=-18;z>=-650;z-=14)for(let sideSign of [-1,1]){forestDummy.position.set(curveX(z)+sideSign*(9.0+(vineN%3)*.6),routeY(z)+8.5,z);forestDummy.rotation.set(0,0,sideSign*.12);forestDummy.scale.set(.65,1.1+(vineN%4)*.35,.65);forestDummy.updateMatrix();vines.setMatrixAt(vineN++,forestDummy.matrix)}
  vines.count=vineN;vines.instanceMatrix.needsUpdate=true;scene.add(vines);
  // Natural ravines and short timber bridges. The trail remains safely traversable in preview.
  riverGaps.push({start:-184,end:-190},{start:-392,end:-398},{start:-574,end:-580});
@@ -467,7 +467,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  checkpoints=[-72,-172,-272,-372,-472,-572,-642];
  function addTrailSign(title,range,z){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=160;const ctx=canvas.getContext('2d');ctx.fillStyle='#173c25';ctx.fillRect(0,0,1024,160);ctx.fillStyle='#9bc66d';ctx.fillRect(0,0,16,160);ctx.fillRect(1008,0,16,160);ctx.fillStyle='#f5f4d8';ctx.font='900 54px system-ui';ctx.textAlign='center';ctx.fillText(title,512,70);ctx.fillStyle='#b8d98b';ctx.font='800 27px system-ui';ctx.fillText(range,512,119);const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;const board=new THREE.Mesh(new THREE.PlaneGeometry(8,1.25),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));board.position.set(curveX(z),routeY(z)+5.2,z);scene.add(board)}
  const jungleZones=[['JUNGLE TRAIL','0m — 133m',-12],['WATERFALL RUN','266m — 399m',-278],['ANCIENT CANOPY','399m — 532m',-411],['DEEP FOREST','532m — 665m',-544]];
- for(const [title,range,z] of jungleZones)addTrailSign(title,range,z);
+ // Zone names stay in the HUD; no overhead text boards obstruct the running view.
  // Keep logical checkpoints, but remove the overhead wooden frames that looked like a barrier in the running path.
  const finish=new THREE.Group(),finishX=curveX(-662);cylinder(.18,.3,4,bark,finishX-2.55,2,0,finish);cylinder(.18,.3,4,bark,finishX+2.55,2,0,finish);box(5.5,.28,.4,rootMat,finishX,3.9,0,finish);finish.position.z=-662;scene.add(finish);
  spinner.position.set(100,-100,100);
@@ -501,7 +501,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
     model.updateMatrixWorld(true);
     const bounds=new THREE.Box3().setFromObject(model);
     const height=Math.max(.01,bounds.max.y-bounds.min.y);
-    model.scale.setScalar(2.0/height); // Slightly larger runner: approximately 9% taller.
+    model.scale.setScalar(2.35/height); // Larger, clearly readable full-body runner.
     model.position.y=-bounds.min.y*model.scale.y;
     model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
     body.clear();body.add(model);
@@ -767,7 +767,7 @@ function releaseStick(e){if(e.pointerId===stickPointer){stickPointer=null;stickX
 stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);stick.addEventListener('lostpointercapture',e=>{if(e.pointerId===stickPointer){stickPointer=null;stickX=0;stickY=0;knob.style.transform='translate(0,0)'}});
 
 // Camera follows from behind and eases toward the runner.
-camera.position.set(0,6,13);camera.lookAt(0,1,-2);
+camera.position.set(0,7.2,15.5);camera.lookAt(0,1.4,-3);
 const clock=new THREE.Clock();
 // Collision uses the runner's actual action state. A normal runner cannot pass
 // through a block; jumping clears it only after the feet rise above its top.
@@ -842,7 +842,7 @@ function update(dt){
   if(player.position.z<-661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   player.position.y=routeY(player.position.z)+.05+vertical;
-  const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
+  const target=new THREE.Vector3(player.position.x,player.position.y+6.1,player.position.z+14.2);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.25,player.position.z-4.2);
   const moving=running&&!paused;
   if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}
   // Keep the run cycle active during automatic forward travel, even when the
