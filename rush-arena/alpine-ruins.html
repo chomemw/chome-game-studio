@@ -697,16 +697,41 @@ async function settleRushRun(){
   const pointsEarned=Number(data.points_credited)||0;
   ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You earned '+pointsEarned+' Game Points and '+chox+' CHOX.'+(data.first_completion?' CHOX first-completion reward!':' Replay completed — no additional CHOX.');
 }
+let startInProgress=false;
 async function reset(){
-  audioReady();running=false;
-  document.getElementById('bootStatus').textContent='Checking your CHOME account…';
-  const {data:authData,error:authError}=await supabase.auth.getSession();
-  if(authError||!authData?.session){document.getElementById('bootStatus').textContent='Please sign in with your CHOME administrator account before starting Temple Trail.';return;}
-  if(developmentPreview){const {error:adminError}=await supabase.rpc('get_chome_admin_overview');if(adminError){document.getElementById('bootStatus').textContent='Administrator access required for the Temple Trail development preview.';return;}rushSessionId=null;}
-  else{const {data:sessionData,error:sessionError}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'start',level}});if(sessionError||!sessionData?.ok){document.getElementById('bootStatus').textContent=sessionError?.message||sessionData?.error||'Could not start this level. Please try again.';return;}rushSessionId=sessionData.session_id;}
-  lastProgressReport=0;progressChain=Promise.resolve();
-  if(rushAudioOn){sfxStart();startHorrorAmbience()}
-  activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'JUNGLE APPROACH  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(curveX(3.5),.05,3.5);coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
+  if(startInProgress||running)return;
+  startInProgress=true;
+  const startButton=document.getElementById('start');
+  const status=document.getElementById('bootStatus');
+  if(startButton){startButton.disabled=true;startButton.textContent='STARTING…'}
+  running=false;
+  if(status)status.textContent='Checking your CHOME administrator access…';
+  try{
+    audioReady();
+    const {data:authData,error:authError}=await supabase.auth.getSession();
+    if(authError)throw new Error('Could not check your CHOME sign-in: '+authError.message);
+    if(!authData?.session)throw new Error('Please sign in with your CHOME administrator account, then reopen Temple Trail.');
+    if(developmentPreview){
+      const {error:adminError}=await supabase.rpc('get_chome_admin_overview');
+      if(adminError)throw new Error('Administrator access check failed: '+adminError.message);
+      rushSessionId=null;
+    }else{
+      const {data:sessionData,error:sessionError}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'start',level}});
+      if(sessionError||!sessionData?.ok)throw new Error(sessionError?.message||sessionData?.error||'Could not create a game session. Please try again.');
+      rushSessionId=sessionData.session_id;
+    }
+    lastProgressReport=0;progressChain=Promise.resolve();
+    if(rushAudioOn){sfxStart();startHorrorAmbience()}
+    activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'JUNGLE APPROACH  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(curveX(3.5),.05,3.5);coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
+  }catch(error){
+    const message=error?.message||String(error)||'Unable to start Temple Trail.';
+    if(status)status.textContent=message;
+    window.__rushBootError=message;
+    console.error('Temple Trail start failed:',error);
+  }finally{
+    startInProgress=false;
+    if(startButton){startButton.disabled=false;startButton.textContent='START RUN'}
+  }
 }
 function respawn(){player.position.set(curveX(respawnZ),.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
 function onTrack(x,z){const localX=x-curveX(z);if(developmentPreview){return Math.abs(localX)<=2.85&&z<=5&&z>=-665}return Math.abs(localX)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z>=-74))}
