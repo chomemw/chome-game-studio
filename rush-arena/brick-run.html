@@ -120,10 +120,11 @@ try {
 const root=document.getElementById('game');
 const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
 // Level 4 uses a separate narrow brick-road environment and hazards.
-const level=4;
+const level=4; // This file is exclusively Rush Arena Level 4.
 const developmentPreview=true;
 // Level 3 is a true winding mountain trail, not a straight flat sprint.
 // Large, broad turns and rolling elevation changes shape the full route.
+// Level 4 owns this route profile; it does not import Level 3's route or scene file.
 const routeTurns=[{d:0,x:0},{d:48,x:0},{d:105,x:5.2},{d:165,x:6.2},{d:225,x:-5.4},{d:285,x:-6.0},{d:345,x:5.2},{d:405,x:6.0},{d:465,x:-5.2},{d:525,x:-5.8},{d:585,x:4.8},{d:630,x:3.8},{d:665,x:0}];
 const routeHeights=[{d:0,y:0},{d:65,y:.3},{d:125,y:1.4},{d:185,y:2.1},{d:245,y:.7},{d:305,y:-.5},{d:365,y:.5},{d:430,y:2.2},{d:495,y:2.8},{d:555,y:1.3},{d:615,y:2.5},{d:665,y:1.6}];
 const curveX=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeTurns.length-2&&d>routeTurns[i+1].d)i++;const a=routeTurns[i],b=routeTurns[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1),s=t*t*(3-2*t);return THREE.MathUtils.lerp(a.x,b.x,s)};
@@ -131,7 +132,7 @@ const routeY=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeHe
 const curveAngle=z=>Math.atan2(curveX(z-2)-curveX(z+2),-4);
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
 const obstacleInspectionMode=level===1;
-const scene=new THREE.Scene();scene.background=new THREE.Color(level===4?0xb9c5ca:0xa9c2d0);scene.fog=new THREE.Fog(level===3?0xb9d9e9:0xa9c2d0,level===4?58:42,level===4?190:155);
+const scene=new THREE.Scene();scene.background=new THREE.Color(level===4?0xb9c5ca:0xa9c2d0);scene.fog=new THREE.Fog(level===4?0xb9d9e9:0xa9c2d0,level===4?58:42,level===4?190:155);
 const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,300);
 const mobileDevice=matchMedia('(max-width: 900px), (pointer: coarse)').matches;
 const renderer=new THREE.WebGLRenderer({antialias:!mobileDevice,powerPreference:'high-performance'});
@@ -223,7 +224,7 @@ const sphere=(r,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.SphereG
 const cylinder=(rt,rb,h,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,16),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o};
 
 // Sky islands and clouds. Cloud puffs share one instanced draw call.
-const sky=new THREE.Mesh(new THREE.SphereGeometry(180,24,16),new THREE.MeshBasicMaterial({color:level===3?0x88ad79:0x8ed9f4,side:THREE.BackSide}));scene.add(sky);
+const sky=new THREE.Mesh(new THREE.SphereGeometry(180,24,16),new THREE.MeshBasicMaterial({color:level===4?0x88ad79:0x8ed9f4,side:THREE.BackSide}));scene.add(sky);
 const cloudGeometry=new THREE.SphereGeometry(1,12,8);
 const cloudInstances=new THREE.InstancedMesh(cloudGeometry,white,120);
 const cloudDummy=new THREE.Object3D();let cloudIndex=0;
@@ -370,7 +371,7 @@ addMovingBlock(-610,2.2,2,1.7,'crusher');addExtendedOverhead(-626,.98);addMoving
 spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
 
 }else{
- // LEVEL 3 — BRICK ROAD. Original jungle-runner environment inspired by the
+ // LEVEL 4 — BRICK ROAD. Independent brick-road runner environment designed for the
  // reference footage: a narrow winding forest trail, dense canopy and natural hazards.
  scene.background=new THREE.Color(0x8dbb82);scene.fog=new THREE.Fog(0x8dbb82,105,360);
  const jungleSoil=mat(0x443b2a,.99),trailDirt=mat(0x766044,.98),trailCenter=mat(0x92764d,.98),trailEdge=mat(0x3a3827,.98),bark=mat(0x493326,.98),barkLight=mat(0x694832,.98),leafDark=mat(0x183d25,.98),leafMid=mat(0x286039,.98),leafBright=mat(0x477d3d,.98),fernMat=mat(0x39743a,.98),rootMat=mat(0x59432c,.98),riverMat=new THREE.MeshStandardMaterial({color:0x258f9b,roughness:.22,metalness:.08,transparent:true,opacity:.9}),riverFoam=new THREE.MeshStandardMaterial({color:0xc6f2db,roughness:.3,transparent:true,opacity:.8});
