@@ -18,7 +18,7 @@
 @media(max-width:620px){.top{align-items:flex-start}.stats{gap:5px}.stat{min-width:64px;padding:7px 8px}.stat b{font-size:16px}.race-pill{display:none}.progress-wrap{top:82px;width:58vw}.hint{display:none}.bottom{padding-bottom:calc(12px + env(safe-area-inset-bottom))}.stick{left:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:100px;height:100px}.knob{left:28px;top:28px}.action{width:64px;height:64px}.action.secondary{width:54px;height:54px}}
 @media(min-width:900px){.hud{padding-left:26px;padding-right:26px}.bottom{padding-bottom:25px}.stick{left:26px;bottom:25px;opacity:.9}.controls{opacity:.75}}
 
-.runner-dialog{width:min(760px,100%)}.runner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.runner-card{min-width:0;padding:15px 10px 13px;border:1px solid #ffffff30;border-radius:17px;background:linear-gradient(145deg,#243a60,#111c36);display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .18s,border-color .18s,background .18s}.runner-card:hover{transform:translateY(-3px);border-color:#9ff2ee}.runner-card.selected{border:2px solid #8ff2e6;background:linear-gradient(145deg,#244e61,#182544);box-shadow:0 0 0 3px #65e4ef22}.runner-card b{font-size:11px;letter-spacing:.06em}.runner-card small{font-size:10px;color:#bdcce5}.runner-preview-wrap{position:relative;display:block;width:100%;height:238px;overflow:hidden;border-radius:13px;background:radial-gradient(ellipse at 50% 28%,#476b8b 0%,#1b2b49 58%,#0d172a 100%);border:1px solid #ffffff18}.runner-preview{display:block;width:100%;height:100%;outline:0}.preview-loading{position:absolute;left:0;right:0;bottom:7px;font-size:9px;color:#d7e8f7;text-align:center;text-shadow:0 1px 4px #000;pointer-events:none}.runner-card[data-runner="female"] .runner-preview-wrap{background:radial-gradient(ellipse at 50% 28%,#865b84 0%,#3b2a55 58%,#19152d 100%)}.runner-card[data-runner="soldier"] .runner-preview-wrap{background:radial-gradient(ellipse at 50% 28%,#778568 0%,#344633 58%,#18261d 100%)}#continueToBriefing:disabled{opacity:.42;cursor:not-allowed}@media(max-width:560px){.runner-grid{gap:7px}.runner-card{padding:8px 5px}.runner-preview-wrap{height:190px}.runner-card b{font-size:9px}.runner-card small{font-size:8px}.runner-dialog{padding:19px 13px}}
+.runner-dialog{width:min(760px,100%)}.runner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.runner-card{min-width:0;padding:15px 10px 13px;border:1px solid #ffffff30;border-radius:17px;background:linear-gradient(145deg,#243a60,#111c36);display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .18s,border-color .18s,background .18s}.runner-card:hover{transform:translateY(-3px);border-color:#9ff2ee}.runner-card.selected{border:2px solid #8ff2e6;background:linear-gradient(145deg,#244e61,#182544);box-shadow:0 0 0 3px #65e4ef22}.runner-card b{font-size:11px;letter-spacing:.06em}.runner-card small{font-size:10px;color:#bdcce5}.runner-preview-wrap{position:relative;display:block;width:100%;height:280px;overflow:hidden;border-radius:13px;background:radial-gradient(ellipse at 50% 28%,#476b8b 0%,#1b2b49 58%,#0d172a 100%);border:1px solid #ffffff18}.runner-preview{display:block;width:100%;height:100%;outline:0}.preview-loading{position:absolute;left:0;right:0;bottom:7px;font-size:9px;color:#d7e8f7;text-align:center;text-shadow:0 1px 4px #000;pointer-events:none}.runner-card[data-runner="female"] .runner-preview-wrap{background:radial-gradient(ellipse at 50% 28%,#865b84 0%,#3b2a55 58%,#19152d 100%)}.runner-card[data-runner="soldier"] .runner-preview-wrap{background:radial-gradient(ellipse at 50% 28%,#778568 0%,#344633 58%,#18261d 100%)}#continueToBriefing:disabled{opacity:.42;cursor:not-allowed}@media(max-width:560px){.runner-grid{gap:7px}.runner-card{padding:8px 5px}.runner-preview-wrap{height:230px}.runner-card b{font-size:9px}.runner-card small{font-size:8px}.runner-dialog{padding:19px 13px}}
 </style>
 </head>
 <body>
@@ -409,9 +409,9 @@ async function loadRunnerCharacter(choice){
       const loader=new GLTFLoader();
       loader.load(runnerUrl,gltf=>{
         if(token!==runnerLoadToken){resolve(false);return;}
-        const model=gltf.scene;model.rotation.y=Math.PI;model.updateMatrixWorld(true);
+        const model=gltf.scene;model.rotation.y=0; // Face the preview camera so clients can inspect the character.model.updateMatrixWorld(true);
         const bounds=new THREE.Box3().setFromObject(model),height=Math.max(.01,bounds.max.y-bounds.min.y);
-        model.scale.setScalar(2.55/height); // Larger, clearly visible full-body runner.
+        model.scale.setScalar(2.9/height); // Clearly larger full-body gameplay runner.
          model.position.y=-bounds.min.y*model.scale.y;
         model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
         body.clear();body.add(model);runnerMixer=new THREE.AnimationMixer(model);runnerActions={};
@@ -610,17 +610,17 @@ async function startRunnerPreviews(){
       previewRenderer.toneMappingExposure=1.12;
       const previewScene=new THREE.Scene();
       const previewCamera=new THREE.PerspectiveCamera(32,1,.1,30);
-      previewCamera.position.set(0,1.2,-4.25);previewCamera.lookAt(0,1.16,0);
+      previewCamera.position.set(0,1.45,5.2);previewCamera.lookAt(0,1.45,0);
       previewScene.add(new THREE.HemisphereLight(0xd8eaff,0x263044,2.1));
-      const keyLight=new THREE.DirectionalLight(0xffffff,2.5);keyLight.position.set(-3,5,-4);previewScene.add(keyLight);
-      const rimLight=new THREE.DirectionalLight(0x7bdcff,1.1);rimLight.position.set(3,2,3);previewScene.add(rimLight);
-      const platform=new THREE.Mesh(new THREE.CylinderGeometry(.78,.88,.12,48),new THREE.MeshStandardMaterial({color:choice==='male'?0x527ba5:choice==='female'?0x94669b:0x778765,metalness:.35,roughness:.42}));
+      const keyLight=new THREE.DirectionalLight(0xffffff,2.5);keyLight.position.set(-3,5,4);previewScene.add(keyLight);
+      const rimLight=new THREE.DirectionalLight(0x7bdcff,1.1);rimLight.position.set(3,2,-3);previewScene.add(rimLight);
+      const platform=new THREE.Mesh(new THREE.CylinderGeometry(1.02,1.12,.12,48),new THREE.MeshStandardMaterial({color:choice==='male'?0x527ba5:choice==='female'?0x94669b:0x778765,metalness:.35,roughness:.42}));
       platform.position.y=.06;previewScene.add(platform);
       const loader=new GLTFLoader();
       const gltf=await loader.loadAsync(runnerAssets[choice]);
       const model=gltf.scene;
       const box=new THREE.Box3().setFromObject(model),height=Math.max(.01,box.max.y-box.min.y);
-      model.scale.setScalar(2.55/height);model.position.y=-box.min.y*model.scale.y;
+      model.scale.setScalar(3.0/height);model.position.y=-box.min.y*model.scale.y;
       model.rotation.y=Math.PI;
       model.traverse(node=>{if(node.isMesh){node.castShadow=false;node.receiveShadow=false;}});
       previewScene.add(model);
@@ -654,7 +654,7 @@ async function startRunnerPreviews(){
       for(const entry of runnerPreviewEntries){
         if(entry.mixer)entry.mixer.update(dt);
         entry.angle+=dt*.16;
-        entry.model.rotation.y=Math.PI+Math.sin(entry.angle)*.08;
+        entry.model.rotation.y=Math.sin(entry.angle)*.08;
         entry.resize();entry.renderer.render(entry.scene,entry.camera);
       }
     };
