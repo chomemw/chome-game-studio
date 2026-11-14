@@ -509,8 +509,7 @@ obstacles.forEach((o,index)=>{
   scene.add(rig);hazardBeacons.push({rig,lamps:rig.children.filter(child=>child.isMesh&&child.geometry.type==='SphereGeometry'),obstacle:o,index});
 });
 
-// The Soldier GLB is the only player character. No procedural placeholder
-// or alternate athlete model is created while the Soldier asset loads.
+// The character selected at the start of Rush Arena is used throughout this level.
 const player=new THREE.Group();scene.add(player);player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);
 const body=new THREE.Group();player.add(body);
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
@@ -553,9 +552,9 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
     runnerModelLoaded=Object.keys(runnerActions).length>0;
     if(runnerActions.idle)playRunnerAction('idle',0);
     else if(runnerActions.run)playRunnerAction('run',0);
-    console.info('Rush Arena Soldier loaded:',gltf.animations.map(a=>a.name));
+    console.info('Rush Arena runner loaded:',gltf.animations.map(a=>a.name));
   },undefined,error=>{
-    console.error('Soldier character failed to load:',error);
+    console.error('Selected runner failed to load:',error);
     const status=document.getElementById('bootStatus');
     if(status)status.textContent='Soldier model could not load. Check your connection and reload.';
   });
