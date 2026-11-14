@@ -95,32 +95,23 @@
 }
 </script>
 <script type="module">
-// Load runtime dependencies dynamically so one optional CDN failure cannot
-// prevent the START RUN handler from ever being installed.
-let THREE,createClient;
+// Use the same proven dependency-loading pattern as the working Level 2 game.
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+let THREE;
 try {
+  THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+} catch (primaryEngineError) {
   try {
-    THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
-  } catch (primaryEngineError) {
     THREE = await import('https://unpkg.com/three@0.160.0/build/three.module.js');
+  } catch (fallbackEngineError) {
+    const detail = fallbackEngineError && (fallbackEngineError.message || String(fallbackEngineError));
+    const message = 'Could not load the 3D engine from either source. Check your connection and reload. ' + (detail || '');
+    const status = document.getElementById('bootStatus');
+    if (status) status.textContent = message;
+    window.__rushBootError = message;
+    throw new Error(message);
   }
-} catch (engineError) {
-  const detail=engineError&&(engineError.message||String(engineError));
-  const message='Could not load the 3D engine. Check your connection and reload. '+(detail||'');
-  const status=document.getElementById('bootStatus');if(status)status.textContent=message;
-  window.__rushBootError=message;throw new Error(message);
-}
-try {
-  try {
-    ({createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'));
-  } catch (primarySupabaseError) {
-    ({createClient}=await import('https://esm.sh/@supabase/supabase-js@2'));
-  }
-} catch (supabaseLoadError) {
-  const detail=supabaseLoadError&&(supabaseLoadError.message||String(supabaseLoadError));
-  const message='Could not load CHOME sign-in services. Check your connection and reload. '+(detail||'');
-  const status=document.getElementById('bootStatus');if(status)status.textContent=message;
-  window.__rushBootError=message;throw new Error(message);
 }
 
 const root=document.getElementById('game');
@@ -499,7 +490,6 @@ let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
 (async()=>{
  try {
-  const {GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
   const loader=new GLTFLoader();
   const soldierUrl='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb';
   loader.load(soldierUrl,gltf=>{
