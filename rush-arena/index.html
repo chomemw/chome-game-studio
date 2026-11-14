@@ -17,6 +17,8 @@
 .overlay{position:fixed;inset:0;display:grid;place-items:center;padding:18px;background:linear-gradient(180deg,#101b35a8,#101b35bd);backdrop-filter:blur(9px);z-index:5}.dialog{width:min(470px,100%);padding:28px;border:1px solid #ffffff45;border-radius:25px;background:linear-gradient(145deg,#1d3157f2,#111a35f5);box-shadow:0 30px 90px #06112c88;text-align:center}.eyebrow{font-size:10px;letter-spacing:.24em;font-weight:1000;color:#9ff2ee}.dialog h1{font-size:clamp(35px,9vw,55px);line-height:.92;letter-spacing:-.075em;margin:13px 0}.dialog h1 span{color:#a995ff}.dialog p{color:#c3d0e9;font-size:13px;line-height:1.7;margin:12px auto 22px;max-width:360px}.primary{border:0;border-radius:13px;padding:14px 22px;background:linear-gradient(100deg,#8d70ff,#5c8fff);font-weight:1000;letter-spacing:.1em;box-shadow:0 12px 28px #6c5ae955}.small{display:block;color:#aebbd5;font-size:10px;margin-top:13px}.hidden{display:none!important}
 @media(max-width:620px){.top{align-items:flex-start}.stats{gap:5px}.stat{min-width:64px;padding:7px 8px}.stat b{font-size:16px}.race-pill{display:none}.progress-wrap{top:82px;width:58vw}.hint{display:none}.bottom{padding-bottom:calc(12px + env(safe-area-inset-bottom))}.stick{left:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:100px;height:100px}.knob{left:28px;top:28px}.action{width:64px;height:64px}.action.secondary{width:54px;height:54px}}
 @media(min-width:900px){.hud{padding-left:26px;padding-right:26px}.bottom{padding-bottom:25px}.stick{left:26px;bottom:25px;opacity:.9}.controls{opacity:.75}}
+
+.runner-dialog{width:min(760px,100%)}.runner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.runner-card{min-width:0;padding:15px 10px 13px;border:1px solid #ffffff30;border-radius:17px;background:linear-gradient(145deg,#243a60,#111c36);display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .18s,border-color .18s,background .18s}.runner-card:hover{transform:translateY(-3px);border-color:#9ff2ee}.runner-card.selected{border:2px solid #8ff2e6;background:linear-gradient(145deg,#244e61,#182544);box-shadow:0 0 0 3px #65e4ef22}.runner-card b{font-size:11px;letter-spacing:.06em}.runner-card small{font-size:10px;color:#bdcce5}.runner-avatar{width:76px;height:88px;border-radius:16px;display:grid;place-items:center;font-size:48px;font-weight:900;color:#f8fbff;background:linear-gradient(145deg,#5d8fba,#253c61);box-shadow:inset 0 0 20px #ffffff20}.female-avatar{background:linear-gradient(145deg,#b66e9b,#573b77)}.soldier-avatar{background:linear-gradient(145deg,#82956d,#344735)}#continueToBriefing:disabled{opacity:.42;cursor:not-allowed}@media(max-width:560px){.runner-grid{gap:7px}.runner-card{padding:10px 5px}.runner-avatar{width:58px;height:70px;font-size:38px}.runner-card b{font-size:9px}.runner-card small{font-size:8px}.runner-dialog{padding:19px 13px}}
 </style>
 </head>
 <body>
@@ -40,10 +42,35 @@
   <div class="dialog">
     <div class="eyebrow">CHOME GAME STUDIO PRESENTS</div>
     <h1>RUSH <span>ARENA</span></h1>
-    <p>Take on a high-altitude race course with realistic surfaces, industrial track details and moving hazards. This is the first solo practice build.</p>
-    <button class="primary" id="start">START RUN</button>
-    <span class="small">Third-person camera · Semi-realistic 3D · Sky Starter</span>
-    <span class="small" id="bootStatus" role="status" aria-live="polite">Preparing 3D engine…</span>
+    <p>Welcome to Rush Arena. Choose your runner, learn how rewards work, then take on Level 1.</p>
+    <button class="primary" id="start">ENTER RUSH ARENA</button>
+    <span class="small">Three runners. One arena. Your choice.</span>
+    <span class="small" id="bootStatus" role="status" aria-live="polite">Preparing your arena…</span>
+  </div>
+</div>
+<div class="overlay hidden" id="characterSelect">
+  <div class="dialog runner-dialog">
+    <div class="eyebrow">CHOOSE YOUR RUNNER</div>
+    <h1>WHO WILL <span>YOU BE?</span></h1>
+    <p>Choose the character you want to take through Rush Arena. Your choice will carry across the levels on this device.</p>
+    <div class="runner-grid">
+      <button class="runner-card" data-runner="male" type="button"><span class="runner-avatar male-avatar">♂</span><b>MALE RUNNER</b><small>Agile athletic runner</small></button>
+      <button class="runner-card" data-runner="female" type="button"><span class="runner-avatar female-avatar">♀</span><b>FEMALE RUNNER</b><small>Fast athletic runner</small></button>
+      <button class="runner-card" data-runner="soldier" type="button"><span class="runner-avatar soldier-avatar">✦</span><b>SOLDIER</b><small>Tactical field runner</small></button>
+    </div>
+    <span class="small" id="runnerStatus" role="status" aria-live="polite">Select a character to prepare them.</span>
+    <button class="primary" id="continueToBriefing" disabled>CONTINUE</button>
+  </div>
+</div>
+<div class="overlay hidden" id="rewardIntro">
+  <div class="dialog">
+    <div class="eyebrow">BEFORE THE START</div>
+    <h1>RUN. EARN. <span>RISE.</span></h1>
+    <p><b>Game Points:</b> Earn points from completed runs and eligible in-game objectives. Points can also be earned when replaying a level.</p>
+    <p><b>CHOX:</b> Receive the CHOX first-completion reward once when you successfully complete a level for the first time. Replaying a completed level does not pay that first-completion CHOX again.</p>
+    <p><b>Controls:</b> Steer with WASD / arrow keys or the mobile joystick. Press SPACE / JUMP to jump and SHIFT / DIVE to slide.</p>
+    <button class="primary" id="startLevelOne">START LEVEL 1</button>
+    <span class="small">Your run and eligible rewards are verified by CHOME.</span>
   </div>
 </div>
 <div class="overlay hidden" id="result">
@@ -67,14 +94,12 @@
   const report = message => { if (status) status.textContent = message; };
   window.__rushBootError = '';
   button.addEventListener('click', () => {
-    if (typeof window.__rushStart === 'function') {
-      window.__rushStart();
+    if (typeof window.__rushShowCharacters === 'function') {
+      window.__rushShowCharacters();
       return;
     }
-    // Remember an early tap. The 3D module may still be downloading on mobile.
-    // It will start the run as soon as scene setup has completed.
-    window.__rushStartRequested = true;
-    report(window.__rushBootError || 'Loading the 3D course… your START RUN tap is queued.');
+    window.__rushEnterRequested = true;
+    report(window.__rushBootError || 'Opening Rush Arena…');
   });
   window.addEventListener('error', event => {
     window.__rushBootError = 'Game startup failed: ' + (event.message || 'A script failed to load.');
@@ -363,57 +388,46 @@ obstacles.forEach((o,index)=>{
   scene.add(rig);hazardBeacons.push({rig,lamps:rig.children.filter(child=>child.isMesh&&child.geometry.type==='SphereGeometry'),obstacle:o,index});
 });
 
-// The Soldier GLB is the only player character. No procedural placeholder
-// or alternate athlete model is created while the Soldier asset loads.
-const player=new THREE.Group();scene.add(player);player.position.set(0,.05,3.5);
-const body=new THREE.Group();player.add(body);
+// Shared Rush Arena character roster. The chosen runner is loaded only after selection.
+const runnerAssets={
+  male:'https://files.innerscene.com/library/locomotion-collection-sam-3d-person-animated-dc23800f/735aec6a564c1def48e8/locomotion-collection-sam-3d-person-animated.glb',
+  female:'https://files.innerscene.com/library/run-maya-3d-person-animated-eebf24b9/d5f2b8f5a11a7c383293/run-maya-3d-person-animated.glb',
+  soldier:'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb'
+};
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
-function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
-(async()=>{
- try {
-  const {GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
-  const loader=new GLTFLoader();
-  const soldierUrl='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb';
-  loader.load(soldierUrl,gltf=>{
-    const model=gltf.scene;
-    model.rotation.y=0;
-    model.updateMatrixWorld(true);
-    const bounds=new THREE.Box3().setFromObject(model);
-    const height=Math.max(.01,bounds.max.y-bounds.min.y);
-    model.scale.setScalar(1.84/height);
-    model.position.y=-bounds.min.y*model.scale.y;
-    model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
-    body.clear();body.add(model);
-    runnerMixer=new THREE.AnimationMixer(model);
-    runnerActions={};
-    for(const clip of gltf.animations||[]){
-      const key=clip.name.toLowerCase().replace(/[\\s_-]+/g,'');
-      let slot=null;
-      if(key.includes('idle'))slot='idle';
-      else if(key.includes('walk'))slot='walk';
-      else if(key.includes('run'))slot='run';
-      if(slot&&!runnerActions[slot]){
-        const action=runnerMixer.clipAction(clip);
-        action.enabled=true;action.setEffectiveTimeScale(1);action.setEffectiveWeight(1);
-        action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;
-      }
-    }
-    runnerModelLoaded=Object.keys(runnerActions).length>0;
-    if(runnerActions.idle)playRunnerAction('idle',0);
-    else if(runnerActions.run)playRunnerAction('run',0);
-    console.info('Rush Arena Soldier loaded:',gltf.animations.map(a=>a.name));
-  },undefined,error=>{
-    console.error('Soldier character failed to load:',error);
-    const status=document.getElementById('bootStatus');
-    if(status)status.textContent='Soldier model could not load. Check your connection and reload.';
+let selectedRunner='',runnerLoadPromise=Promise.resolve(false),runnerLoadToken=0;
+function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();}
+async function loadRunnerCharacter(choice){
+  selectedRunner=choice;
+  localStorage.setItem('rushArenaRunner',choice);
+  const token=++runnerLoadToken;
+  runnerModelLoaded=false;runnerMixer=null;runnerActions={};activeRunnerAction=null;body.clear();
+  const runnerUrl=runnerAssets[choice]||runnerAssets.soldier;
+  runnerLoadPromise=new Promise(async resolve=>{
+    try{
+      const {GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
+      const loader=new GLTFLoader();
+      loader.load(runnerUrl,gltf=>{
+        if(token!==runnerLoadToken){resolve(false);return;}
+        const model=gltf.scene;model.rotation.y=0;model.updateMatrixWorld(true);
+        const bounds=new THREE.Box3().setFromObject(model),height=Math.max(.01,bounds.max.y-bounds.min.y);
+        model.scale.setScalar(1.84/height);model.position.y=-bounds.min.y*model.scale.y;
+        model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
+        body.clear();body.add(model);runnerMixer=new THREE.AnimationMixer(model);runnerActions={};
+        for(const clip of gltf.animations||[]){
+          const key=clip.name.toLowerCase().replace(/[\\s_-]+/g,'');let slot=null;
+          if(key.includes('idle'))slot='idle';else if(key.includes('walk'))slot='walk';else if(key.includes('run'))slot='run';
+          if(slot&&!runnerActions[slot]){const action=runnerMixer.clipAction(clip);action.enabled=true;action.setEffectiveTimeScale(1);action.setEffectiveWeight(1);action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;}
+        }
+        runnerModelLoaded=Object.keys(runnerActions).length>0;
+        if(runnerActions.idle)playRunnerAction('idle',0);else if(runnerActions.run)playRunnerAction('run',0);
+        console.info('Rush Arena runner loaded:',choice,gltf.animations.map(a=>a.name));
+        resolve(true);
+      },undefined,error=>{console.error('Runner model failed to load:',choice,error);resolve(false);});
+    }catch(error){console.error('Runner loader unavailable:',error);resolve(false);}
   });
- } catch(error) {
-  console.error('Soldier loader unavailable:',error);
-  const status=document.getElementById('bootStatus');
-  if(status)status.textContent='Soldier model loader could not start. Reload the game.';
- }
-})();
-
+  return runnerLoadPromise;
+}
 let running=false,finished=false,failed=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,stickX=0,stickY=0,lastFrame=0,slideTimer=0,points=0,chox=0;
 let rushSessionId=null,lastProgressReport=0,progressChain=Promise.resolve();
 const rewardedObstacles=new Set();
@@ -564,13 +578,41 @@ async function reset(){
   if(sessionError||!sessionData?.ok){document.getElementById('bootStatus').textContent=sessionError?.message||sessionData?.error||'Could not start this level. Please try again.';return;}
   rushSessionId=sessionData.session_id;lastProgressReport=0;progressChain=Promise.resolve();
   if(rushAudioOn){sfxStart();startHorrorAmbience()}
-  activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent='OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
+  activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent='OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');document.getElementById('characterSelect').classList.add('hidden');document.getElementById('rewardIntro').classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
 }
 function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
 function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z<=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
-window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
+window.__rushStart=reset;
+function showCharacterSelection(){
+  try{audioReady();soundTone(392,523,.2,.13,'sine',0);soundTone(523,784,.32,.12,'sine',.18);soundTone(784,1046,.42,.09,'sine',.4);}catch(e){console.warn('Welcome sound unavailable',e)}
+  ui.welcome.classList.add('hidden');document.getElementById('characterSelect').classList.remove('hidden');
+}
+window.__rushShowCharacters=showCharacterSelection;
+document.querySelectorAll('[data-runner]').forEach(card=>card.addEventListener('click',async()=>{
+  const choice=card.dataset.runner;
+  document.querySelectorAll('[data-runner]').forEach(item=>item.classList.toggle('selected',item===card));
+  const status=document.getElementById('runnerStatus'),next=document.getElementById('continueToBriefing');
+  next.disabled=true;status.textContent='Preparing your '+choice+' runner…';
+  try{audioReady();soundTone(660,880,.18,.1,'triangle')}catch(e){}
+  const ok=await loadRunnerCharacter(choice);
+  if(ok){status.textContent=(choice==='male'?'Male runner':choice==='female'?'Female runner':'Soldier')+' is ready. Continue to the game briefing.';next.disabled=false;}
+  else{status.textContent='That character could not load. Please select again or try the Soldier.';}
+}));
+document.getElementById('continueToBriefing').addEventListener('click',()=>{
+  if(!runnerModelLoaded)return;
+  document.getElementById('characterSelect').classList.add('hidden');document.getElementById('rewardIntro').classList.remove('hidden');
+  try{audioReady();soundTone(523,784,.28,.1,'sine')}catch(e){}
+});
+document.getElementById('startLevelOne').addEventListener('click',async()=>{
+  const status=document.getElementById('runnerStatus');
+  if(!selectedRunner){document.getElementById('rewardIntro').classList.add('hidden');document.getElementById('characterSelect').classList.remove('hidden');return;}
+  if(!runnerModelLoaded){status.textContent='Finishing character setup…';const ok=await runnerLoadPromise;if(!ok){status.textContent='Please choose your runner again.';return;}}
+  document.getElementById('rewardIntro').classList.add('hidden');reset();
+});
+if(window.__rushEnterRequested){window.__rushEnterRequested=false;showCharacterSelection();}
+document.getElementById('bootStatus').textContent='Ready — enter Rush Arena';document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 document.getElementById('restartFailed').addEventListener('click',reset);
 document.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
 addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
@@ -679,7 +721,7 @@ renderer.render(scene,camera);
 animate();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight)});
 // Start only after every control, camera, renderer and animation loop is initialized.
-if(window.__rushStartRequested){window.__rushStartRequested=false;reset()}
+if(window.__rushEnterRequested){window.__rushEnterRequested=false;showCharacterSelection()}
 </script>
 </body>
 </html>
