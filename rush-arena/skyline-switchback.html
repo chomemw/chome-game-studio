@@ -698,7 +698,7 @@ function updateHazardWarnings(dt){
   cameraShake=Math.max(0,cameraShake-dt*2.8);
 }
 
-soundButton.addEventListener('click',()=>{rushAudioOn=!rushAudioOn;soundButton.textContent=rushAudioOn?'🔊 SOUND ON':'🔇 SOUND OFF';if(audioReady()){rushMaster.gain.setTargetAtTime(rushAudioOn?.72:0,rushAudio.currentTime,.06);if(rushAudioOn&&running)startHorrorAmbience()}});
+soundButton.addEventListener('click',()=>{rushAudioOn=!rushAudioOn;soundButton.textContent=rushAudioOn?'🔊 SOUND ON':'🔇 SOUND OFF';if(audioReady()){rushMaster.gain.setTargetAtTime(rushAudioOn?.72:0,rushAudio.currentTime,.06);if(rushAudioOn&&running){if(level===5)startPremiumAmbience();else startHorrorAmbience()}}});
 
 function updateMovingHazards(dt){
   for(const o of obstacles){if(o.type!=='movingBlock')continue;o.x=o.baseX+Math.sin(elapsed*o.frequency+o.phase)*o.amplitude;o.mesh.position.x=o.x;if(o.rotor)o.rotor.rotation.z+=dt*3.4;}
@@ -767,8 +767,8 @@ async function reset(){
       rushSessionId=sessionData.session_id;
     }
     if(status)status.textContent='Starting Brick Road…';
-    lastProgressReport=0;progressChain=Promise.resolve();ziplineRide=null;ziplineUsed=false;if(zipGrip)zipGrip.visible=false;
-    if(rushAudioOn){try{sfxStart();startHorrorAmbience()}catch(audioError){rushAudioOn=false;console.warn('Brick Road audio unavailable; continuing silently.',audioError)}}
+    lastProgressReport=0;progressChain=Promise.resolve();ziplineRide=null;ziplineUsed=false;if(zipGrip)zipGrip.visible=false;ziplineRide=null;ziplineUsed=false;if(zipGrip)zipGrip.visible=false;
+    if(rushAudioOn){try{sfxStart();if(level!==5)startHorrorAmbience()}catch(audioError){rushAudioOn=false;console.warn('Brick Road audio unavailable; continuing silently.',audioError)}}
     activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'BRICK ROAD ENTRY  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');renderer.render(scene,camera);
   }catch(error){
     // Roll back a partially-started run so the welcome screen and retry remain usable.
