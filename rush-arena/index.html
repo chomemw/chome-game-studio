@@ -18,7 +18,7 @@
 @media(max-width:620px){.top{align-items:flex-start}.stats{gap:5px}.stat{min-width:64px;padding:7px 8px}.stat b{font-size:16px}.race-pill{display:none}.progress-wrap{top:82px;width:58vw}.hint{display:none}.bottom{padding-bottom:calc(12px + env(safe-area-inset-bottom))}.stick{left:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:100px;height:100px}.knob{left:28px;top:28px}.action{width:64px;height:64px}.action.secondary{width:54px;height:54px}}
 @media(min-width:900px){.hud{padding-left:26px;padding-right:26px}.bottom{padding-bottom:25px}.stick{left:26px;bottom:25px;opacity:.9}.controls{opacity:.75}}
 
-.runner-dialog{width:min(760px,100%)}.runner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.runner-card{min-width:0;padding:15px 10px 13px;border:1px solid #ffffff30;border-radius:17px;background:linear-gradient(145deg,#243a60,#111c36);display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .18s,border-color .18s,background .18s}.runner-card:hover{transform:translateY(-3px);border-color:#9ff2ee}.runner-card.selected{border:2px solid #8ff2e6;background:linear-gradient(145deg,#244e61,#182544);box-shadow:0 0 0 3px #65e4ef22}.runner-card b{font-size:11px;letter-spacing:.06em}.runner-card small{font-size:10px;color:#bdcce5}.runner-avatar{width:76px;height:88px;border-radius:16px;display:grid;place-items:center;font-size:48px;font-weight:900;color:#f8fbff;background:linear-gradient(145deg,#5d8fba,#253c61);box-shadow:inset 0 0 20px #ffffff20}.female-avatar{background:linear-gradient(145deg,#b66e9b,#573b77)}.soldier-avatar{background:linear-gradient(145deg,#82956d,#344735)}#continueToBriefing:disabled{opacity:.42;cursor:not-allowed}@media(max-width:560px){.runner-grid{gap:7px}.runner-card{padding:10px 5px}.runner-avatar{width:58px;height:70px;font-size:38px}.runner-card b{font-size:9px}.runner-card small{font-size:8px}.runner-dialog{padding:19px 13px}}
+.runner-dialog{width:min(760px,100%)}.runner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.runner-card{min-width:0;padding:15px 10px 13px;border:1px solid #ffffff30;border-radius:17px;background:linear-gradient(145deg,#243a60,#111c36);display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .18s,border-color .18s,background .18s}.runner-card:hover{transform:translateY(-3px);border-color:#9ff2ee}.runner-card.selected{border:2px solid #8ff2e6;background:linear-gradient(145deg,#244e61,#182544);box-shadow:0 0 0 3px #65e4ef22}.runner-card b{font-size:11px;letter-spacing:.06em}.runner-card small{font-size:10px;color:#bdcce5}.runner-preview-wrap{position:relative;display:block;width:100%;height:174px;overflow:hidden;border-radius:13px;background:radial-gradient(ellipse at 50% 28%,#476b8b 0%,#1b2b49 58%,#0d172a 100%);border:1px solid #ffffff18}.runner-preview{display:block;width:100%;height:100%;outline:0}.preview-loading{position:absolute;left:0;right:0;bottom:7px;font-size:9px;color:#d7e8f7;text-align:center;text-shadow:0 1px 4px #000;pointer-events:none}.runner-card[data-runner="female"] .runner-preview-wrap{background:radial-gradient(ellipse at 50% 28%,#865b84 0%,#3b2a55 58%,#19152d 100%)}.runner-card[data-runner="soldier"] .runner-preview-wrap{background:radial-gradient(ellipse at 50% 28%,#778568 0%,#344633 58%,#18261d 100%)}#continueToBriefing:disabled{opacity:.42;cursor:not-allowed}@media(max-width:560px){.runner-grid{gap:7px}.runner-card{padding:8px 5px}.runner-preview-wrap{height:132px}.runner-card b{font-size:9px}.runner-card small{font-size:8px}.runner-dialog{padding:19px 13px}}
 </style>
 </head>
 <body>
@@ -54,9 +54,9 @@
     <h1>WHO WILL <span>YOU BE?</span></h1>
     <p>Choose the character you want to take through Rush Arena. Your choice will carry across the levels on this device.</p>
     <div class="runner-grid">
-      <button class="runner-card" data-runner="male" type="button"><span class="runner-avatar male-avatar">♂</span><b>MALE RUNNER</b><small>Agile athletic runner</small></button>
-      <button class="runner-card" data-runner="female" type="button"><span class="runner-avatar female-avatar">♀</span><b>FEMALE RUNNER</b><small>Fast athletic runner</small></button>
-      <button class="runner-card" data-runner="soldier" type="button"><span class="runner-avatar soldier-avatar">✦</span><b>SOLDIER</b><small>Tactical field runner</small></button>
+      <button class="runner-card" data-runner="male" type="button"><span class="runner-preview-wrap"><canvas class="runner-preview" id="preview-male" aria-label="Animated 3D preview of the male runner"></canvas><span class="preview-loading" id="preview-status-male">Loading 3D runner…</span></span><b>MALE RUNNER</b><small>Agile athletic runner</small></button>
+      <button class="runner-card" data-runner="female" type="button"><span class="runner-preview-wrap"><canvas class="runner-preview" id="preview-female" aria-label="Animated 3D preview of the female runner"></canvas><span class="preview-loading" id="preview-status-female">Loading 3D runner…</span></span><b>FEMALE RUNNER</b><small>Fast athletic runner</small></button>
+      <button class="runner-card" data-runner="soldier" type="button"><span class="runner-preview-wrap"><canvas class="runner-preview" id="preview-soldier" aria-label="Animated 3D preview of the soldier"></canvas><span class="preview-loading" id="preview-status-soldier">Loading 3D runner…</span></span><b>SOLDIER</b><small>Tactical field runner</small></button>
     </div>
     <span class="small" id="runnerStatus" role="status" aria-live="polite">Select a character to prepare them.</span>
     <button class="primary" id="continueToBriefing" disabled>CONTINUE</button>
@@ -588,7 +588,74 @@ function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.7
 window.__rushStart=reset;
 function showCharacterSelection(){
   try{audioReady();soundTone(392,523,.2,.13,'sine',0);soundTone(523,784,.32,.12,'sine',.18);soundTone(784,1046,.42,.09,'sine',.4);}catch(e){console.warn('Welcome sound unavailable',e)}
-  ui.welcome.classList.add('hidden');document.getElementById('characterSelect').classList.remove('hidden');
+  ui.welcome.classList.add('hidden');document.getElementById('characterSelect').classList.remove('hidden');startRunnerPreviews();
+}
+
+let runnerPreviewEntries=[],runnerPreviewFrame=0,runnerPreviewLast=0,runnerPreviewsStarted=false;
+async function startRunnerPreviews(){
+  if(runnerPreviewsStarted)return;
+  runnerPreviewsStarted=true;
+  let GLTFLoader;
+  try{({GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js'));}
+  catch(error){console.warn('3D character preview loader unavailable',error);document.querySelectorAll('.preview-loading').forEach(el=>el.textContent='Preview unavailable');return;}
+  for(const choice of ['male','female','soldier']){
+    const canvas=document.getElementById('preview-'+choice),status=document.getElementById('preview-status-'+choice);
+    if(!canvas)continue;
+    try{
+      const previewRenderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:!mobileDevice,powerPreference:'low-power'});
+      previewRenderer.setPixelRatio(Math.min(devicePixelRatio,1.25));
+      previewRenderer.setSize(canvas.clientWidth||180,canvas.clientHeight||174,false);
+      previewRenderer.outputColorSpace=THREE.SRGBColorSpace;
+      previewRenderer.toneMapping=THREE.ACESFilmicToneMapping;
+      previewRenderer.toneMappingExposure=1.12;
+      const previewScene=new THREE.Scene();
+      const previewCamera=new THREE.PerspectiveCamera(32,1,.1,30);
+      previewCamera.position.set(0,1.18,5.9);previewCamera.lookAt(0,1.08,0);
+      previewScene.add(new THREE.HemisphereLight(0xd8eaff,0x263044,2.1));
+      const keyLight=new THREE.DirectionalLight(0xffffff,2.3);keyLight.position.set(-3,5,4);previewScene.add(keyLight);
+      const rimLight=new THREE.DirectionalLight(0x7bdcff,1.1);rimLight.position.set(3,2,-3);previewScene.add(rimLight);
+      const platform=new THREE.Mesh(new THREE.CylinderGeometry(.78,.88,.12,48),new THREE.MeshStandardMaterial({color:choice==='male'?0x527ba5:choice==='female'?0x94669b:0x778765,metalness:.35,roughness:.42}));
+      platform.position.y=.06;previewScene.add(platform);
+      const loader=new GLTFLoader();
+      const gltf=await loader.loadAsync(runnerAssets[choice]);
+      const model=gltf.scene;
+      const box=new THREE.Box3().setFromObject(model),height=Math.max(.01,box.max.y-box.min.y);
+      model.scale.setScalar(2.2/height);model.position.y=-box.min.y*model.scale.y;
+      model.rotation.y=0;
+      model.traverse(node=>{if(node.isMesh){node.castShadow=false;node.receiveShadow=false;}});
+      previewScene.add(model);
+      const mixer=new THREE.AnimationMixer(model);
+      const clips=gltf.animations||[];
+      const runClip=clips.find(clip=>/run|jog/i.test(clip.name))||clips.find(clip=>/walk/i.test(clip.name))||clips[0];
+      let action=null;
+      if(runClip){action=mixer.clipAction(runClip);action.setLoop(THREE.LoopRepeat,Infinity);action.play();}
+      const resize=()=>{
+        const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);
+        previewRenderer.setSize(w,h,false);previewCamera.aspect=w/h;previewCamera.updateProjectionMatrix();
+      };
+      resize();
+      runnerPreviewEntries.push({renderer:previewRenderer,scene:previewScene,camera:previewCamera,mixer,action,model,canvas,resize,choice,angle:0});
+      if(status)status.textContent=runClip?'Animated 3D preview':'3D character preview';
+    }catch(error){
+      console.warn('Could not create '+choice+' 3D preview',error);
+      if(status)status.textContent='Preview unavailable';
+    }
+  }
+  if(!runnerPreviewFrame&&runnerPreviewEntries.length){
+    const renderPreviews=now=>{
+      runnerPreviewFrame=requestAnimationFrame(renderPreviews);
+      const visible=!document.getElementById('characterSelect').classList.contains('hidden');
+      if(!visible){runnerPreviewLast=now;return;}
+      const dt=Math.min(.05,(now-runnerPreviewLast)/1000||.016);runnerPreviewLast=now;
+      for(const entry of runnerPreviewEntries){
+        if(entry.mixer)entry.mixer.update(dt);
+        entry.angle+=dt*.16;
+        entry.model.rotation.y=Math.sin(entry.angle)*.12;
+        entry.resize();entry.renderer.render(entry.scene,entry.camera);
+      }
+    };
+    runnerPreviewFrame=requestAnimationFrame(renderPreviews);
+  }
 }
 window.__rushShowCharacters=showCharacterSelection;
 document.querySelectorAll('[data-runner]').forEach(card=>card.addEventListener('click',async()=>{
