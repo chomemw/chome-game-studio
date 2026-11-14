@@ -505,11 +505,11 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
   loader.load(runnerUrl,gltf=>{
     const model=gltf.scene;
     // Match Level 2: face the runner forward along the auto-run direction.
-    model.rotation.y=0;
+    model.rotation.y=Math.PI;
     model.updateMatrixWorld(true);
     const bounds=new THREE.Box3().setFromObject(model);
     const height=Math.max(.01,bounds.max.y-bounds.min.y);
-    model.scale.setScalar(2.35/height); // Larger, clearly readable full-body runner.
+    model.scale.setScalar(3.2/height); // Larger, clearly readable full-body runner.
     model.position.y=-bounds.min.y*model.scale.y;
     model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
     body.clear();body.add(model);
