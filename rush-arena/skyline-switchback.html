@@ -244,6 +244,7 @@ const coins=[];
 const spinner=new THREE.Group();
 let riverGaps=[];
 let checkpoints=[];
+let zipStartZ=-320,zipEndZ=-347,zipStartX=0,zipEndX=0,zipHint=null;
 if(level===1){
 // Floating course with three safe gaps that require a jump.
 const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,5);extensionRoadTexture.needsUpdate=true;
@@ -476,14 +477,14 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  function addWaterfall(z,sideSign){const x=curveX(z)+sideSign*9.2,fall=box(2.6,8,.18,riverMat,x,2.2,z);fall.rotation.z=sideSign*.05;const pool=sphere(1.1,riverMat,x,-1.7,z+1);pool.scale.set(3.2,.18,1.8);for(let i=0;i<10;i++){const spray=sphere(.08+Math.random()*.13,riverFoam,x+(Math.random()-.5)*2.5,-1.45,z+(Math.random()-.5)*2);spray.scale.set(1.5,.25,.8)}}
  addWaterfall(-188,-1);addWaterfall(-396,1);addWaterfall(-578,-1);
   // Level 5 set-piece: a deep river gorge crossed by a suspended zipline.
-  const zipStartZ=-320,zipEndZ=-347,zipStartX=curveX(zipStartZ),zipEndX=curveX(zipEndZ);
+  zipStartX=curveX(zipStartZ);zipEndX=curveX(zipEndZ);
   const gorgeWater=box(42,.32,44,riverMat,(zipStartX+zipEndX)/2,-8.4,(zipStartZ+zipEndZ)/2);gorgeWater.receiveShadow=true;
   for(let r=0;r<5;r++){const ripple=sphere(.28,riverFoam,zipStartX+(Math.random()-.5)*28,-8.18,zipStartZ-8-r*5);ripple.scale.set(4,.12,1.2)}
   const platformMat=mat(0x6f8da3,.58,.42),steel=mat(0x9bb8cc,.3,.72);
   for(const [px,pz] of [[zipStartX,zipStartZ],[zipEndX,zipEndZ]]){box(5.2,.48,5.5,platformMat,px,routeY(pz)-.05,pz);for(const sideSign of [-1,1]){cylinder(.22,.32,9,steel,px+sideSign*2.1,routeY(pz)+4.35,pz);sphere(.34,gold,px+sideSign*2.1,routeY(pz)+8.9,pz).scale.set(1.2,.55,1.2)}}
   const cableCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(zipStartX,routeY(zipStartZ)+8.4,zipStartZ),new THREE.Vector3((zipStartX+zipEndX)/2,routeY((zipStartZ+zipEndZ)/2)+7.3,(zipStartZ+zipEndZ)/2),new THREE.Vector3(zipEndX,routeY(zipEndZ)+8.4,zipEndZ)]);
   scene.add(new THREE.Mesh(new THREE.TubeGeometry(cableCurve,36,.085,8,false),steel));
-  const zipHint=document.createElement('div');zipHint.textContent='ZIPLINE CROSSING AHEAD';Object.assign(zipHint.style,{position:'fixed',top:'104px',left:'50%',transform:'translateX(-50%)',zIndex:'47',padding:'9px 15px',border:'1px solid rgba(112,211,255,.7)',borderRadius:'12px',background:'rgba(5,24,44,.82)',color:'#e6f7ff',font:'900 11px system-ui',letterSpacing:'.12em',pointerEvents:'none',opacity:'0',transition:'opacity .2s'});document.body.appendChild(zipHint);
+  zipHint=document.createElement('div');zipHint.textContent='ZIPLINE CROSSING AHEAD';Object.assign(zipHint.style,{position:'fixed',top:'104px',left:'50%',transform:'translateX(-50%)',zIndex:'47',padding:'9px 15px',border:'1px solid rgba(112,211,255,.7)',borderRadius:'12px',background:'rgba(5,24,44,.82)',color:'#e6f7ff',font:'900 11px system-ui',letterSpacing:'.12em',pointerEvents:'none',opacity:'0',transition:'opacity .2s'});document.body.appendChild(zipHint);
 
  // Massive exposed roots, fallen logs and mossy stones make the course feel organic.
  for(let i=0;i<48;i++){const z=-15-i*13.2,sideSign=i%2?1:-1,x=curveX(z)+sideSign*(3.45+(i%3)*.3);const log=cylinder(.22,.34,3.6,barkLight,x,.28,z);log.rotation.set(.12,curveAngle(z),sideSign*.13);if(i%3===0){const b=sphere(.72,jungleSoil,x+sideSign*.7,.05,z-1.2);b.scale.set(1.5,.7,1.2)}}
@@ -811,7 +812,7 @@ const clock=new THREE.Clock();
 function moveRunner(dx,dz){
   const nextZ=player.position.z+dz;
   const nextCenter=curveX(nextZ);
-  const nextX=nextCenter+THREE.MathUtils.clamp(player.position.x+dx-nextCenter,level===4?-1.42:-2.45,level===4?1.42:2.45);
+  const nextX=nextCenter+THREE.MathUtils.clamp(player.position.x+dx-nextCenter,level>=4?-1.42:-2.45,level>=4?1.42:2.45);
   if(!obstacleInspectionMode){
   const radius=.38,runnerHeight=slideTimer>0?1.02:2.3;
   for(const o of obstacles){
