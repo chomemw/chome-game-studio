@@ -129,7 +129,7 @@ const routeTurns=[{d:0,x:0},{d:48,x:0},{d:105,x:5.2},{d:165,x:6.2},{d:225,x:-5.4
 const routeHeights=[{d:0,y:0},{d:65,y:.3},{d:125,y:1.4},{d:185,y:2.1},{d:245,y:.7},{d:305,y:-.5},{d:365,y:.5},{d:430,y:2.2},{d:495,y:2.8},{d:555,y:1.3},{d:615,y:2.5},{d:665,y:1.6}];
 const curveX=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeTurns.length-2&&d>routeTurns[i+1].d)i++;const a=routeTurns[i],b=routeTurns[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1),s=t*t*(3-2*t);return THREE.MathUtils.lerp(a.x,b.x,s)};
 const routeY=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeHeights.length-2&&d>routeHeights[i+1].d)i++;const a=routeHeights[i],b=routeHeights[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1),s=t*t*(3-2*t);return THREE.MathUtils.lerp(a.y,b.y,s)};
-const curveAngle=z=>Math.atan2(curveX(z-2)-curveX(z+2),-4);
+const curveAngle=z=>Math.atan2(curveX(z-2)-curveX(z+2),4);
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
 const obstacleInspectionMode=level===1;
 const scene=new THREE.Scene();scene.background=new THREE.Color(level===4?0xb9c5ca:0xa9c2d0);scene.fog=new THREE.Fog(level===4?0xb9d9e9:0xa9c2d0,level===4?58:42,level===4?190:155);
@@ -875,7 +875,7 @@ function update(dt){
   if(player.position.z<-661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   player.position.y=routeY(player.position.z)+.05+vertical;
-  const target=new THREE.Vector3(player.position.x,player.position.y+6.1,player.position.z+14.2);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.25,player.position.z-4.2);
+  // Temple Run-style follow rig: camera offsets and look direction follow the road tangent through every bend.\n  const heading=curveAngle(player.position.z),forwardX=Math.sin(heading),forwardZ=-Math.cos(heading);\n  const cameraTarget=new THREE.Vector3(player.position.x-forwardX*14.2,player.position.y+6.1,player.position.z-forwardZ*14.2);\n  camera.position.lerp(cameraTarget,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}\n  camera.lookAt(player.position.x+forwardX*4.2,player.position.y+1.25,player.position.z+forwardZ*4.2);
   const moving=running&&!paused;
   if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}
   // Keep the run cycle active during automatic forward travel, even when the
@@ -887,7 +887,7 @@ function update(dt){
     runnerMixer.update(dt);
   }
   body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);
-  body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);
+  // Keep the runner aligned with the winding brick path; lean gently into steering.\n  const routeHeading=curveAngle(player.position.z);\n  body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,routeHeading,.16);\n  body.rotation.z=THREE.MathUtils.lerp(body.rotation.z,-nx*.12,.14);
   if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 let lastRenderAt=0,frameAccumulator=0;
