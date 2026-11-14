@@ -629,9 +629,13 @@ async function startRunnerPreviews(){
       const runClip=clips.find(clip=>/run|jog/i.test(clip.name))||clips.find(clip=>/walk/i.test(clip.name))||clips[0];
       let action=null;
       if(runClip){action=mixer.clipAction(runClip);action.setLoop(THREE.LoopRepeat,Infinity);action.play();}
+      let previewWidth=0,previewHeight=0;
       const resize=()=>{
         const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);
-        previewRenderer.setSize(w,h,false);previewCamera.aspect=w/h;previewCamera.updateProjectionMatrix();
+        if(w!==previewWidth||h!==previewHeight){
+          previewWidth=w;previewHeight=h;
+          previewRenderer.setSize(w,h,false);previewCamera.aspect=w/h;previewCamera.updateProjectionMatrix();
+        }
       };
       resize();
       runnerPreviewEntries.push({renderer:previewRenderer,scene:previewScene,camera:previewCamera,mixer,action,model,canvas,resize,choice,angle:0});
