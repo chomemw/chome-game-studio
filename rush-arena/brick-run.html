@@ -875,11 +875,7 @@ function update(dt){
   if(player.position.z<-661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   player.position.y=routeY(player.position.z)+.05+vertical;
-  // Match the established Rush Arena follow camera used by Level 3.
-  const target=new THREE.Vector3(player.position.x,player.position.y+6.1,player.position.z+14.2);
-  camera.position.lerp(target,1-Math.pow(.001,dt));
-  if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}
-  camera.lookAt(player.position.x,player.position.y+1.25,player.position.z-4.2);
+  // Camera follow is handled once per rendered frame in animate(), just like Level 3.
   const moving=running&&!paused;
   if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}
   // Keep the run cycle active during automatic forward travel, even when the
@@ -913,6 +909,14 @@ function animate(now=0){
   }
   // Avoid a long catch-up spiral on severely overloaded devices.
   if(steps===4&&frameAccumulator>step*2)frameAccumulator=step*2;
+  // Follow the live runner on every rendered frame, independently of the fixed-step
+  // simulation. This prevents the Level 4 camera from appearing locked while the
+  // runner advances between simulation updates.
+  const cameraDt=Math.min(frameDelta,.12);
+  const cameraTarget=new THREE.Vector3(player.position.x,player.position.y+6.1,player.position.z+14.2);
+  camera.position.lerp(cameraTarget,1-Math.pow(.001,cameraDt));
+  if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}
+  camera.lookAt(player.position.x,player.position.y+1.25,player.position.z-4.2);
   renderer.render(scene,camera);
 }
 renderer.render(scene,camera);
