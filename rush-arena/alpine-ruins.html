@@ -406,7 +406,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
    roadUvs.push(0,n/samples*15,1,n/samples*15,.5,n/samples*15);
    if(n<samples){
      const i=n*3,j=(n+1)*3,e=n*2;
-     roadIdx.push(i,i+2,j,i+2,j+2,j,i+2,i+1,j+2,i+1,j+1,j+2);
+     roadIdx.push(i,i+1,j,i+1,j+1,j,i+1,i+2,j+1,i+2,j+2,j+1);
      edgeIdx.push(e,e+2,e+1,e+1,e+2,e+3);
    }
  }
