@@ -875,7 +875,11 @@ function update(dt){
   if(player.position.z<-661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   player.position.y=routeY(player.position.z)+.05+vertical;
-  // Temple Run-style follow rig: camera offsets and look direction follow the road tangent through every bend.\n  const heading=curveAngle(player.position.z),forwardX=Math.sin(heading),forwardZ=-Math.cos(heading);\n  const cameraTarget=new THREE.Vector3(player.position.x-forwardX*14.2,player.position.y+6.1,player.position.z-forwardZ*14.2);\n  camera.position.lerp(cameraTarget,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}\n  camera.lookAt(player.position.x+forwardX*4.2,player.position.y+1.25,player.position.z+forwardZ*4.2);
+  // Match the established Rush Arena follow camera used by Level 3.
+  const target=new THREE.Vector3(player.position.x,player.position.y+6.1,player.position.z+14.2);
+  camera.position.lerp(target,1-Math.pow(.001,dt));
+  if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}
+  camera.lookAt(player.position.x,player.position.y+1.25,player.position.z-4.2);
   const moving=running&&!paused;
   if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}
   // Keep the run cycle active during automatic forward travel, even when the
@@ -887,7 +891,8 @@ function update(dt){
     runnerMixer.update(dt);
   }
   body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);
-  // Keep the runner aligned with the winding brick path; lean gently into steering.\n  const routeHeading=curveAngle(player.position.z);\n  body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,routeHeading,.16);\n  body.rotation.z=THREE.MathUtils.lerp(body.rotation.z,-nx*.12,.14);
+  // Preserve the same natural steering lean used by the other Rush Arena levels.
+  body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);
   if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 let lastRenderAt=0,frameAccumulator=0;
