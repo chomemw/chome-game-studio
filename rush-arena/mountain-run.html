@@ -522,6 +522,7 @@ obstacles.forEach((o,index)=>{
 // The character selected at the start of Rush Arena is used throughout this level.
 const player=new THREE.Group();scene.add(player);player.position.set(0,.05,3.5);
 const body=new THREE.Group();player.add(body);
+import { attachSoldierRunAnimation } from './soldier-run-retarget.js';
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
 (async()=>{
@@ -535,7 +536,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
 };
   const runnerChoice=localStorage.getItem('rushArenaRunner')||'soldier';
   const runnerUrl=runnerAssets[runnerChoice]||runnerAssets.soldier;
-  loader.load(runnerUrl,gltf=>{
+  loader.load(runnerUrl,async gltf=>{
     const model=gltf.scene;
     model.rotation.y=Math.PI;
     model.updateMatrixWorld(true);
@@ -559,7 +560,16 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
         action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;
       }
     }
-    runnerModelLoaded=Object.keys(runnerActions).length>0;
+    if(runnerChoice!=='soldier'){
+       try{
+         const retargeted=await attachSoldierRunAnimation(model,runnerMixer,THREE);
+         runnerActions.run=retargeted.action;
+         console.info('Soldier sprint retargeted to runnerChoice:',retargeted.matched,'/',retargeted.total,'bones');
+       }catch(retargetError){
+         console.warn('Soldier sprint retarget unavailable; keeping the selected character run clip:',retargetError);
+       }
+     }
+     runnerModelLoaded=Object.keys(runnerActions).length>0;
     if(runnerActions.idle)playRunnerAction('idle',0);
     else if(runnerActions.run)playRunnerAction('run',0);
     console.info('Rush Arena runner loaded:',gltf.animations.map(a=>a.name));
