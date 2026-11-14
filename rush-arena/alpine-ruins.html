@@ -370,21 +370,52 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  // reference footage: a narrow winding forest trail, dense canopy and natural hazards.
  scene.background=new THREE.Color(0x8dbb82);scene.fog=new THREE.Fog(0x8dbb82,48,158);
  const jungleSoil=mat(0x443b2a,.99),trailDirt=mat(0x766044,.98),trailCenter=mat(0x92764d,.98),trailEdge=mat(0x3a3827,.98),bark=mat(0x493326,.98),barkLight=mat(0x694832,.98),leafDark=mat(0x183d25,.98),leafMid=mat(0x286039,.98),leafBright=mat(0x477d3d,.98),fernMat=mat(0x39743a,.98),rootMat=mat(0x59432c,.98),riverMat=new THREE.MeshStandardMaterial({color:0x258f9b,roughness:.22,metalness:.08,transparent:true,opacity:.9}),riverFoam=new THREE.MeshStandardMaterial({color:0xc6f2db,roughness:.3,transparent:true,opacity:.8});
- // Narrow dirt-and-root trail follows the same winding route as the runner.
- const roadVerts=[],roadIdx=[],edgeVerts=[],edgeIdx=[];
+ // Build a warm, earthy trail texture for this level only. Other levels keep
+ // their existing road material and geometry unchanged.
+ function makeJungleTrailTexture(){
+   const canvas=document.createElement('canvas');canvas.width=256;canvas.height=512;
+   const ctx=canvas.getContext('2d');ctx.fillStyle='#765638';ctx.fillRect(0,0,256,512);
+   for(let i=0;i<5200;i++){
+     const shade=Math.random();
+     ctx.fillStyle=shade>.72?'rgba(38,30,20,.22)':shade>.35?'rgba(190,151,98,.16)':'rgba(224,193,139,.10)';
+     ctx.fillRect(Math.random()*256,Math.random()*512,1+Math.random()*4,1+Math.random()*7);
+   }
+   for(let i=0;i<95;i++){
+     ctx.strokeStyle='rgba(42,31,20,.13)';ctx.lineWidth=.5+Math.random()*1.2;
+     const x=Math.random()*256,y=Math.random()*512;
+     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(Math.random()-.5)*8,y+5+Math.random()*18);ctx.stroke();
+   }
+   const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
+   texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=renderer.capabilities.getMaxAnisotropy();
+   return texture;
+ }
+ const jungleTrailTexture=makeJungleTrailTexture();
+ // Preserve the exact existing route and 2.75m half-width. A shallow crown
+ // across the surface adds a natural dirt-trail profile without changing movement.
+ const roadVerts=[],roadUvs=[],roadIdx=[],edgeVerts=[],edgeIdx=[];
  const samples=665,half=2.75;
  for(let n=0;n<=samples;n++){
-   const z=5-n, cx=curveX(z), a=curveX(z-0.5)-curveX(z+0.5), len=Math.hypot(a,1), nx=1/len, nz=a/len;
+   const z=5-n,cx=curveX(z),a=curveX(z-0.5)-curveX(z+0.5),len=Math.hypot(a,1),nx=1/len,nz=a/len;
    for(const sideSign of [-1,1]){
-     const x=cx+sideSign*half*nx, rz=z+sideSign*half*nz;
+     const x=cx+sideSign*half*nx,rz=z+sideSign*half*nz;
      roadVerts.push(x,-.12,rz);
      const ex=cx+sideSign*3.18*nx,ez=z+sideSign*3.18*nz;
      edgeVerts.push(ex,-.19,ez);
    }
-   if(n<samples){const i=n*2;roadIdx.push(i,i+1,i+2,i+1,i+3,i+2);edgeIdx.push(i,i+2,i+1,i+1,i+2,i+3)}
+   roadVerts.push(cx,-.085,z);
+   roadUvs.push(0,n/samples*15,1,n/samples*15,.5,n/samples*15);
+   if(n<samples){
+     const i=n*3,j=(n+1)*3,e=n*2;
+     roadIdx.push(i,i+2,j,i+2,j+2,j,i+2,i+1,j+2,i+1,j+1,j+2);
+     edgeIdx.push(e,e+2,e+1,e+1,e+2,e+3);
+   }
  }
- const roadGeo=new THREE.BufferGeometry();roadGeo.setAttribute('position',new THREE.Float32BufferAttribute(roadVerts,3));roadGeo.setIndex(roadIdx);roadGeo.computeVertexNormals();
- const trail=new THREE.Mesh(roadGeo,new THREE.MeshStandardMaterial({map:roadTexture,color:0xb99a6c,roughness:1,metalness:0}));trail.receiveShadow=true;scene.add(trail);
+ const roadGeo=new THREE.BufferGeometry();
+ roadGeo.setAttribute('position',new THREE.Float32BufferAttribute(roadVerts,3));
+ roadGeo.setAttribute('uv',new THREE.Float32BufferAttribute(roadUvs,2));
+ roadGeo.setIndex(roadIdx);roadGeo.computeVertexNormals();
+ const trail=new THREE.Mesh(roadGeo,new THREE.MeshStandardMaterial({map:jungleTrailTexture,color:0xffffff,roughness:1,metalness:0}));
+ trail.receiveShadow=true;scene.add(trail);
  const edgeGeo=new THREE.BufferGeometry();edgeGeo.setAttribute('position',new THREE.Float32BufferAttribute(edgeVerts,3));edgeGeo.setIndex(edgeIdx);edgeGeo.computeVertexNormals();const edges=new THREE.Mesh(edgeGeo,trailEdge);edges.receiveShadow=true;scene.add(edges);
  // Deep jungle floor and layered forest walls.
  const floor=box(90,.6,690,jungleSoil,0,-1.1,-330);floor.receiveShadow=true;
