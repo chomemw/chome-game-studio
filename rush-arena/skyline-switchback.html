@@ -411,7 +411,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
    roadUvs.push(0,n/samples*15,1,n/samples*15,.5,n/samples*15);
    if(n<samples){
      const i=n*3,j=(n+1)*3,e=n*2;
-     roadIdx.push(i,i+1,j,i+1,j+1,j,i+1,i+2,j+1,i+2,j+2,j+1);
+     if(n<320||n>347)roadIdx.push(i,i+1,j,i+1,j+1,j,i+1,i+2,j+1,i+2,j+2,j+1); // Zipline ravine opening.
      edgeIdx.push(e,e+2,e+1,e+1,e+2,e+3);
    }
  }
@@ -475,6 +475,16 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  // Waterfall curtains and pools sit beside the path, visible from the running camera.
  function addWaterfall(z,sideSign){const x=curveX(z)+sideSign*9.2,fall=box(2.6,8,.18,riverMat,x,2.2,z);fall.rotation.z=sideSign*.05;const pool=sphere(1.1,riverMat,x,-1.7,z+1);pool.scale.set(3.2,.18,1.8);for(let i=0;i<10;i++){const spray=sphere(.08+Math.random()*.13,riverFoam,x+(Math.random()-.5)*2.5,-1.45,z+(Math.random()-.5)*2);spray.scale.set(1.5,.25,.8)}}
  addWaterfall(-188,-1);addWaterfall(-396,1);addWaterfall(-578,-1);
+  // Level 5 set-piece: a deep river gorge crossed by a suspended zipline.
+  const zipStartZ=-320,zipEndZ=-347,zipStartX=curveX(zipStartZ),zipEndX=curveX(zipEndZ);
+  const gorgeWater=box(42,.32,44,riverMat,(zipStartX+zipEndX)/2,-8.4,(zipStartZ+zipEndZ)/2);gorgeWater.receiveShadow=true;
+  for(let r=0;r<5;r++){const ripple=sphere(.28,riverFoam,zipStartX+(Math.random()-.5)*28,-8.18,zipStartZ-8-r*5);ripple.scale.set(4,.12,1.2)}
+  const platformMat=mat(0x6f8da3,.58,.42),steel=mat(0x9bb8cc,.3,.72);
+  for(const [px,pz] of [[zipStartX,zipStartZ],[zipEndX,zipEndZ]]){box(5.2,.48,5.5,platformMat,px,routeY(pz)-.05,pz);for(const sideSign of [-1,1]){cylinder(.22,.32,9,steel,px+sideSign*2.1,routeY(pz)+4.35,pz);sphere(.34,gold,px+sideSign*2.1,routeY(pz)+8.9,pz).scale.set(1.2,.55,1.2)}}
+  const cableCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(zipStartX,routeY(zipStartZ)+8.4,zipStartZ),new THREE.Vector3((zipStartX+zipEndX)/2,routeY((zipStartZ+zipEndZ)/2)+7.3,(zipStartZ+zipEndZ)/2),new THREE.Vector3(zipEndX,routeY(zipEndZ)+8.4,zipEndZ)]);
+  scene.add(new THREE.Mesh(new THREE.TubeGeometry(cableCurve,36,.085,8,false),steel));
+  const zipHint=document.createElement('div');zipHint.textContent='ZIPLINE CROSSING AHEAD';Object.assign(zipHint.style,{position:'fixed',top:'104px',left:'50%',transform:'translateX(-50%)',zIndex:'47',padding:'9px 15px',border:'1px solid rgba(112,211,255,.7)',borderRadius:'12px',background:'rgba(5,24,44,.82)',color:'#e6f7ff',font:'900 11px system-ui',letterSpacing:'.12em',pointerEvents:'none',opacity:'0',transition:'opacity .2s'});document.body.appendChild(zipHint);
+
  // Massive exposed roots, fallen logs and mossy stones make the course feel organic.
  for(let i=0;i<48;i++){const z=-15-i*13.2,sideSign=i%2?1:-1,x=curveX(z)+sideSign*(3.45+(i%3)*.3);const log=cylinder(.22,.34,3.6,barkLight,x,.28,z);log.rotation.set(.12,curveAngle(z),sideSign*.13);if(i%3===0){const b=sphere(.72,jungleSoil,x+sideSign*.7,.05,z-1.2);b.scale.set(1.5,.7,1.2)}}
  // Gold relics follow the centerline and alternate between safe lanes.
@@ -656,11 +666,12 @@ function startHorrorAmbience(){
   const len=ctx.sampleRate*3,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
   const wind=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),wg=ctx.createGain();wind.buffer=buf;wind.loop=true;filter.type='lowpass';filter.frequency.value=360;wg.gain.value=.035;wind.connect(filter);filter.connect(wg);wg.connect(rushMaster);wind.start();rushWind={wind,filter,wg};
 }
-function sfxStart(){startHorrorAmbience();soundTone(180,48,.9,.18,'sawtooth');soundTone(92,38,1.25,.2,'triangle',.12);soundNoise(.75,.11,500,.2)}
+function startPremiumAmbience(){if(!audioReady()||rushDrone)return;const ctx=rushAudio,bus=ctx.createGain();bus.gain.value=.12;bus.connect(rushMaster);rushDrone=bus;[130.81,164.81,196,261.63].forEach((hz,i)=>{const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();o.type='triangle';o.frequency.value=hz;f.type='lowpass';f.frequency.value=900;g.gain.value=[.11,.075,.06,.025][i];o.connect(f);f.connect(g);g.connect(bus);o.start()});const lfo=ctx.createOscillator(),lg=ctx.createGain();lfo.frequency.value=.075;lg.gain.value=12;lfo.connect(lg);lg.connect(bus.gain);lfo.start()}
+function sfxStart(){startPremiumAmbience();soundTone(392,523,.42,.09,'sine');soundTone(523,784,.7,.08,'sine',.22);soundNoise(.45,.035,1700,.05)}
 function sfxJump(){soundNoise(.32,.13,1500);soundTone(125,390,.24,.09,'sine')}
 function sfxSlide(){soundNoise(.62,.16,1100);soundTone(90,42,.48,.08,'sawtooth')}
 function sfxImpact(){soundNoise(.42,.2,360);soundTone(72,28,.55,.2,'sawtooth')}
-function sfxFinish(){soundTone(220,55,.85,.16,'triangle');soundTone(165,330,.7,.1,'sine',.3);soundNoise(.8,.1,900,.45)}
+function sfxFinish(){soundTone(392,523,.45,.12,'sine');soundTone(523,659,.6,.1,'sine',.2);soundTone(659,784,.9,.09,'sine',.48);soundNoise(.35,.04,1500,.55)}
 function sfxFall(){soundTone(260,32,.7,.17,'sawtooth');soundNoise(.5,.14,260,.12)}
 function sfxWarning(){soundTone(740,330,.24,.13,'square');soundTone(520,210,.34,.11,'sawtooth',.16);soundNoise(.2,.045,1200,.05)}
 const dangerBanner=document.createElement('div');
@@ -825,6 +836,7 @@ function moveRunner(dx,dz){
   player.position.x=nextX;player.position.z=nextZ;
   return true;
 }
+let ziplineRide=null,ziplineUsed=false;
 function update(dt){
   spinner.rotation.y+=dt*1.55;
   hazardBeacons.forEach(b=>{b.rig.rotation.y=Math.sin(elapsed*2+b.index)*.08});
@@ -841,6 +853,10 @@ function update(dt){
   const nx=THREE.MathUtils.clamp(steerInput,-1,1);
   const level2SteerSpeed=6.5,templeAutoRunSpeed=14.2;
   const dx=nx*level2SteerSpeed*dt,dz=-templeAutoRunSpeed*dt;
+  const zipDistance=-player.position.z;
+  zipHint.style.opacity=!ziplineUsed&&zipDistance>300&&zipDistance<320?'1':'0';
+  if(!ziplineUsed&&!ziplineRide&&zipDistance>=320){ziplineRide={elapsed:0,startX:zipStartX,startZ:zipStartZ,endX:zipEndX,endZ:zipEndZ};player.position.set(zipStartX,routeY(zipStartZ)+.1,zipStartZ);body.rotation.x=-.15;}
+  if(ziplineRide){ziplineRide.elapsed+=dt;const t=THREE.MathUtils.clamp(ziplineRide.elapsed/2.45,0,1),ease=t*t*(3-2*t);player.position.x=THREE.MathUtils.lerp(ziplineRide.startX,ziplineRide.endX,ease);player.position.z=THREE.MathUtils.lerp(ziplineRide.startZ,ziplineRide.endZ,ease);player.position.y=THREE.MathUtils.lerp(routeY(ziplineRide.startZ),routeY(ziplineRide.endZ),ease)+5.15+Math.sin(t*Math.PI)*.22;body.rotation.x=THREE.MathUtils.lerp(body.rotation.x,-.2,.12);if(t>=1){player.position.set(ziplineRide.endX,routeY(ziplineRide.endZ)+.06,ziplineRide.endZ);ziplineRide=null;ziplineUsed=true;grounded=true;vertical=0;body.rotation.set(0,0,0);soundTone(660,990,.32,.11,'sine')}return;}
   if(!moveRunner(dx,dz))return;
   player.position.z=Math.max(player.position.z,-665);
   // Collect each gold medallion once as the runner passes it.
