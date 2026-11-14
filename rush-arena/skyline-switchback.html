@@ -152,7 +152,7 @@ const rainMaterial=new THREE.LineBasicMaterial({color:0xb8d8ed,transparent:true,
 const rainField=new THREE.LineSegments(rainGeometry,rainMaterial);rainField.frustumCulled=false;scene.add(rainField);
 const stormFlashLight=new THREE.PointLight(0xdcecff,0,95,1.5);scene.add(stormFlashLight);
 let lightningTimer=level===4?99999:7+Math.random()*6,lightningFlash=0,thunderPending=0;
-const weatherLabel=document.createElement('div');weatherLabel.textContent=level===4?'🧱  BRICK ROAD · NARROW PATH / HOLES / TREE HAZARDS':'⛈  STORM CONDITIONS';
+const weatherLabel=document.createElement('div');weatherLabel.textContent=level===5?'✦  SKYLINE SWITCHBACK · CANYON / ZIPLINE / SHARP TURNS':'🧱  BRICK ROAD · NARROW PATH / HOLES / TREE HAZARDS';
 Object.assign(weatherLabel.style,{position:'fixed',left:'12px',top:'54px',zIndex:'45',padding:'7px 10px',border:'1px solid rgba(173,204,224,.28)',borderRadius:'9px',background:'rgba(12,22,32,.58)',color:'#d8e8f4',font:'800 10px system-ui',letterSpacing:'.12em',pointerEvents:'none',backdropFilter:'blur(5px)'});
 document.body.appendChild(weatherLabel);
 if(obstacleInspectionMode){const inspectionLabel=document.createElement('div');inspectionLabel.textContent='👁 INSPECTION MODE · COLLISIONS OFF';Object.assign(inspectionLabel.style,{position:'fixed',right:'12px',top:'54px',zIndex:'46',padding:'7px 10px',border:'1px solid rgba(120,235,190,.45)',borderRadius:'9px',background:'rgba(8,28,24,.72)',color:'#c8ffe8',font:'800 10px system-ui',letterSpacing:'.08em',pointerEvents:'none',backdropFilter:'blur(5px)'});document.body.appendChild(inspectionLabel)}
@@ -584,11 +584,11 @@ const zoneBanner=document.createElement('div');
 Object.assign(zoneBanner.style,{position:'fixed',top:'37%',left:'50%',transform:'translate(-50%,-50%) scale(.96)',zIndex:'48',padding:'18px 25px',minWidth:'min(320px,84vw)',border:'1px solid rgba(255,255,255,.45)',borderRadius:'18px',background:'linear-gradient(145deg,rgba(9,18,30,.94),rgba(27,43,58,.9))',boxShadow:'0 18px 55px rgba(0,0,0,.4)',color:'#fff',font:'1000 19px system-ui',letterSpacing:'.1em',textAlign:'center',opacity:'0',transition:'opacity .25s, transform .25s',pointerEvents:'none'});
 document.body.appendChild(zoneBanner);
 const courseZones=developmentPreview?[
-  {start:0,end:133,name:'BRICK ROAD ENTRY',sub:'0m — 133m',bg:0x8dbb82,fog:0x8dbb82,accent:'#79c58b'},
-  {start:133,end:266,name:'BROKEN BRICKWAY',sub:'133m — 266m',bg:0x8dbb82,fog:0x8dbb82,accent:'#c6a77a'},
-  {start:266,end:399,name:'TREE-LINED PASS',sub:'266m — 399m',bg:0x8dbb82,fog:0x8dbb82,accent:'#8bd8e8'},
-  {start:399,end:532,name:'NARROW RIDGE',sub:'399m — 532m',bg:0x8dbb82,fog:0x8dbb82,accent:'#b8a77b'},
-  {start:532,end:665,name:'FINAL BRICK ASCENT',sub:'532m — 665m',bg:0x8dbb82,fog:0x8dbb82,accent:'#d9e5e1'}
+  {start:0,end:133,name:'SKYLINE APPROACH',sub:'0m — 133m',bg:0x172b46,fog:0x172b46,accent:'#8edaff'},
+  {start:133,end:266,name:'GLACIER SWITCHBACKS',sub:'133m — 266m',bg:0x203b58,fog:0x203b58,accent:'#a9dcf4'},
+  {start:266,end:399,name:'ABYSS ZIPLINE',sub:'266m — 399m',bg:0x10253d,fog:0x10253d,accent:'#61cfff'},
+  {start:399,end:532,name:'CRYSTAL RIDGE',sub:'399m — 532m',bg:0x29435c,fog:0x29435c,accent:'#c4e9ff'},
+  {start:532,end:665,name:'SUMMIT RUN',sub:'532m — 665m',bg:0x152b45,fog:0x152b45,accent:'#f1d6a1'}
 ]:[
   {start:0,end:133,name:'OPENING COURSE',sub:'0m — 133m',bg:0xa9c2d0,fog:0xa9c2d0,accent:'#9ec7d7'},
   {start:133,end:266,name:'CONSTRUCTION ZONE',sub:'133m — 266m',bg:0x8b9aa0,fog:0x8b9aa0,accent:'#e0a34a'},
@@ -770,7 +770,7 @@ async function reset(){
     if(status)status.textContent='Starting Brick Road…';
     lastProgressReport=0;progressChain=Promise.resolve();ziplineRide=null;ziplineUsed=false;if(zipGrip)zipGrip.visible=false;ziplineRide=null;ziplineUsed=false;if(zipGrip)zipGrip.visible=false;
     if(rushAudioOn){try{sfxStart();if(level!==5)startHorrorAmbience()}catch(audioError){rushAudioOn=false;console.warn('Brick Road audio unavailable; continuing silently.',audioError)}}
-    activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'BRICK ROAD ENTRY  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');renderer.render(scene,camera);
+    activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'SKYLINE APPROACH  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');renderer.render(scene,camera);
   }catch(error){
     // Roll back a partially-started run so the welcome screen and retry remain usable.
     running=false;
