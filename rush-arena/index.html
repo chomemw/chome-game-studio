@@ -396,7 +396,7 @@ const runnerAssets={
 };
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
 let selectedRunner='',runnerLoadPromise=Promise.resolve(false),runnerLoadToken=0;
-function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();}
+function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
 async function loadRunnerCharacter(choice){
   selectedRunner=choice;
   localStorage.setItem('rushArenaRunner',choice);
@@ -418,7 +418,7 @@ async function loadRunnerCharacter(choice){
         for(const clip of gltf.animations||[]){
           const key=clip.name.toLowerCase().replace(/[\\s_-]+/g,'');let slot=null;
           if(key.includes('idle'))slot='idle';else if(key.includes('walk'))slot='walk';else if(key.includes('run'))slot='run';
-          if(slot&&!runnerActions[slot]){const action=runnerMixer.clipAction(clip);action.enabled=true;action.setEffectiveTimeScale(slot==='run'?2.25:1);action.setEffectiveWeight(1);action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;}
+          if(slot&&!runnerActions[slot]){const action=runnerMixer.clipAction(clip);action.enabled=true;action.setEffectiveTimeScale(slot==='run'?1:1);action.setEffectiveWeight(1);action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;}
         }
         runnerModelLoaded=Object.keys(runnerActions).length>0;
         if(runnerActions.idle)playRunnerAction('idle',0);else if(runnerActions.run)playRunnerAction('run',0);
