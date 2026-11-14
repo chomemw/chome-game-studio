@@ -411,13 +411,14 @@ async function loadRunnerCharacter(choice){
         if(token!==runnerLoadToken){resolve(false);return;}
         const model=gltf.scene;model.rotation.y=0;model.updateMatrixWorld(true);
         const bounds=new THREE.Box3().setFromObject(model),height=Math.max(.01,bounds.max.y-bounds.min.y);
-        model.scale.setScalar(1.84/height);model.position.y=-bounds.min.y*model.scale.y;
+        model.scale.setScalar(2.35/height); // Match the Temple Trail full-body runner height and proportions.
+         model.position.y=-bounds.min.y*model.scale.y;
         model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
         body.clear();body.add(model);runnerMixer=new THREE.AnimationMixer(model);runnerActions={};
         for(const clip of gltf.animations||[]){
           const key=clip.name.toLowerCase().replace(/[\\s_-]+/g,'');let slot=null;
           if(key.includes('idle'))slot='idle';else if(key.includes('walk'))slot='walk';else if(key.includes('run'))slot='run';
-          if(slot&&!runnerActions[slot]){const action=runnerMixer.clipAction(clip);action.enabled=true;action.setEffectiveTimeScale(1);action.setEffectiveWeight(1);action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;}
+          if(slot&&!runnerActions[slot]){const action=runnerMixer.clipAction(clip);action.enabled=true;action.setEffectiveTimeScale(slot==='run'?2.25:1);action.setEffectiveWeight(1);action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;}
         }
         runnerModelLoaded=Object.keys(runnerActions).length>0;
         if(runnerActions.idle)playRunnerAction('idle',0);else if(runnerActions.run)playRunnerAction('run',0);
