@@ -518,8 +518,14 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
 (async()=>{
  try {
   const loader=new GLTFLoader();
-  const soldierUrl='https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb';
-  loader.load(soldierUrl,gltf=>{
+  const runnerAssets={
+  male:'https://files.innerscene.com/library/locomotion-collection-sam-3d-person-animated-dc23800f/735aec6a564c1def48e8/locomotion-collection-sam-3d-person-animated.glb',
+  female:'https://files.innerscene.com/library/run-maya-3d-person-animated-eebf24b9/d5f2b8f5a11a7c383293/run-maya-3d-person-animated.glb',
+  soldier:'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb'
+};
+  const runnerChoice=localStorage.getItem('rushArenaRunner')||'soldier';
+  const runnerUrl=runnerAssets[runnerChoice]||runnerAssets.soldier;
+  loader.load(runnerUrl,gltf=>{
     const model=gltf.scene;
     // Match Level 2: face the runner forward along the auto-run direction.
     model.rotation.y=0;
