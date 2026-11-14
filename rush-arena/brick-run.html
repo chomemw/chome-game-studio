@@ -531,7 +531,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
     model.updateMatrixWorld(true);
     const bounds=new THREE.Box3().setFromObject(model);
     const height=Math.max(.01,bounds.max.y-bounds.min.y);
-    model.scale.setScalar(2.5/height); // Larger full-body runner for the narrow brick-road preview.
+    model.scale.setScalar(2.35/height); // Match the Temple Trail full-body runner measurement.
     model.position.y=-bounds.min.y*model.scale.y;
     model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
     body.clear();body.add(model);
