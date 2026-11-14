@@ -411,7 +411,7 @@ async function loadRunnerCharacter(choice){
         if(token!==runnerLoadToken){resolve(false);return;}
         const model=gltf.scene;model.rotation.y=Math.PI;model.updateMatrixWorld(true);
         const bounds=new THREE.Box3().setFromObject(model),height=Math.max(.01,bounds.max.y-bounds.min.y);
-        model.scale.setScalar(2.9/height); // Clearly larger full-body gameplay runner.
+        model.scale.setScalar(3.2/height); // Clearly larger full-body gameplay runner.
          model.position.y=-bounds.min.y*model.scale.y;
         model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
         body.clear();body.add(model);runnerMixer=new THREE.AnimationMixer(model);runnerActions={};
@@ -621,7 +621,7 @@ async function startRunnerPreviews(){
       const model=gltf.scene;
       const box=new THREE.Box3().setFromObject(model),height=Math.max(.01,box.max.y-box.min.y);
       model.scale.setScalar(3.0/height);model.position.y=-box.min.y*model.scale.y;
-      model.rotation.y=0; // Face the preview camera so clients can inspect the character.
+      model.rotation.y=Math.PI; // Face the preview camera so clients can inspect the character.
       model.traverse(node=>{if(node.isMesh){node.castShadow=false;node.receiveShadow=false;}});
       previewScene.add(model);
       const mixer=new THREE.AnimationMixer(model);
