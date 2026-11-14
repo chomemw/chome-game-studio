@@ -433,7 +433,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  }
  // Thick tree trunks and canopies deliberately placed on the road as solid hazards.
  const roadTreeBark=mat(0x263b4d,.98),roadTreeLeaves=mat(0x1b4057,.98);
- const roadTreeLayout=[[-63,-1.12],[-126,1.12],[-185,-1.1],[-251,1.12],[-319,-1.12],[-386,1.1],[-454,-1.12],[-521,1.12],[-589,-1.1]];
+ const roadTreeLayout=[[-63,-1.12],[-126,1.12],[-185,-1.1],[-251,1.12],[-286,-1.12],[-386,1.1],[-454,-1.12],[-521,1.12],[-589,-1.1]];
  for(const [z,offset] of roadTreeLayout){
    const x=curveX(z)+offset,y=routeY(z);
    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.38,.52,3.4,10),roadTreeBark);
@@ -491,9 +491,9 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  const coinMaterial=new THREE.MeshStandardMaterial({color:0xffd45b,metalness:.78,roughness:.22,emissive:0x6d3d08,emissiveIntensity:.22}),coinGeometry=new THREE.TorusGeometry(.34,.105,8,18);
  for(let z=-20;z>=-650;z-=9.5){const lanePattern=Math.floor(Math.abs(z)/28)%3,offset=[-1.75,0,1.75][lanePattern],coin=new THREE.Mesh(coinGeometry,coinMaterial);coin.position.set(curveX(z)+offset,routeY(z)+1.15,z);coin.rotation.y=Math.PI/2;coin.castShadow=true;scene.add(coin);coins.push({mesh:coin,x:coin.position.x,z,collected:false})}
  // Jungle hazards: fallen logs, hanging roots, thorn clusters and leaning trunks.
- function addFallenLog(z,x){const wx=curveX(z)+x,mesh=cylinder(.42,.48,3.25,barkLight,wx,routeY(z)+.48,z);mesh.rotation.z=Math.PI/2;mesh.rotation.y=curveAngle(z);obstacles.push({mesh,x:wx,z,w:3.1,d:1.05,h:.98,type:'block'})}
- function addRootCluster(z,x){const wx=curveX(z)+x,mesh=box(1.55,1.25,1.05,rootMat,wx,routeY(z)+.62,z);for(let q=-1;q<=1;q++){const root=cylinder(.09,.2,1.5,rootMat,wx+q*.48,routeY(z)+.15,z);root.rotation.z=q*.35}obstacles.push({mesh,x:wx,z,w:1.65,d:1.15,h:1.3,type:'block'})}
- function addHangingRoot(z,x){const wx=curveX(z)+x,mesh=cylinder(.12,.22,2.15,rootMat,wx,routeY(z)+2.45,z);obstacles.push({mesh,x:wx,z,w:.7,d:.9,h:2.9,type:'overhead',clearance:1.05})}
+ function addFallenLog(z,x){if(Math.abs(z+333)<17)return;const wx=curveX(z)+x,mesh=cylinder(.42,.48,3.25,barkLight,wx,routeY(z)+.48,z);mesh.rotation.z=Math.PI/2;mesh.rotation.y=curveAngle(z);obstacles.push({mesh,x:wx,z,w:3.1,d:1.05,h:.98,type:'block'})}
+ function addRootCluster(z,x){if(Math.abs(z+333)<17)return;const wx=curveX(z)+x,mesh=box(1.55,1.25,1.05,rootMat,wx,routeY(z)+.62,z);for(let q=-1;q<=1;q++){const root=cylinder(.09,.2,1.5,rootMat,wx+q*.48,routeY(z)+.15,z);root.rotation.z=q*.35}obstacles.push({mesh,x:wx,z,w:1.65,d:1.15,h:1.3,type:'block'})}
+ function addHangingRoot(z,x){if(Math.abs(z+333)<17)return;const wx=curveX(z)+x,mesh=cylinder(.12,.22,2.15,rootMat,wx,routeY(z)+2.45,z);obstacles.push({mesh,x:wx,z,w:.7,d:.9,h:2.9,type:'overhead',clearance:1.05})}
  addFallenLog(-34,-1.8);addRootCluster(-58,2.0);addHangingRoot(-78,-2.0);addFallenLog(-118,1.8);
  addRootCluster(-146,-2.0);addFallenLog(-166,1.9);addHangingRoot(-207,2.0);addRootCluster(-229,-2.0);addFallenLog(-252,1.8);
  addRootCluster(-278,-1.9);addHangingRoot(-326,2.0);addFallenLog(-350,-2.0);addRootCluster(-371,1.9);
@@ -523,7 +523,7 @@ obstacles.forEach((o,index)=>{
 // or alternate athlete model is created while the Soldier asset loads.
 const player=new THREE.Group();scene.add(player);player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);
 const body=new THREE.Group();player.add(body);
-let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
+let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false,zipGrip=null;
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
 (async()=>{
  try {
@@ -539,7 +539,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
     model.scale.setScalar(2.85/height); // New larger character for the Level 5 preview.
     model.position.y=-bounds.min.y*model.scale.y;
     model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
-    body.clear();body.add(model);
+    body.clear();body.add(model);zipGrip=new THREE.Group();const gripMat=new THREE.MeshStandardMaterial({color:0xd6e9f5,metalness:.72,roughness:.25});const gripBar=new THREE.Mesh(new THREE.BoxGeometry(1.35,.1,.1),gripMat);gripBar.position.set(0,2.35,-.1);zipGrip.add(gripBar);for(const gx of [-.48,.48]){const strap=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.65,8),gripMat);strap.position.set(gx,2.02,-.1);zipGrip.add(strap)}zipGrip.visible=false;body.add(zipGrip);
     runnerMixer=new THREE.AnimationMixer(model);
     runnerActions={};
     for(const clip of gltf.animations||[]){
@@ -767,7 +767,7 @@ async function reset(){
       rushSessionId=sessionData.session_id;
     }
     if(status)status.textContent='Starting Brick Road…';
-    lastProgressReport=0;progressChain=Promise.resolve();
+    lastProgressReport=0;progressChain=Promise.resolve();ziplineRide=null;ziplineUsed=false;if(zipGrip)zipGrip.visible=false;
     if(rushAudioOn){try{sfxStart();startHorrorAmbience()}catch(audioError){rushAudioOn=false;console.warn('Brick Road audio unavailable; continuing silently.',audioError)}}
     activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'BRICK ROAD ENTRY  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');renderer.render(scene,camera);
   }catch(error){
@@ -855,8 +855,8 @@ function update(dt){
   const dx=nx*level2SteerSpeed*dt,dz=-templeAutoRunSpeed*dt;
   const zipDistance=-player.position.z;
   zipHint.style.opacity=!ziplineUsed&&zipDistance>300&&zipDistance<320?'1':'0';
-  if(!ziplineUsed&&!ziplineRide&&zipDistance>=320){ziplineRide={elapsed:0,startX:zipStartX,startZ:zipStartZ,endX:zipEndX,endZ:zipEndZ};player.position.set(zipStartX,routeY(zipStartZ)+.1,zipStartZ);body.rotation.x=-.15;}
-  if(ziplineRide){ziplineRide.elapsed+=dt;const t=THREE.MathUtils.clamp(ziplineRide.elapsed/2.45,0,1),ease=t*t*(3-2*t);player.position.x=THREE.MathUtils.lerp(ziplineRide.startX,ziplineRide.endX,ease);player.position.z=THREE.MathUtils.lerp(ziplineRide.startZ,ziplineRide.endZ,ease);player.position.y=THREE.MathUtils.lerp(routeY(ziplineRide.startZ),routeY(ziplineRide.endZ),ease)+5.15+Math.sin(t*Math.PI)*.22;body.rotation.x=THREE.MathUtils.lerp(body.rotation.x,-.2,.12);if(t>=1){player.position.set(ziplineRide.endX,routeY(ziplineRide.endZ)+.06,ziplineRide.endZ);ziplineRide=null;ziplineUsed=true;grounded=true;vertical=0;body.rotation.set(0,0,0);soundTone(660,990,.32,.11,'sine')}return;}
+  if(!ziplineUsed&&!ziplineRide&&zipDistance>=320){if(zipGrip)zipGrip.visible=true;ziplineRide={elapsed:0,startX:zipStartX,startZ:zipStartZ,endX:zipEndX,endZ:zipEndZ};player.position.set(zipStartX,routeY(zipStartZ)+.1,zipStartZ);body.rotation.x=-.15;}
+  if(ziplineRide){ziplineRide.elapsed+=dt;const t=THREE.MathUtils.clamp(ziplineRide.elapsed/2.45,0,1),ease=t*t*(3-2*t);player.position.x=THREE.MathUtils.lerp(ziplineRide.startX,ziplineRide.endX,ease);player.position.z=THREE.MathUtils.lerp(ziplineRide.startZ,ziplineRide.endZ,ease);player.position.y=THREE.MathUtils.lerp(routeY(ziplineRide.startZ),routeY(ziplineRide.endZ),ease)+5.15+Math.sin(t*Math.PI)*.22;body.rotation.x=THREE.MathUtils.lerp(body.rotation.x,-.2,.12);if(t>=1){player.position.set(ziplineRide.endX,routeY(ziplineRide.endZ)+.06,ziplineRide.endZ);ziplineRide=null;ziplineUsed=true;if(zipGrip)zipGrip.visible=false;grounded=true;vertical=0;body.rotation.set(0,0,0);soundTone(660,990,.32,.11,'sine')}return;}
   if(!moveRunner(dx,dz))return;
   player.position.z=Math.max(player.position.z,-665);
   // Collect each gold medallion once as the runner passes it.
