@@ -244,7 +244,7 @@ const coins=[];
 const spinner=new THREE.Group();
 let riverGaps=[];
 let checkpoints=[];
-let zipStartZ=-320,zipEndZ=-347,zipStartX=0,zipEndX=0,zipHint=null;
+let zipStartZ=-315,zipEndZ=-342,zipStartX=0,zipEndX=0,zipHint=null;
 if(level===1){
 // Floating course with three safe gaps that require a jump.
 const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,5);extensionRoadTexture.needsUpdate=true;
@@ -855,9 +855,9 @@ function update(dt){
   const level2SteerSpeed=6.5,templeAutoRunSpeed=14.2;
   const dx=nx*level2SteerSpeed*dt,dz=-templeAutoRunSpeed*dt;
   const zipDistance=-player.position.z;
-  zipHint.style.opacity=!ziplineUsed&&zipDistance>300&&zipDistance<320?'1':'0';
-  if(!ziplineUsed&&!ziplineRide&&zipDistance>=320){if(zipGrip)zipGrip.visible=true;ziplineRide={elapsed:0,startX:zipStartX,startZ:zipStartZ,endX:zipEndX,endZ:zipEndZ};player.position.set(zipStartX,routeY(zipStartZ)+.1,zipStartZ);body.rotation.x=-.15;}
-  if(ziplineRide){ziplineRide.elapsed+=dt;const t=THREE.MathUtils.clamp(ziplineRide.elapsed/2.45,0,1),ease=t*t*(3-2*t);player.position.x=THREE.MathUtils.lerp(ziplineRide.startX,ziplineRide.endX,ease);player.position.z=THREE.MathUtils.lerp(ziplineRide.startZ,ziplineRide.endZ,ease);player.position.y=THREE.MathUtils.lerp(routeY(ziplineRide.startZ),routeY(ziplineRide.endZ),ease)+5.15+Math.sin(t*Math.PI)*.22;body.rotation.x=THREE.MathUtils.lerp(body.rotation.x,-.2,.12);if(t>=1){player.position.set(ziplineRide.endX,routeY(ziplineRide.endZ)+.06,ziplineRide.endZ);ziplineRide=null;ziplineUsed=true;if(zipGrip)zipGrip.visible=false;grounded=true;vertical=0;body.rotation.set(0,0,0);soundTone(660,990,.32,.11,'sine')}return;}
+  zipHint.style.opacity=!ziplineUsed&&zipDistance>295&&zipDistance<315?'1':'0';
+  if(!ziplineUsed&&!ziplineRide&&zipDistance>=315){if(zipGrip)zipGrip.visible=true;ziplineRide={elapsed:0,startX:zipStartX,startZ:zipStartZ,endX:zipEndX,endZ:zipEndZ};player.position.set(zipStartX,routeY(zipStartZ)+.1,zipStartZ);body.rotation.x=-.15;}
+  if(ziplineRide){ziplineRide.elapsed+=dt;const t=THREE.MathUtils.clamp(ziplineRide.elapsed/2.45,0,1),ease=t*t*(3-2*t);player.position.x=THREE.MathUtils.lerp(ziplineRide.startX,ziplineRide.endX,ease);player.position.z=THREE.MathUtils.lerp(ziplineRide.startZ,ziplineRide.endZ,ease);player.position.y=THREE.MathUtils.lerp(routeY(ziplineRide.startZ),routeY(ziplineRide.endZ),ease)+6.05+Math.sin(t*Math.PI)*.22;body.rotation.x=THREE.MathUtils.lerp(body.rotation.x,-.2,.12);if(t>=1){player.position.set(ziplineRide.endX,routeY(ziplineRide.endZ)+.06,ziplineRide.endZ);ziplineRide=null;ziplineUsed=true;if(zipGrip)zipGrip.visible=false;grounded=true;vertical=0;body.rotation.set(0,0,0);soundTone(660,990,.32,.11,'sine')}return;}
   if(!moveRunner(dx,dz))return;
   player.position.z=Math.max(player.position.z,-665);
   // Collect each gold medallion once as the runner passes it.
