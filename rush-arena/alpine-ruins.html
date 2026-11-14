@@ -119,10 +119,12 @@ const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publi
 // Level 3 uses its own alpine-citadel lighting, scenery and hazards.
 const level=3;
 const developmentPreview=true;
-// Level 3 follows a gentle S-shaped alpine trail; player X is world-space.
-// Broad alternating bends create a winding three-lane mountain route.
-const routeTurns=[{d:0,x:0},{d:72,x:0},{d:112,x:3.25},{d:166,x:3.55},{d:216,x:-3.25},{d:270,x:-3.55},{d:326,x:3.25},{d:382,x:3.55},{d:438,x:-3.25},{d:494,x:-3.55},{d:552,x:3.1},{d:610,x:2.8},{d:665,x:0}];
+// Level 3 is a true winding mountain trail, not a straight flat sprint.
+// Large, broad turns and rolling elevation changes shape the full route.
+const routeTurns=[{d:0,x:0},{d:48,x:0},{d:105,x:7.2},{d:165,x:9.0},{d:225,x:-7.5},{d:285,x:-9.0},{d:345,x:7.4},{d:405,x:9.0},{d:465,x:-7.4},{d:525,x:-8.6},{d:585,x:6.8},{d:630,x:5.0},{d:665,x:0}];
+const routeHeights=[{d:0,y:0},{d:65,y:.2},{d:125,y:2.1},{d:185,y:3.1},{d:245,y:1.0},{d:305,y:-1.1},{d:365,y:.8},{d:430,y:3.3},{d:495,y:4.1},{d:555,y:2.0},{d:615,y:3.6},{d:665,y:2.4}];
 const curveX=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeTurns.length-2&&d>routeTurns[i+1].d)i++;const a=routeTurns[i],b=routeTurns[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1),s=t*t*(3-2*t);return THREE.MathUtils.lerp(a.x,b.x,s)};
+const routeY=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeHeights.length-2&&d>routeHeights[i+1].d)i++;const a=routeHeights[i],b=routeHeights[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1),s=t*t*(3-2*t);return THREE.MathUtils.lerp(a.y,b.y,s)};
 const curveAngle=z=>Math.atan2(curveX(z-2)-curveX(z+2),-4);
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
 const obstacleInspectionMode=level===1;
@@ -397,11 +399,11 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
    const z=5-n,cx=curveX(z),a=curveX(z-0.5)-curveX(z+0.5),len=Math.hypot(a,1),nx=1/len,nz=a/len;
    for(const sideSign of [-1,1]){
      const x=cx+sideSign*half*nx,rz=z+sideSign*half*nz;
-     roadVerts.push(x,-.12,rz);
+     roadVerts.push(x,routeY(z)-.12,rz);
      const ex=cx+sideSign*3.18*nx,ez=z+sideSign*3.18*nz;
-     edgeVerts.push(ex,-.19,ez);
+     edgeVerts.push(ex,routeY(z)-.19,ez);
    }
-   roadVerts.push(cx,-.085,z);
+   roadVerts.push(cx,routeY(z)-.085,z);
    roadUvs.push(0,n/samples*15,1,n/samples*15,.5,n/samples*15);
    if(n<samples){
      const i=n*3,j=(n+1)*3,e=n*2;
@@ -452,7 +454,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  for(let i=0;i<48;i++){const z=-15-i*13.2,sideSign=i%2?1:-1,x=curveX(z)+sideSign*(3.45+(i%3)*.3);const log=cylinder(.22,.34,3.6,barkLight,x,.28,z);log.rotation.set(.12,curveAngle(z),sideSign*.13);if(i%3===0){const b=sphere(.72,jungleSoil,x+sideSign*.7,.05,z-1.2);b.scale.set(1.5,.7,1.2)}}
  // Gold relics follow the centerline and alternate between safe lanes.
  const coinMaterial=new THREE.MeshStandardMaterial({color:0xffd45b,metalness:.78,roughness:.22,emissive:0x6d3d08,emissiveIntensity:.22}),coinGeometry=new THREE.TorusGeometry(.34,.105,8,18);
- for(let z=-20;z>=-650;z-=9.5){const lanePattern=Math.floor(Math.abs(z)/28)%3,offset=[-1.75,0,1.75][lanePattern],coin=new THREE.Mesh(coinGeometry,coinMaterial);coin.position.set(curveX(z)+offset,1.15,z);coin.rotation.y=Math.PI/2;coin.castShadow=true;scene.add(coin);coins.push({mesh:coin,x:coin.position.x,z,collected:false})}
+ for(let z=-20;z>=-650;z-=9.5){const lanePattern=Math.floor(Math.abs(z)/28)%3,offset=[-1.75,0,1.75][lanePattern],coin=new THREE.Mesh(coinGeometry,coinMaterial);coin.position.set(curveX(z)+offset,routeY(z)+1.15,z);coin.rotation.y=Math.PI/2;coin.castShadow=true;scene.add(coin);coins.push({mesh:coin,x:coin.position.x,z,collected:false})}
  // Jungle hazards: fallen logs, hanging roots, thorn clusters and leaning trunks.
  function addFallenLog(z,x){const wx=curveX(z)+x,mesh=cylinder(.42,.48,3.25,barkLight,wx,.48,z);mesh.rotation.z=Math.PI/2;mesh.rotation.y=curveAngle(z);obstacles.push({mesh,x:wx,z,w:3.1,d:1.05,h:.98,type:'block'})}
  function addRootCluster(z,x){const wx=curveX(z)+x,mesh=box(1.55,1.25,1.05,rootMat,wx,.62,z);for(let q=-1;q<=1;q++){const root=cylinder(.09,.2,1.5,rootMat,wx+q*.48,.15,z);root.rotation.z=q*.35}obstacles.push({mesh,x:wx,z,w:1.65,d:1.15,h:1.3,type:'block'})}
@@ -484,7 +486,7 @@ obstacles.forEach((o,index)=>{
 
 // The Soldier GLB is the only player character. No procedural placeholder
 // or alternate athlete model is created while the Soldier asset loads.
-const player=new THREE.Group();scene.add(player);player.position.set(curveX(3.5),.05,3.5);
+const player=new THREE.Group();scene.add(player);player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);
 const body=new THREE.Group();player.add(body);
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
@@ -839,6 +841,7 @@ function update(dt){
   checkpoints.forEach((z,i)=>{if(checkpoint===i&&player.position.z<z){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/7'}});
   if(player.position.z<-661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
+  player.position.y=routeY(player.position.z)+.05+vertical;
   const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
   const moving=running&&!paused;
   if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}
