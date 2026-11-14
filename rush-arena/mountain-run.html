@@ -541,7 +541,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
     model.updateMatrixWorld(true);
     const bounds=new THREE.Box3().setFromObject(model);
     const height=Math.max(.01,bounds.max.y-bounds.min.y);
-    model.scale.setScalar(1.84/height);
+    model.scale.setScalar(2.35/height); // Match the Temple Trail full-body runner measurement.
     model.position.y=-bounds.min.y*model.scale.y;
     model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
     body.clear();body.add(model);
@@ -555,7 +555,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
       else if(key.includes('run'))slot='run';
       if(slot&&!runnerActions[slot]){
         const action=runnerMixer.clipAction(clip);
-        action.enabled=true;action.setEffectiveTimeScale(1);action.setEffectiveWeight(1);
+        action.enabled=true;action.setEffectiveTimeScale(slot==='run'?2.25:1);action.setEffectiveWeight(1);
         action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;
       }
     }
