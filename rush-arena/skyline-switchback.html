@@ -543,7 +543,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
     model.updateMatrixWorld(true);
     const bounds=new THREE.Box3().setFromObject(model);
     const height=Math.max(.01,bounds.max.y-bounds.min.y);
-    model.scale.setScalar(1.84/height); // Keep the selected runner's scale consistent across every level.
+    model.scale.setScalar(2.35/height); // Match the Temple Trail full-body runner measurement across levels.
     model.position.y=-bounds.min.y*model.scale.y;
     model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
     body.clear();body.add(model);zipGrip=new THREE.Group();const gripMat=new THREE.MeshStandardMaterial({color:0xd6e9f5,metalness:.72,roughness:.25});const gripBar=new THREE.Mesh(new THREE.BoxGeometry(1.35,.1,.1),gripMat);gripBar.position.set(0,2.35,-.1);zipGrip.add(gripBar);for(const gx of [-.48,.48]){const strap=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.65,8),gripMat);strap.position.set(gx,2.02,-.1);zipGrip.add(strap)}zipGrip.visible=false;body.add(zipGrip);
