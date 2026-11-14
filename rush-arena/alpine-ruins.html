@@ -780,7 +780,7 @@ function moveRunner(dx,dz){
   const radius=.42,runnerHeight=slideTimer>0?1.02:2.3;
   for(const o of obstacles){
     if(o.type==='spinner')continue;
-    const verticalBlocked=(o.type==='block'||o.type==='movingBlock')?player.position.y<o.h-.02:(o.type==='overhead'&&runnerHeight>o.clearance);
+    const verticalBlocked=(o.type==='block'||o.type==='movingBlock')?(player.position.y-routeY(nextZ))<o.h-.02:(o.type==='overhead'&&runnerHeight>o.clearance);
     if(!verticalBlocked)continue;
     const halfX=o.w/2+radius,halfZ=o.d/2+radius;
     if(Math.abs(nextX-o.x)<halfX&&Math.abs(nextZ-o.z)<halfZ){
