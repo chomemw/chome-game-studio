@@ -418,7 +418,7 @@ async function loadRunnerCharacter(choice){
         for(const clip of gltf.animations||[]){
           const key=clip.name.toLowerCase().replace(/[\\s_-]+/g,'');let slot=null;
           if(key.includes('idle'))slot='idle';else if(key.includes('walk'))slot='walk';else if(key.includes('run'))slot='run';
-          if(slot&&!runnerActions[slot]){const action=runnerMixer.clipAction(clip);action.enabled=true;action.setEffectiveTimeScale(slot==='run'?1.7:1);action.setEffectiveWeight(1);action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;}
+          if(slot&&!runnerActions[slot]){const action=runnerMixer.clipAction(clip);action.enabled=true;action.setEffectiveTimeScale(slot==='run'?1.15:1);action.setEffectiveWeight(1);action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;}
         }
         runnerModelLoaded=Object.keys(runnerActions).length>0;
         if(runnerActions.idle)playRunnerAction('idle',0);else if(runnerActions.run)playRunnerAction('run',0);
