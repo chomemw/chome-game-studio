@@ -745,10 +745,12 @@ function update(dt){
   updateMovingHazards(dt);
   updateHazardWarnings(dt);
   if(slideTimer>0){slideTimer=Math.max(0,slideTimer-dt);if(slideTimer===0){body.scale.set(1,1,1);body.position.y=0;body.rotation.x=0}}
-  const ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+stickX;
-  const nx=THREE.MathUtils.clamp(ix,-1,1);
-  // Temple-runner auto-forward motion starts immediately after START RUN.
-  const forwardSpeed=8.2,steerSpeed=6.2,dx=nx*steerSpeed*dt,dz=-forwardSpeed*dt;
+  // Level 2-style steering, adapted for Temple Trail's auto-run:
+  // left/right input controls the same lateral steering; forward motion stays automatic.
+  const steerInput=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+stickX;
+  const nx=THREE.MathUtils.clamp(steerInput,-1,1);
+  const level2SteerSpeed=7.0,templeAutoRunSpeed=8.2;
+  const dx=nx*level2SteerSpeed*dt,dz=-templeAutoRunSpeed*dt;
   if(!moveRunner(dx,dz))return;
   player.position.z=Math.max(player.position.z,-665);
   // Collect each gold medallion once as the runner passes it.
@@ -783,7 +785,19 @@ function update(dt){
   if(player.position.z<-661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   const target=new THREE.Vector3(player.position.x*.42,player.position.y+5.2,player.position.z+10.8);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-3.5);
-  const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(running?'run':'idle'));if(runnerModelLoaded){const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run?'run':(runnerActions.walk?'walk':'idle'));playRunnerAction(action);runnerMixer.update(dt);}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
+  const moving=running&&!paused;
+  if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}
+  // Keep the run cycle active during automatic forward travel, even when the
+  // player is not steering. Jump and slide retain Level 2's action handling.
+  const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));
+  if(runnerModelLoaded){
+    const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run? 'run':(runnerActions.walk?'walk':'idle'));
+    playRunnerAction(action);
+    runnerMixer.update(dt);
+  }
+  body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);
+  body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);
+  if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 let lastRenderAt=0,frameAccumulator=0;
 function animate(now=0){
