@@ -515,7 +515,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
       else if(key.includes('run'))slot='run';
       if(slot&&!runnerActions[slot]){
         const action=runnerMixer.clipAction(clip);
-        action.enabled=true;action.setEffectiveTimeScale(1);action.setEffectiveWeight(1);
+        action.enabled=true;action.setEffectiveTimeScale(slot==='run'?1.65:1);action.setEffectiveWeight(1);
         action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;
       }
     }
@@ -750,7 +750,7 @@ function update(dt){
   // left/right input controls the same lateral steering; forward motion stays automatic.
   const steerInput=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+stickX;
   const nx=THREE.MathUtils.clamp(steerInput,-1,1);
-  const level2SteerSpeed=7.0,templeAutoRunSpeed=8.2;
+  const level2SteerSpeed=7.0,templeAutoRunSpeed=11.5;
   const dx=nx*level2SteerSpeed*dt,dz=-templeAutoRunSpeed*dt;
   if(!moveRunner(dx,dz))return;
   player.position.z=Math.max(player.position.z,-665);
