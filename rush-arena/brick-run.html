@@ -125,7 +125,7 @@ const developmentPreview=true;
 // Level 3 is a true winding mountain trail, not a straight flat sprint.
 // Large, broad turns and rolling elevation changes shape the full route.
 // Level 4 owns this route profile; it does not import Level 3's route or scene file.
-const routeTurns=[{d:0,x:0},{d:48,x:0},{d:105,x:5.2},{d:165,x:6.2},{d:225,x:-5.4},{d:285,x:-6.0},{d:345,x:5.2},{d:405,x:6.0},{d:465,x:-5.2},{d:525,x:-5.8},{d:585,x:4.8},{d:630,x:3.8},{d:665,x:0}];
+const routeTurns=[{d:0,x:0},{d:48,x:0},{d:105,x:5.2},{d:133,x:5.8},{d:143,x:6.8},{d:155,x:10.5},{d:168,x:16.8},{d:183,x:20.5},{d:198,x:20.8},{d:215,x:17.2},{d:235,x:9.2},{d:255,x:2.0},{d:275,x:-4.8},{d:285,x:-6.0},{d:345,x:5.2},{d:405,x:6.0},{d:465,x:-5.2},{d:525,x:-5.8},{d:585,x:4.8},{d:630,x:3.8},{d:665,x:0}];
 const routeHeights=[{d:0,y:0},{d:65,y:.3},{d:125,y:1.4},{d:185,y:2.1},{d:245,y:.7},{d:305,y:-.5},{d:365,y:.5},{d:430,y:2.2},{d:495,y:2.8},{d:555,y:1.3},{d:615,y:2.5},{d:665,y:1.6}];
 const curveX=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeTurns.length-2&&d>routeTurns[i+1].d)i++;const a=routeTurns[i],b=routeTurns[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1),s=t*t*(3-2*t);return THREE.MathUtils.lerp(a.x,b.x,s)};
 const routeY=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeHeights.length-2&&d>routeHeights[i+1].d)i++;const a=routeHeights[i],b=routeHeights[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1),s=t*t*(3-2*t);return THREE.MathUtils.lerp(a.y,b.y,s)};
