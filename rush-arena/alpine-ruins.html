@@ -368,7 +368,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
 }else{
  // LEVEL 3 — TEMPLE TRAIL. Original jungle-runner environment inspired by the
  // reference footage: a narrow winding forest trail, dense canopy and natural hazards.
- scene.background=new THREE.Color(0x8dbb82);scene.fog=new THREE.Fog(0x8dbb82,48,158);
+ scene.background=new THREE.Color(0x8dbb82);scene.fog=new THREE.Fog(0x8dbb82,105,360);
  const jungleSoil=mat(0x443b2a,.99),trailDirt=mat(0x766044,.98),trailCenter=mat(0x92764d,.98),trailEdge=mat(0x3a3827,.98),bark=mat(0x493326,.98),barkLight=mat(0x694832,.98),leafDark=mat(0x183d25,.98),leafMid=mat(0x286039,.98),leafBright=mat(0x477d3d,.98),fernMat=mat(0x39743a,.98),rootMat=mat(0x59432c,.98),riverMat=new THREE.MeshStandardMaterial({color:0x258f9b,roughness:.22,metalness:.08,transparent:true,opacity:.9}),riverFoam=new THREE.MeshStandardMaterial({color:0xc6f2db,roughness:.3,transparent:true,opacity:.8});
  // Build a warm, earthy trail texture for this level only. Other levels keep
  // their existing road material and geometry unchanged.
@@ -467,7 +467,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  function addTrailSign(title,range,z){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=160;const ctx=canvas.getContext('2d');ctx.fillStyle='#173c25';ctx.fillRect(0,0,1024,160);ctx.fillStyle='#9bc66d';ctx.fillRect(0,0,16,160);ctx.fillRect(1008,0,16,160);ctx.fillStyle='#f5f4d8';ctx.font='900 54px system-ui';ctx.textAlign='center';ctx.fillText(title,512,70);ctx.fillStyle='#b8d98b';ctx.font='800 27px system-ui';ctx.fillText(range,512,119);const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;const board=new THREE.Mesh(new THREE.PlaneGeometry(8,1.25),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));board.position.set(curveX(z),5.2,z);scene.add(board)}
  const jungleZones=[['JUNGLE TRAIL','0m — 133m',-12],['ROOT BRIDGES','133m — 266m',-145],['WATERFALL RUN','266m — 399m',-278],['ANCIENT CANOPY','399m — 532m',-411],['DEEP FOREST','532m — 665m',-544]];
  for(const [title,range,z] of jungleZones)addTrailSign(title,range,z);
- for(const z of checkpoints){const g=new THREE.Group(),cx=curveX(z);const left=cylinder(.13,.22,3.1,rootMat,cx-2.6,1.45,0,g),right=cylinder(.13,.22,3.1,rootMat,cx+2.6,1.45,0,g);box(5.4,.22,.35,barkLight,cx,2.9,0,g);g.position.z=z;scene.add(g)}
+ // Keep logical checkpoints, but remove the overhead wooden frames that looked like a barrier in the running path.
  const finish=new THREE.Group(),finishX=curveX(-662);cylinder(.18,.3,4,bark,finishX-2.55,2,0,finish);cylinder(.18,.3,4,bark,finishX+2.55,2,0,finish);box(5.5,.28,.4,rootMat,finishX,3.9,0,finish);finish.position.z=-662;scene.add(finish);
  spinner.position.set(100,-100,100);
 }
@@ -568,11 +568,11 @@ function updateCourseZone(dt){
   if(index<0)index=courseZones.length-1;
   const zone=courseZones[index];
   if(index!==activeZone){
-    activeZone=index;zoneBannerTimer=3.4;
+    activeZone=index;zoneBannerTimer=0;
     zoneBadge.textContent=zone.name+'  •  '+zone.sub;
     zoneBadge.style.borderColor=zone.accent;
-    zoneBanner.innerHTML=zone.name+'<div style="font:800 11px system-ui;letter-spacing:.16em;color:'+zone.accent+';margin-top:8px">'+zone.sub+'</div>';
-    zoneBanner.style.opacity='1';zoneBanner.style.transform='translate(-50%,-50%) scale(1)';
+    // No full-screen zone popup: the run stays visually uninterrupted.
+    zoneBanner.style.opacity='0';zoneBanner.style.transform='translate(-50%,-50%) scale(.96)';
   }else if(zoneBannerTimer>0){
     zoneBannerTimer=Math.max(0,zoneBannerTimer-dt);
     if(zoneBannerTimer===0){zoneBanner.style.opacity='0';zoneBanner.style.transform='translate(-50%,-50%) scale(.96)'}
@@ -581,11 +581,11 @@ function updateCourseZone(dt){
   let blendIndex=-1;
   for(let i=1;i<courseZones.length;i++){
     const boundary=courseZones[i].start;
-    if(distance>=boundary-20&&distance<=boundary+20){blendIndex=i;break;}
+    if(distance>=boundary-50&&distance<=boundary+50){blendIndex=i;break;}
   }
   if(blendIndex>0){
     const boundary=courseZones[blendIndex].start;
-    const blend=THREE.MathUtils.smoothstep(distance,boundary-20,boundary+20);
+    const blend=THREE.MathUtils.smoothstep(distance,boundary-50,boundary+50);
     scene.background.copy(zoneColors[blendIndex-1].bg).lerp(zoneColors[blendIndex].bg,blend);
     scene.fog.color.copy(zoneColors[blendIndex-1].fog).lerp(zoneColors[blendIndex].fog,blend);
   }else{
