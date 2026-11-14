@@ -425,9 +425,9 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  let treeCount=0,rootCount=0;
  for(let z=-9;z>=-655;z-=5.25)for(const sideSign of [-1,1]){
    const wobble=Math.sin((Math.abs(z)+treeCount*7)*.19)*1.15,offset=5.15+(treeCount%4)*1.28+wobble,x=curveX(z)+sideSign*offset;
-   forestDummy.position.set(x,3.5,z);forestDummy.rotation.set(0,(treeCount%9)*.37,sideSign*.025);forestDummy.scale.set(.82+(treeCount%5)*.13,1.0+(treeCount%4)*.18,.82+(treeCount%5)*.13);forestDummy.updateMatrix();trunks.setMatrixAt(treeCount,forestDummy.matrix);
-   for(const [mesh,y,scale] of [[canopiesA,7.2,3.4],[canopiesB,9.2,2.8],[canopiesC,10.7,2.2]]){forestDummy.position.set(x+sideSign*.5,y,z);forestDummy.rotation.set(.12,(treeCount%7)*.42,.08);forestDummy.scale.set(scale,scale*.82,scale);forestDummy.updateMatrix();mesh.setMatrixAt(treeCount,forestDummy.matrix)}
-   for(let r=0;r<2;r++){forestDummy.position.set(x-sideSign*(.5+r*.5),.02,z+(r?-.5:.5));forestDummy.rotation.set(0,sideSign*(.8+r*.5),Math.PI/2);forestDummy.scale.set(.24,.24,2.5+r);forestDummy.updateMatrix();roots.setMatrixAt(rootCount++,forestDummy.matrix)}
+   forestDummy.position.set(x,routeY(z)+3.5,z);forestDummy.rotation.set(0,(treeCount%9)*.37,sideSign*.025);forestDummy.scale.set(.82+(treeCount%5)*.13,1.0+(treeCount%4)*.18,.82+(treeCount%5)*.13);forestDummy.updateMatrix();trunks.setMatrixAt(treeCount,forestDummy.matrix);
+   for(const [mesh,y,scale] of [[canopiesA,7.2,3.4],[canopiesB,9.2,2.8],[canopiesC,10.7,2.2]]){forestDummy.position.set(x+sideSign*.5,routeY(z)+y,z);forestDummy.rotation.set(.12,(treeCount%7)*.42,.08);forestDummy.scale.set(scale,scale*.82,scale);forestDummy.updateMatrix();mesh.setMatrixAt(treeCount,forestDummy.matrix)}
+   for(let r=0;r<2;r++){forestDummy.position.set(x-sideSign*(.5+r*.5),routeY(z)+.02,z+(r?-.5:.5));forestDummy.rotation.set(0,sideSign*(.8+r*.5),Math.PI/2);forestDummy.scale.set(.24,.24,2.5+r);forestDummy.updateMatrix();roots.setMatrixAt(rootCount++,forestDummy.matrix)}
    treeCount++;
  }
  for(const inst of [trunks,canopiesA,canopiesB,canopiesC,roots]){inst.count=inst===roots?rootCount:treeCount;inst.instanceMatrix.needsUpdate=true;inst.castShadow=!mobileDevice;inst.receiveShadow=true;scene.add(inst)}
@@ -435,17 +435,17 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  const bushGeo=new THREE.IcosahedronGeometry(1,1),bushes=new THREE.InstancedMesh(bushGeo,fernMat,260),ferns=new THREE.InstancedMesh(new THREE.ConeGeometry(.32,1.15,5),leafBright,520);let bushN=0,fernN=0;
  for(let z=-8;z>=-655;z-=5.1)for(const sideSign of [-1,1]){
    const x=curveX(z)+sideSign*(3.65+(bushN%4)*.34);
-   forestDummy.position.set(x,.35,z);forestDummy.rotation.set(.1,bushN*.7,.08);forestDummy.scale.set(1.15,.7,1.1);forestDummy.updateMatrix();bushes.setMatrixAt(bushN++,forestDummy.matrix);
-   for(let q=0;q<2;q++){forestDummy.position.set(x+sideSign*q*.55,.48,z-q*.7);forestDummy.rotation.set(.2,fernN*.91,sideSign*.35);forestDummy.scale.set(.75,1,.72);forestDummy.updateMatrix();ferns.setMatrixAt(fernN++,forestDummy.matrix)}
+   forestDummy.position.set(x,routeY(z)+.35,z);forestDummy.rotation.set(.1,bushN*.7,.08);forestDummy.scale.set(1.15,.7,1.1);forestDummy.updateMatrix();bushes.setMatrixAt(bushN++,forestDummy.matrix);
+   for(let q=0;q<2;q++){forestDummy.position.set(x+sideSign*q*.55,routeY(z)+.48,z-q*.7);forestDummy.rotation.set(.2,fernN*.91,sideSign*.35);forestDummy.scale.set(.75,1,.72);forestDummy.updateMatrix();ferns.setMatrixAt(fernN++,forestDummy.matrix)}
  }
  bushes.count=bushN;ferns.count=fernN;for(const inst of [bushes,ferns]){inst.instanceMatrix.needsUpdate=true;inst.castShadow=false;scene.add(inst)}
  // Hanging vines and broad leaves overhead create the enclosed jungle tunnel.
  const vineMat=mat(0x28552d,.98),vineGeo=new THREE.CylinderGeometry(.035,.055,1,5),vines=new THREE.InstancedMesh(vineGeo,vineMat,180);let vineN=0;
- for(let z=-18;z>=-650;z-=14)for(let sideSign of [-1,1]){forestDummy.position.set(curveX(z)+sideSign*(4.2+(vineN%3)*.7),7.3,z);forestDummy.rotation.set(0,0,sideSign*.12);forestDummy.scale.set(1,1.5+(vineN%4)*.65,1);forestDummy.updateMatrix();vines.setMatrixAt(vineN++,forestDummy.matrix)}
+ for(let z=-18;z>=-650;z-=14)for(let sideSign of [-1,1]){forestDummy.position.set(curveX(z)+sideSign*(4.2+(vineN%3)*.7),routeY(z)+7.3,z);forestDummy.rotation.set(0,0,sideSign*.12);forestDummy.scale.set(1,1.5+(vineN%4)*.65,1);forestDummy.updateMatrix();vines.setMatrixAt(vineN++,forestDummy.matrix)}
  vines.count=vineN;vines.instanceMatrix.needsUpdate=true;scene.add(vines);
  // Natural ravines and short timber bridges. The trail remains safely traversable in preview.
  riverGaps.push({start:-184,end:-190},{start:-392,end:-398},{start:-574,end:-580});
- function addJungleBridge(center){const span=9.5,cx=curveX(center),angle=curveAngle(center);const deck=box(5.55,.24,span,rootMat,cx,-.02,center);deck.rotation.y=angle;for(let i=0;i<9;i++){const plank=box(5.42,.12,.72,trailCenter,cx,-.16,center-span/2+.55+i*1.05);plank.rotation.y=angle}for(const sideSign of [-1,1]){const rail=box(.16,.72,span,bark,cx+sideSign*2.62,.28,center);rail.rotation.y=angle;for(let i=0;i<5;i++)cylinder(.09,.13,.95,bark,cx+sideSign*2.62,.34,center-span/2+i*2.2)}}
+ function addJungleBridge(center){const span=9.5,cx=curveX(center),angle=curveAngle(center);const deck=box(5.55,.24,span,rootMat,cx,routeY(center)-.02,center);deck.rotation.y=angle;for(let i=0;i<9;i++){const plank=box(5.42,.12,.72,trailCenter,cx,routeY(center)-.16,center-span/2+.55+i*1.05);plank.rotation.y=angle}for(const sideSign of [-1,1]){const rail=box(.16,.72,span,bark,cx+sideSign*2.62,routeY(center)+.28,center);rail.rotation.y=angle;for(let i=0;i<5;i++)cylinder(.09,.13,.95,bark,cx+sideSign*2.62,routeY(center)+.34,center-span/2+i*2.2)}}
  for(const z of [-187,-395,-577]){addJungleBridge(z);const cx=curveX(z);const water=box(20,.18,15,riverMat,cx,-2.25,z);water.rotation.y=curveAngle(z);for(let n=0;n<12;n++){const ripple=sphere(.12+Math.random()*.17,riverFoam,cx+(Math.random()-.5)*13,-2.08,z+(Math.random()-.5)*9);ripple.scale.set(2,.2,.7)}}
  // Waterfall curtains and pools sit beside the path, visible from the running camera.
  function addWaterfall(z,sideSign){const x=curveX(z)+sideSign*9.2,fall=box(2.6,8,.18,riverMat,x,2.2,z);fall.rotation.z=sideSign*.05;const pool=sphere(1.1,riverMat,x,-1.7,z+1);pool.scale.set(3.2,.18,1.8);for(let i=0;i<10;i++){const spray=sphere(.08+Math.random()*.13,riverFoam,x+(Math.random()-.5)*2.5,-1.45,z+(Math.random()-.5)*2);spray.scale.set(1.5,.25,.8)}}
@@ -456,16 +456,16 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  const coinMaterial=new THREE.MeshStandardMaterial({color:0xffd45b,metalness:.78,roughness:.22,emissive:0x6d3d08,emissiveIntensity:.22}),coinGeometry=new THREE.TorusGeometry(.34,.105,8,18);
  for(let z=-20;z>=-650;z-=9.5){const lanePattern=Math.floor(Math.abs(z)/28)%3,offset=[-1.75,0,1.75][lanePattern],coin=new THREE.Mesh(coinGeometry,coinMaterial);coin.position.set(curveX(z)+offset,routeY(z)+1.15,z);coin.rotation.y=Math.PI/2;coin.castShadow=true;scene.add(coin);coins.push({mesh:coin,x:coin.position.x,z,collected:false})}
  // Jungle hazards: fallen logs, hanging roots, thorn clusters and leaning trunks.
- function addFallenLog(z,x){const wx=curveX(z)+x,mesh=cylinder(.42,.48,3.25,barkLight,wx,.48,z);mesh.rotation.z=Math.PI/2;mesh.rotation.y=curveAngle(z);obstacles.push({mesh,x:wx,z,w:3.1,d:1.05,h:.98,type:'block'})}
- function addRootCluster(z,x){const wx=curveX(z)+x,mesh=box(1.55,1.25,1.05,rootMat,wx,.62,z);for(let q=-1;q<=1;q++){const root=cylinder(.09,.2,1.5,rootMat,wx+q*.48,.15,z);root.rotation.z=q*.35}obstacles.push({mesh,x:wx,z,w:1.65,d:1.15,h:1.3,type:'block'})}
- function addHangingRoot(z,x){const wx=curveX(z)+x,mesh=cylinder(.12,.22,2.15,rootMat,wx,2.45,z);obstacles.push({mesh,x:wx,z,w:.7,d:.9,h:2.9,type:'overhead',clearance:1.05})}
+ function addFallenLog(z,x){const wx=curveX(z)+x,mesh=cylinder(.42,.48,3.25,barkLight,wx,routeY(z)+.48,z);mesh.rotation.z=Math.PI/2;mesh.rotation.y=curveAngle(z);obstacles.push({mesh,x:wx,z,w:3.1,d:1.05,h:.98,type:'block'})}
+ function addRootCluster(z,x){const wx=curveX(z)+x,mesh=box(1.55,1.25,1.05,rootMat,wx,routeY(z)+.62,z);for(let q=-1;q<=1;q++){const root=cylinder(.09,.2,1.5,rootMat,wx+q*.48,routeY(z)+.15,z);root.rotation.z=q*.35}obstacles.push({mesh,x:wx,z,w:1.65,d:1.15,h:1.3,type:'block'})}
+ function addHangingRoot(z,x){const wx=curveX(z)+x,mesh=cylinder(.12,.22,2.15,rootMat,wx,routeY(z)+2.45,z);obstacles.push({mesh,x:wx,z,w:.7,d:.9,h:2.9,type:'overhead',clearance:1.05})}
  addFallenLog(-34,-1.8);addRootCluster(-58,2.0);addHangingRoot(-78,-2.0);addFallenLog(-118,1.8);
  addRootCluster(-146,-2.0);addFallenLog(-166,1.9);addHangingRoot(-207,2.0);addRootCluster(-229,-2.0);addFallenLog(-252,1.8);
  addRootCluster(-278,-1.9);addHangingRoot(-326,2.0);addFallenLog(-350,-2.0);addRootCluster(-371,1.9);
  addHangingRoot(-414,-2.0);addFallenLog(-442,1.9);addRootCluster(-466,2.0);addFallenLog(-486,-1.9);addHangingRoot(-524,2.0);
  addRootCluster(-548,-2.0);addHangingRoot(-596,1.9);addFallenLog(-616,2.0);addRootCluster(-632,-2.0);addFallenLog(-654,1.9);
  checkpoints=[-72,-172,-272,-372,-472,-572,-642];
- function addTrailSign(title,range,z){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=160;const ctx=canvas.getContext('2d');ctx.fillStyle='#173c25';ctx.fillRect(0,0,1024,160);ctx.fillStyle='#9bc66d';ctx.fillRect(0,0,16,160);ctx.fillRect(1008,0,16,160);ctx.fillStyle='#f5f4d8';ctx.font='900 54px system-ui';ctx.textAlign='center';ctx.fillText(title,512,70);ctx.fillStyle='#b8d98b';ctx.font='800 27px system-ui';ctx.fillText(range,512,119);const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;const board=new THREE.Mesh(new THREE.PlaneGeometry(8,1.25),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));board.position.set(curveX(z),5.2,z);scene.add(board)}
+ function addTrailSign(title,range,z){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=160;const ctx=canvas.getContext('2d');ctx.fillStyle='#173c25';ctx.fillRect(0,0,1024,160);ctx.fillStyle='#9bc66d';ctx.fillRect(0,0,16,160);ctx.fillRect(1008,0,16,160);ctx.fillStyle='#f5f4d8';ctx.font='900 54px system-ui';ctx.textAlign='center';ctx.fillText(title,512,70);ctx.fillStyle='#b8d98b';ctx.font='800 27px system-ui';ctx.fillText(range,512,119);const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;const board=new THREE.Mesh(new THREE.PlaneGeometry(8,1.25),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));board.position.set(curveX(z),routeY(z)+5.2,z);scene.add(board)}
  const jungleZones=[['JUNGLE TRAIL','0m — 133m',-12],['WATERFALL RUN','266m — 399m',-278],['ANCIENT CANOPY','399m — 532m',-411],['DEEP FOREST','532m — 665m',-544]];
  for(const [title,range,z] of jungleZones)addTrailSign(title,range,z);
  // Keep logical checkpoints, but remove the overhead wooden frames that looked like a barrier in the running path.
@@ -475,7 +475,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
 // Red hazard beacons: visible from a distance and pulsed while the race is active.
 const hazardBeacons=[];
 obstacles.forEach((o,index)=>{
-  const rig=new THREE.Group();rig.position.set(curveX(o.z),0,o.z);
+  const rig=new THREE.Group();rig.position.set(curveX(o.z),routeY(o.z),o.z);
   for(const x of [-4.05,4.05]){
     const post=new THREE.Mesh(new THREE.CylinderGeometry(.055,.075,.95,8),side);post.position.set(x,.48,0);post.castShadow=true;rig.add(post);
     const lamp=new THREE.Mesh(new THREE.SphereGeometry(.19,12,10),new THREE.MeshStandardMaterial({color:0xff2020,emissive:0xff0800,emissiveIntensity:1.8,roughness:.3}));
@@ -733,7 +733,7 @@ async function reset(){
     if(status)status.textContent='Starting Temple Trail…';
     lastProgressReport=0;progressChain=Promise.resolve();
     if(rushAudioOn){try{sfxStart();startHorrorAmbience()}catch(audioError){rushAudioOn=false;console.warn('Temple Trail audio unavailable; continuing silently.',audioError)}}
-    activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'JUNGLE APPROACH  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(curveX(3.5),.05,3.5);coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');renderer.render(scene,camera);
+    activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'JUNGLE APPROACH  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');renderer.render(scene,camera);
   }catch(error){
     // Roll back a partially-started run so the welcome screen and retry remain usable.
     running=false;
@@ -749,7 +749,7 @@ async function reset(){
     if(startButton){startButton.disabled=false;startButton.textContent='START RUN'}
   }
 }
-function respawn(){player.position.set(curveX(respawnZ),.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
+function respawn(){player.position.set(curveX(respawnZ),routeY(respawnZ)+.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
 function onTrack(x,z){const localX=x-curveX(z);if(developmentPreview){return Math.abs(localX)<=2.85&&z<=5&&z>=-665}return Math.abs(localX)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z>=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
