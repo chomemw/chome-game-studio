@@ -131,7 +131,7 @@ const curveX=z=>0;
 function routeFrame(distance,lateral=0){const d=distance,segment=d<133?0:d<266?1:d<399?2:d<532?3:4;let cx=0,cz=0,yaw=0;if(segment===0){cz=-d}else if(segment===1){cx=-(d-133);cz=-133;yaw=Math.PI/2}else if(segment===2){cx=-133;cz=-(d-133)}else if(segment===3){cx=-133-(d-399);cz=-266;yaw=Math.PI/2}else{cx=-266;cz=-(d-266)}return{x:cx+lateral*Math.cos(yaw),z:cz-lateral*Math.sin(yaw),yaw}}
 const curveAngle=z=>0;
 const routeY=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeHeights.length-2&&d>routeHeights[i+1].d)i++;const a=routeHeights[i],b=routeHeights[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1),s=t*t*(3-2*t);return THREE.MathUtils.lerp(a.y,b.y,s)};
-const curveAngle=z=>Math.atan2(curveX(z-2)-curveX(z+2),4);
+// Level 5 turns are square; the route-frame transform supplies each segment heading.
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
 const obstacleInspectionMode=level===1;
 const scene=new THREE.Scene();scene.background=new THREE.Color(level===4?0xb9c5ca:0xa9c2d0);scene.fog=new THREE.Fog(level===4?0xb9d9e9:0xa9c2d0,level===4?58:42,level===4?190:155);
