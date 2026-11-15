@@ -48,18 +48,6 @@
     <span class="small" id="bootStatus" role="status" aria-live="polite">Preparing your arena…</span>
   </div>
 </div>
-<div class="overlay hidden" id="characterSelect">
-  <div class="dialog runner-dialog">
-    <div class="eyebrow">CHOOSE YOUR RUNNER</div>
-    <h1>WHO WILL <span>YOU BE?</span></h1>
-    <p>The Soldier is the Rush Arena player across every level.</p>
-    <div class="runner-grid">
-      <button class="runner-card" data-runner="soldier" type="button"><span class="runner-preview-wrap"><canvas class="runner-preview" id="preview-soldier" aria-label="Animated 3D preview of the soldier"></canvas><span class="preview-loading" id="preview-status-soldier">Loading 3D runner…</span></span><b>SOLDIER</b><small>Tactical field runner</small></button>
-    </div>
-    <span class="small" id="runnerStatus" role="status" aria-live="polite">Select a character to prepare them.</span>
-    <button class="primary" id="continueToBriefing" disabled>CONTINUE</button>
-  </div>
-</div>
 <div class="overlay hidden" id="rewardIntro">
   <div class="dialog">
     <div class="eyebrow">BEFORE THE START</div>
@@ -389,10 +377,9 @@ obstacles.forEach((o,index)=>{
 // Rush Arena uses the established Soldier character in every level.
 const runnerAssets={soldier:'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/models/gltf/Soldier.glb'};
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
-let selectedRunner='',runnerLoadPromise=Promise.resolve(false),runnerLoadToken=0;
+let runnerLoadPromise=Promise.resolve(false),runnerLoadToken=0;
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
 async function loadRunnerCharacter(choice){
-  selectedRunner='soldier';
   const token=++runnerLoadToken;
   runnerModelLoaded=false;runnerMixer=null;runnerActions={};activeRunnerAction=null;body.clear();
   const runnerUrl=runnerAssets.soldier;
@@ -579,104 +566,27 @@ function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)|
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.position.y=-.22;body.rotation.x=-.35;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
 window.__rushStart=reset;
-function showCharacterSelection(){
-  try{audioReady();soundTone(392,523,.2,.13,'sine',0);soundTone(523,784,.32,.12,'sine',.18);soundTone(784,1046,.42,.09,'sine',.4);}catch(e){console.warn('Welcome sound unavailable',e)}
-  ui.welcome.classList.add('hidden');document.getElementById('characterSelect').classList.remove('hidden');startRunnerPreviews();
+async function beginRushRun(){
+  ui.welcome.classList.add('hidden');
+  const status=document.getElementById('bootStatus');
+  status.textContent='Preparing Soldier…';
+  const ready=runnerModelLoaded||await loadRunnerCharacter('soldier');
+  if(!ready){
+    ui.welcome.classList.remove('hidden');
+    status.textContent='Soldier could not load. Please try again.';
+    return;
+  }
+  status.textContent='Soldier ready. Review the briefing to begin.';
+  document.getElementById('rewardIntro').classList.remove('hidden');
+  try{audioReady();soundTone(523,784,.28,.1,'sine')}catch(e){}
 }
 
-let runnerPreviewEntries=[],runnerPreviewFrame=0,runnerPreviewLast=0,runnerPreviewsStarted=false;
-async function startRunnerPreviews(){
-  if(runnerPreviewsStarted)return;
-  runnerPreviewsStarted=true;
-  let GLTFLoader;
-  try{({GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js'));}
-  catch(error){console.warn('3D character preview loader unavailable',error);document.querySelectorAll('.preview-loading').forEach(el=>el.textContent='Preview unavailable');return;}
-  for(const choice of ['soldier']){
-    const canvas=document.getElementById('preview-'+choice),status=document.getElementById('preview-status-'+choice);
-    if(!canvas)continue;
-    try{
-      const previewRenderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:!mobileDevice,powerPreference:'low-power'});
-      previewRenderer.setPixelRatio(Math.min(devicePixelRatio,1.25));
-      previewRenderer.setSize(canvas.clientWidth||180,canvas.clientHeight||238,false);
-      previewRenderer.outputColorSpace=THREE.SRGBColorSpace;
-      previewRenderer.toneMapping=THREE.ACESFilmicToneMapping;
-      previewRenderer.toneMappingExposure=1.12;
-      const previewScene=new THREE.Scene();
-      const previewCamera=new THREE.PerspectiveCamera(32,1,.1,30);
-      previewCamera.position.set(0,1.45,5.2);previewCamera.lookAt(0,1.45,0);
-      previewScene.add(new THREE.HemisphereLight(0xd8eaff,0x263044,2.1));
-      const keyLight=new THREE.DirectionalLight(0xffffff,2.5);keyLight.position.set(-3,5,4);previewScene.add(keyLight);
-      const rimLight=new THREE.DirectionalLight(0x7bdcff,1.1);rimLight.position.set(3,2,-3);previewScene.add(rimLight);
-      const platform=new THREE.Mesh(new THREE.CylinderGeometry(1.02,1.12,.12,48),new THREE.MeshStandardMaterial({color:0x778765,metalness:.35,roughness:.42}));
-      platform.position.y=.06;previewScene.add(platform);
-      const loader=new GLTFLoader();
-      const gltf=await loader.loadAsync(runnerAssets[choice]);
-      const model=gltf.scene;
-      const box=new THREE.Box3().setFromObject(model),height=Math.max(.01,box.max.y-box.min.y);
-      model.scale.setScalar(1.9/height);model.position.y=-box.min.y*model.scale.y;
-      model.rotation.y=Math.PI; // Face the preview camera so clients can inspect the character.
-      model.traverse(node=>{if(node.isMesh){node.castShadow=false;node.receiveShadow=false;}});
-      previewScene.add(model);
-      const mixer=new THREE.AnimationMixer(model);
-      const clips=gltf.animations||[];
-      const runClip=clips.find(clip=>/run|jog/i.test(clip.name))||clips.find(clip=>/walk/i.test(clip.name))||clips[0];
-      let action=null;
-      if(runClip){action=mixer.clipAction(runClip);action.setLoop(THREE.LoopRepeat,Infinity);action.play();}
-      let previewWidth=0,previewHeight=0;
-      const resize=()=>{
-        const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);
-        if(w!==previewWidth||h!==previewHeight){
-          previewWidth=w;previewHeight=h;
-          previewRenderer.setSize(w,h,false);previewCamera.aspect=w/h;previewCamera.updateProjectionMatrix();
-        }
-      };
-      resize();
-      runnerPreviewEntries.push({renderer:previewRenderer,scene:previewScene,camera:previewCamera,mixer,action,model,canvas,resize,choice,angle:0});
-      if(status)status.textContent=runClip?'Animated 3D preview':'3D character preview';
-    }catch(error){
-      console.warn('Could not create '+choice+' 3D preview',error);
-      if(status)status.textContent='Preview unavailable';
-    }
-  }
-  if(!runnerPreviewFrame&&runnerPreviewEntries.length){
-    const renderPreviews=now=>{
-      runnerPreviewFrame=requestAnimationFrame(renderPreviews);
-      const visible=!document.getElementById('characterSelect').classList.contains('hidden');
-      if(!visible){runnerPreviewLast=now;return;}
-      const dt=Math.min(.05,(now-runnerPreviewLast)/1000||.016);runnerPreviewLast=now;
-      for(const entry of runnerPreviewEntries){
-        if(entry.mixer)entry.mixer.update(dt);
-        entry.angle+=dt*.16;
-        entry.model.rotation.y=Math.sin(entry.angle)*.08;
-        entry.resize();entry.renderer.render(entry.scene,entry.camera);
-      }
-    };
-    runnerPreviewFrame=requestAnimationFrame(renderPreviews);
-  }
-}
-window.__rushShowCharacters=showCharacterSelection;
-document.querySelectorAll('[data-runner]').forEach(card=>card.addEventListener('click',async()=>{
-  const choice=card.dataset.runner;
-  document.querySelectorAll('[data-runner]').forEach(item=>item.classList.toggle('selected',item===card));
-  const status=document.getElementById('runnerStatus'),next=document.getElementById('continueToBriefing');
-  next.disabled=true;status.textContent='Preparing your '+choice+' runner…';
-  try{audioReady();soundTone(660,880,.18,.1,'triangle')}catch(e){}
-  const ok=await loadRunnerCharacter(choice);
-  if(ok){status.textContent='Soldier is ready. Continue to the game briefing.';next.disabled=false;}
-  else{status.textContent='Soldier could not load. Please try again.';}
-}));
-document.getElementById('continueToBriefing').addEventListener('click',()=>{
-  if(!runnerModelLoaded)return;
-  document.getElementById('characterSelect').classList.add('hidden');document.getElementById('rewardIntro').classList.remove('hidden');
-  try{audioReady();soundTone(523,784,.28,.1,'sine')}catch(e){}
-});
 document.getElementById('startLevelOne').addEventListener('click',async()=>{
-  const status=document.getElementById('runnerStatus');
-  if(!selectedRunner){document.getElementById('rewardIntro').classList.add('hidden');document.getElementById('characterSelect').classList.remove('hidden');return;}
-  if(!runnerModelLoaded){status.textContent='Finishing character setup…';const ok=await runnerLoadPromise;if(!ok){status.textContent='Please choose your runner again.';return;}}
+  const status=document.getElementById('bootStatus');
+  if(!runnerModelLoaded){status.textContent='Finishing Soldier setup…';const ok=await runnerLoadPromise;if(!ok){document.getElementById('rewardIntro').classList.add('hidden');ui.welcome.classList.remove('hidden');status.textContent='Soldier could not load. Please try again.';return;}}
   document.getElementById('rewardIntro').classList.add('hidden');reset();
 });
-if(window.__rushEnterRequested){window.__rushEnterRequested=false;showCharacterSelection();}
+if(window.__rushEnterRequested){window.__rushEnterRequested=false;beginRushRun();}
 document.getElementById('bootStatus').textContent='Ready — enter Rush Arena';document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 document.getElementById('restartFailed').addEventListener('click',reset);
 document.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
@@ -786,7 +696,7 @@ renderer.render(scene,camera);
 animate();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight)});
 // Start only after every control, camera, renderer and animation loop is initialized.
-if(window.__rushEnterRequested){window.__rushEnterRequested=false;showCharacterSelection()}
+if(window.__rushEnterRequested){window.__rushEnterRequested=false;beginRushRun()}
 </script>
 </body>
 </html>
