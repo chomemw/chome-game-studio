@@ -400,7 +400,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  // Preserve the exact existing route and 2.75m half-width. A shallow crown
  // across the surface adds a natural dirt-trail profile without changing movement.
  const roadVerts=[],roadUvs=[],roadIdx=[],edgeVerts=[],edgeIdx=[];
- const samples=665,half=1.85;
+ const samples=670,half=1.85;
  for(let n=0;n<=samples;n++){
    const z=5-n,cx=curveX(z),a=curveX(z-0.5)-curveX(z+0.5),len=Math.hypot(a,1),nx=1/len,nz=a/len;
    for(const sideSign of [-1,1]){
@@ -535,7 +535,7 @@ function transformLevelFiveScene(){
    for(let i=0;i<o.count;i++){o.getMatrixAt(i,m);m.decompose(p,q,sc);const e=new THREE.Euler().setFromQuaternion(q,'YXZ'),w=map(p.x,p.y,p.z);dmy.position.set(w.x,w.y,w.z);dmy.rotation.set(e.x,e.y+w.yaw,e.z);dmy.scale.copy(sc);dmy.updateMatrix();o.setMatrixAt(i,dmy.matrix)}
    o.instanceMatrix.needsUpdate=true;continue;
   }
-  if(o.isMesh&&o.geometry?.attributes?.position?.count>1000&&Math.abs(o.position.x)<1e-7&&Math.abs(o.position.z)<1e-7){
+  if(o.isMesh&&(o.geometry?.attributes?.position?.count>1000||o.geometry?.type==='TubeGeometry')&&Math.abs(o.position.x)<1e-7&&Math.abs(o.position.z)<1e-7){
    const a=o.geometry.attributes.position;for(let i=0;i<a.count;i++){const w=map(a.getX(i),a.getY(i),a.getZ(i));a.setXYZ(i,w.x,w.y,w.z)}a.needsUpdate=true;o.geometry.computeVertexNormals();
   }
   const w=map(o.position.x,o.position.y,o.position.z);o.position.set(w.x,w.y,w.z);o.rotation.y+=w.yaw;
