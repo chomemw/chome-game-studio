@@ -532,7 +532,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
     model.updateMatrixWorld(true);
     const bounds=new THREE.Box3().setFromObject(model);
     const height=Math.max(.01,bounds.max.y-bounds.min.y);
-    model.scale.setScalar(3.2/height); // Match the Temple Trail full-body runner measurement.
+    model.scale.setScalar(1.9/height); // Match the Temple Trail full-body runner measurement.
     model.position.y=-bounds.min.y*model.scale.y;
     model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
     body.clear();body.add(model);
@@ -546,7 +546,7 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
       else if(key.includes('run'))slot='run';
       if(slot&&!runnerActions[slot]){
         const action=runnerMixer.clipAction(clip);
-        action.enabled=true;action.setEffectiveTimeScale(slot==='run'?1.15:1);action.setEffectiveWeight(1);
+        action.enabled=true;action.setEffectiveTimeScale(slot==='run'?1:1);action.setEffectiveWeight(1);
         action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;
       }
     }
@@ -792,7 +792,7 @@ async function reset(){
 function respawn(){player.position.set(curveX(respawnZ),routeY(respawnZ)+.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
 function onTrack(x,z){const localX=x-curveX(z);if(developmentPreview){return Math.abs(localX)<=1.72&&z<=5&&z>=-665}return Math.abs(localX)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z>=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
-function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
+function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.position.y=-.22;body.rotation.x=-.35;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
 window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';
 if(developmentPreview){document.title='CHOME Rush Arena — Brick Road Level 4 Preview';document.querySelector('.brand').innerHTML='CHOME <span>RUSH ARENA · LEVEL 4</span>';document.querySelector('.race-pill').textContent='ADMIN DEVELOPMENT PREVIEW';document.querySelector('#welcome .dialog h1').innerHTML='BRICK <span>ROAD</span>';document.querySelector('#welcome .dialog p').textContent='Run along a narrow, winding brick mountain road. Dodge realistic tree obstacles and jump across dangerous holes. Level 4 is an administrator-only preview.';document.querySelector('#welcome .dialog .small').textContent='Brick Road · 665m jungle auto-run · Third-person camera';document.querySelector('#result .eyebrow').textContent='BRICK ROAD PREVIEW';document.querySelector('#result .small').textContent='Admin preview only · No player rewards are issued';document.getElementById('chox').closest('.stat').style.display='none';document.querySelector('.brand').style.letterSpacing='.08em';}document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 document.getElementById('restartFailed').addEventListener('click',reset);
@@ -895,13 +895,13 @@ function update(dt){
   if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}
   // Keep the run cycle active during automatic forward travel, even when the
   // player is not steering. Jump and slide retain Level 2's action handling.
-  const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));
+  const desired=slideTimer>0?(runnerActions.slide?'slide':'run'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));
   if(runnerModelLoaded){
     const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run? 'run':(runnerActions.walk?'walk':'idle'));
     playRunnerAction(action);
     runnerMixer.update(dt);
   }
-  body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);
+  body.position.y=slideTimer>0?-.22:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);
   // Preserve the same natural steering lean used by the other Rush Arena levels.
   body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);
   if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
