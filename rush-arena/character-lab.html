@@ -40,7 +40,7 @@ button:hover:not(:disabled){background:#9a83ff38}button.active{background:#8069e
 <div class="grid">
 <section class="panel"><div id="stage"><div style="padding:18px;color:#9aa9c0">Loading 3D stage…</div></div><div class="row" style="margin-top:10px"><button id="cameraFront">Front view</button><button id="cameraSide">Side view</button><button id="cameraBack">Rear view</button><button id="resetPose">Reset pose</button></div></section>
 <aside class="panel controls">
-<div class="field"><label for="character">CHARACTER ROSTER</label><select id="character"><option value="male">Male runner · Sam</option><option value="female">Female runner · Maya</option><option value="soldier">Soldier</option></select></div>
+<div class="field"><label for="character">CHARACTER ROSTER</label><select id="character" disabled><option value="soldier" selected>Soldier · Rush Arena player</option></select></div>
 <div><div class="field"><label>ANIMATION TESTS</label></div><div class="actions">
 <button data-action="idle">Idle</button><button data-action="walk">Walk</button><button data-action="run" class="active">Run</button><button data-action="jump">Jump</button><button data-action="slide">Slide</button><button id="stop">Stop</button>
 </div></div>
@@ -91,11 +91,7 @@ const floor=new THREE.Mesh(new THREE.CircleGeometry(5,64),new THREE.MeshStandard
 const grid=new THREE.GridHelper(10,20,0x7788a8,0x46546d);grid.position.y=0;scene.add(grid);
 const ring=new THREE.Mesh(new THREE.TorusGeometry(1.15,.018,8,64),new THREE.MeshBasicMaterial({color:0x9a83ff}));ring.rotation.x=Math.PI/2;ring.position.y=.012;scene.add(ring);
 const rig=new THREE.Group();scene.add(rig);
-const roster={
- male:'https://files.innerscene.com/library/locomotion-collection-sam-3d-person-animated-dc23800f/735aec6a564c1def48e8/locomotion-collection-sam-3d-person-animated.glb',
- female:'https://files.innerscene.com/library/run-maya-3d-person-animated-eebf24b9/d5f2b8f5a11a7c383293/run-maya-3d-person-animated.glb',
- soldier:'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/models/gltf/Soldier.glb'
-};
+const roster={soldier:'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/models/gltf/Soldier.glb'};
 let mixer=null,actions={},active=null,model=null,loadToken=0,clock=new THREE.Clock();
 function report(id,yes,label){$(id).textContent=yes?(label||'Available'):'Not found';$(id).className=yes?'ok':'bad';}
 function play(name){
@@ -120,10 +116,6 @@ async function loadCharacter(choice){
    if(key.includes('idle'))slot='idle';else if(key.includes('walk'))slot='walk';else if(key.includes('run'))slot='run';else if(key.includes('jump'))slot='jump';else if(key.includes('slide'))slot='slide';
    if(slot&&!actions[slot]){const a=mixer.clipAction(clip);a.setLoop(THREE.LoopRepeat,Infinity);actions[slot]=a;}
   }
-  if(choice!=='soldier'&&actions.run){
-   try{const retarget=await attachSoldierRunAnimation(model,mixer,THREE);if(token!==loadToken)return;actions.run=retarget.action;$('message').textContent='Loaded '+choice+' with Soldier run retarget ('+Math.round(retarget.coverage*100)+'% rig coverage).';}
-   catch(e){console.warn(e);$('message').textContent='Loaded '+choice+'. Native run animation retained because retargeting did not pass its quality check.';}
-  }
   report('modelCheck',true,'Loaded');
   ['idle','walk','run','jump','slide'].forEach(k=>report(k+'Check',!!actions[k]));
   document.querySelectorAll('[data-action]').forEach(btn=>btn.disabled=!actions[btn.dataset.action]);
@@ -143,7 +135,7 @@ $('resetPose').onclick=()=>{$('turn').value=0;$('turnLabel').textContent='0°';r
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);}
 new ResizeObserver(resize).observe(stage);resize();
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05);if(mixer)mixer.update(dt);orbit.update();renderer.render(scene,camera);}animate();
-loadCharacter('male');
+loadCharacter('soldier');
 supabase.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT')location.replace('../admin-login.html');});
 </script>
 </body></html>
