@@ -490,19 +490,12 @@ obstacles.forEach((o,index)=>{
 // The character selected at the start of Rush Arena is used throughout this level.
 const player=new THREE.Group();scene.add(player);player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);
 const body=new THREE.Group();player.add(body);
-import { attachSoldierRunAnimation } from './soldier-run-retarget.js';
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
 (async()=>{
  try {
   const loader=new GLTFLoader();
-  const runnerAssets={
-  male:'https://files.innerscene.com/library/locomotion-collection-sam-3d-person-animated-dc23800f/735aec6a564c1def48e8/locomotion-collection-sam-3d-person-animated.glb',
-  female:'https://files.innerscene.com/library/run-maya-3d-person-animated-eebf24b9/d5f2b8f5a11a7c383293/run-maya-3d-person-animated.glb',
-  soldier:'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb'
-};
-  const runnerChoice=localStorage.getItem('rushArenaRunner')||'soldier';
-  const runnerUrl=runnerAssets[runnerChoice]||runnerAssets.soldier;
+  const runnerUrl='https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/models/gltf/Soldier.glb';
   loader.load(runnerUrl,async gltf=>{
     const model=gltf.scene;
     // Match Level 2: face the runner forward along the auto-run direction.
@@ -528,19 +521,10 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
         action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;
       }
     }
-    if(runnerChoice!=='soldier'){
-       try{
-         const retargeted=await attachSoldierRunAnimation(model,runnerMixer,THREE);
-         runnerActions.run=retargeted.action;
-         console.info('Soldier sprint retargeted to runnerChoice:',retargeted.matched,'/',retargeted.total,'bones');
-       }catch(retargetError){
-         console.warn('Soldier sprint retarget unavailable; keeping the selected character run clip:',retargetError);
-       }
-     }
-     runnerModelLoaded=Object.keys(runnerActions).length>0;
+    runnerModelLoaded=Object.keys(runnerActions).length>0;
     if(runnerActions.idle)playRunnerAction('idle',0);
     else if(runnerActions.run)playRunnerAction('run',0);
-    console.info('Rush Arena runner loaded:',gltf.animations.map(a=>a.name));
+    console.info('Rush Arena Soldier loaded:',gltf.animations.map(a=>a.name));
   },undefined,error=>{
     console.error('Selected runner failed to load:',error);
     const status=document.getElementById('bootStatus');
