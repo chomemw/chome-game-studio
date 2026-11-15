@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d18"><title>Rush Arena Character Lab · CHOME Admin</title>
+<style>
+:root{color-scheme:dark;--bg:#080d18;--panel:#111b2d;--line:#ffffff20;--muted:#9aa9c0;--accent:#9a83ff;--white:#f5f6fb}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#302456 0,transparent 42%),var(--bg);color:var(--white);font:14px Inter,system-ui,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;border-bottom:1px solid var(--line);background:#0b1322}
+.brand{font-weight:950;letter-spacing:.12em}.brand small{display:block;color:var(--muted);font-size:9px;margin-top:4px}
+a,button,select,input{font:inherit}a{color:#c9bdff}.wrap{max-width:1500px;margin:auto;padding:22px}
+h1{font-size:clamp(25px,4vw,38px);letter-spacing:-.05em;margin:8px 0}.muted{color:var(--muted);line-height:1.6}
+.notice{border:1px solid #d7ac4a55;background:#45351855;color:#f4dca8;border-radius:12px;padding:12px 14px;margin:16px 0;line-height:1.6}
+.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.8fr);gap:16px;align-items:start}
+.panel{background:linear-gradient(145deg,#152239,#101827);border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0}
+#stage{height:min(66vh,650px);min-height:380px;background:radial-gradient(ellipse at 50% 20%,#273c5d,#0b1220 70%);border-radius:12px;overflow:hidden;position:relative}
+#stage canvas{width:100%;height:100%;display:block}
+.controls{display:grid;gap:13px}.field label{display:block;color:#cbd5e5;font-size:11px;font-weight:850;margin-bottom:7px}
+select,input[type=range]{width:100%}select{padding:11px;background:#09111f;border:1px solid var(--line);border-radius:10px;color:white}
+.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+button{padding:10px 12px;border-radius:10px;border:1px solid #9a83ff55;background:#9a83ff20;color:#eeeaff;font-weight:850;cursor:pointer}
+button:hover:not(:disabled){background:#9a83ff38}button.active{background:#8069ed;color:white}button:disabled{opacity:.35;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row button{flex:1}
+.status{padding:10px;border-radius:10px;background:#0a1220;border:1px solid var(--line);color:#b8c5d9;font-size:12px;line-height:1.5;min-height:42px}
+.checks{display:grid;gap:8px}.check{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;font-size:12px}.ok{color:#8ee0ad}.bad{color:#f2c778}
+.small{font-size:11px;color:var(--muted);line-height:1.6}.back{display:inline-block;margin-top:18px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}#stage{height:52vh;min-height:340px}.wrap{padding:15px}header{padding:13px 15px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<header><div class="brand">CHOME <small>RUSH ARENA · CHARACTER LAB</small></div><a href="../admin.html">← Admin Dashboard</a></header>
+<main class="wrap">
+<div class="muted" style="font-size:10px;font-weight:900;letter-spacing:.18em;color:#b9aaff">PRIVATE ADMIN TESTING WORKSPACE</div>
+<h1>Character Lab</h1>
+<p class="muted">Test runner models and available animations on a neutral stage before approving a character for any Rush Arena level.</p>
+<div id="gate" class="notice">Checking administrator access…</div>
+<div id="lab" class="hidden">
+<div class="notice">SAFE TEST MODE · No game sessions, CHOX, Game Points, rewards, obstacle logic or level progress are connected to this lab. Tests here do not publish or change any Rush Arena level.</div>
+<div class="grid">
+<section class="panel"><div id="stage"><div style="padding:18px;color:#9aa9c0">Loading 3D stage…</div></div><div class="row" style="margin-top:10px"><button id="cameraFront">Front view</button><button id="cameraSide">Side view</button><button id="cameraBack">Rear view</button><button id="resetPose">Reset pose</button></div></section>
+<aside class="panel controls">
+<div class="field"><label for="character">CHARACTER ROSTER</label><select id="character"><option value="male">Male runner · Sam</option><option value="female">Female runner · Maya</option><option value="soldier">Soldier</option></select></div>
+<div><div class="field"><label>ANIMATION TESTS</label></div><div class="actions">
+<button data-action="idle">Idle</button><button data-action="walk">Walk</button><button data-action="run" class="active">Run</button><button data-action="jump">Jump</button><button data-action="slide">Slide</button><button id="stop">Stop</button>
+</div></div>
+<div class="field"><label for="speed">ANIMATION SPEED · <span id="speedLabel">1.00×</span></label><input id="speed" type="range" min=".5" max="1.8" step=".05" value="1"></div>
+<div class="field"><label for="turn">BODY DIRECTION · <span id="turnLabel">0°</span></label><input id="turn" type="range" min="-180" max="180" step="5" value="0"></div>
+<div class="field"><label>MODEL & ANIMATION DIAGNOSTICS</label><div class="checks">
+<div class="check"><span>Model loaded</span><strong id="modelCheck" class="bad">Waiting</strong></div>
+<div class="check"><span>Idle clip</span><strong id="idleCheck" class="bad">—</strong></div>
+<div class="check"><span>Walk clip</span><strong id="walkCheck" class="bad">—</strong></div>
+<div class="check"><span>Run clip</span><strong id="runCheck" class="bad">—</strong></div>
+<div class="check"><span>Jump clip</span><strong id="jumpCheck" class="bad">—</strong></div>
+<div class="check"><span>Slide clip</span><strong id="slideCheck" class="bad">—</strong></div>
+</div></div>
+<div id="message" class="status" role="status" aria-live="polite">Select a character to begin testing.</div>
+<p class="small">Jump and slide controls are enabled only when a matching animation exists in the selected model. The lab reports missing clips rather than pretending a run or walk animation is a proper jump or slide.</p>
+</aside>
+</div>
+<p class="small">Testing checklist: natural proportions · foot contact and stride · run-cycle smoothness · idle/walk transitions · jump/slide clip availability · model loading · desktop/mobile rendering.</p>
+<a class="back" href="../admin.html">← Return to Admin Dashboard</a>
+</div>
+</main>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import {attachSoldierRunAnimation} from './soldier-run-retarget.js';
+const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
+const $=id=>document.getElementById(id);
+const gate=$('gate'),lab=$('lab');
+async function authorize(){
+ const {data:{session}}=await supabase.auth.getSession();
+ if(!session?.user){location.replace('../admin-login.html');return false;}
+ const {error}=await supabase.rpc('get_chome_admin_overview');
+ if(error){gate.textContent='Administrator access required. This testing workspace is not available to this account.';gate.classList.add('bad');return false;}
+ gate.classList.add('hidden');lab.classList.remove('hidden');return true;
+}
+const allowed=await authorize();if(!allowed)throw new Error('Admin authorization failed');
+const stage=$('stage');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x101b2d);scene.fog=new THREE.Fog(0x101b2d,15,38);
+const camera=new THREE.PerspectiveCamera(38,1,.1,100);camera.position.set(0,2.8,7.8);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;stage.replaceChildren(renderer.domElement);
+const orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(0,1,0);orbit.enableDamping=true;orbit.maxPolarAngle=Math.PI*.48;orbit.minDistance=2.8;orbit.maxDistance=13;
+scene.add(new THREE.HemisphereLight(0xdceaff,0x263047,2.1));
+const key=new THREE.DirectionalLight(0xffffff,3.0);key.position.set(-4,8,5);key.castShadow=true;key.shadow.mapSize.set(1024,1024);scene.add(key);
+const fill=new THREE.DirectionalLight(0x9d8bff,1.1);fill.position.set(4,3,-5);scene.add(fill);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(5,64),new THREE.MeshStandardMaterial({color:0x26354b,roughness:.88}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;floor.receiveShadow=true;scene.add(floor);
+const grid=new THREE.GridHelper(10,20,0x7788a8,0x46546d);grid.position.y=0;scene.add(grid);
+const ring=new THREE.Mesh(new THREE.TorusGeometry(1.15,.018,8,64),new THREE.MeshBasicMaterial({color:0x9a83ff}));ring.rotation.x=Math.PI/2;ring.position.y=.012;scene.add(ring);
+const rig=new THREE.Group();scene.add(rig);
+const roster={
+ male:'https://files.innerscene.com/library/locomotion-collection-sam-3d-person-animated-dc23800f/735aec6a564c1def48e8/locomotion-collection-sam-3d-person-animated.glb',
+ female:'https://files.innerscene.com/library/run-maya-3d-person-animated-eebf24b9/d5f2b8f5a11a7c383293/run-maya-3d-person-animated.glb',
+ soldier:'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/models/gltf/Soldier.glb'
+};
+let mixer=null,actions={},active=null,model=null,loadToken=0,clock=new THREE.Clock();
+function report(id,yes,label){$(id).textContent=yes?(label||'Available'):'Not found';$(id).className=yes?'ok':'bad';}
+function play(name){
+ const next=actions[name];if(!next){$('message').textContent='This character does not contain a dedicated '+name+' animation clip.';return;}
+ if(active!==next){if(active)active.fadeOut(.16);next.reset().fadeIn(.16).play();active=next;}
+ Object.values(actions).forEach(a=>a.setEffectiveTimeScale(Number($('speed').value)));
+ $('message').textContent='Playing '+name+' animation. Use the camera to inspect the movement from different angles.';
+}
+async function loadCharacter(choice){
+ const token=++loadToken;rig.clear();mixer=null;actions={};active=null;model=null;
+ $('message').textContent='Loading '+choice+' character model…';report('modelCheck',false,'Loading');
+ ['idle','walk','run','jump','slide'].forEach(k=>report(k+'Check',false,'Checking'));
+ try{
+  const gltf=await new GLTFLoader().loadAsync(roster[choice]);if(token!==loadToken)return;
+  model=gltf.scene;model.rotation.y=Math.PI;model.updateMatrixWorld(true);
+  const bounds=new THREE.Box3().setFromObject(model),height=Math.max(.01,bounds.max.y-bounds.min.y);
+  model.scale.setScalar(1.9/height);model.position.y=-bounds.min.y*model.scale.y;
+  model.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
+  rig.add(model);mixer=new THREE.AnimationMixer(model);actions={};
+  for(const clip of gltf.animations||[]){
+   const key=clip.name.toLowerCase().replace(/[\s_-]+/g,'');let slot=null;
+   if(key.includes('idle'))slot='idle';else if(key.includes('walk'))slot='walk';else if(key.includes('run'))slot='run';else if(key.includes('jump'))slot='jump';else if(key.includes('slide'))slot='slide';
+   if(slot&&!actions[slot]){const a=mixer.clipAction(clip);a.setLoop(THREE.LoopRepeat,Infinity);actions[slot]=a;}
+  }
+  if(choice!=='soldier'&&actions.run){
+   try{const retarget=await attachSoldierRunAnimation(model,mixer,THREE);if(token!==loadToken)return;actions.run=retarget.action;$('message').textContent='Loaded '+choice+' with Soldier run retarget ('+Math.round(retarget.coverage*100)+'% rig coverage).';}
+   catch(e){console.warn(e);$('message').textContent='Loaded '+choice+'. Native run animation retained because retargeting did not pass its quality check.';}
+  }
+  report('modelCheck',true,'Loaded');
+  ['idle','walk','run','jump','slide'].forEach(k=>report(k+'Check',!!actions[k]));
+  document.querySelectorAll('[data-action]').forEach(btn=>btn.disabled=!actions[btn.dataset.action]);
+  $('message').textContent+=' Available clips: '+(Object.keys(actions).join(', ')||'none')+'.';
+  play(actions.run?'run':actions.idle?'idle':Object.keys(actions)[0]);
+ }catch(e){console.error(e);report('modelCheck',false,'Load failed');$('message').textContent='Could not load '+choice+': '+(e?.message||e)+'. Check the asset host and try again.';}
+}
+$('character').addEventListener('change',e=>loadCharacter(e.target.value));
+document.querySelectorAll('[data-action]').forEach(btn=>btn.addEventListener('click',()=>play(btn.dataset.action)));
+$('stop').addEventListener('click',()=>{if(active){active.fadeOut(.12);active=null;}$('message').textContent='Animation stopped.';});
+$('speed').addEventListener('input',e=>{$('speedLabel').textContent=Number(e.target.value).toFixed(2)+'×';Object.values(actions).forEach(a=>a.setEffectiveTimeScale(Number(e.target.value)));});
+$('turn').addEventListener('input',e=>{rig.rotation.y=THREE.MathUtils.degToRad(Number(e.target.value));$('turnLabel').textContent=e.target.value+'°';});
+$('cameraFront').onclick=()=>{camera.position.set(0,2.8,7.8);orbit.target.set(0,1,0);orbit.update();};
+$('cameraSide').onclick=()=>{camera.position.set(7.8,2.5,0);orbit.target.set(0,1,0);orbit.update();};
+$('cameraBack').onclick=()=>{camera.position.set(0,2.8,-7.8);orbit.target.set(0,1,0);orbit.update();};
+$('resetPose').onclick=()=>{$('turn').value=0;$('turnLabel').textContent='0°';rig.rotation.set(0,0,0);$('speed').value=1;$('speedLabel').textContent='1.00×';Object.values(actions).forEach(a=>a.setEffectiveTimeScale(1));if(actions.run)play('run');else if(actions.idle)play('idle');};
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);}
+new ResizeObserver(resize).observe(stage);resize();
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05);if(mixer)mixer.update(dt);orbit.update();renderer.render(scene,camera);}animate();
+loadCharacter('male');
+supabase.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT')location.replace('../admin-login.html');});
+</script>
+</body></html>
