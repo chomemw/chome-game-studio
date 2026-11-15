@@ -529,7 +529,7 @@ function transformLevelFiveScene(){
  const excluded=new Set([rainField,splashField]);
  const map=(x,y,z)=>{const f=routeFrame(-z,x);return{x:f.x,y,z:f.z,yaw:f.yaw}};
  for(const o of [...scene.children]){
-  if(excluded.has(o)||o===playerVisual||o.isLight)continue;
+  if(excluded.has(o)||o.isLight)continue;
   if(o.isInstancedMesh){
    const m=new THREE.Matrix4(),p=new THREE.Vector3(),q=new THREE.Quaternion(),sc=new THREE.Vector3(),dmy=new THREE.Object3D();
    for(let i=0;i<o.count;i++){o.getMatrixAt(i,m);m.decompose(p,q,sc);const e=new THREE.Euler().setFromQuaternion(q,'YXZ'),w=map(p.x,p.y,p.z);dmy.position.set(w.x,w.y,w.z);dmy.rotation.set(e.x,e.y+w.yaw,e.z);dmy.scale.copy(sc);dmy.updateMatrix();o.setMatrixAt(i,dmy.matrix)}
@@ -716,6 +716,7 @@ function updateHazardWarnings(dt){
     beacon.lamps.forEach(lamp=>{lamp.material.emissiveIntensity=ahead?2.8*pulse:1.15*pulse;lamp.scale.setScalar(ahead?1.12+.18*pulse:1)});
     beacon.rig.visible=distance>-2&&distance<26;
     if(ahead&&distance<nearestDistance){nearest=beacon;nearestDistance=distance}
+    const beaconFrame=routeFrame(-beacon.obstacle.z,beacon.obstacle.x);beacon.rig.position.set(beaconFrame.x,routeY(beacon.obstacle.z),beaconFrame.z);beacon.rig.rotation.y=beaconFrame.yaw;
     if(ahead&&distance<17&&!warnedHazards.has(beacon.index)){warnedHazards.add(beacon.index);sfxWarning()}
   }
   if(nearest){
@@ -884,7 +885,7 @@ function update(dt){
   const zipDistance=-player.position.z;
   zipHint.style.opacity=!ziplineUsed&&zipDistance>295&&zipDistance<315?'1':'0';
   if(!ziplineUsed&&!ziplineRide&&zipDistance>=315){if(zipGrip)zipGrip.visible=true;ziplineRide={elapsed:0,startX:zipStartX,startZ:zipStartZ,endX:zipEndX,endZ:zipEndZ};player.position.set(zipStartX,routeY(zipStartZ)+.1,zipStartZ);body.rotation.x=-.15;}
-  if(ziplineRide){ziplineRide.elapsed+=dt;const t=THREE.MathUtils.clamp(ziplineRide.elapsed/2.45,0,1),ease=t*t*(3-2*t);player.position.x=THREE.MathUtils.lerp(ziplineRide.startX,ziplineRide.endX,ease);player.position.z=THREE.MathUtils.lerp(ziplineRide.startZ,ziplineRide.endZ,ease);player.position.y=THREE.MathUtils.lerp(routeY(ziplineRide.startZ),routeY(ziplineRide.endZ),ease)+6.05+Math.sin(t*Math.PI)*.22;body.rotation.x=THREE.MathUtils.lerp(body.rotation.x,-.2,.12);if(t>=1){player.position.set(ziplineRide.endX,routeY(ziplineRide.endZ)+.06,ziplineRide.endZ);ziplineRide=null;ziplineUsed=true;if(zipGrip)zipGrip.visible=false;grounded=true;vertical=0;body.rotation.set(0,0,0);soundTone(660,990,.32,.11,'sine')}return;}
+  if(ziplineRide){ziplineRide.elapsed+=dt;const t=THREE.MathUtils.clamp(ziplineRide.elapsed/2.45,0,1),ease=t*t*(3-2*t);player.position.x=THREE.MathUtils.lerp(ziplineRide.startX,ziplineRide.endX,ease);player.position.z=THREE.MathUtils.lerp(ziplineRide.startZ,ziplineRide.endZ,ease);player.position.y=THREE.MathUtils.lerp(routeY(ziplineRide.startZ),routeY(ziplineRide.endZ),ease)+6.05+Math.sin(t*Math.PI)*.22;const zipFrame=routeFrame(-player.position.z,player.position.x);playerVisual.position.set(zipFrame.x,player.position.y,zipFrame.z);playerVisual.rotation.y=zipFrame.yaw;body.rotation.x=THREE.MathUtils.lerp(body.rotation.x,-.2,.12);if(t>=1){player.position.set(ziplineRide.endX,routeY(ziplineRide.endZ)+.06,ziplineRide.endZ);ziplineRide=null;ziplineUsed=true;if(zipGrip)zipGrip.visible=false;grounded=true;vertical=0;body.rotation.set(0,0,0);soundTone(660,990,.32,.11,'sine')}return;}
   if(!moveRunner(dx,dz))return;
   player.position.z=Math.max(player.position.z,-665);
   // Collect each gold medallion once as the runner passes it.
