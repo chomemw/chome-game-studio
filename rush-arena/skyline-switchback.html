@@ -127,7 +127,9 @@ const developmentPreview=true;
 // Level 4 owns this route profile; it does not import Level 3's route or scene file.
 const routeTurns=[{d:0,x:0},{d:26,x:0},{d:29,x:0},{d:37,x:7.5},{d:59,x:7.5},{d:62,x:7.5},{d:70,x:-7.5},{d:92,x:-7.5},{d:95,x:-7.5},{d:103,x:7.5},{d:125,x:7.5},{d:128,x:7.5},{d:136,x:-7.5},{d:158,x:-7.5},{d:161,x:-7.5},{d:169,x:7.5},{d:191,x:7.5},{d:194,x:7.5},{d:202,x:-7.5},{d:224,x:-7.5},{d:227,x:-7.5},{d:235,x:7.5},{d:257,x:7.5},{d:260,x:7.5},{d:268,x:-7.5},{d:290,x:-7.5},{d:293,x:-7.5},{d:301,x:7.5},{d:323,x:7.5},{d:326,x:7.5},{d:334,x:-7.5},{d:356,x:-7.5},{d:359,x:-7.5},{d:367,x:7.5},{d:389,x:7.5},{d:392,x:7.5},{d:400,x:-7.5},{d:422,x:-7.5},{d:425,x:-7.5},{d:433,x:7.5},{d:455,x:7.5},{d:458,x:7.5},{d:466,x:-7.5},{d:488,x:-7.5},{d:491,x:-7.5},{d:499,x:7.5},{d:521,x:7.5},{d:524,x:7.5},{d:532,x:-7.5},{d:554,x:-7.5},{d:557,x:-7.5},{d:565,x:7.5},{d:587,x:7.5},{d:590,x:7.5},{d:598,x:-7.5},{d:620,x:-7.5},{d:623,x:-7.5},{d:631,x:7.5},{d:653,x:7.5},{d:665,x:0}];
 const routeHeights=[{d:0,y:0},{d:65,y:.3},{d:125,y:1.4},{d:185,y:2.1},{d:245,y:.7},{d:305,y:-.5},{d:365,y:.5},{d:430,y:2.2},{d:495,y:2.8},{d:555,y:1.3},{d:615,y:2.5},{d:665,y:1.6}];
-const curveX=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeTurns.length-2&&d>routeTurns[i+1].d)i++;const a=routeTurns[i],b=routeTurns[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1),s=t*t*(3-2*t);return THREE.MathUtils.lerp(a.x,b.x,s)};
+const curveX=z=>0;
+function routeFrame(distance,lateral=0){const d=distance,segment=d<133?0:d<266?1:d<399?2:d<532?3:4;let cx=0,cz=0,yaw=0;if(segment===0){cz=-d}else if(segment===1){cx=-(d-133);cz=-133;yaw=Math.PI/2}else if(segment===2){cx=-133;cz=-(d-133)}else if(segment===3){cx=-133-(d-399);cz=-266;yaw=Math.PI/2}else{cx=-266;cz=-(d-266)}return{x:cx+lateral*Math.cos(yaw),z:cz-lateral*Math.sin(yaw),yaw}}
+const curveAngle=z=>0;
 const routeY=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeHeights.length-2&&d>routeHeights[i+1].d)i++;const a=routeHeights[i],b=routeHeights[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1),s=t*t*(3-2*t);return THREE.MathUtils.lerp(a.y,b.y,s)};
 const curveAngle=z=>Math.atan2(curveX(z-2)-curveX(z+2),4);
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
@@ -161,9 +163,8 @@ function updateStorm(dt){
   for(let i=0;i<rainCount;i++){
     const r=rainSeed[i];r.y-=r.v*dt;
     if(r.y<-.8){r.y=14+Math.random()*4;r.x=(Math.random()-.5)*22;r.z=(Math.random()-.5)*38}
-    const k=i*6,x=p.x+r.x,z=p.z+r.z;
-    arr[k]=x;arr[k+1]=r.y;arr[k+2]=z;
-    arr[k+3]=x-.22;arr[k+4]=r.y+.78;arr[k+5]=z+.08;
+    const k=i*6,a=routeFrame(-p.z-r.z,p.x+r.x),b=routeFrame(-p.z-r.z-.08,p.x+r.x-.22);
+    arr[k]=a.x;arr[k+1]=r.y;arr[k+2]=a.z;arr[k+3]=b.x;arr[k+4]=r.y+.78;arr[k+5]=b.z;
   }
   rainGeometry.attributes.position.needsUpdate=true;
   rainField.position.set(0,0,0);
@@ -520,10 +521,36 @@ obstacles.forEach((o,index)=>{
   scene.add(rig);hazardBeacons.push({rig,lamps:rig.children.filter(child=>child.isMesh&&child.geometry.type==='SphereGeometry'),obstacle:o,index});
 });
 
+
+// Transform the completed Level 5 course from route-local coordinates into
+// five connected world-space straights. Static scenery, instances and generated
+// road/cable geometry all use the same route frame as the runner.
+function transformLevelFiveScene(){
+ const excluded=new Set([rainField,splashField]);
+ const map=(x,y,z)=>{const f=routeFrame(-z,x);return{x:f.x,y,z:f.z,yaw:f.yaw}};
+ for(const o of [...scene.children]){
+  if(excluded.has(o)||o===playerVisual||o.isLight)continue;
+  if(o.isInstancedMesh){
+   const m=new THREE.Matrix4(),p=new THREE.Vector3(),q=new THREE.Quaternion(),sc=new THREE.Vector3(),dmy=new THREE.Object3D();
+   for(let i=0;i<o.count;i++){o.getMatrixAt(i,m);m.decompose(p,q,sc);const e=new THREE.Euler().setFromQuaternion(q,'YXZ'),w=map(p.x,p.y,p.z);dmy.position.set(w.x,w.y,w.z);dmy.rotation.set(e.x,e.y+w.yaw,e.z);dmy.scale.copy(sc);dmy.updateMatrix();o.setMatrixAt(i,dmy.matrix)}
+   o.instanceMatrix.needsUpdate=true;continue;
+  }
+  if(o.isMesh&&o.geometry?.attributes?.position?.count>1000&&Math.abs(o.position.x)<1e-7&&Math.abs(o.position.z)<1e-7){
+   const a=o.geometry.attributes.position;for(let i=0;i<a.count;i++){const w=map(a.getX(i),a.getY(i),a.getZ(i));a.setXYZ(i,w.x,w.y,w.z)}a.needsUpdate=true;o.geometry.computeVertexNormals();
+  }
+  const w=map(o.position.x,o.position.y,o.position.z);o.position.set(w.x,w.y,w.z);o.rotation.y+=w.yaw;
+ }
+ // Ground follows every straight; square joints close the inside/outside corner seams.
+ for(let i=0;i<5;i++){const mid=i*133+66.5,w=routeFrame(mid,0),g=box(90,.62,137,grass,w.x,-1.42,w.z);g.rotation.y=w.yaw;g.receiveShadow=true}
+ for(const d of [133,266,399,532]){const w=routeFrame(d,0),j=box(3.72,.16,3.72,path,w.x,routeY(-d)-.10,w.z);j.rotation.y=w.yaw;j.receiveShadow=true}
+}
+transformLevelFiveScene();
+
 // The selected Rush Arena character is loaded for this level. No procedural placeholder
 // or alternate athlete model is created while the Soldier asset loads.
-const player=new THREE.Group();scene.add(player);player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);
-const body=new THREE.Group();player.add(body);
+const player=new THREE.Group();player.position.set(0,routeY(3.5)+.05,3.5);
+const playerVisual=new THREE.Group();scene.add(playerVisual);
+const body=new THREE.Group();playerVisual.add(body);
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false,zipGrip=null;
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
 (async()=>{
@@ -702,7 +729,7 @@ function updateHazardWarnings(dt){
 soundButton.addEventListener('click',()=>{rushAudioOn=!rushAudioOn;soundButton.textContent=rushAudioOn?'🔊 SOUND ON':'🔇 SOUND OFF';if(audioReady()){rushMaster.gain.setTargetAtTime(rushAudioOn?.72:0,rushAudio.currentTime,.06);if(rushAudioOn&&running){if(level===5)startPremiumAmbience();else startHorrorAmbience()}}});
 
 function updateMovingHazards(dt){
-  for(const o of obstacles){if(o.type!=='movingBlock')continue;o.x=o.baseX+Math.sin(elapsed*o.frequency+o.phase)*o.amplitude;o.mesh.position.x=o.x;if(o.rotor)o.rotor.rotation.z+=dt*3.4;}
+  for(const o of obstacles){if(o.type!=='movingBlock')continue;o.x=o.baseX+Math.sin(elapsed*o.frequency+o.phase)*o.amplitude;const w=routeFrame(-o.z,o.x);o.mesh.position.set(w.x,routeY(o.z),w.z);o.mesh.rotation.y=w.yaw;if(o.rotor)o.rotor.rotation.z+=dt*3.4;}
 }
 function failRun(message){
   // Inspection mode must never interrupt the run with a game-over overlay.
@@ -770,7 +797,7 @@ async function reset(){
     if(status)status.textContent='Starting Brick Road…';
     lastProgressReport=0;progressChain=Promise.resolve();ziplineRide=null;ziplineUsed=false;if(zipGrip)zipGrip.visible=false;ziplineRide=null;ziplineUsed=false;if(zipGrip)zipGrip.visible=false;
     if(rushAudioOn){try{sfxStart();if(level!==5)startHorrorAmbience()}catch(audioError){rushAudioOn=false;console.warn('Brick Road audio unavailable; continuing silently.',audioError)}}
-    activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'SKYLINE APPROACH  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');renderer.render(scene,camera);
+    activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'SKYLINE APPROACH  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,routeY(3.5)+.05,3.5);const startFrame=routeFrame(3.5,0);playerVisual.position.set(startFrame.x,player.position.y,startFrame.z);playerVisual.rotation.y=startFrame.yaw;coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');renderer.render(scene,camera);
   }catch(error){
     // Roll back a partially-started run so the welcome screen and retry remain usable.
     running=false;
@@ -786,7 +813,7 @@ async function reset(){
     if(startButton){startButton.disabled=false;startButton.textContent='START RUN'}
   }
 }
-function respawn(){player.position.set(curveX(respawnZ),routeY(respawnZ)+.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
+function respawn(){player.position.set(0,routeY(respawnZ)+.05,respawnZ);const w=routeFrame(-respawnZ,0);playerVisual.position.set(w.x,player.position.y,w.z);playerVisual.rotation.y=w.yaw;vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
 function onTrack(x,z){const localX=x-curveX(z);if(developmentPreview){return Math.abs(localX)<=1.72&&z<=5&&z>=-665}return Math.abs(localX)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z>=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.position.y=-.22;body.rotation.x=-.35;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
@@ -804,7 +831,7 @@ function releaseStick(e){if(e.pointerId===stickPointer){stickPointer=null;stickX
 stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);stick.addEventListener('lostpointercapture',e=>{if(e.pointerId===stickPointer){stickPointer=null;stickX=0;stickY=0;knob.style.transform='translate(0,0)'}});
 
 // Camera follows from behind and eases toward the runner.
-camera.position.set(0,7.2,15.5);camera.lookAt(0,1.4,-3);
+const initialBehind=routeFrame(-14.2,0),initialAhead=routeFrame(4.2,0);camera.position.set(initialBehind.x,7.2,initialBehind.z);camera.lookAt(initialAhead.x,1.4,initialAhead.z);
 const clock=new THREE.Clock();
 // Collision uses the runner's actual action state. A normal runner cannot pass
 // through a block; jumping clears it only after the feet rise above its top.
@@ -874,8 +901,9 @@ function update(dt){
   if(grounded&&!onTrack(player.position.x,player.position.z)){grounded=false;vertical=0}
   if(!grounded){vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<=.05&&onTrack(player.position.x,player.position.z)){player.position.y=.05;vertical=0;grounded=true;body.rotation.x=0;spawnWaterSplash(player.position.x,player.position.z,18)}if(player.position.y<-5){sfxFall();respawn()}}
   // Resolve the rotating sweeper as a solid capsule in the track plane.
-  const beamX=Math.cos(spinner.rotation.y),beamZ=-Math.sin(spinner.rotation.y);
-  const relX=player.position.x-spinner.position.x,relZ=player.position.z-spinner.position.z;
+  const spinAngle=spinner.rotation.y-routeFrame(47,0).yaw;
+  const beamX=Math.cos(spinAngle),beamZ=-Math.sin(spinAngle);
+  const relX=player.position.x,relZ=player.position.z+47;
   const along=THREE.MathUtils.clamp(relX*beamX+relZ*beamZ,-3.7,3.7);
   const nearX=spinner.position.x+along*beamX,nearZ=spinner.position.z+along*beamZ;
   let pushX=player.position.x-nearX,pushZ=player.position.z-nearZ;
@@ -892,6 +920,7 @@ function update(dt){
   if(player.position.z<-661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
   const pct=THREE.MathUtils.clamp((3.5-player.position.z)/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   player.position.y=routeY(player.position.z)+.05+vertical;
+  const runnerFrame=routeFrame(-player.position.z,player.position.x);playerVisual.position.set(runnerFrame.x,player.position.y,runnerFrame.z);playerVisual.rotation.y=runnerFrame.yaw;
   // Camera follow is handled once per rendered frame in animate(), just like Level 3.
   const moving=running&&!paused;
   if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}
@@ -930,10 +959,10 @@ function animate(now=0){
   // simulation. This prevents the Level 4 camera from appearing locked while the
   // runner advances between simulation updates.
   const cameraDt=Math.min(frameDelta,.12);
-  const cameraTarget=new THREE.Vector3(player.position.x,player.position.y+6.1,player.position.z+14.2);
-  camera.position.lerp(cameraTarget,1-Math.pow(.001,cameraDt));
+  const distance=-player.position.z,behind=routeFrame(distance-14.2,player.position.x),ahead=routeFrame(distance+4.2,player.position.x);
+  const cameraTarget=new THREE.Vector3(behind.x,player.position.y+6.1,behind.z);camera.position.lerp(cameraTarget,1-Math.pow(.001,cameraDt));
   if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}
-  camera.lookAt(player.position.x,player.position.y+1.25,player.position.z-4.2);
+  camera.lookAt(ahead.x,player.position.y+1.25,ahead.z);
   renderer.render(scene,camera);
 }
 renderer.render(scene,camera);
