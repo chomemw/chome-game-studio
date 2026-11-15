@@ -498,8 +498,8 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
   const runnerUrl='https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/models/gltf/Soldier.glb';
   loader.load(runnerUrl,async gltf=>{
     const model=gltf.scene;
-    // Match Level 2: face the runner forward along the auto-run direction.
-    model.rotation.y=Math.PI;
+    // The course advances toward -Z; keep Soldier facing that direction.
+    model.rotation.y=0;
     model.updateMatrixWorld(true);
     const bounds=new THREE.Box3().setFromObject(model);
     const height=Math.max(.01,bounds.max.y-bounds.min.y);
