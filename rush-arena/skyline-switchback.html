@@ -538,6 +538,47 @@ function transformLevelFiveScene(){
  for(const d of [133,266,399,532]){const w=routeFrame(d,0),j=box(3.72,.16,3.72,path,w.x,routeY(-d)-.10,w.z);j.rotation.y=w.yaw;j.receiveShadow=true}
 }
 transformLevelFiveScene();
+transformLevelFiveScene();
+
+// Rebuild ONLY the running surface in world space so it follows the existing
+// five-straight route through the same square turns without seams. Obstacles,
+// turn positions, checkpoints and the zipline ravine remain unchanged.
+scene.remove(trail);
+scene.remove(edges);
+{
+ const verts=[],uvs=[],indices=[];
+ const steps=1330,halfWidth=2.15;
+ const centerAt=d=>routeFrame(THREE.MathUtils.clamp(d,0,665),0);
+ for(let i=0;i<=steps;i++){
+   const d=i*665/steps;
+   const before=centerAt(Math.max(0,d-.25)),after=centerAt(Math.min(665,d+.25)),p=centerAt(d);
+   let tx=after.x-before.x,tz=after.z-before.z;
+   const tl=Math.hypot(tx,tz)||1;tx/=tl;tz/=tl;
+   // Mitered cross-section: average the incoming/outgoing headings at each turn.
+   let nx=-tz,nz=tx;
+   const miter=Math.min(1/Math.max(.707,Math.abs(nx* -tz+nz*tx)),1.414);
+   nx*=miter;nz*=miter;
+   const y=routeY(-d)-.105;
+   verts.push(p.x+nx*halfWidth,y,p.z+nz*halfWidth);
+   verts.push(p.x-nx*halfWidth,y,p.z-nz*halfWidth);
+   uvs.push(0,d/8,1,d/8);
+   if(i<steps){
+     const nextD=(i+1)*665/steps;
+     // Keep the existing zipline ravine opening exactly where it was.
+     if(!(d<342&&nextD>315)){
+       const a=i*2,b=a+2;
+       indices.push(a,b,a+1,a+1,b,b+1);
+     }
+   }
+ }
+ const geo=new THREE.BufferGeometry();
+ geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+ geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+ geo.setIndex(indices);geo.computeVertexNormals();
+ const continuousTrail=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:jungleTrailTexture,color:0xffffff,roughness:1,metalness:0}));
+ continuousTrail.receiveShadow=true;scene.add(continuousTrail);
+}
+
 
 // The selected Rush Arena character is loaded for this level. No procedural placeholder
 // or alternate athlete model is created while the Soldier asset loads.
