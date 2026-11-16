@@ -490,27 +490,20 @@ obstacles.forEach((o,index)=>{
 // The character selected at the start of Rush Arena is used throughout this level.
 const player=new THREE.Group();scene.add(player);player.position.set(curveX(3.5),routeY(3.5)+.05,3.5);
 const body=new THREE.Group();player.add(body);
-import { attachSoldierRunAnimation } from './soldier-run-retarget.js';
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
 function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
 (async()=>{
  try {
   const loader=new GLTFLoader();
-  const runnerAssets={
-  male:'https://files.innerscene.com/library/locomotion-collection-sam-3d-person-animated-dc23800f/735aec6a564c1def48e8/locomotion-collection-sam-3d-person-animated.glb',
-  female:'https://files.innerscene.com/library/run-maya-3d-person-animated-eebf24b9/d5f2b8f5a11a7c383293/run-maya-3d-person-animated.glb',
-  soldier:'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb'
-};
-  const runnerChoice=localStorage.getItem('rushArenaRunner')||'soldier';
-  const runnerUrl=runnerAssets[runnerChoice]||runnerAssets.soldier;
+  const runnerUrl='https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/models/gltf/Soldier.glb';
   loader.load(runnerUrl,async gltf=>{
     const model=gltf.scene;
-    // Match Level 2: face the runner forward along the auto-run direction.
-    model.rotation.y=Math.PI;
+    // The course advances toward -Z; keep Soldier facing that direction.
+    model.rotation.y=0;
     model.updateMatrixWorld(true);
     const bounds=new THREE.Box3().setFromObject(model);
     const height=Math.max(.01,bounds.max.y-bounds.min.y);
-    model.scale.setScalar(3.2/height); // Larger, clearly readable full-body runner.
+    model.scale.setScalar(1.9/height); // Larger, clearly readable full-body runner.
     model.position.y=-bounds.min.y*model.scale.y;
     model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
     body.clear();body.add(model);
@@ -524,23 +517,14 @@ function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next
       else if(key.includes('run'))slot='run';
       if(slot&&!runnerActions[slot]){
         const action=runnerMixer.clipAction(clip);
-        action.enabled=true;action.setEffectiveTimeScale(slot==='run'?1.15:1);action.setEffectiveWeight(1);
+        action.enabled=true;action.setEffectiveTimeScale(slot==='run'?1:1);action.setEffectiveWeight(1);
         action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;
       }
     }
-    if(runnerChoice!=='soldier'){
-       try{
-         const retargeted=await attachSoldierRunAnimation(model,runnerMixer,THREE);
-         runnerActions.run=retargeted.action;
-         console.info('Soldier sprint retargeted to runnerChoice:',retargeted.matched,'/',retargeted.total,'bones');
-       }catch(retargetError){
-         console.warn('Soldier sprint retarget unavailable; keeping the selected character run clip:',retargetError);
-       }
-     }
-     runnerModelLoaded=Object.keys(runnerActions).length>0;
+    runnerModelLoaded=Object.keys(runnerActions).length>0;
     if(runnerActions.idle)playRunnerAction('idle',0);
     else if(runnerActions.run)playRunnerAction('run',0);
-    console.info('Rush Arena runner loaded:',gltf.animations.map(a=>a.name));
+    console.info('Rush Arena Soldier loaded:',gltf.animations.map(a=>a.name));
   },undefined,error=>{
     console.error('Selected runner failed to load:',error);
     const status=document.getElementById('bootStatus');
@@ -770,7 +754,7 @@ async function reset(){
 function respawn(){player.position.set(curveX(respawnZ),routeY(respawnZ)+.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
 function onTrack(x,z){const localX=x-curveX(z);if(developmentPreview){return Math.abs(localX)<=2.85&&z<=5&&z>=-665}return Math.abs(localX)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z>=-74))}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
-function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
+function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.position.y=-.22;body.rotation.x=-.35;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
 window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';
 if(developmentPreview){document.title='CHOME Rush Arena — Temple Trail Level 3 Preview';document.querySelector('.brand').innerHTML='CHOME <span>RUSH ARENA · LEVEL 3</span>';document.querySelector('.race-pill').textContent='ADMIN DEVELOPMENT PREVIEW';document.querySelector('#welcome .dialog h1').innerHTML='TEMPLE <span>TRAIL</span>';document.querySelector('#welcome .dialog p').textContent='Auto-run through a narrow winding jungle trail with towering trees, dense canopy, exposed roots, fallen logs, waterfalls, wooden bridges, jumps, slides and collectible relics. Level 3 is an administrator-only preview.';document.querySelector('#welcome .dialog .small').textContent='Temple Trail · 665m jungle auto-run · Third-person camera';document.querySelector('#result .eyebrow').textContent='TEMPLE TRAIL PREVIEW';document.querySelector('#result .small').textContent='Admin preview only · No player rewards are issued';document.getElementById('chox').closest('.stat').style.display='none';document.querySelector('.brand').style.letterSpacing='.08em';}document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 document.getElementById('restartFailed').addEventListener('click',reset);
@@ -865,13 +849,13 @@ function update(dt){
   if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}
   // Keep the run cycle active during automatic forward travel, even when the
   // player is not steering. Jump and slide retain Level 2's action handling.
-  const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));
+  const desired=slideTimer>0?(runnerActions.slide?'slide':'run'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));
   if(runnerModelLoaded){
     const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run? 'run':(runnerActions.walk?'walk':'idle'));
     playRunnerAction(action);
     runnerMixer.update(dt);
   }
-  body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);
+  body.position.y=slideTimer>0?-.22:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);
   body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);
   if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }

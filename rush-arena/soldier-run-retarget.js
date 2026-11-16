@@ -10,7 +10,7 @@ async function getSoldierRunSource(){
         import('https://esm.sh/@three-ws/retarget@0.1.2?deps=three@0.160.0'),
         import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js')
       ]);
-      const response=await fetch('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb');
+      const response=await fetch('https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/models/gltf/Soldier.glb');
       if(!response.ok)throw new Error('Soldier animation source failed to download: '+response.status);
       const canonical=canonicalizeGLBBones(await response.arrayBuffer());
       const loader=new GLTFLoader();
@@ -28,6 +28,8 @@ export async function attachSoldierRunAnimation(targetModel,mixer,THREE){
   targetModel.updateMatrixWorld(true);
   const result=retargetClipToObject(runClip,targetModel);
   if(!result.clip)throw new Error('Soldier run could not map to this character rig ('+Math.round((result.coverage||0)*100)+'% bone coverage)');
+  const coverage=Number(result.coverage)||0;
+  if(coverage<0.55)throw new Error('Soldier run retarget rejected: only '+Math.round(coverage*100)+'% bone coverage; keeping the character\'s native animation instead.');
   const action=mixer.clipAction(result.clip);
   action.enabled=true;
   action.setEffectiveTimeScale(1);
