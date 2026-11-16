@@ -233,7 +233,7 @@ if(level===1){
 // Floating course with three safe gaps that require a jump.
 const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,5);extensionRoadTexture.needsUpdate=true;
 const extensionPath=new THREE.MeshStandardMaterial({map:extensionRoadTexture,color:0xb4c0c9,roughness:.58,metalness:.12});
-const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40],[0,-399,536]];
+const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40],[0,-399,556]];
 for(const [x,z,len] of floorSegments){
   // Grass is the lower foundation; it must sit beneath the asphalt, not over it.
   box(28,.22,len+.5,grass,x,-1.12,z);
@@ -251,7 +251,7 @@ const laneMarks=[];for(let z=-5;z>-666;z-=4){laneMarks.push({x:-1.5,y:.035,z},{x
 addBoxInstances(white,.09,.018,.85,laneMarks);
 for(const x of [-4.52,4.52]){
   box(.12,.12,134,side,x,.18,-64);box(.12,.12,134,gold,x,.34,-64);
-  box(.12,.12,536,side,x,.18,-399);box(.12,.12,536,gold,x,.34,-399);
+  box(.12,.12,556,side,x,.18,-399);box(.12,.12,556,gold,x,.34,-399);
   const posts=[],caps=[];for(let z=-3;z>-666;z-=6){posts.push({x,y:.54,z});caps.push({x,y:.85,z})}
   addBoxInstances(side,.18,.52,.16,posts);addBoxInstances(white,.2,.08,.2,caps);
 }
@@ -608,21 +608,33 @@ const courseZones=developmentPreview?[
   {start:532,end:665,name:'FINAL SURVIVAL',sub:'532m — 665m',bg:0x443a43,fog:0x443a43,accent:'#d46b76'}
 ];
 let activeZone=-1,zoneBannerTimer=0;
+const zoneColors=courseZones.map(z=>({bg:new THREE.Color(z.bg),fog:new THREE.Color(z.fog)}));
 function updateCourseZone(dt){
   const distance=THREE.MathUtils.clamp(3.5-player.position.z,0,665);
   let index=courseZones.findIndex((z,i)=>distance>=z.start&&(distance<z.end||(i===courseZones.length-1&&distance<=z.end)));
   if(index<0)index=courseZones.length-1;
   const zone=courseZones[index];
   if(index!==activeZone){
-    activeZone=index;zoneBannerTimer=3.4;
+    activeZone=index;zoneBannerTimer=0;
     zoneBadge.textContent=zone.name+'  •  '+zone.sub;
     zoneBadge.style.borderColor=zone.accent;
-    zoneBanner.innerHTML=zone.name+'<div style="font:800 11px system-ui;letter-spacing:.16em;color:'+zone.accent+';margin-top:8px">'+zone.sub+'</div>';
-    zoneBanner.style.opacity='1';zoneBanner.style.transform='translate(-50%,-50%) scale(1)';
-    scene.background.setHex(zone.bg);scene.fog.color.setHex(zone.fog);
-  }else if(zoneBannerTimer>0){
-    zoneBannerTimer=Math.max(0,zoneBannerTimer-dt);
-    if(zoneBannerTimer===0){zoneBanner.style.opacity='0';zoneBanner.style.transform='translate(-50%,-50%) scale(.96)'}
+    // Keep the runner's view clear; zone changes must not interrupt the road.
+    zoneBanner.style.opacity='0';zoneBanner.style.transform='translate(-50%,-50%) scale(.96)';
+  }
+  // Blend sky and fog across each zone boundary instead of abruptly switching.
+  let blendIndex=-1;
+  for(let i=1;i<courseZones.length;i++){
+    const boundary=courseZones[i].start;
+    if(distance>=boundary-50&&distance<=boundary+50){blendIndex=i;break;}
+  }
+  if(blendIndex>0){
+    const boundary=courseZones[blendIndex].start;
+    const blend=THREE.MathUtils.smoothstep(distance,boundary-50,boundary+50);
+    scene.background.copy(zoneColors[blendIndex-1].bg).lerp(zoneColors[blendIndex].bg,blend);
+    scene.fog.color.copy(zoneColors[blendIndex-1].fog).lerp(zoneColors[blendIndex].fog,blend);
+  }else{
+    scene.background.copy(zoneColors[index].bg);
+    scene.fog.color.copy(zoneColors[index].fog);
   }
 }
 
