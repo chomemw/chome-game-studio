@@ -229,14 +229,28 @@ cloudInstances.instanceMatrix.needsUpdate=true;cloudInstances.frustumCulled=true
 for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new THREE.Group();const top=cylinder(2.6,3.8,2.5,grass2,0,-1,0,island);top.rotation.y=Math.random();const cap=cylinder(2.65,2.65,.28,grass,0,.32,0,island);cap.position.y=.32;island.position.set(x,-2.2,z);scene.add(island)}
 
 // Floating course with three safe gaps that require a jump.
-const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,5);extensionRoadTexture.needsUpdate=true;
-const extensionPath=new THREE.MeshStandardMaterial({map:extensionRoadTexture,color:0xb4c0c9,roughness:.58,metalness:.12});
-const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40],[0,-399,556]];
-for(const [x,z,len] of floorSegments){
-  // Grass is the lower foundation; it must sit beneath the asphalt, not over it.
+// Keep the original 0–133m opening intact. The extension starts exactly at
+// its end (-133), in four aligned 133m sections. Each section receives a
+// continuous asphalt texture phase so there is no overlapping road surface
+// or abrupt texture-scale change at the 133m connection.
+const openingFloorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40]];
+for(const [x,z,len] of openingFloorSegments){
   box(28,.22,len+.5,grass,x,-1.12,z);
-  box(9,.8,len,len>200?extensionPath:path,x,-.48,z);
+  box(9,.8,len,path,x,-.48,z);
   box(9.35,.34,len+.25,side,x,-.99,z);
+}
+for(let i=0;i<4;i++){
+  const len=133;
+  const z=-199.5-i*133;
+  const texture=roadTexture.clone();
+  // Continue the opening's 8m-per-repeat asphalt scale and UV phase.
+  texture.repeat.set(1,len/8);
+  texture.offset.set(0,i*len/8);
+  texture.needsUpdate=true;
+  const sectionPath=new THREE.MeshStandardMaterial({map:texture,color:0xb4c0c9,roughness:.58,metalness:.12});
+  box(28,.22,len,grass,0,-1.12,z);
+  box(9,.8,len,sectionPath,0,-.48,z);
+  box(9.35,.34,len,side,0,-.99,z);
 }
 
 // Worn asphalt shoulders and repeated markings use instancing to reduce draw calls.
@@ -249,8 +263,13 @@ function addBoxInstances(material,w,h,d,placements){
 const laneMarks=[];for(let z=-5;z>-666;z-=4){laneMarks.push({x:-1.5,y:.035,z},{x:1.5,y:.035,z})}
 addBoxInstances(white,.09,.018,.85,laneMarks);
 for(const x of [-4.52,4.52]){
-  box(.12,.12,134,side,x,.18,-64);box(.12,.12,134,gold,x,.34,-64);
-  box(.12,.12,556,side,x,.18,-399);box(.12,.12,556,gold,x,.34,-399);
+  // Align the opening rails with the -133m road join, then continue in four
+  // non-overlapping 133m sections.
+  box(.12,.12,136,side,x,.18,-65);box(.12,.12,136,gold,x,.34,-65);
+  for(let i=0;i<4;i++){
+    const z=-199.5-i*133;
+    box(.12,.12,133,side,x,.18,z);box(.12,.12,133,gold,x,.34,z);
+  }
   const posts=[],caps=[];for(let z=-3;z>-666;z-=6){posts.push({x,y:.54,z});caps.push({x,y:.85,z})}
   addBoxInstances(side,.18,.52,.16,posts);addBoxInstances(white,.2,.08,.2,caps);
 }
