@@ -7,16 +7,16 @@
 <title>CHOME Rush Arena — Prototype</title>
 <style>
 :root{color-scheme:dark;--ink:#f8fbff;--muted:#b9c6e2;--panel:#101a35dc;--line:#ffffff30;--purple:#8c70ff;--cyan:#65e4ef;--gold:#ffe18a}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#91d8f2;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}button{font:inherit;color:inherit;cursor:pointer}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#91d8f2;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}button{font:inherit;color:inherit;cursor:pointer}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}
 .hud{position:fixed;inset:0;pointer-events:none;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);display:flex;flex-direction:column;justify-content:space-between}
 .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-top:12px}.brand,.stat,.race-pill{background:var(--panel);border:1px solid var(--line);box-shadow:0 12px 35px #0b173a35;backdrop-filter:blur(14px);border-radius:15px}
 .brand{padding:10px 14px;font-weight:1000;letter-spacing:.13em;font-size:12px}.brand span{color:#b8a8ff}.stats{display:flex;gap:8px}.stat{min-width:84px;padding:8px 12px;text-align:center}.stat small{display:block;color:var(--muted);font-size:9px;letter-spacing:.13em;font-weight:900}.stat b{display:block;font-size:19px;margin-top:2px}.race-pill{padding:10px 13px;font-size:10px;font-weight:950;letter-spacing:.1em;color:#d9faff}
 .progress-wrap{position:absolute;top:88px;left:50%;transform:translateX(-50%);width:min(390px,54vw);background:#101a35b8;border:1px solid var(--line);padding:8px 12px;border-radius:13px}.progress-label{display:flex;justify-content:space-between;font-size:9px;font-weight:900;letter-spacing:.1em;color:#e9f7ff;margin-bottom:6px}.progress-track{height:7px;border-radius:9px;background:#ffffff30;overflow:hidden}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#5ee8e0,#a5ffb6,#ffe17e);border-radius:9px;transition:width .12s}
-.bottom{display:flex;align-items:flex-end;justify-content:space-between;padding:0 2px 18px;gap:12px}.hint{max-width:260px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:10px 13px;color:#dbe8ff;font-size:10px;line-height:1.5}
-.controls{display:flex;align-items:flex-end;gap:12px;pointer-events:auto}.stick{position:fixed;left:14px;bottom:18px;z-index:3;width:112px;height:112px;border-radius:50%;border:1px solid #ffffff65;background:#101a356b;backdrop-filter:blur(8px);touch-action:none;box-shadow:0 10px 30px #0b173a40}.stick:after{content:"";position:absolute;inset:29px;border:1px dashed #ffffff55;border-radius:50%}.knob{position:absolute;width:44px;height:44px;left:33px;top:33px;border-radius:50%;background:linear-gradient(145deg,#fff,#b8d8ff);box-shadow:0 5px 15px #09152e88;pointer-events:none}.action-buttons{display:flex;gap:9px;align-items:flex-end}.action{width:70px;height:70px;border-radius:50%;border:2px solid #ffffff9c;background:linear-gradient(145deg,#a58cff,#6548d8);font-weight:1000;font-size:11px;letter-spacing:.07em;box-shadow:0 9px 25px #10113c70}.action.secondary{width:58px;height:58px;background:linear-gradient(145deg,#5fe7e2,#188da9);font-size:9px}
+.bottom{display:flex;align-items:flex-end;justify-content:flex-start;padding:0 2px 18px;gap:12px}.hint{max-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:10px 13px;color:#dbe8ff;font-size:10px;line-height:1.5}
+/* Mobile movement is gesture-based; no virtual joystick or action buttons. */
 .overlay{position:fixed;inset:0;display:grid;place-items:center;padding:18px;background:linear-gradient(180deg,#101b35a8,#101b35bd);backdrop-filter:blur(9px);z-index:5}.dialog{width:min(470px,100%);padding:28px;border:1px solid #ffffff45;border-radius:25px;background:linear-gradient(145deg,#1d3157f2,#111a35f5);box-shadow:0 30px 90px #06112c88;text-align:center}.eyebrow{font-size:10px;letter-spacing:.24em;font-weight:1000;color:#9ff2ee}.dialog h1{font-size:clamp(35px,9vw,55px);line-height:.92;letter-spacing:-.075em;margin:13px 0}.dialog h1 span{color:#a995ff}.dialog p{color:#c3d0e9;font-size:13px;line-height:1.7;margin:12px auto 22px;max-width:360px}.primary{border:0;border-radius:13px;padding:14px 22px;background:linear-gradient(100deg,#8d70ff,#5c8fff);font-weight:1000;letter-spacing:.1em;box-shadow:0 12px 28px #6c5ae955}.small{display:block;color:#aebbd5;font-size:10px;margin-top:13px}.hidden{display:none!important}
-@media(max-width:620px){.top{align-items:flex-start}.stats{gap:5px}.stat{min-width:64px;padding:7px 8px}.stat b{font-size:16px}.race-pill{display:none}.progress-wrap{top:82px;width:58vw}.hint{display:none}.bottom{padding-bottom:calc(12px + env(safe-area-inset-bottom))}.stick{left:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:100px;height:100px}.knob{left:28px;top:28px}.action{width:64px;height:64px}.action.secondary{width:54px;height:54px}}
-@media(min-width:900px){.hud{padding-left:26px;padding-right:26px}.bottom{padding-bottom:25px}.stick{left:26px;bottom:25px;opacity:.9}.controls{opacity:.75}}
+@media(max-width:620px){.top{align-items:flex-start}.stats{gap:5px}.stat{min-width:64px;padding:7px 8px}.stat b{font-size:16px}.race-pill{display:none}.progress-wrap{top:82px;width:58vw}.hint{display:none}.bottom{padding-bottom:calc(12px + env(safe-area-inset-bottom))}}
+@media(min-width:900px){.hud{padding-left:26px;padding-right:26px}.bottom{padding-bottom:25px}}
 
 </style>
 </head>
@@ -30,11 +30,7 @@
   </div>
   <div class="progress-wrap"><div class="progress-label"><span>COURSE PROGRESS</span><span id="percent">0%</span></div><div class="progress-track"><div class="progress-fill" id="progress"></div></div></div>
   <div class="bottom">
-    <div class="hint">MOVE: WASD / ARROW KEYS<br>JUMP: SPACE · DIVE: SHIFT<br>Mobile: use the joystick and action buttons.</div>
-    <div class="controls">
-      <div class="stick" id="stick"><div class="knob" id="knob"></div></div>
-      <div class="action-buttons"><button class="action secondary" id="dive">DIVE</button><button class="action" id="jump">JUMP</button></div>
-    </div>
+    <div class="hint">SWIPE LEFT / RIGHT: STEER<br>SWIPE UP: JUMP · SWIPE DOWN: DIVE<br>Desktop: WASD / ARROWS · SPACE / SHIFT</div>
   </div>
 </div>
 <div class="overlay" id="welcome">
@@ -53,7 +49,7 @@
     <h1>RUN. EARN. <span>RISE.</span></h1>
     <p><b>Game Points:</b> Earn points from completed runs and eligible in-game objectives. Points can also be earned when replaying a level.</p>
     <p><b>CHOX:</b> Receive the CHOX first-completion reward once when you successfully complete a level for the first time. Replaying a completed level does not pay that first-completion CHOX again.</p>
-    <p><b>Controls:</b> Steer with WASD / arrow keys or the mobile joystick. Press SPACE / JUMP to jump and SHIFT / DIVE to slide.</p>
+    <p><b>Controls:</b> Swipe left or right to steer, swipe up to jump and swipe down to dive/slide. Desktop players can use WASD / arrow keys, SPACE and SHIFT.</p>
     <button class="primary" id="startLevelOne">START LEVEL 1</button>
     <span class="small">Your run and eligible rewards are verified by CHOME.</span>
   </div>
@@ -415,7 +411,7 @@ async function loadRunnerCharacter(choice){
   });
   return runnerLoadPromise;
 }
-let running=false,finished=false,failed=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,stickX=0,stickY=0,lastFrame=0,slideTimer=0,points=0,chox=0;
+let running=false,finished=false,failed=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,lastFrame=0,slideTimer=0,points=0,chox=0,swipeSteer=0,swipeSteerTimer=0;
 let rushSessionId=null,lastProgressReport=0,progressChain=Promise.resolve();
 const rewardedObstacles=new Set();
 const keys={};let jumpQueued=false,diveQueued=false;
@@ -565,7 +561,7 @@ async function reset(){
   if(sessionError||!sessionData?.ok){document.getElementById('bootStatus').textContent=sessionError?.message||sessionData?.error||'Could not start this level. Please try again.';return;}
   rushSessionId=sessionData.session_id;lastProgressReport=0;progressChain=Promise.resolve();
   if(rushAudioOn){sfxStart();startHorrorAmbience()}
-  activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent='OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');document.getElementById('rewardIntro').classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
+  activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent='OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,.05,3.5);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);swipeSteer=0;swipeSteerTimer=0;ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');document.getElementById('rewardIntro').classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
 }
 function respawn(){player.position.set(0,.05,respawnZ);vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
 function onTrack(x,z){return Math.abs(x)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z<=-74))}
@@ -582,24 +578,39 @@ async function beginRushRun(){
   document.getElementById('rewardIntro').classList.remove('hidden');
   try{audioReady();soundTone(523,784,.28,.1,'sine')}catch(e){}
 }
+async function launchSelectedLevel(){
+  const status=document.getElementById('bootStatus');
+  status.textContent='Loading Level 1 and preparing your Soldier…';
+  const ready=runnerModelLoaded||await loadRunnerCharacter('soldier');
+  if(!ready){status.textContent='Soldier could not load. Tap ENTER RUSH ARENA to retry.';return;}
+  await reset();
+}
 
 document.getElementById('startLevelOne').addEventListener('click',async()=>{
   const status=document.getElementById('bootStatus');
   if(!runnerModelLoaded){status.textContent='Finishing Soldier setup…';const ok=await runnerLoadPromise;if(!ok){document.getElementById('rewardIntro').classList.add('hidden');ui.welcome.classList.remove('hidden');status.textContent='Soldier could not load. Please try again.';return;}}
   document.getElementById('rewardIntro').classList.add('hidden');reset();
 });
-if(window.__rushEnterRequested){window.__rushEnterRequested=false;beginRushRun();}
-document.getElementById('bootStatus').textContent='Ready — enter Rush Arena';document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('dive').addEventListener('pointerdown',e=>{e.preventDefault();dive()});document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
+document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
 document.getElementById('restartFailed').addEventListener('click',reset);
 document.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
 addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
 addEventListener('keyup',e=>{keys[e.code]=false});
-const stick=document.getElementById('stick'),knob=document.getElementById('knob');let stickPointer=null;
-stick.addEventListener('pointerdown',e=>{stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);updateStick(e)});
-stick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer)updateStick(e)});
-function updateStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=r.width*.34,len=Math.hypot(dx,dy)||1;if(len>max){dx=dx/len*max;dy=dy/len*max}stickX=dx/max;stickY=dy/max;knob.style.transform='translate('+dx+'px,'+dy+'px)'}
-function releaseStick(e){if(e.pointerId===stickPointer){stickPointer=null;stickX=0;stickY=0;knob.style.transform='translate(0,0)'}}
-stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);stick.addEventListener('lostpointercapture',e=>{if(e.pointerId===stickPointer){stickPointer=null;stickX=0;stickY=0;knob.style.transform='translate(0,0)'}});
+let swipeStart=null;
+renderer.domElement.addEventListener('pointerdown',e=>{
+  if(!mobileDevice||e.pointerType==='mouse'||!running||paused||finished)return;
+  swipeStart={id:e.pointerId,x:e.clientX,y:e.clientY};
+},{passive:true});
+window.addEventListener('pointerup',e=>{
+  if(!swipeStart||e.pointerId!==swipeStart.id)return;
+  const dx=e.clientX-swipeStart.x,dy=e.clientY-swipeStart.y;swipeStart=null;
+  const threshold=Math.max(28,Math.min(48,innerWidth*.055));
+  if(Math.max(Math.abs(dx),Math.abs(dy))<threshold||!running||paused||finished)return;
+  if(Math.abs(dx)>Math.abs(dy)){
+    swipeSteer=dx<0?-1:1;swipeSteerTimer=.32;
+  }else if(dy<0){jumpQueued=true;}else{diveQueued=true;}
+},{passive:true});
+window.addEventListener('pointercancel',()=>{swipeStart=null},{passive:true});
 
 // Camera follows from behind and eases toward the runner.
 camera.position.set(0,6,13);camera.lookAt(0,1,-2);
@@ -636,8 +647,9 @@ function update(dt){
   updateMovingHazards(dt);
   updateHazardWarnings(dt);
   if(slideTimer>0){slideTimer=Math.max(0,slideTimer-dt);if(slideTimer===0){body.scale.set(1,1,1);body.position.y=0;body.rotation.x=0}}
-  const ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+stickX;
-  const iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0)+stickY;
+  if(swipeSteerTimer>0){swipeSteerTimer=Math.max(0,swipeSteerTimer-dt);if(swipeSteerTimer===0)swipeSteer=0;}
+  const ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+swipeSteer;
+  const iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0);
   const len=Math.hypot(ix,iz);const nx=len>1?ix/len:ix,nz=len>1?iz/len:iz;
   const speed=7.0,dx=nx*speed*dt,dz=(-Math.max(0,-nz)+Math.max(0,nz)*.52)*speed*dt;
   if(!moveRunner(dx,dz))return;
@@ -697,8 +709,9 @@ function animate(now=0){
 renderer.render(scene,camera);
 animate();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight)});
-// Start only after every control, camera, renderer and animation loop is initialized.
-if(window.__rushEnterRequested){window.__rushEnterRequested=false;beginRushRun()}
+// Start only after the renderer, inputs, camera and animation loop are initialized.
+if(window.__rushEnterRequested){window.__rushEnterRequested=false;beginRushRun();}
+else if(new URLSearchParams(location.search).has('level')){void launchSelectedLevel();}
 </script>
 </body>
 </html>
