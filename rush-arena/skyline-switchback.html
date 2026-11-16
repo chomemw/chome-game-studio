@@ -43,9 +43,9 @@
   <div class="dialog">
     <div class="eyebrow">CHOME GAME STUDIO PRESENTS</div>
     <h1>RUSH <span>ARENA</span></h1>
-    <p>Sprint through a winding mountain-brick road: dodge ruins, leap bridges, slide beneath fallen stonework and collect golden medallions. Level 4 is an administrator-only visual and gameplay preview.</p>
+    <p>Run a 665m jungle switchback course with four sharp corners, waterfall crossings, forest hazards and a suspended zipline over a deep gorge. Level 5 is an administrator-only visual and gameplay preview.</p>
     <button class="primary" id="start">START RUN</button>
-    <span class="small">Brick Road · Level 4 · Narrow mountain runner</span>
+    <span class="small">Skyline Switchback · Level 5 · 665m jungle course</span>
     <span class="small" id="bootStatus" role="status" aria-live="polite">Preparing 3D engine…</span>
   </div>
 </div>
@@ -119,17 +119,14 @@ try {
 
 const root=document.getElementById('game');
 const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
-// Level 4 uses a separate narrow brick-road environment and hazards.
+// Level 5 has one authoritative route: five 133m straights and four alternating right-angle turns.
 const level=5; // This file is exclusively Rush Arena Level 5.
 const developmentPreview=true;
-// Level 3 is a true winding mountain trail, not a straight flat sprint.
-// Large, broad turns and rolling elevation changes shape the full route.
-// Level 4 owns this route profile; it does not import Level 3's route or scene file.
-const routeTurns=[{d:0,x:0},{d:26,x:0},{d:29,x:0},{d:37,x:7.5},{d:59,x:7.5},{d:62,x:7.5},{d:70,x:-7.5},{d:92,x:-7.5},{d:95,x:-7.5},{d:103,x:7.5},{d:125,x:7.5},{d:128,x:7.5},{d:136,x:-7.5},{d:158,x:-7.5},{d:161,x:-7.5},{d:169,x:7.5},{d:191,x:7.5},{d:194,x:7.5},{d:202,x:-7.5},{d:224,x:-7.5},{d:227,x:-7.5},{d:235,x:7.5},{d:257,x:7.5},{d:260,x:7.5},{d:268,x:-7.5},{d:290,x:-7.5},{d:293,x:-7.5},{d:301,x:7.5},{d:323,x:7.5},{d:326,x:7.5},{d:334,x:-7.5},{d:356,x:-7.5},{d:359,x:-7.5},{d:367,x:7.5},{d:389,x:7.5},{d:392,x:7.5},{d:400,x:-7.5},{d:422,x:-7.5},{d:425,x:-7.5},{d:433,x:7.5},{d:455,x:7.5},{d:458,x:7.5},{d:466,x:-7.5},{d:488,x:-7.5},{d:491,x:-7.5},{d:499,x:7.5},{d:521,x:7.5},{d:524,x:7.5},{d:532,x:-7.5},{d:554,x:-7.5},{d:557,x:-7.5},{d:565,x:7.5},{d:587,x:7.5},{d:590,x:7.5},{d:598,x:-7.5},{d:620,x:-7.5},{d:623,x:-7.5},{d:631,x:7.5},{d:653,x:7.5},{d:665,x:0}];
 const routeHeights=[{d:0,y:0},{d:65,y:.3},{d:125,y:1.4},{d:185,y:2.1},{d:245,y:.7},{d:305,y:-.5},{d:365,y:.5},{d:430,y:2.2},{d:495,y:2.8},{d:555,y:1.3},{d:615,y:2.5},{d:665,y:1.6}];
-const curveX=z=>0;
+// Scene objects are authored along one local straight, then mapped into the switchback world route.
+const localCenterX=z=>0;
 function routeFrame(distance,lateral=0){const d=distance,segment=d<133?0:d<266?1:d<399?2:d<532?3:4;let cx=0,cz=0,yaw=0;if(segment===0){cz=-d}else if(segment===1){cx=-(d-133);cz=-133;yaw=Math.PI/2}else if(segment===2){cx=-133;cz=-(d-133)}else if(segment===3){cx=-133-(d-399);cz=-266;yaw=Math.PI/2}else{cx=-266;cz=-(d-266)}return{x:cx+lateral*Math.cos(yaw),z:cz-lateral*Math.sin(yaw),yaw}}
-const curveAngle=z=>0;
+const localHeading=z=>0;
 const routeY=z=>{const d=THREE.MathUtils.clamp(-z,0,665);let i=0;while(i<routeHeights.length-2&&d>routeHeights[i+1].d)i++;const a=routeHeights[i],b=routeHeights[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1),s=t*t*(3-2*t);return THREE.MathUtils.lerp(a.y,b.y,s)};
 // Level 5 turns are square; the route-frame transform supplies each segment heading.
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
@@ -279,7 +276,7 @@ for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-
 
 // Checkpoint arches.
 checkpoints=[-31,-59,-79,-190,-338,-471,-635];const checkpointMeshes=[];
-for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i];const g=new THREE.Group();box(.28,3,.3,gold,-3.8,1.45,0,g);box(.28,3,.3,gold,3.8,1.45,0,g);box(7.9,.3,.3,coral,0,2.95,0,g);g.position.set(curveX(z),0,z);scene.add(g);checkpointMeshes.push(g)}
+for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i];const g=new THREE.Group();box(.28,3,.3,gold,-3.8,1.45,0,g);box(.28,3,.3,gold,3.8,1.45,0,g);box(7.9,.3,.3,coral,0,2.95,0,g);g.position.set(localCenterX(z),0,z);scene.add(g);checkpointMeshes.push(g)}
 
 // Readable overhead zone signs mark each new 133m section.
 function addZoneSign(title,range,z,accent){
@@ -291,16 +288,16 @@ function addZoneSign(title,range,z,accent){
   ctx.fillStyle=accent;ctx.font='800 27px system-ui';ctx.fillText(range,512,119);
   const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
   const board=new THREE.Mesh(new THREE.PlaneGeometry(8.6,1.35),new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide}));
-  board.position.set(curveX(z),4.85,z);scene.add(board);
+  board.position.set(localCenterX(z),4.85,z);scene.add(board);
   box(8.9,.12,.18,accent,0,4.12,z);
 }
-addZoneSign('CONSTRUCTION ZONE','133m — 266m',-135,'#e0a34a');
-addZoneSign('UNDERGROUND TUNNEL','266m — 399m',-268,'#69a8c8');
-addZoneSign('CARGO YARD','399m — 532m',-401,'#d39a55');
-addZoneSign('FINAL SURVIVAL','532m — 665m',-534,'#d46b76');
+addZoneSign('FOREST SWITCHBACK','133m — 266m',-135,'#e0a34a');
+addZoneSign('WATERFALL CROSSING','266m — 399m',-268,'#69a8c8');
+addZoneSign('ANCIENT CANOPY','399m — 532m',-401,'#d39a55');
+addZoneSign('DEEP FOREST','532m — 665m',-534,'#d46b76');
 
 // Finish arch.
-const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.set(curveX(-662),0,-662);scene.add(finish);
+const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);finish.position.set(localCenterX(-662),0,-662);scene.add(finish);
 
 // The new environments begin after the original opening; scenery stays outside the running lanes.
 function addCourseFrame(z,material=side,roofY=4.05){
@@ -402,7 +399,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  const roadVerts=[],roadUvs=[],roadIdx=[],edgeVerts=[],edgeIdx=[];
  const samples=670,half=1.85;
  for(let n=0;n<=samples;n++){
-   const z=5-n,cx=curveX(z),a=curveX(z-0.5)-curveX(z+0.5),len=Math.hypot(a,1),nx=1/len,nz=a/len;
+   const z=5-n,cx=localCenterX(z),a=localCenterX(z-0.5)-localCenterX(z+0.5),len=Math.hypot(a,1),nx=1/len,nz=a/len;
    for(const sideSign of [-1,1]){
      const x=cx+sideSign*half*nx,rz=z+sideSign*half*nz;
      roadVerts.push(x,routeY(z)-.12,rz);
@@ -427,7 +424,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  const holeMat=mat(0x020914,1),holeRim=mat(0x52758e,.98);
  const holeLayout=[[-38,-.72,1.45],[-91,.72,1.55],[-154,-.35,1.65],[-219,.82,1.5],[-286,-.78,1.6],[-354,.28,1.7],[-421,.78,1.55],[-488,-.72,1.65],[-555,.25,1.6],[-622,-.65,1.7]];
  for(const [z,x,w] of holeLayout){
-   const hx=curveX(z)+x,hy=routeY(z)+.015;
+   const hx=localCenterX(z)+x,hy=routeY(z)+.015;
    const pit=box(w,.035,2.15,holeMat,hx,hy,z);pit.receiveShadow=false;
    box(w+.16,.10,.18,holeRim,hx,hy+.015,z-1.12);
    box(w+.16,.10,.18,holeRim,hx,hy+.015,z+1.12);
@@ -437,7 +434,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  const roadTreeBark=mat(0x263b4d,.98),roadTreeLeaves=mat(0x1b4057,.98);
  const roadTreeLayout=[[-63,-1.12],[-126,1.12],[-185,-1.1],[-251,1.12],[-286,-1.12],[-386,1.1],[-454,-1.12],[-521,1.12],[-589,-1.1]];
  for(const [z,offset] of roadTreeLayout){
-   const x=curveX(z)+offset,y=routeY(z);
+   const x=localCenterX(z)+offset,y=routeY(z);
    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.38,.52,3.4,10),roadTreeBark);
    trunk.position.set(x,y+1.7,z);trunk.castShadow=true;trunk.receiveShadow=true;scene.add(trunk);
    const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(1.45,1),roadTreeLeaves);
@@ -451,7 +448,7 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  const trunks=new THREE.InstancedMesh(trunkGeo,bark,250),canopiesA=new THREE.InstancedMesh(canopyGeo,leafDark,250),canopiesB=new THREE.InstancedMesh(canopyGeo,leafMid,250),canopiesC=new THREE.InstancedMesh(leafGeo,leafBright,250),roots=new THREE.InstancedMesh(rootGeo,rootMat,500),forestDummy=new THREE.Object3D();
  let treeCount=0,rootCount=0;
  for(let z=-9;z>=-655;z-=5.25)for(const sideSign of [-1,1]){
-   const wobble=Math.sin((Math.abs(z)+treeCount*7)*.19)*.8,offset=5.2+(treeCount%4)*.55+wobble*.45,x=curveX(z)+sideSign*offset;
+   const wobble=Math.sin((Math.abs(z)+treeCount*7)*.19)*.8,offset=5.2+(treeCount%4)*.55+wobble*.45,x=localCenterX(z)+sideSign*offset;
    forestDummy.position.set(x,routeY(z)+3.5,z);forestDummy.rotation.set(0,(treeCount%9)*.37,sideSign*.025);forestDummy.scale.set(.82+(treeCount%5)*.13,1.0+(treeCount%4)*.18,.82+(treeCount%5)*.13);forestDummy.updateMatrix();trunks.setMatrixAt(treeCount,forestDummy.matrix);
    for(const [mesh,y,scale] of [[canopiesA,7.2,2.65],[canopiesB,9.2,2.25],[canopiesC,10.7,1.8]]){forestDummy.position.set(x+sideSign*.5,routeY(z)+y,z);forestDummy.rotation.set(.12,(treeCount%7)*.42,.08);forestDummy.scale.set(scale,scale*.82,scale);forestDummy.updateMatrix();mesh.setMatrixAt(treeCount,forestDummy.matrix)}
    for(let r=0;r<2;r++){forestDummy.position.set(x-sideSign*(.5+r*.5),routeY(z)+.02,z+(r?-.5:.5));forestDummy.rotation.set(0,sideSign*(.8+r*.5),Math.PI/2);forestDummy.scale.set(.24,.24,2.5+r);forestDummy.updateMatrix();roots.setMatrixAt(rootCount++,forestDummy.matrix)}
@@ -461,24 +458,24 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
  // Low shrubs and ferns frame the path without blocking the running lane.
  const bushGeo=new THREE.IcosahedronGeometry(1,1),bushes=new THREE.InstancedMesh(bushGeo,fernMat,260),ferns=new THREE.InstancedMesh(new THREE.ConeGeometry(.32,1.15,5),leafBright,520);let bushN=0,fernN=0;
  for(let z=-8;z>=-655;z-=5.1)for(const sideSign of [-1,1]){
-   const x=curveX(z)+sideSign*(4.15+(bushN%4)*.38);
+   const x=localCenterX(z)+sideSign*(4.15+(bushN%4)*.38);
    forestDummy.position.set(x,routeY(z)+.35,z);forestDummy.rotation.set(.1,bushN*.7,.08);forestDummy.scale.set(1.15,.7,1.1);forestDummy.updateMatrix();bushes.setMatrixAt(bushN++,forestDummy.matrix);
    for(let q=0;q<2;q++){forestDummy.position.set(x+sideSign*q*.55,routeY(z)+.48,z-q*.7);forestDummy.rotation.set(.2,fernN*.91,sideSign*.35);forestDummy.scale.set(.75,1,.72);forestDummy.updateMatrix();ferns.setMatrixAt(fernN++,forestDummy.matrix)}
  }
  bushes.count=bushN;ferns.count=fernN;for(const inst of [bushes,ferns]){inst.instanceMatrix.needsUpdate=true;inst.castShadow=false;scene.add(inst)}
  // Keep the overhead camera corridor clear so foliage never masks the runner or route.
  const vineMat=mat(0x28552d,.98),vineGeo=new THREE.CylinderGeometry(.035,.055,1,5),vines=new THREE.InstancedMesh(vineGeo,vineMat,180);let vineN=0;
- for(let z=-18;z>=-650;z-=14)for(let sideSign of [-1,1]){forestDummy.position.set(curveX(z)+sideSign*(9.0+(vineN%3)*.6),routeY(z)+8.5,z);forestDummy.rotation.set(0,0,sideSign*.12);forestDummy.scale.set(.65,1.1+(vineN%4)*.35,.65);forestDummy.updateMatrix();vines.setMatrixAt(vineN++,forestDummy.matrix)}
+ for(let z=-18;z>=-650;z-=14)for(let sideSign of [-1,1]){forestDummy.position.set(localCenterX(z)+sideSign*(9.0+(vineN%3)*.6),routeY(z)+8.5,z);forestDummy.rotation.set(0,0,sideSign*.12);forestDummy.scale.set(.65,1.1+(vineN%4)*.35,.65);forestDummy.updateMatrix();vines.setMatrixAt(vineN++,forestDummy.matrix)}
  vines.count=vineN;vines.instanceMatrix.needsUpdate=true;scene.add(vines);
  // Natural ravines and short timber bridges. The trail remains safely traversable in preview.
  riverGaps.push({start:-184,end:-190},{start:-392,end:-398},{start:-574,end:-580});
- function addJungleBridge(center){const span=9.5,cx=curveX(center),angle=curveAngle(center);const deck=box(5.55,.24,span,rootMat,cx,routeY(center)-.02,center);deck.rotation.y=angle;for(let i=0;i<9;i++){const plank=box(5.42,.12,.72,trailCenter,cx,routeY(center)-.16,center-span/2+.55+i*1.05);plank.rotation.y=angle}for(const sideSign of [-1,1]){const rail=box(.16,.72,span,bark,cx+sideSign*2.62,routeY(center)+.28,center);rail.rotation.y=angle;for(let i=0;i<5;i++)cylinder(.09,.13,.95,bark,cx+sideSign*2.62,routeY(center)+.34,center-span/2+i*2.2)}}
- for(const z of [-187,-395,-577]){addJungleBridge(z);const cx=curveX(z);const water=box(20,.18,15,riverMat,cx,-2.25,z);water.rotation.y=curveAngle(z);for(let n=0;n<12;n++){const ripple=sphere(.12+Math.random()*.17,riverFoam,cx+(Math.random()-.5)*13,-2.08,z+(Math.random()-.5)*9);ripple.scale.set(2,.2,.7)}}
+ function addJungleBridge(center){const span=9.5,cx=localCenterX(center),angle=localHeading(center);const deck=box(5.55,.24,span,rootMat,cx,routeY(center)-.02,center);deck.rotation.y=angle;for(let i=0;i<9;i++){const plank=box(5.42,.12,.72,trailCenter,cx,routeY(center)-.16,center-span/2+.55+i*1.05);plank.rotation.y=angle}for(const sideSign of [-1,1]){const rail=box(.16,.72,span,bark,cx+sideSign*2.62,routeY(center)+.28,center);rail.rotation.y=angle;for(let i=0;i<5;i++)cylinder(.09,.13,.95,bark,cx+sideSign*2.62,routeY(center)+.34,center-span/2+i*2.2)}}
+ for(const z of [-187,-395,-577]){addJungleBridge(z);const cx=localCenterX(z);const water=box(20,.18,15,riverMat,cx,-2.25,z);water.rotation.y=localHeading(z);for(let n=0;n<12;n++){const ripple=sphere(.12+Math.random()*.17,riverFoam,cx+(Math.random()-.5)*13,-2.08,z+(Math.random()-.5)*9);ripple.scale.set(2,.2,.7)}}
  // Waterfall curtains and pools sit beside the path, visible from the running camera.
- function addWaterfall(z,sideSign){const x=curveX(z)+sideSign*9.2,fall=box(2.6,8,.18,riverMat,x,2.2,z);fall.rotation.z=sideSign*.05;const pool=sphere(1.1,riverMat,x,-1.7,z+1);pool.scale.set(3.2,.18,1.8);for(let i=0;i<10;i++){const spray=sphere(.08+Math.random()*.13,riverFoam,x+(Math.random()-.5)*2.5,-1.45,z+(Math.random()-.5)*2);spray.scale.set(1.5,.25,.8)}}
+ function addWaterfall(z,sideSign){const x=localCenterX(z)+sideSign*9.2,fall=box(2.6,8,.18,riverMat,x,2.2,z);fall.rotation.z=sideSign*.05;const pool=sphere(1.1,riverMat,x,-1.7,z+1);pool.scale.set(3.2,.18,1.8);for(let i=0;i<10;i++){const spray=sphere(.08+Math.random()*.13,riverFoam,x+(Math.random()-.5)*2.5,-1.45,z+(Math.random()-.5)*2);spray.scale.set(1.5,.25,.8)}}
  addWaterfall(-188,-1);addWaterfall(-396,1);addWaterfall(-578,-1);
   // Level 5 set-piece: a deep river gorge crossed by a suspended zipline.
-  zipStartX=curveX(zipStartZ);zipEndX=curveX(zipEndZ);
+  zipStartX=localCenterX(zipStartZ);zipEndX=localCenterX(zipEndZ);
   const gorgeWater=box(42,.32,44,riverMat,(zipStartX+zipEndX)/2,-8.4,(zipStartZ+zipEndZ)/2);gorgeWater.receiveShadow=true;
   for(let r=0;r<5;r++){const ripple=sphere(.28,riverFoam,zipStartX+(Math.random()-.5)*28,-8.18,zipStartZ-8-r*5);ripple.scale.set(4,.12,1.2)}
   const platformMat=mat(0x6f8da3,.58,.42),steel=mat(0x9bb8cc,.3,.72);
@@ -488,31 +485,30 @@ spinner.position.set(0,1.45,-47);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const 
   zipHint=document.createElement('div');zipHint.textContent='ZIPLINE CROSSING AHEAD';Object.assign(zipHint.style,{position:'fixed',top:'104px',left:'50%',transform:'translateX(-50%)',zIndex:'47',padding:'9px 15px',border:'1px solid rgba(112,211,255,.7)',borderRadius:'12px',background:'rgba(5,24,44,.82)',color:'#e6f7ff',font:'900 11px system-ui',letterSpacing:'.12em',pointerEvents:'none',opacity:'0',transition:'opacity .2s'});document.body.appendChild(zipHint);
 
  // Massive exposed roots, fallen logs and mossy stones make the course feel organic.
- for(let i=0;i<48;i++){const z=-15-i*13.2,sideSign=i%2?1:-1,x=curveX(z)+sideSign*(3.45+(i%3)*.3);const log=cylinder(.22,.34,3.6,barkLight,x,.28,z);log.rotation.set(.12,curveAngle(z),sideSign*.13);if(i%3===0){const b=sphere(.72,jungleSoil,x+sideSign*.7,.05,z-1.2);b.scale.set(1.5,.7,1.2)}}
+ for(let i=0;i<48;i++){const z=-15-i*13.2,sideSign=i%2?1:-1,x=localCenterX(z)+sideSign*(3.45+(i%3)*.3);const log=cylinder(.22,.34,3.6,barkLight,x,.28,z);log.rotation.set(.12,localHeading(z),sideSign*.13);if(i%3===0){const b=sphere(.72,jungleSoil,x+sideSign*.7,.05,z-1.2);b.scale.set(1.5,.7,1.2)}}
  // Gold relics follow the centerline and alternate between safe lanes.
  const coinMaterial=new THREE.MeshStandardMaterial({color:0xffd45b,metalness:.78,roughness:.22,emissive:0x6d3d08,emissiveIntensity:.22}),coinGeometry=new THREE.TorusGeometry(.34,.105,8,18);
- for(let z=-20;z>=-650;z-=9.5){const lanePattern=Math.floor(Math.abs(z)/28)%3,offset=[-1.75,0,1.75][lanePattern],coin=new THREE.Mesh(coinGeometry,coinMaterial);coin.position.set(curveX(z)+offset,routeY(z)+1.15,z);coin.rotation.y=Math.PI/2;coin.castShadow=true;scene.add(coin);coins.push({mesh:coin,x:coin.position.x,z,collected:false})}
+ for(let z=-20;z>=-650;z-=9.5){const lanePattern=Math.floor(Math.abs(z)/28)%3,offset=[-1.75,0,1.75][lanePattern],coin=new THREE.Mesh(coinGeometry,coinMaterial);coin.position.set(localCenterX(z)+offset,routeY(z)+1.15,z);coin.rotation.y=Math.PI/2;coin.castShadow=true;scene.add(coin);coins.push({mesh:coin,x:coin.position.x,z,collected:false})}
  // Jungle hazards: fallen logs, hanging roots, thorn clusters and leaning trunks.
- function addFallenLog(z,x){if(Math.abs(z+333)<17)return;const wx=curveX(z)+x,mesh=cylinder(.42,.48,3.25,barkLight,wx,routeY(z)+.48,z);mesh.rotation.z=Math.PI/2;mesh.rotation.y=curveAngle(z);obstacles.push({mesh,x:wx,z,w:3.1,d:1.05,h:.98,type:'block'})}
- function addRootCluster(z,x){if(Math.abs(z+333)<17)return;const wx=curveX(z)+x,mesh=box(1.55,1.25,1.05,rootMat,wx,routeY(z)+.62,z);for(let q=-1;q<=1;q++){const root=cylinder(.09,.2,1.5,rootMat,wx+q*.48,routeY(z)+.15,z);root.rotation.z=q*.35}obstacles.push({mesh,x:wx,z,w:1.65,d:1.15,h:1.3,type:'block'})}
- function addHangingRoot(z,x){if(Math.abs(z+333)<17)return;const wx=curveX(z)+x,mesh=cylinder(.12,.22,2.15,rootMat,wx,routeY(z)+2.45,z);obstacles.push({mesh,x:wx,z,w:.7,d:.9,h:2.9,type:'overhead',clearance:1.05})}
+ function addFallenLog(z,x){if(Math.abs(z+333)<17)return;const wx=localCenterX(z)+x,mesh=cylinder(.42,.48,3.25,barkLight,wx,routeY(z)+.48,z);mesh.rotation.z=Math.PI/2;mesh.rotation.y=localHeading(z);obstacles.push({mesh,x:wx,z,w:3.1,d:1.05,h:.98,type:'block'})}
+ function addRootCluster(z,x){if(Math.abs(z+333)<17)return;const wx=localCenterX(z)+x,mesh=box(1.55,1.25,1.05,rootMat,wx,routeY(z)+.62,z);for(let q=-1;q<=1;q++){const root=cylinder(.09,.2,1.5,rootMat,wx+q*.48,routeY(z)+.15,z);root.rotation.z=q*.35}obstacles.push({mesh,x:wx,z,w:1.65,d:1.15,h:1.3,type:'block'})}
+ function addHangingRoot(z,x){if(Math.abs(z+333)<17)return;const wx=localCenterX(z)+x,mesh=cylinder(.12,.22,2.15,rootMat,wx,routeY(z)+2.45,z);obstacles.push({mesh,x:wx,z,w:.7,d:.9,h:2.9,type:'overhead',clearance:1.05})}
  addFallenLog(-34,-1.8);addRootCluster(-58,2.0);addHangingRoot(-78,-2.0);addFallenLog(-118,1.8);
  addRootCluster(-146,-2.0);addFallenLog(-166,1.9);addHangingRoot(-207,2.0);addRootCluster(-229,-2.0);addFallenLog(-252,1.8);
  addRootCluster(-278,-1.9);addHangingRoot(-326,2.0);addFallenLog(-350,-2.0);addRootCluster(-371,1.9);
  addHangingRoot(-414,-2.0);addFallenLog(-442,1.9);addRootCluster(-466,2.0);addFallenLog(-486,-1.9);addHangingRoot(-524,2.0);
  addRootCluster(-548,-2.0);addHangingRoot(-596,1.9);addFallenLog(-616,2.0);addRootCluster(-632,-2.0);addFallenLog(-654,1.9);
  checkpoints=[-72,-172,-272,-372,-472,-572,-642];
- function addTrailSign(title,range,z){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=160;const ctx=canvas.getContext('2d');ctx.fillStyle='#173c25';ctx.fillRect(0,0,1024,160);ctx.fillStyle='#9bc66d';ctx.fillRect(0,0,16,160);ctx.fillRect(1008,0,16,160);ctx.fillStyle='#f5f4d8';ctx.font='900 54px system-ui';ctx.textAlign='center';ctx.fillText(title,512,70);ctx.fillStyle='#b8d98b';ctx.font='800 27px system-ui';ctx.fillText(range,512,119);const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;const board=new THREE.Mesh(new THREE.PlaneGeometry(8,1.25),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));board.position.set(curveX(z),routeY(z)+5.2,z);scene.add(board)}
- const jungleZones=[['JUNGLE TRAIL','0m — 133m',-12],['WATERFALL RUN','266m — 399m',-278],['ANCIENT CANOPY','399m — 532m',-411],['DEEP FOREST','532m — 665m',-544]];
+ function addTrailSign(title,range,z){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=160;const ctx=canvas.getContext('2d');ctx.fillStyle='#173c25';ctx.fillRect(0,0,1024,160);ctx.fillStyle='#9bc66d';ctx.fillRect(0,0,16,160);ctx.fillRect(1008,0,16,160);ctx.fillStyle='#f5f4d8';ctx.font='900 54px system-ui';ctx.textAlign='center';ctx.fillText(title,512,70);ctx.fillStyle='#b8d98b';ctx.font='800 27px system-ui';ctx.fillText(range,512,119);const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;const board=new THREE.Mesh(new THREE.PlaneGeometry(8,1.25),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));board.position.set(localCenterX(z),routeY(z)+5.2,z);scene.add(board)}
  // Zone names stay in the HUD; no overhead text boards obstruct the running view.
  // Keep logical checkpoints, but remove the overhead wooden frames that looked like a barrier in the running path.
- const finish=new THREE.Group(),finishX=curveX(-662);cylinder(.18,.3,4,bark,finishX-2.55,2,0,finish);cylinder(.18,.3,4,bark,finishX+2.55,2,0,finish);box(5.5,.28,.4,rootMat,finishX,3.9,0,finish);finish.position.z=-662;scene.add(finish);
+ const finish=new THREE.Group(),finishX=localCenterX(-662);cylinder(.18,.3,4,bark,finishX-2.55,2,0,finish);cylinder(.18,.3,4,bark,finishX+2.55,2,0,finish);box(5.5,.28,.4,rootMat,finishX,3.9,0,finish);finish.position.z=-662;scene.add(finish);
  spinner.position.set(100,-100,100);
 }
 // Red hazard beacons: visible from a distance and pulsed while the race is active.
 const hazardBeacons=[];
 obstacles.forEach((o,index)=>{
-  const rig=new THREE.Group();rig.position.set(curveX(o.z),routeY(o.z),o.z);
+  const rig=new THREE.Group();rig.position.set(localCenterX(o.z),routeY(o.z),o.z);
   for(const x of [-4.05,4.05]){
     const post=new THREE.Mesh(new THREE.CylinderGeometry(.055,.075,.95,8),side);post.position.set(x,.48,0);post.castShadow=true;rig.add(post);
     const lamp=new THREE.Mesh(new THREE.SphereGeometry(.19,12,10),new THREE.MeshStandardMaterial({color:0xff2020,emissive:0xff0800,emissiveIntensity:1.8,roughness:.3}));
@@ -611,17 +607,17 @@ const zoneBanner=document.createElement('div');
 Object.assign(zoneBanner.style,{position:'fixed',top:'37%',left:'50%',transform:'translate(-50%,-50%) scale(.96)',zIndex:'48',padding:'18px 25px',minWidth:'min(320px,84vw)',border:'1px solid rgba(255,255,255,.45)',borderRadius:'18px',background:'linear-gradient(145deg,rgba(9,18,30,.94),rgba(27,43,58,.9))',boxShadow:'0 18px 55px rgba(0,0,0,.4)',color:'#fff',font:'1000 19px system-ui',letterSpacing:'.1em',textAlign:'center',opacity:'0',transition:'opacity .25s, transform .25s',pointerEvents:'none'});
 document.body.appendChild(zoneBanner);
 const courseZones=developmentPreview?[
-  {start:0,end:133,name:'SKYLINE APPROACH',sub:'0m — 133m',bg:0x172b46,fog:0x172b46,accent:'#8edaff'},
-  {start:133,end:266,name:'GLACIER SWITCHBACKS',sub:'133m — 266m',bg:0x203b58,fog:0x203b58,accent:'#a9dcf4'},
-  {start:266,end:399,name:'ABYSS ZIPLINE',sub:'266m — 399m',bg:0x10253d,fog:0x10253d,accent:'#61cfff'},
-  {start:399,end:532,name:'CRYSTAL RIDGE',sub:'399m — 532m',bg:0x29435c,fog:0x29435c,accent:'#c4e9ff'},
-  {start:532,end:665,name:'SUMMIT RUN',sub:'532m — 665m',bg:0x152b45,fog:0x152b45,accent:'#f1d6a1'}
+  {start:0,end:133,name:'JUNGLE TRAIL',sub:'0m — 133m',bg:0x172b46,fog:0x172b46,accent:'#8edaff'},
+  {start:133,end:266,name:'FOREST SWITCHBACK',sub:'133m — 266m',bg:0x203b58,fog:0x203b58,accent:'#a9dcf4'},
+  {start:266,end:399,name:'WATERFALL CROSSING',sub:'266m — 399m',bg:0x10253d,fog:0x10253d,accent:'#61cfff'},
+  {start:399,end:532,name:'ANCIENT CANOPY',sub:'399m — 532m',bg:0x29435c,fog:0x29435c,accent:'#c4e9ff'},
+  {start:532,end:665,name:'DEEP FOREST',sub:'532m — 665m',bg:0x152b45,fog:0x152b45,accent:'#f1d6a1'}
 ]:[
   {start:0,end:133,name:'OPENING COURSE',sub:'0m — 133m',bg:0xa9c2d0,fog:0xa9c2d0,accent:'#9ec7d7'},
-  {start:133,end:266,name:'CONSTRUCTION ZONE',sub:'133m — 266m',bg:0x8b9aa0,fog:0x8b9aa0,accent:'#e0a34a'},
-  {start:266,end:399,name:'UNDERGROUND TUNNEL',sub:'266m — 399m',bg:0x34414e,fog:0x34414e,accent:'#69a8c8'},
-  {start:399,end:532,name:'CARGO YARD',sub:'399m — 532m',bg:0x7b8585,fog:0x7b8585,accent:'#d39a55'},
-  {start:532,end:665,name:'FINAL SURVIVAL',sub:'532m — 665m',bg:0x443a43,fog:0x443a43,accent:'#d46b76'}
+  {start:133,end:266,name:'FOREST SWITCHBACK',sub:'133m — 266m',bg:0x8b9aa0,fog:0x8b9aa0,accent:'#e0a34a'},
+  {start:266,end:399,name:'WATERFALL CROSSING',sub:'266m — 399m',bg:0x34414e,fog:0x34414e,accent:'#69a8c8'},
+  {start:399,end:532,name:'ANCIENT CANOPY',sub:'399m — 532m',bg:0x7b8585,fog:0x7b8585,accent:'#d39a55'},
+  {start:532,end:665,name:'DEEP FOREST',sub:'532m — 665m',bg:0x443a43,fog:0x443a43,accent:'#d46b76'}
 ];
 const zoneColors=courseZones.map(z=>({bg:new THREE.Color(z.bg),fog:new THREE.Color(z.fog)}));
 let activeZone=-1,zoneBannerTimer=0;
@@ -738,7 +734,7 @@ function failRun(message){
   if(failed||finished)return;
   failed=true;running=false;paused=false;finished=false;
   sfxFall();dangerBanner.style.opacity='0';
-  ui.failedText.textContent=developmentPreview?message+' Brick Road is an admin preview; no player rewards are issued.':message+' You collected '+points+' provisional Game Points. CHOX is only settled after a verified level completion.';
+  ui.failedText.textContent=developmentPreview?message+' Skyline Switchback is an admin preview; no player rewards are issued.':message+' You collected '+points+' provisional Game Points. CHOX is only settled after a verified level completion.';
   ui.failed.classList.remove('hidden');
 }
 async function reportRushProgress(distance){
@@ -753,7 +749,7 @@ async function reportRushProgress(distance){
   return progressChain;
 }
 async function settleRushRun(){
-  const sessionId=rushSessionId;if(developmentPreview){ui.resultText.textContent='Brick Road preview complete · '+fmt(elapsed)+'. This admin test build does not issue CHOX or save player rewards.';return;}if(!sessionId)return;
+  const sessionId=rushSessionId;if(developmentPreview){ui.resultText.textContent='Skyline Switchback preview complete · '+fmt(elapsed)+'. This admin test build does not issue CHOX or save player rewards.';return;}if(!sessionId)return;
   await reportRushProgress(665);
   const {data,error}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'finish',session_id:sessionId,elapsed_seconds:Math.floor(elapsed),obstacles_passed:rewardedObstacles.size,score:points}});
   rushSessionId=null;
@@ -780,11 +776,11 @@ async function reset(){
   if(status)status.textContent='Checking your CHOME administrator access…';
   try{
     // Audio is optional: a mobile browser's audio policy must never prevent the run from starting.
-    try{audioReady()}catch(audioError){rushAudioOn=false;console.warn('Brick Road audio unavailable; continuing silently.',audioError)}
+    try{audioReady()}catch(audioError){rushAudioOn=false;console.warn('Skyline Switchback audio unavailable; continuing silently.',audioError)}
     if(status)status.textContent='Checking your CHOME sign-in…';
     const {data:authData,error:authError}=await startupRequest(supabase.auth.getSession(),'CHOME sign-in check',12000);
     if(authError)throw new Error('Could not check your CHOME sign-in: '+authError.message);
-    if(!authData?.session)throw new Error('Please sign in with your CHOME administrator account, then reopen Brick Road.');
+    if(!authData?.session)throw new Error('Please sign in with your CHOME administrator account, then reopen Skyline Switchback.');
     if(developmentPreview){
       if(status)status.textContent='Verifying administrator access…';
       const {error:adminError}=await startupRequest(supabase.rpc('get_chome_admin_overview'),'Administrator access check',12000);
@@ -795,27 +791,27 @@ async function reset(){
       if(sessionError||!sessionData?.ok)throw new Error(sessionError?.message||sessionData?.error||'Could not create a game session. Please try again.');
       rushSessionId=sessionData.session_id;
     }
-    if(status)status.textContent='Starting Brick Road…';
+    if(status)status.textContent='Starting Skyline Switchback…';
     lastProgressReport=0;progressChain=Promise.resolve();ziplineRide=null;ziplineUsed=false;if(zipGrip)zipGrip.visible=false;ziplineRide=null;ziplineUsed=false;if(zipGrip)zipGrip.visible=false;
-    if(rushAudioOn){try{sfxStart();if(level!==5)startHorrorAmbience()}catch(audioError){rushAudioOn=false;console.warn('Brick Road audio unavailable; continuing silently.',audioError)}}
-    activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'SKYLINE APPROACH  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,routeY(3.5)+.05,3.5);const startFrame=routeFrame(3.5,0);playerVisual.position.set(startFrame.x,player.position.y,startFrame.z);playerVisual.rotation.y=startFrame.yaw;coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');renderer.render(scene,camera);
+    if(rushAudioOn){try{sfxStart();if(level!==5)startHorrorAmbience()}catch(audioError){rushAudioOn=false;console.warn('Skyline Switchback audio unavailable; continuing silently.',audioError)}}
+    activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent=developmentPreview?'JUNGLE TRAIL  •  0m — 133m':'OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.set(0,routeY(3.5)+.05,3.5);const startFrame=routeFrame(3.5,0);playerVisual.position.set(startFrame.x,player.position.y,startFrame.z);playerVisual.rotation.y=startFrame.yaw;coinCount=0;document.getElementById('coinCount').textContent='0';coins.forEach(c=>{c.collected=false;c.mesh.visible=true});vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);stickX=0;stickY=0;knob.style.transform='translate(0,0)';ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');renderer.render(scene,camera);
   }catch(error){
     // Roll back a partially-started run so the welcome screen and retry remain usable.
     running=false;
     if(ui?.welcome)ui.welcome.classList.remove('hidden');
     if(ui?.result)ui.result.classList.add('hidden');
     if(ui?.pause)ui.pause.classList.add('hidden');
-    const message=error?.message||String(error)||'Unable to start Brick Road.';
+    const message=error?.message||String(error)||'Unable to start Skyline Switchback.';
     if(status)status.textContent=message;
     window.__rushBootError=message;
-    console.error('Brick Road start failed:',error);
+    console.error('Skyline Switchback start failed:',error);
   }finally{
     startInProgress=false;
     if(startButton){startButton.disabled=false;startButton.textContent='START RUN'}
   }
 }
 function respawn(){player.position.set(0,routeY(respawnZ)+.05,respawnZ);const w=routeFrame(-respawnZ,0);playerVisual.position.set(w.x,player.position.y,w.z);playerVisual.rotation.y=w.yaw;vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
-function onTrack(x,z){const localX=x-curveX(z);if(developmentPreview){return Math.abs(localX)<=1.72&&z<=5&&z>=-665}return Math.abs(localX)<=4.05&&((z>=-5&&z<=5)||(z>=-25&&z<=-5)||(z>=-49&&z<=-27)||(z>=-73&&z<=-51)||(z>=-665&&z>=-74))}
+function onTrack(x,z){return Math.abs(x)<=1.72&&z<=5&&z>=-665}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.position.y=-.22;body.rotation.x=-.35;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
 window.__rushStart=reset;document.getElementById('bootStatus').textContent='Ready — tap START RUN';
@@ -839,7 +835,7 @@ const clock=new THREE.Clock();
 // Ground-diving lowers the hitbox so the runner can pass beneath a low clearance gate.
 function moveRunner(dx,dz){
   const nextZ=player.position.z+dz;
-  const nextCenter=curveX(nextZ);
+  const nextCenter=localCenterX(nextZ);
   const nextX=nextCenter+THREE.MathUtils.clamp(player.position.x+dx-nextCenter,level>=4?-1.42:-2.45,level>=4?1.42:2.45);
   if(!obstacleInspectionMode){
   const radius=.38,runnerHeight=slideTimer>0?1.02:2.3;
@@ -876,7 +872,7 @@ function update(dt){
   updateMovingHazards(dt);
   updateHazardWarnings(dt);
   if(slideTimer>0){slideTimer=Math.max(0,slideTimer-dt);if(slideTimer===0){body.scale.set(1,1,1);body.position.y=0;body.rotation.x=0}}
-  // Level 2-style steering, adapted for Brick Road's auto-run:
+  // Level 2-style steering, adapted for Skyline Switchback's auto-run:
   // left/right input controls the same lateral steering; forward motion stays automatic.
   const steerInput=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+stickX;
   const nx=THREE.MathUtils.clamp(steerInput,-1,1);
