@@ -174,7 +174,7 @@ function updateStorm(dt){
     stormFlashLight.intensity=0;
     renderer.toneMappingExposure=1.08;
   }
-  if(thunderPending>0){thunderPending-=dt;if(thunderPending<=0){soundNoise(1.15,.16,260);soundTone(58,32,1.35,.18,'sawtooth',.12)}}
+  if(thunderPending>0){thunderPending-=dt;if(thunderPending<=0){playGameSound('thunder',.78)}}
 }
 
 
@@ -688,13 +688,24 @@ function startHorrorAmbience(){
   const wind=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),wg=ctx.createGain();wind.buffer=buf;wind.loop=true;filter.type='lowpass';filter.frequency.value=360;wg.gain.value=.035;wind.connect(filter);filter.connect(wg);wg.connect(rushMaster);wind.start();rushWind={wind,filter,wg};
 }
 function startPremiumAmbience(){if(!audioReady()||rushDrone)return;const ctx=rushAudio,bus=ctx.createGain();bus.gain.value=.12;bus.connect(rushMaster);rushDrone=bus;[130.81,164.81,196,261.63].forEach((hz,i)=>{const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();o.type='triangle';o.frequency.value=hz;f.type='lowpass';f.frequency.value=900;g.gain.value=[.11,.075,.06,.025][i];o.connect(f);f.connect(g);g.connect(bus);o.start()});const lfo=ctx.createOscillator(),lg=ctx.createGain();lfo.frequency.value=.075;lg.gain.value=12;lfo.connect(lg);lg.connect(bus.gain);lfo.start()}
-function sfxStart(){startPremiumAmbience();soundTone(392,523,.42,.09,'sine');soundTone(523,784,.7,.08,'sine',.22);soundNoise(.45,.035,1700,.05)}
-function sfxJump(){soundNoise(.32,.13,1500);soundTone(125,390,.24,.09,'sine')}
-function sfxSlide(){soundNoise(.62,.16,1100);soundTone(90,42,.48,.08,'sawtooth')}
-function sfxImpact(){soundNoise(.42,.2,360);soundTone(72,28,.55,.2,'sawtooth')}
-function sfxFinish(){soundTone(392,523,.45,.12,'sine');soundTone(523,659,.6,.1,'sine',.2);soundTone(659,784,.9,.09,'sine',.48);soundNoise(.35,.04,1500,.55)}
-function sfxFall(){soundTone(260,32,.7,.17,'sawtooth');soundNoise(.5,.14,260,.12)}
-function sfxWarning(){soundTone(740,330,.24,.13,'square');soundTone(520,210,.34,.11,'sawtooth',.16);soundNoise(.2,.045,1200,.05)}
+// Local, original WAV cues for Level 5. Bundled with the game; no remote audio hotlinks.
+const gameSoundFiles=['footstep_1','footstep_2','jump','slide','impact','warning','thunder','zipline','victory','start'];
+const gameSoundPools={};
+for(const name of gameSoundFiles){gameSoundPools[name]=[0,1].map(()=>{const audio=new Audio('/chome-game-studio/rush-arena/audio/'+name+'.wav');audio.preload='auto';audio.volume=.72;return audio})}
+const gameSoundCursor={};
+function playGameSound(name,volume=.72,rate=1){
+  if(!rushAudioOn)return;
+  const pool=gameSoundPools[name];if(!pool)return;
+  const index=gameSoundCursor[name]||0;gameSoundCursor[name]=(index+1)%pool.length;
+  const audio=pool[index];try{audio.pause();audio.currentTime=0;audio.playbackRate=rate;audio.volume=Math.max(0,Math.min(1,volume));const result=audio.play();if(result&&result.catch)result.catch(()=>{})}catch(_){}
+}
+function sfxStart(){startPremiumAmbience();playGameSound('start',.62)}
+function sfxJump(){playGameSound('jump',.78,.96+Math.random()*.08)}
+function sfxSlide(){playGameSound('slide',.72,.96+Math.random()*.08)}
+function sfxImpact(){playGameSound('impact',.88,.94+Math.random()*.12)}
+function sfxFinish(){playGameSound('victory',.82)}
+function sfxFall(){playGameSound('impact',.92,.82)}
+function sfxWarning(){playGameSound('warning',.76)}
 const dangerBanner=document.createElement('div');
 dangerBanner.textContent='⚠ DANGER AHEAD';
 Object.assign(dangerBanner.style,{position:'fixed',top:'58px',left:'50%',transform:'translateX(-50%)',zIndex:'49',padding:'11px 18px',border:'1px solid rgba(255,70,55,.8)',borderRadius:'12px',background:'rgba(55,5,8,.88)',boxShadow:'0 0 24px rgba(255,20,20,.35)',color:'#fff',font:'900 13px system-ui',letterSpacing:'.12em',textAlign:'center',whiteSpace:'nowrap',opacity:'0',transition:'opacity .12s',pointerEvents:'none'});
@@ -720,7 +731,7 @@ function updateHazardWarnings(dt){
   cameraShake=Math.max(0,cameraShake-dt*2.8);
 }
 
-soundButton.addEventListener('click',()=>{rushAudioOn=!rushAudioOn;soundButton.textContent=rushAudioOn?'🔊 SOUND ON':'🔇 SOUND OFF';if(audioReady()){rushMaster.gain.setTargetAtTime(rushAudioOn?.72:0,rushAudio.currentTime,.06);if(rushAudioOn&&running){if(level===5)startPremiumAmbience();else startHorrorAmbience()}}});
+soundButton.addEventListener('click',()=>{rushAudioOn=!rushAudioOn;soundButton.textContent=rushAudioOn?'🔊 SOUND ON':'🔇 SOUND OFF';for(const pool of Object.values(gameSoundPools))for(const audio of pool){if(!rushAudioOn)audio.pause()}if(audioReady()){rushMaster.gain.setTargetAtTime(rushAudioOn?.72:0,rushAudio.currentTime,.06);if(rushAudioOn&&running)startPremiumAmbience()}});
 
 function updateMovingHazards(dt){
   for(const o of obstacles){if(o.type!=='movingBlock')continue;o.x=o.baseX+Math.sin(elapsed*o.frequency+o.phase)*o.amplitude;const w=routeFrame(-o.z,o.x);o.mesh.position.set(w.x,routeY(o.z),w.z);o.mesh.rotation.y=w.yaw;if(o.rotor)o.rotor.rotation.z+=dt*3.4;}
@@ -887,8 +898,8 @@ function update(dt){
   const dx=nx*level2SteerSpeed*dt,dz=-templeAutoRunSpeed*dt;
   const zipDistance=-player.position.z;
   zipHint.style.opacity=!ziplineUsed&&zipDistance>295&&zipDistance<315?'1':'0';
-  if(!ziplineUsed&&!ziplineRide&&zipDistance>=315){if(zipGrip)zipGrip.visible=true;ziplineRide={elapsed:0,startX:zipStartX,startZ:zipStartZ,endX:zipEndX,endZ:zipEndZ};player.position.set(zipStartX,routeY(zipStartZ)+.1,zipStartZ);body.rotation.x=-.15;}
-  if(ziplineRide){ziplineRide.elapsed+=dt;const t=THREE.MathUtils.clamp(ziplineRide.elapsed/2.45,0,1),ease=t*t*(3-2*t);player.position.x=THREE.MathUtils.lerp(ziplineRide.startX,ziplineRide.endX,ease);player.position.z=THREE.MathUtils.lerp(ziplineRide.startZ,ziplineRide.endZ,ease);player.position.y=THREE.MathUtils.lerp(routeY(ziplineRide.startZ),routeY(ziplineRide.endZ),ease)+6.05+Math.sin(t*Math.PI)*.22;const zipFrame=routeFrame(-player.position.z,player.position.x);playerVisual.position.set(zipFrame.x,player.position.y,zipFrame.z);playerVisual.rotation.y=zipFrame.yaw;body.rotation.x=THREE.MathUtils.lerp(body.rotation.x,-.2,.12);if(t>=1){player.position.set(ziplineRide.endX,routeY(ziplineRide.endZ)+.06,ziplineRide.endZ);ziplineRide=null;ziplineUsed=true;if(zipGrip)zipGrip.visible=false;grounded=true;vertical=0;body.rotation.set(0,0,0);soundTone(660,990,.32,.11,'sine')}return;}
+  if(!ziplineUsed&&!ziplineRide&&zipDistance>=315){playGameSound('zipline',.78);if(zipGrip)zipGrip.visible=true;ziplineRide={elapsed:0,startX:zipStartX,startZ:zipStartZ,endX:zipEndX,endZ:zipEndZ};player.position.set(zipStartX,routeY(zipStartZ)+.1,zipStartZ);body.rotation.x=-.15;}
+  if(ziplineRide){ziplineRide.elapsed+=dt;const t=THREE.MathUtils.clamp(ziplineRide.elapsed/2.45,0,1),ease=t*t*(3-2*t);player.position.x=THREE.MathUtils.lerp(ziplineRide.startX,ziplineRide.endX,ease);player.position.z=THREE.MathUtils.lerp(ziplineRide.startZ,ziplineRide.endZ,ease);player.position.y=THREE.MathUtils.lerp(routeY(ziplineRide.startZ),routeY(ziplineRide.endZ),ease)+6.05+Math.sin(t*Math.PI)*.22;const zipFrame=routeFrame(-player.position.z,player.position.x);playerVisual.position.set(zipFrame.x,player.position.y,zipFrame.z);playerVisual.rotation.y=zipFrame.yaw;body.rotation.x=THREE.MathUtils.lerp(body.rotation.x,-.2,.12);if(t>=1){player.position.set(ziplineRide.endX,routeY(ziplineRide.endZ)+.06,ziplineRide.endZ);ziplineRide=null;ziplineUsed=true;if(zipGrip)zipGrip.visible=false;grounded=true;vertical=0;body.rotation.set(0,0,0);playGameSound('impact',.32,1.18)}return;}
   if(!moveRunner(dx,dz))return;
   player.position.z=Math.max(player.position.z,-665);
   // Collect each gold medallion once as the runner passes it.
@@ -927,7 +938,7 @@ function update(dt){
   const runnerFrame=routeFrame(-player.position.z,player.position.x);playerVisual.position.set(runnerFrame.x,player.position.y,runnerFrame.z);playerVisual.rotation.y=runnerFrame.yaw;
   // Camera follow is handled once per rendered frame in animate(), just like Level 3.
   const moving=running&&!paused;
-  if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}
+  if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.36){playGameSound(Math.random()<.5?'footstep_1':'footstep_2',.34,.92+Math.random()*.16);spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}
   // Keep the run cycle active during automatic forward travel, even when the
   // player is not steering. Jump and slide retain Level 2's action handling.
   const desired=slideTimer>0?(runnerActions.slide?'slide':'run'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));
