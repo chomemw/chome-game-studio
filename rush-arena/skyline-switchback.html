@@ -693,6 +693,13 @@ const gameSoundFiles=['footstep_1','footstep_2','jump','slide','impact','warning
 const gameSoundPools={};
 for(const name of gameSoundFiles){gameSoundPools[name]=[0,1].map(()=>{const audio=new Audio('/chome-game-studio/rush-arena/audio/'+name+'.wav');audio.preload='auto';audio.volume=.72;return audio})}
 const gameSoundCursor={};
+function primeGameAudio(){
+  // Prime each local HTML audio element during the START RUN user gesture on mobile browsers.
+  for(const pool of Object.values(gameSoundPools))for(const audio of pool){
+    audio.muted=true;const pending=audio.play();
+    if(pending&&pending.then)pending.then(()=>{audio.pause();audio.currentTime=0;audio.muted=false}).catch(()=>{audio.muted=false});
+  }
+}
 function playGameSound(name,volume=.72,rate=1){
   if(!rushAudioOn)return;
   const pool=gameSoundPools[name];if(!pool)return;
@@ -784,7 +791,7 @@ async function reset(){
   if(status)status.textContent='Checking your CHOME administrator access…';
   try{
     // Audio is optional: a mobile browser's audio policy must never prevent the run from starting.
-    try{audioReady()}catch(audioError){rushAudioOn=false;console.warn('Skyline Switchback audio unavailable; continuing silently.',audioError)}
+    try{audioReady();primeGameAudio()}catch(audioError){rushAudioOn=false;console.warn('Skyline Switchback audio unavailable; continuing silently.',audioError)}
     if(status)status.textContent='Checking your CHOME sign-in…';
     const {data:authData,error:authError}=await startupRequest(supabase.auth.getSession(),'CHOME sign-in check',12000);
     if(authError)throw new Error('Could not check your CHOME sign-in: '+authError.message);
