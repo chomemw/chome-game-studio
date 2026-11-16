@@ -370,7 +370,7 @@ obstacles.forEach((o,index)=>{
 });
 
 // Shared Rush Arena character roster. The chosen runner is loaded only after selection.
-const runnerAssets={soldier:'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/models/gltf/Soldier.glb'};
+const runnerAssets={soldier:'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb'};
 import { attachSoldierRunAnimation } from './soldier-run-retarget.js';
 let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
 let runnerLoadPromise=Promise.resolve(false),runnerLoadToken=0;
