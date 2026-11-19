@@ -417,6 +417,16 @@ obstacles.forEach((o,index)=>{
   scene.add(rig);hazardBeacons.push({rig,lamps:rig.children.filter(child=>child.isMesh&&child.geometry.type==='SphereGeometry'),obstacle:o,index});
 });
 
+// The runner root and animated character pivot must exist before character loading,
+// controls, reset, camera follow, and storm effects can reference them.
+const player=new THREE.Group();
+player.name='RushArenaPlayer';
+player.position.copy(routePosition(0,0,.05));
+scene.add(player);
+const body=new THREE.Group();
+body.name='SoldierCharacterPivot';
+player.add(body);
+
 // Shared Rush Arena character roster. The chosen runner is loaded only after selection.
 const runnerAssets={soldier:'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb'};
 import { attachSoldierRunAnimation } from './soldier-run-retarget.js';
