@@ -36,6 +36,9 @@
  window.addEventListener('unhandledrejection',e=>{window.__rushBootError='Startup error: '+(e.reason?.message||String(e.reason||'resource failed'));status.textContent=window.__rushBootError;});
 })();
 </script>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+</script>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
