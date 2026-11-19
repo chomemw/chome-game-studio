@@ -286,14 +286,14 @@ function addBoxInstances(material,w,h,d,placements){
   placements.forEach((p,i)=>{dummy.position.set(p.x,p.y,p.z);dummy.rotation.y=p.ry||0;dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix)});
   mesh.instanceMatrix.needsUpdate=true;mesh.frustumCulled=true;mesh.castShadow=false;mesh.receiveShadow=true;scene.add(mesh);return mesh;
 }
-const laneMarks=[];for(let distance=5;distance<LEVEL1_ROUTE_LENGTH-2;distance+=4){for(const lateral of [-1.5,1.5]){const f=frame(distance,lateral);laneMarks.push({x:f.x,y:.035,z:f.z,ry:f.yaw})}}
+const laneMarks=[];for(let distance=5;distance<LEVEL1_ROUTE_LENGTH-2;distance+=4){if(isCourseGapDistance(distance))continue;for(const lateral of [-1.5,1.5]){const f=frame(distance,lateral);laneMarks.push({x:f.x,y:.035,z:f.z,ry:f.yaw})}}
 addBoxInstances(white,.09,.018,.85,laneMarks);
 for(const lateral of [-4.52,4.52]){
   for(const [start,end] of [[0,134],[134,665]]){const mid=(start+end)/2,length=end-start;const rail=routeBox(.12,.12,length,side,mid,lateral,.18);rail.material=side;const trim=routeBox(.12,.12,length,gold,mid,lateral,.34);}
-  const posts=[],caps=[];for(let distance=3;distance<LEVEL1_ROUTE_LENGTH-2;distance+=6){const f=frame(distance,lateral);posts.push({x:f.x,y:.54,z:f.z,ry:f.yaw});caps.push({x:f.x,y:.85,z:f.z,ry:f.yaw})}
+  const posts=[],caps=[];for(let distance=3;distance<LEVEL1_ROUTE_LENGTH-2;distance+=6){if(isCourseGapDistance(distance))continue;const f=frame(distance,lateral);posts.push({x:f.x,y:.54,z:f.z,ry:f.yaw});caps.push({x:f.x,y:.85,z:f.z,ry:f.yaw})}
   addBoxInstances(side,.18,.52,.16,posts);addBoxInstances(white,.2,.08,.2,caps);
 }
-const shoulderMarks=[];for(let distance=4;distance<LEVEL1_ROUTE_LENGTH-2;distance+=8){for(const lateral of [-4.1,4.1]){const f=frame(distance,lateral);shoulderMarks.push({x:f.x,y:.035,z:f.z,ry:f.yaw})}}
+const shoulderMarks=[];for(let distance=4;distance<LEVEL1_ROUTE_LENGTH-2;distance+=8){if(isCourseGapDistance(distance))continue;for(const lateral of [-4.1,4.1]){const f=frame(distance,lateral);shoulderMarks.push({x:f.x,y:.035,z:f.z,ry:f.yaw})}}
 addBoxInstances(white,.22,.025,1.5,shoulderMarks);
 // Gaps: remove small sections of path with dark clouds beneath.
 for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-3.4,z+(Math.random()-.5)*1.8)}
@@ -708,7 +708,9 @@ function update(dt){
   if(routeCoordinates(player.position.x,player.position.z).distance>=665)player.position.copy(routePosition(665,routeCoordinates(player.position.x,player.position.z).lateral,player.position.y));
   // Reward each obstacle once, only after the runner has safely passed it.
   obstacles.forEach((o,index)=>{
-    if(!rewardedObstacles.has(index)&&player.position.z<o.z-o.d/2-.5){
+    const runnerDistance=routeCoordinates(player.position.x,player.position.z).distance;
+    const obstacleDistance=routeCoordinates(o.mesh.position.x,o.mesh.position.z).distance;
+    if(!rewardedObstacles.has(index)&&runnerDistance>obstacleDistance+o.d/2+.5){
       rewardedObstacles.add(index);points+=100;
       ui.points.textContent=String(points);
       soundTone(620,920,.16,.08,'sine');
@@ -732,10 +734,11 @@ function update(dt){
     return;
   }
   // Checkpoints store a safe respawn position.
-  checkpoints.forEach((z,i)=>{if(checkpoint===i&&player.position.z<z){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/7'}});
+  const runnerDistance=routeCoordinates(player.position.x,player.position.z).distance;
+  checkpoints.forEach((z,i)=>{const checkpointDistance=3.5-z;if(checkpoint===i&&runnerDistance>checkpointDistance){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/7'}});
   if(routeCoordinates(player.position.x,player.position.z).distance>=661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
   const pct=THREE.MathUtils.clamp(routeCoordinates(player.position.x,player.position.z).distance/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
-  const target=new THREE.Vector3(player.position.x,player.position.y+6.1,player.position.z+14.2);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x,player.position.y+1.25,player.position.z-4.2);
+  const runnerFrame=frame(routeCoordinates(player.position.x,player.position.z).distance,routeCoordinates(player.position.x,player.position.z).lateral);const target=new THREE.Vector3(player.position.x-runnerFrame.tx*14.2,player.position.y+6.1,player.position.z-runnerFrame.tz*14.2);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x+runnerFrame.tx*4.2,player.position.y+1.25,player.position.z+runnerFrame.tz*4.2);
   const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run?'run':(runnerActions.walk?'walk':'idle'));playRunnerAction(action);runnerMixer.update(dt);}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 let lastRenderAt=0,frameAccumulator=0;
