@@ -65,11 +65,13 @@ function frame(d,lateral=0){const x=centerX(d),ahead=centerX(Math.min(TOTAL,d+1)
 function place(mesh,d,lateral,y=0){const f=frame(d,lateral);mesh.position.set(f.x,y,f.z);mesh.rotation.y=f.yaw;return mesh;}
 // Build the complete road as one continuous ribbon mesh with dense samples and no section seams.
 const samples=TOTAL*2,verts=[],uv=[],indices=[];for(let i=0;i<=samples;i++){const d=TOTAL*i/samples,f=frame(d);for(const side of [-1,1]){verts.push(f.x+f.nx*5.3*side,0.02,f.z+f.nz*5.3*side);uv.push(side*.5+.5,d/18);}}
-for(let i=0;i<samples;i++){const a=i*2,b=a+1,c=a+2,d=a+3;indices.push(a,c,b,b,c,d);}
+for(let i=0;i<samples;i++){const a=i*2,b=a+1,c=a+2,d=a+3;indices.push(a,b,c,b,d,c);}
 const roadGeo=new THREE.BufferGeometry();roadGeo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));roadGeo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));roadGeo.setIndex(indices);roadGeo.computeVertexNormals();const road=new THREE.Mesh(roadGeo,asphalt);road.receiveShadow=true;scene.add(road);
 // Continuous shoulders, sidewalks and edge markings are generated from the same centerline.
-function ribbon(offset,width,y,material){const v=[],ix=[];for(let i=0;i<=samples;i++){const d=TOTAL*i/samples,f=frame(d);for(const s of [-1,1])v.push(f.x+f.nx*(offset+s*width/2),y,f.z+f.nz*(offset+s*width/2));}for(let i=0;i<samples;i++){let a=i*2;ix.push(a,a+2,a+1,a+1,a+2,a+3);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(ix);g.computeVertexNormals();const m=new THREE.Mesh(g,material);m.receiveShadow=true;scene.add(m);return m;}
+function ribbon(offset,width,y,material){const v=[],ix=[];for(let i=0;i<=samples;i++){const d=TOTAL*i/samples,f=frame(d);for(const s of [-1,1])v.push(f.x+f.nx*(offset+s*width/2),y,f.z+f.nz*(offset+s*width/2));}for(let i=0;i<samples;i++){let a=i*2;ix.push(a,a+1,a+2,a+1,a+3,a+2);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(ix);g.computeVertexNormals();const m=new THREE.Mesh(g,material);m.receiveShadow=true;scene.add(m);return m;}
 ribbon(-6.35,1.5,.0,concrete);ribbon(6.35,1.5,.0,concrete);
+// Dashed lane separators follow the same continuous road frame through every bend.
+for(let d=12;d<TOTAL-8;d+=14){for(const lateral of [-1.575,1.575]){const f=frame(d,lateral);const dash=box(.13,.035,5.2,white,f.x,.055,f.z);dash.rotation.y=f.yaw;}}
 for(const side of [-1,1]){const v=[],ix=[];for(let i=0;i<=samples;i++){const f=frame(TOTAL*i/samples);v.push(f.x+f.nx*side*4.85,.035,f.z+f.nz*side*4.85);v.push(f.x+f.nx*side*4.95,.035,f.z+f.nz*side*4.95);}for(let i=0;i<samples;i++){const a=i*2;ix.push(a,a+2,a+1,a+1,a+2,a+3);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(ix);g.computeVertexNormals();scene.add(new THREE.Mesh(g,white));}
 // Terrain plane under the entire route.
 const ground=box(900,.5,1500,grass,0,-1.1,-TOTAL/2);ground.receiveShadow=true;
