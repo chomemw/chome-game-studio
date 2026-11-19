@@ -209,7 +209,7 @@ for(const [d,x,w,h,depth,color] of [
  [106.5,-2.1,1.5,1.4,1.1,obstacleMats.coral],[122.5,2.2,1.4,1.5,1.1,obstacleMats.purple]
 ])addOriginalBlock(d,x,w,h,depth,color);
 addOriginalGate(32.5);
-addOriginalSweeper(50.5);
+const originalSweeper=addOriginalSweeper(50.5);
 // Original construction-zone, tunnel, cargo-yard and final-survival obstacle sequence.
 const originalHazardPlan=[
  ['block',154.5,-2.25],['gate',169.5,0],['crane',184.5,2.15],['block',200.5,2.2,1.5,1.45,1.15,obstacleMats.purple],
@@ -234,7 +234,6 @@ function updateOriginalObstacles(dt,elapsedSeconds){
   if(o.rotor)o.rotor.rotation.z+=dt*3.4;
  }
 }
-const originalSweeper=originalObstacles.find(o=>o.type==='Group'&&o.position.y>1);
 
 // Player: same Soldier GLB, scale, native forward direction and run animation as Level 6.
 const player=new THREE.Group();scene.add(player);const body=new THREE.Group();player.add(body);let mixer=null;
@@ -295,6 +294,7 @@ function animate(){
  const dt=Math.min(clock.getDelta(),.1);
  if(running&&!paused&&!finished){
   elapsed+=dt;distance=Math.min(TOTAL,distance+NORMAL_SPEED*dt);
+  updateOriginalObstacles(dt,elapsed);if(originalSweeper)originalSweeper.rotation.y+=dt*1.55;
   const night=smooth(850,1050,distance);
   scene.background.copy(daySky).lerp(nightSky,night);scene.fog.color.copy(daySky).lerp(nightSky,night);
   hemi.intensity=THREE.MathUtils.lerp(1.65,.48,night);sun.intensity=THREE.MathUtils.lerp(2.1,.16,night);
