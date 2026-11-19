@@ -235,6 +235,94 @@ function updateOriginalObstacles(dt,elapsedSeconds){
  }
 }
 
+// Level 1 themed zones, restored around the unchanged Level 6 road.
+// All scenery is placed outside the 10.6m carriageway and its concrete shoulders.
+// Zone distances map the original five 133m sections onto the 3,000m route.
+const zoneMaterials={
+ sign:mat(0x172333,.72),steel:mat(0x596873,.72),rust:mat(0x9b603b,.82),
+ yellow:mat(0xe4b34e,.7),orange:mat(0xd9783d,.76),concrete:mat(0x777f80,.92),
+ tunnel:mat(0x26333d,.88),lamp: new THREE.MeshStandardMaterial({color:0xffd58a,emissive:0xffa83a,emissiveIntensity:1.1}),
+ containerBlue:mat(0x3e6679,.76),containerRed:mat(0x85534a,.8),containerGreen:mat(0x536b59,.82),
+ hazard:mat(0xe7b84f,.65),dark:mat(0x27313a,.88),sand:mat(0x9b8a68,.94)
+};
+function zoneBox(w,h,d,material,distance,lateral,yOffset=0){
+ const f=frame(distance,lateral);
+ const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
+ mesh.position.set(f.x+f.nx*lateral,f.y+yOffset+h/2,f.z+f.nz*lateral);
+ mesh.rotation.y=f.yaw;mesh.castShadow=false;mesh.receiveShadow=true;scene.add(mesh);return mesh;
+}
+function zoneCylinder(rt,rb,h,material,distance,lateral,yOffset=0){
+ const f=frame(distance,lateral),mesh=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,10),material);
+ mesh.position.set(f.x+f.nx*lateral,f.y+yOffset+h/2,f.z+f.nz*lateral);
+ mesh.rotation.y=f.yaw;scene.add(mesh);return mesh;
+}
+function zoneSign(title,subtitle,distance,accent){
+ const c=document.createElement('canvas');c.width=1024;c.height=220;const g=c.getContext('2d');
+ g.fillStyle='#111c2b';g.fillRect(0,0,1024,220);
+ g.fillStyle=accent;g.fillRect(0,0,18,220);g.fillRect(1006,0,18,220);
+ g.fillStyle='#f6f8fb';g.font='900 66px system-ui';g.textAlign='center';g.fillText(title,512,100);
+ g.fillStyle=accent;g.font='800 30px system-ui';g.fillText(subtitle,512,158);
+ const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
+ const board=new THREE.Mesh(new THREE.PlaneGeometry(8.4,1.8),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));
+ const f=frame(distance);board.position.set(f.x,f.y+6.1,f.z);board.rotation.y=f.yaw;scene.add(board);
+ // Sign supports stay beyond the road shoulders; overhead clearance is generous.
+ for(const side of [-1,1])zoneBox(.22,5.1,.24,zoneMaterials.steel,distance,side*7.8,0);
+ zoneBox(16,.18,.3,zoneMaterials.steel,distance,0,5.15);
+}
+function addConstructionSet(distance,side,variant=0){
+ const x=side*10.2;
+ // Temporary steel scaffold, striped work barricade, cones and stacked material.
+ zoneBox(.18,3.8,.18,zoneMaterials.rust,distance,x,0);
+ zoneBox(.18,3.8,.18,zoneMaterials.rust,distance+3,x,0);
+ zoneBox(3.2,.16,.18,zoneMaterials.yellow,distance,x,3.3);
+ zoneBox(3.2,.16,.18,zoneMaterials.rust,distance,x,1.9);
+ zoneBox(2.8,.85,.28,zoneMaterials.orange,distance+7,side*8.9,.15);
+ for(let k=0;k<3;k++){
+  const d=distance+1.5+k*2.2;
+  zoneCylinder(.05,.34,.72,zoneMaterials.orange,d,side*8.15,.0);
+  zoneBox(.42,.09,.42,zoneMaterials.yellow,d,side*8.15,.67);
+ }
+ zoneBox(2.4,.75,1.25,variant%2?zoneMaterials.concrete:zoneMaterials.sand,distance+11,side*10.8,.0);
+}
+function addTunnelSet(distance){
+ // Repeating tunnel ribs and warm overhead lamps, with side walls outside the road.
+ for(const side of [-1,1]){
+  zoneBox(.34,4.9,.48,zoneMaterials.tunnel,distance,side*7.9,0);
+  zoneBox(.5,4.3,.5,zoneMaterials.steel,distance,side*8.55,0);
+  zoneBox(.12,4.1,.18,zoneMaterials.lamp,distance,side*7.55,.15);
+ }
+ zoneBox(16,.32,.5,zoneMaterials.tunnel,distance,0,4.75);
+ zoneBox(.9,.12,.38,zoneMaterials.lamp,distance,0,4.45);
+}
+function addCargoSet(distance,side,variant=0){
+ const container=variant%3===0?zoneMaterials.containerBlue:variant%3===1?zoneMaterials.containerRed:zoneMaterials.containerGreen;
+ zoneBox(3.2,3.15,8.5,container,distance,side*11.3,0);
+ // Raised corrugation ribs on the outward-facing container wall.
+ for(let k=0;k<8;k++)zoneBox(.07,2.85,.08,zoneMaterials.steel,distance,side*(9.68),.12+k*.0);
+ zoneBox(2.6,.55,1.7,zoneMaterials.sand,distance+7,side*9.1,0);
+ zoneBox(2.1,.7,1.5,zoneMaterials.rust,distance+10,side*11.2,0);
+}
+function addFinalSurvivalSet(distance,side,variant=0){
+ // Worn industrial hazard frames and warning panels mark the final section.
+ zoneBox(.26,4.4,.3,zoneMaterials.dark,distance,side*8.1,0);
+ zoneBox(.26,4.4,.3,zoneMaterials.dark,distance+5,side*8.1,0);
+ zoneBox(2.9,.24,.34,zoneMaterials.hazard,distance,side*8.1,3.65);
+ zoneBox(2.6,1.1,.22,zoneMaterials.orange,distance+8,side*8.5,.1);
+ for(let k=0;k<4;k++)zoneBox(.32,.12,.24,zoneMaterials.hazard,distance+8,side*(7.55+k*.62),.55);
+ if(variant%2===0)zoneBox(2.2,2.1,1.4,zoneMaterials.concrete,distance+12,side*11,0);
+}
+// Zone title gates align to the route but do not alter the road mesh or its dimensions.
+zoneSign('CITY APPROACH','LEVEL 1 · 0m — 600m',120,'#8cc6d8');
+zoneSign('CONSTRUCTION ZONE','WORKSITE HAZARDS · 600m — 1,200m',630,'#e5ad4b');
+zoneSign('UNDERGROUND TUNNEL','LOW CLEARANCE · 1,200m — 1,800m',1230,'#79b9d2');
+zoneSign('CARGO YARD','FORKLIFTS & CONTAINERS · 1,800m — 2,400m',1830,'#d39a55');
+zoneSign('FINAL SURVIVAL','INDUSTRIAL HAZARDS · 2,400m — 3,000m',2430,'#d46b76');
+// The approach stays comparatively open; themed scenery begins at each named area.
+for(let d=650;d<1180;d+=72){addConstructionSet(d,-1,Math.floor(d/72));addConstructionSet(d+34,1,Math.floor(d/34));}
+for(let d=1245;d<1775;d+=38)addTunnelSet(d);
+for(let d=1845;d<2375;d+=88){addCargoSet(d,-1,Math.floor(d/88));addCargoSet(d+43,1,Math.floor(d/43));}
+for(let d=2445;d<2960;d+=78){addFinalSurvivalSet(d,-1,Math.floor(d/78));addFinalSurvivalSet(d+38,1,Math.floor(d/38));}
+
 // Player: same Soldier GLB, scale, native forward direction and run animation as Level 6.
 const player=new THREE.Group();scene.add(player);const body=new THREE.Group();player.add(body);let mixer=null;
 const runnerLoader=new GLTFLoader();
