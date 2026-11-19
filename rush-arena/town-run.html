@@ -32,7 +32,7 @@
  const status=document.getElementById('bootStatus');
  const start=document.getElementById('start');
  start.addEventListener('click',()=>{if(typeof window.__rushStart==='function')window.__rushStart();else status.textContent=window.__rushBootError||'Preparing the town route…';});
- window.addEventListener('error',e=>{window.__rushBootError='Startup error: '+(e.message||'script failed');status.textContent=window.__rushBootError;});
+ window.addEventListener('error',e=>{const where=e.filename?(' at '+e.filename.split('/').pop()+':'+(e.lineno||'?')+':'+(e.colno||'?')):'';window.__rushBootError='Startup error: '+(e.message||'script failed')+where;status.textContent=window.__rushBootError;});
  window.addEventListener('unhandledrejection',e=>{window.__rushBootError='Startup error: '+(e.reason?.message||String(e.reason||'resource failed'));status.textContent=window.__rushBootError;});
 })();
 </script>
