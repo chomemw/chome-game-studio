@@ -246,6 +246,7 @@ function frame(distance,lateral=0){
   return {x:p.x+nx*lateral,z:p.z+nz*lateral,y:0,tx,tz,nx,nz,yaw:Math.atan2(tx,-tz)};
 }
 function routeCoordinates(x,z){const d=THREE.MathUtils.clamp(3.5-z,0,LEVEL1_ROUTE_LENGTH),f=frame(d);return {distance:d,lateral:(x-f.x)*f.nx+(z-f.z)*f.nz};}
+function isCourseGapDistance(distance){return (distance>28.5&&distance<30.5)||(distance>52.5&&distance<54.5)||(distance>76.5&&distance<77.5);}
 function routePosition(distance,lateral=0,y=0){const f=frame(distance,lateral);return new THREE.Vector3(f.x,y+f.y,f.z);}
 function placeOnRoute(object,distance,lateral=0,y=0){const f=frame(distance,lateral);object.position.set(f.x,y+f.y,f.z);object.rotation.y=f.yaw;return object;}
 function routeBox(w,h,d,material,distance,lateral=0,y=h/2,parent=scene){const object=box(w,h,d,material,0,0,0,parent);const f=frame(distance,lateral);object.position.set(f.x,y+f.y,f.z);object.rotation.y=f.yaw;return object;}
@@ -259,6 +260,8 @@ function makeRoadRibbon(width,y,material,segments=LEVEL1_ROUTE_LENGTH*2){
     }
   }
   for(let i=0;i<segments;i++){
+    const distance=LEVEL1_ROUTE_LENGTH*(i+.5)/segments;
+    if(isCourseGapDistance(distance))continue;
     const a=i*2,b=a+1,c=a+2,d=a+3;
     indices.push(a,b,c,b,d,c);
   }
@@ -611,7 +614,7 @@ async function reset(){
   activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent='OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.copy(routePosition(0,0,.05));vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);swipeSteer=0;swipeSteerTimer=0;ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');document.getElementById('rewardIntro').classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
 }
 function respawn(){player.position.copy(routePosition(THREE.MathUtils.clamp(3.5-respawnZ,0,665),0,.05));vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
-function onTrack(x,z){const route=routeCoordinates(x,z),d=route.distance;const insideRoad=Math.abs(route.lateral)<=4.05;const safeSurface=(d<=5)||(d>=25&&d<=27)||(d>=49&&d<=51)||(d>=73&&d<=LEVEL1_ROUTE_LENGTH-3);return insideRoad&&safeSurface}
+function onTrack(x,z){const route=routeCoordinates(x,z),d=route.distance;const insideRoad=Math.abs(route.lateral)<=4.05;const safeSurface=d<=28.5||(d>=30.5&&d<=52.5)||(d>=54.5&&d<=76.5)||(d>=77.5&&d<=665);return insideRoad&&safeSurface}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
 window.__rushStart=reset;
