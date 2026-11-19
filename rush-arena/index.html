@@ -112,6 +112,46 @@ for(const side of [-1,1]){
 }
 // Level 6 terrain bed only; no buildings, traffic, walkers, barriers or obstacles.
 const ground=box(1600,.5,2300,grass,200,-1.1,-750);ground.receiveShadow=true;
+// Restored Level 1 sky and landscape dressing, placed clear of the road corridor.
+const originalSkyDome=new THREE.Mesh(new THREE.SphereGeometry(520,32,20),
+ new THREE.MeshBasicMaterial({color:0x8ed9f4,side:THREE.BackSide,fog:false}));
+scene.add(originalSkyDome);
+const cloudMaterial=new THREE.MeshBasicMaterial({color:0xf1f8fa,transparent:true,opacity:.88,fog:false});
+const cloudGeometry=new THREE.SphereGeometry(1,10,8);
+const cloudInstances=new THREE.InstancedMesh(cloudGeometry,cloudMaterial,150);
+const cloudDummy=new THREE.Object3D();let cloudIndex=0;
+for(let d=55;d<TOTAL;d+=120){
+ const f=frame(d,0);
+ for(let j=0;j<5;j++){
+  const side=j%2===0?-1:1;
+  cloudDummy.position.set(f.x+f.nx*(side*(43+j*2.1)),17+(j%3)*4,f.z+f.nz*(side*(43+j*2.1)));
+  cloudDummy.scale.set(3.4+(j%2)*1.5,1.35+(j%3)*.35,2.4+(j%2)*.8);
+  cloudDummy.rotation.set(0,0,(j-2)*.035);cloudDummy.updateMatrix();cloudInstances.setMatrixAt(cloudIndex++,cloudDummy.matrix);
+ }
+}
+cloudInstances.count=cloudIndex;cloudInstances.instanceMatrix.needsUpdate=true;scene.add(cloudInstances);
+const islandTop=mat(0x526b58,.98),islandRock=mat(0x35483c,.99),islandRim=mat(0x78916b,.98);
+for(let d=135,index=0;d<TOTAL-80;d+=250,index++){
+ const side=index%2===0?-1:1,lat=side*48,f=frame(d,0),island=new THREE.Group();
+ const rock=new THREE.Mesh(new THREE.CylinderGeometry(2.2,4.2,2.8,7),islandRock);rock.position.y=-.35;island.add(rock);
+ const cap=new THREE.Mesh(new THREE.CylinderGeometry(3.5,3.1,.48,8),islandTop);cap.position.y=1.2;island.add(cap);
+ for(let k=0;k<3;k++){const tuft=new THREE.Mesh(new THREE.SphereGeometry(.72,7,6),islandRim);tuft.scale.set(1.6,.42,1);tuft.position.set((k-1)*1.25,1.55,(k%2)*.7);island.add(tuft)}
+ island.position.set(f.x+f.nx*lat,-2.8+(index%3)*.45,f.z+f.nz*lat);island.rotation.y=index*.71;scene.add(island);
+}
+const atmosphereStops=[
+ {d:0,c:0x8ed9f4,f:0xa9c2d0},{d:600,c:0xa9b9bd,f:0x8b9aa0},
+ {d:1200,c:0x34414e,f:0x34414e},{d:1800,c:0x9a9b91,f:0x7b8585},
+ {d:2400,c:0x51434c,f:0x443a43},{d:3000,c:0x51434c,f:0x443a43}
+];
+const atmosphereColors=atmosphereStops.map(p=>({sky:new THREE.Color(p.c),fog:new THREE.Color(p.f)}));
+function updateRestoredAtmosphere(progress){
+ let i=0;while(i<atmosphereStops.length-2&&progress>atmosphereStops[i+1].d)i++;
+ const a=atmosphereStops[i],b=atmosphereStops[i+1],t=THREE.MathUtils.smoothstep(progress,a.d,b.d);
+ const skyColor=atmosphereColors[i].sky.clone().lerp(atmosphereColors[i+1].sky,t);
+ scene.background.copy(skyColor);scene.fog.color.copy(atmosphereColors[i].fog).lerp(atmosphereColors[i+1].fog,t);
+ originalSkyDome.material.color.copy(skyColor);
+}
+
 // Original Level 1 obstacle set, positioned on the unchanged Level 6 route.
 // Distances retain the old Level 1 obstacle sequence, proportionally spread over 3,000m.
 const obstacleScale=TOTAL/665;
@@ -383,9 +423,9 @@ function animate(){
  if(running&&!paused&&!finished){
   elapsed+=dt;distance=Math.min(TOTAL,distance+NORMAL_SPEED*dt);
   updateOriginalObstacles(dt,elapsed);if(originalSweeper)originalSweeper.rotation.y+=dt*1.55;
-  const night=smooth(850,1050,distance);
-  scene.background.copy(daySky).lerp(nightSky,night);scene.fog.color.copy(daySky).lerp(nightSky,night);
-  hemi.intensity=THREE.MathUtils.lerp(1.65,.48,night);sun.intensity=THREE.MathUtils.lerp(2.1,.16,night);
+  updateRestoredAtmosphere(distance);
+  const tunnelBlend=THREE.MathUtils.smoothstep(distance,1120,1280)*(1-THREE.MathUtils.smoothstep(distance,1740,1900));
+  hemi.intensity=THREE.MathUtils.lerp(1.65,.72,tunnelBlend);sun.intensity=THREE.MathUtils.lerp(2.1,.55,tunnelBlend);
   lane=THREE.MathUtils.damp(lane,laneTarget,13,dt);
   const f=frame(distance,lane);
   player.position.set(f.x,f.y+.04,f.z);player.rotation.y=Math.atan2(-f.tx,-f.tz);
