@@ -51,7 +51,7 @@ const root=$('game');
 const TOTAL=3000; // Extended continuous route, longer than the previous 2,666m level.
 const mobile=matchMedia('(max-width:900px), (pointer:coarse)').matches;
 const scene=new THREE.Scene();const daySky=new THREE.Color(0x9bc8d8),nightSky=new THREE.Color(0x101b35);scene.background=daySky.clone();scene.fog=new THREE.Fog(daySky,95,330);
-const camera=new THREE.PerspectiveCamera(mobile?72:62,innerWidth/innerHeight,.1,500);
+const camera=new THREE.PerspectiveCamera(mobile?68:62,innerWidth/innerHeight,.1,500);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1:1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=false;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;root.appendChild(renderer.domElement);
 const hemi=new THREE.HemisphereLight(0xd9efff,0x52604e,1.65);scene.add(hemi);
@@ -74,7 +74,7 @@ function routePoint(d){
 }
 function roadHeight(d){
  const hill=(a,b,h)=>h*smooth(a,a+45,d)*(1-smooth(b-45,b,d));
- return hill(250,470,7)+hill(1080,1320,10)-hill(1660,1880,6)+hill(2180,2380,8);
+ return hill(250,470,7)+hill(1080,1320,10)+hill(1660,1880,6)+hill(2180,2380,8);
 }
 function frame(d,lateral=0){
  d=THREE.MathUtils.clamp(d,0,TOTAL);
@@ -281,7 +281,7 @@ function updateTownAudio(dt,d){if(!audioCtx||!soundEnabled)return;setAmbience(d)
 soundButton.addEventListener('click',()=>{soundEnabled=!soundEnabled;soundButton.textContent=soundEnabled?'SOUND ON':'SOUND OFF';soundButton.setAttribute('aria-label',soundEnabled?'Mute sound':'Enable sound');if(soundEnabled){startTownAudio();if(masterGain&&audioCtx)masterGain.gain.setTargetAtTime(.72,audioCtx.currentTime,.08);}else if(masterGain&&audioCtx){masterGain.gain.setTargetAtTime(0,audioCtx.currentTime,.05);}});
 brakeButton.addEventListener('pointerdown',e=>{e.preventDefault();if(running&&!paused)setBrake(true);});
  addEventListener('pointerup',()=>setBrake(false));addEventListener('pointercancel',()=>setBrake(false));
- const startPos=frame(0,0);player.position.set(startPos.x,startPos.y+.04,startPos.z);const cameraDistance=mobile?16:14,cameraHeight=mobile?7.1:6.2;camera.position.set(startPos.x-startPos.tx*cameraDistance,cameraHeight,startPos.z-startPos.tz*cameraDistance);camera.lookAt(startPos.x+startPos.tx*5,1.3,startPos.z+startPos.tz*5);
+ const startPos=frame(0,0);player.position.set(startPos.x,startPos.y+.04,startPos.z);const cameraDistance=mobile?13:14,cameraHeight=mobile?5.8:6.2;camera.position.set(startPos.x-startPos.tx*cameraDistance,cameraHeight,startPos.z-startPos.tz*cameraDistance);camera.lookAt(startPos.x+startPos.tx*5,1.3,startPos.z+startPos.tz*5);
 function setLane(delta){laneTarget=THREE.MathUtils.clamp(laneTarget+delta,-3.15,3.15);laneTarget=Math.round(laneTarget/3.15)*3.15;}
 function jump(){if(running&&!paused&&grounded){soundEvent('jump');vertical=9.3;grounded=false;jumpTimer=.72;diveTimer=0;}}
 function dive(){if(!running||paused)return;soundEvent('dive');if(grounded)diveTimer=.78;else vertical=Math.min(vertical,-8);}
@@ -311,7 +311,7 @@ const clock=new THREE.Clock();let last=0;
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.1);if(running&&!paused&&!finished&&!failed){elapsed+=dt;const currentSpeed=(brakeHeld||keys.KeyS||keys.KeyB)?BRAKE_SPEED:NORMAL_SPEED;distance=Math.min(TOTAL,distance+currentSpeed*dt);if(!brakeHeld&&!(keys.KeyS||keys.KeyB))brakeReadout.textContent='14 m/s · NORMAL';const night=smooth(850,1050,distance);scene.background.copy(daySky).lerp(nightSky,night);scene.fog.color.copy(daySky).lerp(nightSky,night);hemi.intensity=THREE.MathUtils.lerp(1.65,.48,night);sun.intensity=THREE.MathUtils.lerp(2.1,.16,night);streetLampMat.emissiveIntensity=night*.95;for(const glow of nightLights)glow.intensity=night*2.0;if(jumpTimer>0)jumpTimer=Math.max(0,jumpTimer-dt);if(!grounded){player.position.y+=vertical*dt;vertical-=20*dt;if(player.position.y<=.04){player.position.y=frame(distance,lane).y+.04;vertical=0;grounded=true;soundEvent('land');}}if(diveTimer>0)diveTimer=Math.max(0,diveTimer-dt);lane=THREE.MathUtils.damp(lane,laneTarget,13,dt);const f=frame(distance,lane);player.position.x=f.x;player.position.y=f.y+.04+(grounded?0:player.position.y-(roadHeight(distance)+.04));player.position.z=f.z;player.rotation.y=f.yaw;updateTraffic(dt);const hit=collide();if(hit){soundEvent('hit');failed=true;running=false;$('failedText').textContent=hit;$('failed').classList.remove('hidden');}else{points+=Math.floor(dt*12);$('points').textContent=String(points);$('time').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');$('distance').textContent=Math.floor(distance)+'m';const pct=distance/TOTAL*100;$('progress').style.width=pct+'%';$('percent').textContent=Math.floor(pct)+'%';if(distance>=TOTAL){distance=TOTAL;for(const car of traffic)car.mesh.visible=false;soundEvent('finish');running=false;finished=true;$('resultText').textContent='You completed '+TOTAL+'m of continuous town road in '+$('time').textContent+'. This preview does not issue rewards.';$('result').classList.remove('hidden');}}
  }
  updateTownAudio(dt,distance);if(running&&!paused)updateWalkers(dt);const f=frame(distance,lane);const target=new THREE.Vector3(f.x-f.tx*cameraDistance,player.position.y+cameraHeight,f.z-f.tz*cameraDistance);camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.x+f.tx*5,player.position.y+1.3,player.position.z+f.tz*5);if(mixer)mixer.update(dt);renderer.render(scene,camera);}
-renderer.render(scene,camera);animate();addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();camera.fov=mobile?72:62;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1:1.25));renderer.setSize(innerWidth,innerHeight);});
+renderer.render(scene,camera);animate();addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();camera.fov=mobile?68:62;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1:1.25));renderer.setSize(innerWidth,innerHeight);});
 </script>
 </body>
 </html>
