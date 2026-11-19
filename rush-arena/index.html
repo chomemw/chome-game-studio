@@ -246,13 +246,13 @@ const zoneMaterials={
  hazard:mat(0xe7b84f,.65),dark:mat(0x27313a,.88),sand:mat(0x9b8a68,.94)
 };
 function zoneBox(w,h,d,material,distance,lateral,yOffset=0){
- const f=frame(distance,lateral);
+ const f=frame(distance,0);
  const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
  mesh.position.set(f.x+f.nx*lateral,f.y+yOffset+h/2,f.z+f.nz*lateral);
  mesh.rotation.y=f.yaw;mesh.castShadow=false;mesh.receiveShadow=true;scene.add(mesh);return mesh;
 }
 function zoneCylinder(rt,rb,h,material,distance,lateral,yOffset=0){
- const f=frame(distance,lateral),mesh=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,10),material);
+ const f=frame(distance,0),mesh=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,10),material);
  mesh.position.set(f.x+f.nx*lateral,f.y+yOffset+h/2,f.z+f.nz*lateral);
  mesh.rotation.y=f.yaw;scene.add(mesh);return mesh;
 }
