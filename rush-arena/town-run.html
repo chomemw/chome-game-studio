@@ -48,7 +48,7 @@ catch(e){THREE=await import('https://unpkg.com/three@0.160.0/build/three.module.
 const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
 const $=id=>document.getElementById(id);
 const root=$('game');
-const TOTAL=1500; // Longer continuous route with a dedicated night-town district.
+const TOTAL=1900; // Extended continuous route, longer than the previous 1,500m version.
 const mobile=matchMedia('(max-width:900px), (pointer:coarse)').matches;
 const scene=new THREE.Scene();const daySky=new THREE.Color(0x9bc8d8),nightSky=new THREE.Color(0x101b35);scene.background=daySky.clone();scene.fog=new THREE.Fog(daySky,95,330);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,500);
@@ -61,7 +61,7 @@ const asphalt=mat(0x30363b,.92),asphaltEdge=mat(0x555d60,.9),concrete=mat(0xaaa9
 const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;};
 const cylinder=(r1,r2,h,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,12),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o;};
 // One mathematically continuous centerline. Curvature is smooth at every authored control point.
-const controls=[{d:0,x:0},{d:150,x:0},{d:280,x:10},{d:420,x:18},{d:560,x:18},{d:700,x:4},{d:850,x:-9},{d:970,x:-6},{d:1064,x:0},{d:1160,x:9},{d:1260,x:18},{d:1380,x:10},{d:1500,x:-2}];
+const controls=[{d:0,x:0},{d:150,x:0},{d:280,x:10},{d:420,x:18},{d:560,x:18},{d:700,x:4},{d:850,x:-9},{d:970,x:-6},{d:1064,x:0},{d:1160,x:9},{d:1260,x:18},{d:1380,x:10},{d:1500,x:-2},{d:1620,x:-13},{d:1740,x:-18},{d:1840,x:-7},{d:1900,x:0}];
 function smooth(a,b,t){const q=THREE.MathUtils.clamp((t-a)/(b-a),0,1);return q*q*(3-2*q);}
 function centerX(d){let i=0;while(i<controls.length-2&&d>controls[i+1].d)i++;const a=controls[i],b=controls[i+1];return THREE.MathUtils.lerp(a.x,b.x,smooth(a.d,b.d,d));}
 function frame(d,lateral=0){const x=centerX(d),ahead=centerX(Math.min(TOTAL,d+1)),behind=centerX(Math.max(0,d-1));const dx=(ahead-behind)/Math.max(1,Math.min(TOTAL,d+1)-Math.max(0,d-1));const len=Math.hypot(dx,1),tx=dx/len,tz=-1/len,nx=1/len,nz=dx/len;return{x:x+nx*lateral,z:-d+nz*lateral,y:0,tx,tz,nx,nz,yaw:Math.atan2(tx,-tz)};}
@@ -162,7 +162,7 @@ function updateWalkers(dt){
 sign(42,-1,'TOWN CENTRE');sign(300,1,'SLOW · TRAFFIC');sign(510,-1,'BRIDGE AHEAD',red);sign(780,1,'ROAD WORKS',orange);sign(1015,-1,'NIGHT DISTRICT',blue);sign(1190,1,'MARKET STREET',orange);sign(1390,-1,'TOWN OUTSKIRTS',blue);
 // Warm street lighting marks the night district; lights fade in as daylight disappears.
 const nightLights=[];for(const d of [1040,1130,1220,1310,1400,1480]){const f=frame(d);const glow=new THREE.PointLight(0xffc879,0,38,2);glow.position.set(f.x,6.5,f.z);scene.add(glow);nightLights.push(glow);}
-// Solid full-width finish wall just beyond the 1,500m route. The player stops at
+// Solid full-width finish wall just beyond the 1,900m route. The player stops at
 // the route end with the wall directly ahead; no opening or drive-through gap.
 const finishFrame=frame(TOTAL);
 const finishStructure=new THREE.Group();
@@ -177,7 +177,7 @@ const finishCanvas=document.createElement('canvas');finishCanvas.width=1024;fini
 const finishCtx=finishCanvas.getContext('2d');
 finishCtx.fillStyle='#172536';finishCtx.fillRect(0,0,1024,256);
 finishCtx.fillStyle='#f7f1df';finishCtx.font='900 112px Arial';finishCtx.textAlign='center';finishCtx.textBaseline='middle';
-finishCtx.fillText('FINISH  ·  1500m',512,128);
+finishCtx.fillText('FINISH  ·  1900m',512,128);
 const finishTexture=new THREE.CanvasTexture(finishCanvas);
 const finishSign=new THREE.Mesh(new THREE.PlaneGeometry(8.8,2.2),new THREE.MeshBasicMaterial({map:finishTexture}));
 finishSign.position.set(0,3.55,.545);finishStructure.add(finishSign);
@@ -198,10 +198,10 @@ function trafficCar(d,lane,color,speed){
  const item={mesh:g,d,initialD:d,lastGap:d,lane,speed,baseSpeed:speed,baseLane:lane,phase:Math.random()*6.28,passed:false,paintColor:color};
  traffic.push(item);
 }
-const barrierRows=[[188,[-3.15,0]],[365,[0,3.15]],[468,[-3.15,3.15]],[758,[-3.15,0]],[902,[0,3.15]],[990,[-3.15,3.15]],[1115,[0,3.15]],[1285,[-3.15,0]],[1435,[-3.15,3.15]]];
+const barrierRows=[[188,[-3.15,0]],[365,[0,3.15]],[468,[-3.15,3.15]],[758,[-3.15,0]],[902,[0,3.15]],[990,[-3.15,3.15]],[1115,[0,3.15]],[1285,[-3.15,0]],[1435,[-3.15,3.15]],[1585,[-3.15,0]],[1735,[0,3.15]],[1850,[-3.15,3.15]]];
 for(const [d,blocked] of barrierRows){blocked.forEach(l=>plasticBarrier(d,l));}
 plasticBarrier(805,-3.15);plasticBarrier(805,0); // Keep the right lane open through this work zone so the player has a fair, visible route.
-for(const [d,l,c,s] of [[65,-3.15,0x2676a5,3.5],[135,3.15,0xb94e39,4],[205,0,0x7a8792,3.2],[275,-3.15,0xd4a32f,4.4],[345,3.15,0x287a59,3.6],[415,0,0xb94e39,4.2],[485,-3.15,0x4d6eaa,3.4],[555,3.15,0xb9bfc5,4.5],[625,0,0x2676a5,3.7],[695,-3.15,0xb94e39,4.1],[765,3.15,0x7a8792,3.3],[835,0,0xd4a32f,4.3],[905,-3.15,0x287a59,3.5],[975,3.15,0xb94e39,4],[1060,-3.15,0x2676a5,3.6],[1145,3.15,0xd4a32f,4.1],[1225,0,0xb94e39,3.5],[1305,-3.15,0x287a59,4.2],[1375,3.15,0x7a8792,3.4],[1460,-3.15,0x2676a5,4]])trafficCar(d,l,c,s);
+for(const [d,l,c,s] of [[65,-3.15,0x2676a5,8],[135,3.15,0xb94e39,16],[205,0,0x7a8792,11],[275,-3.15,0xd4a32f,18],[345,3.15,0x287a59,9],[415,0,0xb94e39,14],[485,-3.15,0x4d6eaa,17],[555,3.15,0xb9bfc5,10],[625,0,0x2676a5,15],[695,-3.15,0xb94e39,8.5],[765,3.15,0x7a8792,18],[835,0,0xd4a32f,12],[905,-3.15,0x287a59,16.5],[975,3.15,0xb94e39,9.5],[1060,-3.15,0x2676a5,17.5],[1145,3.15,0xd4a32f,11],[1225,0,0xb94e39,15.5],[1305,-3.15,0x287a59,8],[1375,3.15,0x7a8792,18.5],[1460,-3.15,0x2676a5,13],[1545,3.15,0xb94e39,16],[1635,0,0x287a59,9],[1720,-3.15,0x7a8792,18],[1805,3.15,0xd4a32f,12],[1880,0,0x2676a5,15]])trafficCar(d,l,c,s);
  // Keep the only open lane clear around every barrier approach. Traffic is moved into a blocked lane during these safety windows.
  const safeWindows=[...barrierRows,[805,[-3.15,0]]].map(([d,blocked])=>({from:d-65,to:d+12,safe:lanes.find(l=>!blocked.includes(l)),blocked}));
  for(const car of traffic){const window=safeWindows.find(w=>car.d>=w.from&&car.d<=w.to&&car.lane===w.safe);if(window){car.lane=window.blocked[0];car.baseLane=car.lane;}}
@@ -235,7 +235,7 @@ trafficModelUrls.forEach((url,index)=>{
   });
  },undefined,error=>console.warn('Town Run traffic model failed to load:',url,error));
 });
-// Town traffic moves in the same direction at a lower speed, so the runner can overtake it.
+// Town traffic runs at varied speeds: slower vehicles can be overtaken, while faster vehicles pull ahead.
 const player=new THREE.Group();scene.add(player);const body=new THREE.Group();player.add(body);let mixer=null,runAction=null;
 const runnerLoader=new GLTFLoader();runnerLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',gltf=>{const model=gltf.scene;model.rotation.y=0; // Face forward down the road.
 model.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(model),height=Math.max(.01,bounds.max.y-bounds.min.y);model.scale.setScalar(3.05/height);model.position.y=-bounds.min.y*model.scale.y;model.traverse(n=>{if(n.isMesh){n.castShadow=false;n.receiveShadow=false;}});body.add(model);mixer=new THREE.AnimationMixer(model);const clip=gltf.animations.find(a=>/run/i.test(a.name))||gltf.animations[0];if(clip){runAction=mixer.clipAction(clip);runAction.play();}},undefined,e=>console.warn('Runner model did not load; using fallback runner.',e));
@@ -270,7 +270,7 @@ function dive(){if(!running||paused)return;soundEvent('dive');if(grounded)diveTi
 function collide(){const px=player.position.x,pz=player.position.z;for(const o of obstacles){if(Math.abs(o.d-distance)<2.1&&Math.abs(lane-o.lane)<(o.width/2+.55)){if(o.kind==='barrier'&&jumpTimer>.18)continue;if(o.kind==='cone'&&jumpTimer>.12)continue;return 'You hit a roadworks barrier or cone.';}}
  for(const car of traffic){const gap=car.d-distance;if(Math.abs(gap)<3.05&&Math.abs(lane-car.lane)<1.55){if(gap<0){car.passed=true;continue;}return 'A moving vehicle entered your running lane. Change lanes and overtake safely.';}}
  return '';}
-function updateTraffic(dt){for(const car of traffic){const previousGap=car.lastGap;car.d+=car.speed*dt;if(car.d<distance-14){car.d=distance+150+Math.random()*90;car.lane=lanes[Math.floor(Math.random()*lanes.length)];car.speed=3.2+Math.random()*1.3;car.passed=false;car.lastGap=car.d-distance;}else{const gap=car.d-distance;if(!car.passed&&previousGap>=0&&gap<0){if(Math.abs(lane-car.lane)<=4.8)soundEvent('overtake');car.passed=true;}car.lastGap=gap;}car.mesh.visible=car.d<TOTAL&&!finished;const f=frame(Math.min(car.d,TOTAL),car.lane);car.mesh.position.set(f.x,0,f.z);car.mesh.rotation.y=f.yaw;}}
+function updateTraffic(dt){for(const car of traffic){const previousGap=car.lastGap;car.d+=car.speed*dt;if(car.d<distance-14){car.d=distance+150+Math.random()*90;car.lane=lanes[Math.floor(Math.random()*lanes.length)];car.speed=7.5+Math.random()*11.5;car.passed=false;car.lastGap=car.d-distance;}else{const gap=car.d-distance;if(!car.passed&&((previousGap>=0&&gap<0)||(previousGap<=0&&gap>0))){if(Math.abs(lane-car.lane)<=4.8)soundEvent('overtake');car.passed=true;}car.lastGap=gap;}car.mesh.visible=car.d<TOTAL&&!finished;const f=frame(Math.min(car.d,TOTAL),car.lane);car.mesh.position.set(f.x,0,f.z);car.mesh.rotation.y=f.yaw;}}
 function startRun(){setBrake(false);distance=0;lane=0;laneTarget=0;vertical=0;grounded=true;jumpTimer=0;diveTimer=0;elapsed=0;points=0;running=true;paused=false;finished=false;failed=false;for(const car of traffic){car.d=car.initialD;car.lastGap=car.initialD;car.lane=car.baseLane;car.speed=car.baseSpeed;car.passed=false;car.mesh.visible=true;const cf=frame(car.d,car.lane);car.mesh.position.set(cf.x,0,cf.z);car.mesh.rotation.y=cf.yaw;}player.position.copy(new THREE.Vector3(frame(0,0).x,.04,frame(0,0).z));$('welcome').classList.add('hidden');$('result').classList.add('hidden');$('failed').classList.add('hidden');$('pause').classList.add('hidden');}
 async function verifyAdmin(){const {data:{session},error}=await supabase.auth.getSession();if(error||!session){$('bootStatus').textContent='Administrator sign-in required. Sign in, then reopen Level 6.';return false;}const {error:adminError}=await supabase.rpc('get_chome_admin_overview');if(adminError){$('bootStatus').textContent='Access denied. Level 6 is restricted to CHOME administrators.';return false;}return true;}
 async function reset(){running=false;startTownAudio();$('bootStatus').textContent='Verifying administrator access…';if(!await verifyAdmin())return;if(masterGain&&audioCtx)masterGain.gain.setTargetAtTime(.72,audioCtx.currentTime,.12);startRun();}
