@@ -3,853 +3,202 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#101a35">
-<title>CHOME Rush Arena — Prototype</title>
+<meta name="theme-color" content="#111827">
+<title>CHOME Rush Arena — Level 1 Road Test</title>
 <style>
-:root{color-scheme:dark;--ink:#f8fbff;--muted:#b9c6e2;--panel:#101a35dc;--line:#ffffff30;--purple:#8c70ff;--cyan:#65e4ef;--gold:#ffe18a}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#91d8f2;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}button{font:inherit;color:inherit;cursor:pointer}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}
+:root{color-scheme:dark;--panel:#111c30dc;--line:#ffffff30;--muted:#c3cce0}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#9bc4d0;color:#fff;font-family:Inter,system-ui,sans-serif;touch-action:none}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}
 .hud{position:fixed;inset:0;pointer-events:none;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);display:flex;flex-direction:column;justify-content:space-between}
-.top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-top:12px}.brand,.stat,.race-pill{background:var(--panel);border:1px solid var(--line);box-shadow:0 12px 35px #0b173a35;backdrop-filter:blur(14px);border-radius:15px}
-.brand{padding:10px 14px;font-weight:1000;letter-spacing:.13em;font-size:12px}.brand span{color:#b8a8ff}.stats{display:flex;gap:8px}.stat{min-width:84px;padding:8px 12px;text-align:center}.stat small{display:block;color:var(--muted);font-size:9px;letter-spacing:.13em;font-weight:900}.stat b{display:block;font-size:19px;margin-top:2px}.race-pill{padding:10px 13px;font-size:10px;font-weight:950;letter-spacing:.1em;color:#d9faff}
-.progress-wrap{position:absolute;top:88px;left:50%;transform:translateX(-50%);width:min(390px,54vw);background:#101a35b8;border:1px solid var(--line);padding:8px 12px;border-radius:13px}.progress-label{display:flex;justify-content:space-between;font-size:9px;font-weight:900;letter-spacing:.1em;color:#e9f7ff;margin-bottom:6px}.progress-track{height:7px;border-radius:9px;background:#ffffff30;overflow:hidden}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#5ee8e0,#a5ffb6,#ffe17e);border-radius:9px;transition:width .12s}
-.bottom{display:flex;align-items:flex-end;justify-content:flex-start;padding:0 2px 18px;gap:12px}.hint{max-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:10px 13px;color:#dbe8ff;font-size:10px;line-height:1.5}
-/* Mobile movement is gesture-based; no virtual joystick or action buttons. */
-.overlay{position:fixed;inset:0;display:grid;place-items:center;padding:18px;background:linear-gradient(180deg,#101b35a8,#101b35bd);backdrop-filter:blur(9px);z-index:5}.dialog{width:min(470px,100%);padding:28px;border:1px solid #ffffff45;border-radius:25px;background:linear-gradient(145deg,#1d3157f2,#111a35f5);box-shadow:0 30px 90px #06112c88;text-align:center}.eyebrow{font-size:10px;letter-spacing:.24em;font-weight:1000;color:#9ff2ee}.dialog h1{font-size:clamp(35px,9vw,55px);line-height:.92;letter-spacing:-.075em;margin:13px 0}.dialog h1 span{color:#a995ff}.dialog p{color:#c3d0e9;font-size:13px;line-height:1.7;margin:12px auto 22px;max-width:360px}.primary{border:0;border-radius:13px;padding:14px 22px;background:linear-gradient(100deg,#8d70ff,#5c8fff);font-weight:1000;letter-spacing:.1em;box-shadow:0 12px 28px #6c5ae955}.small{display:block;color:#aebbd5;font-size:10px;margin-top:13px}.hidden{display:none!important}
-@media(max-width:620px){.top{align-items:flex-start}.stats{gap:5px}.stat{min-width:64px;padding:7px 8px}.stat b{font-size:16px}.race-pill{display:none}.progress-wrap{top:82px;width:58vw}.hint{display:none}.bottom{padding-bottom:calc(12px + env(safe-area-inset-bottom))}}
-@media(min-width:900px){.hud{padding-left:26px;padding-right:26px}.bottom{padding-bottom:25px}}
-
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding-top:12px}.brand,.stat,.pill{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(12px);border-radius:13px;box-shadow:0 10px 30px #07132335}.brand{padding:10px 13px;font-size:11px;font-weight:1000;letter-spacing:.13em;white-space:nowrap}.brand span{color:#b8a8ff}.stats{display:flex;gap:6px}.stat{min-width:67px;padding:7px 9px;text-align:center}.stat small{display:block;font-size:8px;color:var(--muted);font-weight:900;letter-spacing:.12em}.stat b{display:block;font-size:17px;margin-top:2px}.pill{padding:9px 11px;font-size:9px;font-weight:950;letter-spacing:.1em;color:#d8ffff}
+.progress-wrap{position:absolute;top:83px;left:50%;transform:translateX(-50%);width:min(420px,55vw);padding:8px 11px;border:1px solid var(--line);border-radius:12px;background:#101b30bd}.progress-label{display:flex;justify-content:space-between;font-size:9px;font-weight:950;letter-spacing:.1em;margin-bottom:6px}.track{height:7px;border-radius:8px;background:#ffffff30;overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,#69e6dd,#b4ffad,#ffe18a)}
+.bottom{display:flex;justify-content:center;align-items:flex-end;padding:0 2px 16px;gap:12px}.hint{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:10px;line-height:1.55;color:#e4efff;text-align:center}
+.overlay{position:fixed;inset:0;display:grid;place-items:center;padding:18px;background:#081323a8;backdrop-filter:blur(9px);z-index:5}.dialog{width:min(480px,100%);padding:27px;border:1px solid #ffffff45;border-radius:23px;background:linear-gradient(145deg,#203653f5,#111b30f7);box-shadow:0 28px 80px #06112c99;text-align:center}.eyebrow{font-size:10px;letter-spacing:.22em;font-weight:1000;color:#9ff2ee}.dialog h1{font-size:clamp(34px,8vw,54px);line-height:.94;letter-spacing:-.07em;margin:13px 0}.dialog h1 span{color:#aa98ff}.dialog p{color:#cad7e9;font-size:13px;line-height:1.7;margin:12px auto 20px;max-width:390px}.primary{border:0;border-radius:12px;padding:14px 22px;background:linear-gradient(100deg,#8d70ff,#4f94e9);font-weight:1000;letter-spacing:.1em;color:#fff}.small{display:block;color:#aebbd5;font-size:10px;margin-top:12px}.hidden{display:none!important}
+@media(max-width:650px){.top{align-items:flex-start}.stats{gap:4px}.stat{min-width:51px;padding:7px 5px}.stat b{font-size:14px}.stat small{font-size:7px}.pill{display:none}.brand{font-size:9px;padding:9px 8px}.progress-wrap{top:78px;width:58vw}.hint{font-size:9px}.bottom{padding-bottom:calc(12px + env(safe-area-inset-bottom))}}
 </style>
 </head>
 <body>
 <div id="game"></div>
 <div class="hud">
-  <div class="top">
-    <div class="brand">CHOME <span>RUSH ARENA</span></div>
-    <div class="stats"><div class="stat"><small>TIME</small><b id="time">00:00</b></div><div class="stat"><small>POINTS</small><b id="points">0</b></div><div class="stat"><small>CHOX</small><b id="chox">0</b></div><div class="stat"><small>CHECKPOINT</small><b id="checkpoint">0/7</b></div></div>
-    <div class="race-pill">SOLO PRACTICE · PROTOTYPE</div>
-  </div>
-  <div class="progress-wrap"><div class="progress-label"><span>COURSE PROGRESS</span><span id="percent">0%</span></div><div class="progress-track"><div class="progress-fill" id="progress"></div></div></div>
-  <div class="bottom">
-    <div class="hint">SWIPE LEFT / RIGHT: STEER<br>SWIPE UP: JUMP · SWIPE DOWN: DIVE<br>Desktop: WASD / ARROWS · SPACE / SHIFT</div>
-  </div>
+ <div class="top"><div class="brand">CHOME <span>RUSH ARENA · LEVEL 1</span></div><div class="stats"><div class="stat"><small>TIME</small><b id="time">00:00</b></div><div class="stat"><small>DISTANCE</small><b id="distance">0m</b></div><div class="stat"><small>ROUTE</small><b id="percent">0%</b></div></div><div class="pill">ADMIN ROAD TEST</div></div>
+ <div class="progress-wrap"><div class="progress-label"><span>LEVEL 6 ROAD · LEVEL 1 TEST</span><span id="progressText">0%</span></div><div class="track"><div class="fill" id="progress"></div></div></div>
+ <div class="bottom"><div class="hint">SWIPE LEFT / RIGHT TO CHANGE LANES · DESKTOP: ← / →</div></div>
 </div>
-<div class="overlay" id="welcome">
-  <div class="dialog">
-    <div class="eyebrow">CHOME GAME STUDIO PRESENTS</div>
-    <h1>RUSH <span>ARENA</span></h1>
-    <p>Welcome to Rush Arena. Your Soldier is ready. Learn how rewards work, then take on Level 1.</p>
-    <button class="primary" id="start">ENTER RUSH ARENA</button>
-    <span class="small">One Soldier. One arena. Ready to run.</span>
-    <span class="small" id="bootStatus" role="status" aria-live="polite">Preparing your arena…</span>
-  </div>
-</div>
-<div class="overlay hidden" id="rewardIntro">
-  <div class="dialog">
-    <div class="eyebrow">BEFORE THE START</div>
-    <h1>RUN. EARN. <span>RISE.</span></h1>
-    <p><b>Game Points:</b> Earn points from completed runs and eligible in-game objectives. Points can also be earned when replaying a level.</p>
-    <p><b>CHOX:</b> Receive the CHOX first-completion reward once when you successfully complete a level for the first time. Replaying a completed level does not pay that first-completion CHOX again.</p>
-    <p><b>Controls:</b> Swipe left or right to steer, swipe up to jump and swipe down to dive/slide. Desktop players can use WASD / arrow keys, SPACE and SHIFT.</p>
-    <button class="primary" id="startLevelOne">START LEVEL 1</button>
-    <span class="small">Your run and eligible rewards are verified by CHOME.</span>
-  </div>
-</div>
-<div class="overlay hidden" id="result">
-  <div class="dialog">
-    <div class="eyebrow">COURSE COMPLETE</div>
-    <h1>YOU <span>MADE IT!</span></h1>
-    <p id="resultText">You reached the finish line.</p>
-    <button class="primary" id="again">REPLAY LEVEL</button>
-    <button class="primary" id="levelSelect" style="margin-top:10px;background:linear-gradient(100deg,#53647c,#34465e)">LEVEL SELECT</button>
-    <span class="small">CHOX is paid once on first completion. Game Points can be earned on every completed run.</span>
-  </div>
-</div>
-<div class="overlay hidden" id="failed"><div class="dialog"><div class="eyebrow">RUN INTERRUPTED</div><h1>GAME <span>FAILED</span></h1><p id="failedText">You hit an obstacle.</p><button class="primary" id="continueRun">CONTINUE</button><button class="primary" id="restartFailed" style="margin-top:10px;background:linear-gradient(100deg,#53647c,#34465e)">START AGAIN</button><span class="small" id="continueNote">Continue rewards will be supported by an ad later.</span></div></div>
-<div class="overlay hidden" id="pause">
-  <div class="dialog"><div class="eyebrow">TAKE A BREATHER</div><h1>PAUSED</h1><p>Your run is waiting.</p><button class="primary" id="resume">RESUME</button></div>
-</div>
+<div class="overlay" id="welcome"><div class="dialog"><div class="eyebrow">CHOME GAME STUDIO · ADMIN TEST</div><h1>ROAD <span>TEST</span></h1><p>Level 1 is temporarily running the complete Level 6 road route and player movement. This test contains only the continuous road and the runner—no obstacles, traffic, barriers or rewards.</p><button class="primary" id="start">START ROAD TEST</button><span class="small" id="bootStatus">Checking administrator access…</span></div></div>
+<div class="overlay hidden" id="result"><div class="dialog"><div class="eyebrow">ROAD TEST COMPLETE</div><h1>ROUTE <span>COMPLETE</span></h1><p id="resultText">You completed the continuous road route.</p><button class="primary" id="again">RUN AGAIN</button><button class="primary" id="levelSelect" style="margin-top:10px;background:linear-gradient(100deg,#53647c,#34465e)">LEVEL SELECT</button><span class="small">Admin test only · No CHOX or player rewards are issued.</span></div></div>
 <script>
 (() => {
-  const button = document.getElementById('start');
-  const status = document.getElementById('bootStatus');
-  const report = message => { if (status) status.textContent = message; };
-  window.__rushBootError = '';
-  button.addEventListener('click', () => {
-    window.__rushEnterRequested = true;
-    report(window.__rushBootError || 'Opening Rush Arena…');
-  });
-  window.addEventListener('error', event => {
-    window.__rushBootError = 'Game startup failed: ' + (event.message || 'A script failed to load.');
-    report(window.__rushBootError);
-  });
-  window.addEventListener('unhandledrejection', event => {
-    const reason = event.reason && (event.reason.message || String(event.reason));
-    window.__rushBootError = 'Game startup failed: ' + (reason || 'A required resource could not load.');
-    report(window.__rushBootError);
-  });
+ const status=document.getElementById('bootStatus');
+ document.getElementById('start').addEventListener('click',()=>{if(typeof window.__rushStart==='function')window.__rushStart();else status.textContent=window.__rushBootError||'Preparing the Level 6 road…';});
+ window.addEventListener('error',e=>{const where=e.filename?(' at '+e.filename.split('/').pop()+':'+(e.lineno||'?')+':'+(e.colno||'?')):'';window.__rushBootError='Startup error: '+(e.message||'script failed')+where;status.textContent=window.__rushBootError;});
+ window.addEventListener('unhandledrejection',e=>{window.__rushBootError='Startup error: '+(e.reason?.message||String(e.reason||'resource failed'));status.textContent=window.__rushBootError;});
 })();
 </script>
 <script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
-  }
-}
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
 </script>
 <script type="module">
-// Load the 3D engine with a second CDN fallback. A failed first CDN must not
-// silently prevent the entire game module from starting.
-// Load Supabase independently from the 3D engine. A temporary CDN failure
-// must not abort the entire page before the game can show its startup screen.
-let supabase = null;
-let supabaseLoadError = null;
-try {
-  let supabaseSdk;
-  try {
-    supabaseSdk = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-  } catch (primarySupabaseError) {
-    supabaseSdk = await import('https://esm.sh/@supabase/supabase-js@2');
-  }
-  supabase = supabaseSdk.createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
-} catch (supabaseError) {
-  supabaseLoadError = supabaseError;
-  console.error('CHOME account services could not load:', supabaseError);
-}
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 let THREE;
-try {
-  THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
-} catch (primaryEngineError) {
-  try {
-    THREE = await import('https://unpkg.com/three@0.160.0/build/three.module.js');
-  } catch (fallbackEngineError) {
-    const detail = fallbackEngineError && (fallbackEngineError.message || String(fallbackEngineError));
-    const message = 'Could not load the 3D engine from either source. Check your connection and reload. ' + (detail || '');
-    const status = document.getElementById('bootStatus');
-    if (status) status.textContent = message;
-    window.__rushBootError = message;
-    throw new Error(message);
-  }
-}
-
-const root=document.getElementById('game');
-const level=Math.max(1,Math.min(250,Number(new URLSearchParams(location.search).get('level'))||1));
-// Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
-const obstacleInspectionMode=true;
-const scene=new THREE.Scene();scene.background=new THREE.Color(0xa9c2d0);scene.fog=new THREE.Fog(0xa9c2d0,42,155);
-const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,260);
-const mobileDevice=matchMedia('(max-width: 900px), (pointer: coarse)').matches;
-const renderer=new THREE.WebGLRenderer({antialias:!mobileDevice,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=!mobileDevice;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;root.appendChild(renderer.domElement);
-const hemisphere=new THREE.HemisphereLight(0xb8c8d8,0x202832,1.05);scene.add(hemisphere);
-const sun=new THREE.DirectionalLight(0xb7c8dc,1.75);sun.position.set(-18,34,22);sun.castShadow=true;sun.shadow.mapSize.set(mobileDevice?512:768,mobileDevice?512:768);sun.shadow.bias=-0.00015;sun.shadow.camera.left=-28;sun.shadow.camera.right=28;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-110;scene.add(sun);
-const mat=(color,roughness=.78,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
-// Permanent storm atmosphere: lightweight rain streaks follow the runner.
-const rainCount=mobileDevice?90:200,rainPositions=new Float32Array(rainCount*6),rainGeometry=new THREE.BufferGeometry();
-const rainSeed=[];
-for(let i=0;i<rainCount;i++){
-  rainSeed.push({x:(Math.random()-.5)*22,y:Math.random()*17,z:(Math.random()-.5)*38,v:12+Math.random()*9});
-}
-rainGeometry.setAttribute('position',new THREE.BufferAttribute(rainPositions,3));
-rainGeometry.setDrawRange(0,rainCount*2);
-const rainMaterial=new THREE.LineBasicMaterial({color:0xb8d8ed,transparent:true,opacity:.42,depthWrite:false});
-const rainField=new THREE.LineSegments(rainGeometry,rainMaterial);rainField.frustumCulled=false;scene.add(rainField);
-const stormFlashLight=new THREE.PointLight(0xdcecff,0,95,1.5);scene.add(stormFlashLight);
-let lightningTimer=7+Math.random()*6,lightningFlash=0,thunderPending=0;
-const weatherLabel=document.createElement('div');weatherLabel.textContent='⛈  STORM CONDITIONS';
-Object.assign(weatherLabel.style,{position:'fixed',left:'12px',top:'54px',zIndex:'45',padding:'7px 10px',border:'1px solid rgba(173,204,224,.28)',borderRadius:'9px',background:'rgba(12,22,32,.58)',color:'#d8e8f4',font:'800 10px system-ui',letterSpacing:'.12em',pointerEvents:'none',backdropFilter:'blur(5px)'});
-document.body.appendChild(weatherLabel);
-if(obstacleInspectionMode){const inspectionLabel=document.createElement('div');inspectionLabel.textContent='👁 INSPECTION MODE · COLLISIONS OFF';Object.assign(inspectionLabel.style,{position:'fixed',right:'12px',top:'54px',zIndex:'46',padding:'7px 10px',border:'1px solid rgba(120,235,190,.45)',borderRadius:'9px',background:'rgba(8,28,24,.72)',color:'#c8ffe8',font:'800 10px system-ui',letterSpacing:'.08em',pointerEvents:'none',backdropFilter:'blur(5px)'});document.body.appendChild(inspectionLabel)}
-function updateStorm(dt){
-  const p=player.position,arr=rainGeometry.attributes.position.array;
-  for(let i=0;i<rainCount;i++){
-    const r=rainSeed[i];r.y-=r.v*dt;
-    if(r.y<-.8){r.y=14+Math.random()*4;r.x=(Math.random()-.5)*22;r.z=(Math.random()-.5)*38}
-    const k=i*6,x=p.x+r.x,z=p.z+r.z;
-    arr[k]=x;arr[k+1]=r.y;arr[k+2]=z;
-    arr[k+3]=x-.22;arr[k+4]=r.y+.78;arr[k+5]=z+.08;
-  }
-  rainGeometry.attributes.position.needsUpdate=true;
-  rainField.position.set(0,0,0);
-  lightningTimer-=dt;
-  if(lightningTimer<=0){lightningFlash=.18;lightningTimer=9+Math.random()*11;thunderPending=.55+Math.random()*.65}
-  if(lightningFlash>0){
-    lightningFlash=Math.max(0,lightningFlash-dt);
-    const pulse=lightningFlash>.09?3.8:1.6;
-    stormFlashLight.position.set(p.x+1.5,7,p.z-7);
-    stormFlashLight.intensity=pulse;
-    renderer.toneMappingExposure=lightningFlash>.09?1.65:1.32;
-  }else{
-    stormFlashLight.intensity=0;
-    renderer.toneMappingExposure=1.08;
-  }
-  if(thunderPending>0){thunderPending-=dt;if(thunderPending<=0){soundNoise(1.15,.16,260);soundTone(58,32,1.35,.18,'sawtooth',.12)}}
-}
-
-
-// Lightweight rain-splash particle pool. Reuses buffers instead of creating meshes per step.
-const splashCount=mobileDevice?32:64,splashPositions=new Float32Array(splashCount*3),splashVelocities=Array.from({length:splashCount},()=>new THREE.Vector3()),splashLives=new Float32Array(splashCount);
-splashPositions.fill(-1000);
-const splashGeometry=new THREE.BufferGeometry();
-splashGeometry.setAttribute('position',new THREE.BufferAttribute(splashPositions,3));
-const splashMaterial=new THREE.PointsMaterial({color:0xc8eaff,size:.13,transparent:true,opacity:.82,depthWrite:false,sizeAttenuation:true});
-const splashField=new THREE.Points(splashGeometry,splashMaterial);splashField.frustumCulled=false;scene.add(splashField);
-let splashCursor=0;
-function spawnWaterSplash(x,z,count=10){
-  for(let n=0;n<count;n++){
-    const i=splashCursor++%splashCount,k=i*3;
-    splashPositions[k]=x+(Math.random()-.5)*.42;
-    splashPositions[k+1]=.09+Math.random()*.04;
-    splashPositions[k+2]=z+(Math.random()-.5)*.42;
-    const v=splashVelocities[i];v.set((Math.random()-.5)*2.7,.9+Math.random()*2.4,(Math.random()-.5)*2.7);
-    splashLives[i]=.28+Math.random()*.32;
-  }
-  splashGeometry.attributes.position.needsUpdate=true;
-}
-function updateWaterSplashes(dt){
-  let changed=false;
-  for(let i=0;i<splashCount;i++){
-    if(splashLives[i]<=0)continue;
-    splashLives[i]-=dt;
-    const k=i*3,v=splashVelocities[i];
-    splashPositions[k]+=v.x*dt;splashPositions[k+1]+=v.y*dt;splashPositions[k+2]+=v.z*dt;
-    v.y-=7.8*dt;
-    if(splashLives[i]<=0||splashPositions[k+1]<.035){splashLives[i]=0;splashPositions[k+1]=-1000}
-    changed=true;
-  }
-  if(changed)splashGeometry.attributes.position.needsUpdate=true;
-}
-
-function makeRoadTexture(){const c=document.createElement('canvas');c.width=256;c.height=256;const g=c.getContext('2d');g.fillStyle='#343b40';g.fillRect(0,0,256,256);for(let i=0;i<2400;i++){const v=35+Math.random()*45;g.fillStyle='rgba('+v+','+v+','+v+','+(Math.random()*.22)+')';g.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*2,1+Math.random()*2)}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,5);t.colorSpace=THREE.SRGBColorSpace;return t}
-const roadTexture=makeRoadTexture();
-const grass=mat(0x526b58,.96),grass2=mat(0x35483c,.98),side=mat(0x4b555b,.72,.22),path=new THREE.MeshStandardMaterial({map:roadTexture,color:0xb4c0c9,roughness:.58,metalness:.12}),path2=mat(0x777f84,.9),white=mat(0xe8e6dc,.55),gold=mat(0xb78b4d,.38,.62),coral=mat(0xb84f45,.48,.18),purple=mat(0x485c70,.55,.24),cyan=mat(0x8ca6ae,.42,.35),dark=mat(0x222a30,.82);
-const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o};
-const sphere=(r,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,18,14),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o};
-const cylinder=(rt,rb,h,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,16),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o};
-
-// Sky islands and clouds. Cloud puffs share one instanced draw call.
-const sky=new THREE.Mesh(new THREE.SphereGeometry(180,24,16),new THREE.MeshBasicMaterial({color:0x8ed9f4,side:THREE.BackSide}));scene.add(sky);
-const cloudGeometry=new THREE.SphereGeometry(1,12,8);
-const cloudInstances=new THREE.InstancedMesh(cloudGeometry,white,120);
-const cloudDummy=new THREE.Object3D();let cloudIndex=0;
-for(let i=0;i<24;i++){
-  const x=(Math.random()-.5)*90,z=-Math.random()*112-8,y=10+Math.random()*22;
-  for(let j=0;j<5;j++){
-    cloudDummy.position.set(x+(j-2)*1.5,y+Math.random()*.7,z);
-    cloudDummy.scale.setScalar(1.4+Math.random()*1.4);
-    cloudDummy.updateMatrix();cloudInstances.setMatrixAt(cloudIndex++,cloudDummy.matrix);
-  }
-}
-cloudInstances.instanceMatrix.needsUpdate=true;cloudInstances.frustumCulled=true;scene.add(cloudInstances);
-for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new THREE.Group();const top=cylinder(2.6,3.8,2.5,grass2,0,-1,0,island);top.rotation.y=Math.random();const cap=cylinder(2.65,2.65,.28,grass,0,.32,0,island);cap.position.y=.32;island.position.set(x,-2.2,z);scene.add(island)}
-
-// Level 1 course route and road foundation.
-// Level 1 now uses the same six-section town-road centerline and distance-frame
-// construction as Level 6, fitted to this level's 665m course length.
-const LEVEL1_ROUTE_LENGTH=665;
-const LEVEL6_ROUTE_SCALE=LEVEL1_ROUTE_LENGTH/3000;
+try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');}
+catch(e){THREE=await import('https://unpkg.com/three@0.160.0/build/three.module.js');}
+const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
+const $=id=>document.getElementById(id),root=$('game');
+const TOTAL=3000;
+const mobile=matchMedia('(max-width:900px), (pointer:coarse)').matches;
+const scene=new THREE.Scene();
+const daySky=new THREE.Color(0x9bc8d8),nightSky=new THREE.Color(0x101b35);
+scene.background=daySky.clone();scene.fog=new THREE.Fog(daySky,95,330);
+const camera=new THREE.PerspectiveCamera(mobile?68:62,innerWidth/innerHeight,.1,500);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1:1.25));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=false;renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;root.appendChild(renderer.domElement);
+const hemi=new THREE.HemisphereLight(0xd9efff,0x52604e,1.65);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xffedcf,2.1);sun.position.set(-38,65,24);sun.castShadow=true;scene.add(sun);
+const mat=(color,roughness=.82,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+const asphalt=mat(0x30363b,.92),concrete=mat(0xaaa99e,.95),white=mat(0xf3eee0,.65),grass=mat(0x647c57,.98);
+const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);parent.add(o);return o;};
+// Exact Level 6 route points and road-height profile.
 const routePoints=[
-  {d:0,x:0,z:0},
-  {d:500*LEVEL6_ROUTE_SCALE,x:0,z:-500*LEVEL6_ROUTE_SCALE},
-  {d:900*LEVEL6_ROUTE_SCALE,x:400*LEVEL6_ROUTE_SCALE,z:-500*LEVEL6_ROUTE_SCALE},
-  {d:1400*LEVEL6_ROUTE_SCALE,x:400*LEVEL6_ROUTE_SCALE,z:-1000*LEVEL6_ROUTE_SCALE},
-  {d:1900*LEVEL6_ROUTE_SCALE,x:-100*LEVEL6_ROUTE_SCALE,z:-1000*LEVEL6_ROUTE_SCALE},
-  {d:2400*LEVEL6_ROUTE_SCALE,x:-100*LEVEL6_ROUTE_SCALE,z:-1500*LEVEL6_ROUTE_SCALE},
-  {d:3000*LEVEL6_ROUTE_SCALE,x:500*LEVEL6_ROUTE_SCALE,z:-1500*LEVEL6_ROUTE_SCALE}
+ {d:0,x:0,z:0},{d:500,x:0,z:-500},{d:900,x:400,z:-500},
+ {d:1400,x:400,z:-1000},{d:1900,x:-100,z:-1000},
+ {d:2400,x:-100,z:-1500},{d:3000,x:500,z:-1500}
 ];
-function routePoint(distance){
-  const d=THREE.MathUtils.clamp(distance,0,LEVEL1_ROUTE_LENGTH);
-  let i=0;while(i<routePoints.length-2&&d>routePoints[i+1].d)i++;
-  const a=routePoints[i],b=routePoints[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1);
-  return {x:THREE.MathUtils.lerp(a.x,b.x,t),z:THREE.MathUtils.lerp(a.z,b.z,t)};
+function smooth(a,b,t){const q=THREE.MathUtils.clamp((t-a)/(b-a),0,1);return q*q*(3-2*q);}
+function routePoint(d){
+ let i=0;while(i<routePoints.length-2&&d>routePoints[i+1].d)i++;
+ const a=routePoints[i],b=routePoints[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1);
+ return{x:THREE.MathUtils.lerp(a.x,b.x,t),z:THREE.MathUtils.lerp(a.z,b.z,t)};
 }
-function roadHeight(distance){
-  // Keep Level 1's existing jump and ground-contact physics on a flat road plane.
-  // The Level 6 centerline, corners, road width and continuous mesh are retained.
-  return 0;
+function roadHeight(d){
+ const hill=(a,b,h)=>h*smooth(a,a+45,d)*(1-smooth(b-45,b,d));
+ return hill(250,470,7)+hill(1080,1320,10)+hill(1660,1880,6)+hill(2180,2380,8);
 }
-function frame(distance,lateral=0){
-  const d=THREE.MathUtils.clamp(distance,0,LEVEL1_ROUTE_LENGTH);
-  const p=routePoint(d),ahead=routePoint(Math.min(LEVEL1_ROUTE_LENGTH,d+1)),behind=routePoint(Math.max(0,d-1));
-  const dx=ahead.x-behind.x,dz=ahead.z-behind.z,len=Math.hypot(dx,dz)||1;
-  const tx=dx/len,tz=dz/len,nx=-tz,nz=tx,y=roadHeight(d);
-  return {x:p.x+nx*lateral,z:p.z+nz*lateral,y,tx,tz,nx,nz,yaw:Math.atan2(tx,-tz)};
+function frame(d,lateral=0){
+ d=THREE.MathUtils.clamp(d,0,TOTAL);
+ const p=routePoint(d),ahead=routePoint(Math.min(TOTAL,d+1)),behind=routePoint(Math.max(0,d-1));
+ const dx=ahead.x-behind.x,dz=ahead.z-behind.z,len=Math.hypot(dx,dz)||1;
+ const tx=dx/len,tz=dz/len,nx=-tz,nz=tx,y=roadHeight(d);
+ return{x:p.x+nx*lateral,z:p.z+nz*lateral,y,tx,tz,nx,nz,yaw:Math.atan2(tx,-tz)};
 }
-function routeCoordinates(x,z){
-  let best={distance:0,lateral:0,distSq:Infinity};
-  for(let i=0;i<routePoints.length-1;i++){
-    const a=routePoints[i],b=routePoints[i+1],vx=b.x-a.x,vz=b.z-a.z,lenSq=vx*vx+vz*vz;
-    const t=THREE.MathUtils.clamp(((x-a.x)*vx+(z-a.z)*vz)/lenSq,0,1);
-    const px=a.x+vx*t,pz=a.z+vz*t,ex=x-px,ez=z-pz,distSq=ex*ex+ez*ez;
-    if(distSq<best.distSq){
-      const length=Math.sqrt(lenSq),tx=vx/length,tz=vz/length,nx=-tz,nz=tx;
-      best={distance:a.d+(b.d-a.d)*t,lateral:ex*nx+ez*nz,distSq};
-    }
-  }
-  return {distance:best.distance,lateral:best.lateral};
-}
-function isCourseGapDistance(){return false;}
-function routePosition(distance,lateral=0,y=0){const f=frame(distance,lateral);return new THREE.Vector3(f.x,y+f.y,f.z);}
-function placeOnRoute(object,distance,lateral=0,y=0){const f=frame(distance,lateral);object.position.set(f.x,y+f.y,f.z);object.rotation.y=f.yaw;return object;}
-function routeBox(w,h,d,material,distance,lateral=0,y=h/2,parent=scene){const object=box(w,h,d,material,0,0,0,parent);const f=frame(distance,lateral);object.position.set(f.x,y+f.y,f.z);object.rotation.y=f.yaw;return object;}
-// Level 6 road-construction system, transplanted as one continuous Level 1 road.
-// One asphalt mesh spans the full route; no separately-built road sections or joins.
-const samples=LEVEL1_ROUTE_LENGTH*2,verts=[],uv=[],indices=[];
+const samples=TOTAL*2,verts=[],uv=[],indices=[];
 for(let i=0;i<=samples;i++){
-  const distance=LEVEL1_ROUTE_LENGTH*i/samples,f=frame(distance);
-  for(const sideSign of [-1,1]){
-    verts.push(f.x+f.nx*5.3*sideSign,f.y+.02,f.z+f.nz*5.3*sideSign);
-    uv.push(sideSign*.5+.5,distance/18);
-  }
+ const d=TOTAL*i/samples,f=frame(d);
+ for(const side of [-1,1]){verts.push(f.x+f.nx*5.3*side,f.y+.02,f.z+f.nz*5.3*side);uv.push(side*.5+.5,d/18);}
 }
-for(let i=0;i<samples;i++){
-  const a=i*2,b=a+1,c=a+2,d=a+3;
-  indices.push(a,b,c,b,d,c);
+for(let i=0;i<samples;i++){const a=i*2,b=a+1,c=a+2,d=a+3;indices.push(a,b,c,b,d,c);}
+const roadGeo=new THREE.BufferGeometry();roadGeo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));roadGeo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));roadGeo.setIndex(indices);roadGeo.computeVertexNormals();
+const road=new THREE.Mesh(roadGeo,asphalt);road.receiveShadow=true;scene.add(road);
+// Same Level 6 continuous concrete shoulders.
+function ribbon(offset,width,y,material){
+ const v=[],ix=[];
+ for(let i=0;i<=samples;i++){const d=TOTAL*i/samples,f=frame(d);for(const side of [-1,1])v.push(f.x+f.nx*(offset+side*width/2),f.y+y,f.z+f.nz*(offset+side*width/2));}
+ for(let i=0;i<samples;i++){const a=i*2;ix.push(a,a+1,a+2,a+1,a+3,a+2);}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(ix);g.computeVertexNormals();
+ const m=new THREE.Mesh(g,material);m.receiveShadow=true;scene.add(m);
 }
-const roadGeo=new THREE.BufferGeometry();
-roadGeo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
-roadGeo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
-roadGeo.setIndex(indices);roadGeo.computeVertexNormals();
-const road=new THREE.Mesh(roadGeo,path);road.receiveShadow=true;road.castShadow=false;scene.add(road);
-
-// Level 6 continuous shoulder ribbons, generated from the same centerline.
-function ribbon(offset,width,yOffset,material){
-  const vertices=[],indices=[];
-  for(let i=0;i<=samples;i++){
-    const distance=LEVEL1_ROUTE_LENGTH*i/samples,f=frame(distance);
-    for(const sign of [-1,1]){
-      vertices.push(
-        f.x+f.nx*(offset+sign*width/2),
-        f.y+yOffset,
-        f.z+f.nz*(offset+sign*width/2)
-      );
-    }
-  }
-  for(let i=0;i<samples;i++){
-    const a=i*2;
-    indices.push(a,a+1,a+2,a+1,a+3,a+2);
-  }
-  const geometry=new THREE.BufferGeometry();
-  geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
-  geometry.setIndex(indices);geometry.computeVertexNormals();
-  const mesh=new THREE.Mesh(geometry,material);mesh.receiveShadow=true;mesh.castShadow=false;scene.add(mesh);
-  return mesh;
+ribbon(-6.35,1.5,.0,concrete);ribbon(6.35,1.5,.0,concrete);
+// Same Level 6 dashed lane separators.
+for(let d=12;d<TOTAL-8;d+=14){
+ for(const lateral of [-1.575,1.575]){const f=frame(d,lateral),dash=box(.13,.035,5.2,white,f.x,f.y+.055,f.z);dash.rotation.y=f.yaw;}
 }
-ribbon(-6.35,1.5,.0,side);
-ribbon(6.35,1.5,.0,side);
-
-// Dashed lane separators use the exact Level 6 spacing and dimensions.
-for(let distance=12;distance<LEVEL1_ROUTE_LENGTH-8;distance+=14){
-  for(const lateral of [-1.575,1.575]){
-    const f=frame(distance,lateral);
-    const dash=box(.13,.035,5.2,white,f.x,f.y+.055,f.z);
-    dash.rotation.y=f.yaw;
-  }
+// Same Level 6 continuous edge markings.
+for(const side of [-1,1]){
+ const v=[],ix=[];
+ for(let i=0;i<=samples;i++){const f=frame(TOTAL*i/samples);v.push(f.x+f.nx*side*4.85,f.y+.035,f.z+f.nz*side*4.85);v.push(f.x+f.nx*side*4.95,f.y+.035,f.z+f.nz*side*4.95);}
+ for(let i=0;i<samples;i++){const a=i*2;ix.push(a,a+2,a+1,a+1,a+2,a+3);}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(ix);g.computeVertexNormals();scene.add(new THREE.Mesh(g,white));
 }
-
-// Continuous edge lines follow every bend without separate road-section joins.
-for(const edgeSide of [-1,1]){
-  const vertices=[],indices=[];
-  for(let i=0;i<=samples;i++){
-    const f=frame(LEVEL1_ROUTE_LENGTH*i/samples);
-    vertices.push(f.x+f.nx*edgeSide*4.85,f.y+.035,f.z+f.nz*edgeSide*4.85);
-    vertices.push(f.x+f.nx*edgeSide*4.95,f.y+.035,f.z+f.nz*edgeSide*4.95);
-  }
-  for(let i=0;i<samples;i++){
-    const a=i*2;
-    indices.push(a,a+2,a+1,a+1,a+2,a+3);
-  }
-  const geometry=new THREE.BufferGeometry();
-  geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
-  geometry.setIndex(indices);geometry.computeVertexNormals();
-  const line=new THREE.Mesh(geometry,white);line.receiveShadow=true;scene.add(line);
+// Level 6 terrain bed only; no buildings, traffic, walkers, barriers or obstacles.
+const ground=box(1600,.5,2300,grass,200,-1.1,-750);ground.receiveShadow=true;
+// Player: same Soldier GLB, scale, native forward direction and run animation as Level 6.
+const player=new THREE.Group();scene.add(player);const body=new THREE.Group();player.add(body);let mixer=null;
+const runnerLoader=new GLTFLoader();
+runnerLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',gltf=>{
+ const model=gltf.scene;model.updateMatrixWorld(true);
+ const bounds=new THREE.Box3().setFromObject(model),height=Math.max(.01,bounds.max.y-bounds.min.y);
+ model.scale.setScalar(3.05/height);model.position.y=-bounds.min.y*model.scale.y;
+ model.traverse(n=>{if(n.isMesh){n.castShadow=false;n.receiveShadow=false;}});
+ body.add(model);mixer=new THREE.AnimationMixer(model);
+ const clip=gltf.animations.find(a=>/run/i.test(a.name))||gltf.animations[0];
+ if(clip)mixer.clipAction(clip).play();
+},undefined,e=>console.warn('Runner model failed to load:',e));
+let distance=0,lane=0,laneTarget=0,elapsed=0,running=false,paused=false,finished=false;
+const NORMAL_SPEED=14,cameraDistance=mobile?13:14,cameraHeight=mobile?5.8:6.2;
+const startFrame=frame(0,0);player.position.set(startFrame.x,startFrame.y+.04,startFrame.z);
+camera.position.set(startFrame.x-startFrame.tx*cameraDistance,cameraHeight,startFrame.z-startFrame.tz*cameraDistance);
+camera.lookAt(startFrame.x+startFrame.tx*5,1.3,startFrame.z+startFrame.tz*5);
+function setLane(delta){laneTarget=THREE.MathUtils.clamp(laneTarget+delta,-3.15,3.15);laneTarget=Math.round(laneTarget/3.15)*3.15;}
+function startRun(){
+ distance=0;lane=0;laneTarget=0;elapsed=0;running=true;paused=false;finished=false;
+ player.position.set(frame(0,0).x,frame(0,0).y+.04,frame(0,0).z);
+ $('welcome').classList.add('hidden');$('result').classList.add('hidden');
 }
-
-// Keep Level 1's original terrain footprint and scenery layout.
-const ground=box(520,.5,520,grass,0,-1.45,-165);ground.receiveShadow=true;
-
-// Checkpoint arches.
-const checkpoints=[-31,-59,-79,-190,-338,-471,-635];const checkpointMeshes=[];
-for(let i=0;i<checkpoints.length;i++){const z=checkpoints[i],g=new THREE.Group();box(.28,3,.3,gold,-3.8,1.45,0,g);box(.28,3,.3,gold,3.8,1.45,0,g);box(7.9,.3,.3,coral,0,2.95,0,g);placeOnRoute(g,3.5-z);scene.add(g);checkpointMeshes.push(g)}
-
-// Readable overhead zone signs mark each new 133m section.
-function addZoneSign(title,range,z,accent){
-  const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=160;
-  const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#101923';ctx.fillRect(0,0,1024,160);
-  ctx.fillStyle=accent;ctx.fillRect(0,0,16,160);ctx.fillRect(1008,0,16,160);
-  ctx.fillStyle='#f4f8fb';ctx.font='900 54px system-ui';ctx.textAlign='center';ctx.fillText(title,512,70);
-  ctx.fillStyle=accent;ctx.font='800 27px system-ui';ctx.fillText(range,512,119);
-  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
-  const board=new THREE.Mesh(new THREE.PlaneGeometry(8.6,1.35),new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide}));
-  const f=frame(3.5-z);board.position.set(f.x,4.85+f.y,f.z);board.rotation.y=f.yaw;scene.add(board);
-  routeBox(8.9,.12,.18,accent,3.5-z,0,4.12);
-}
-addZoneSign('CONSTRUCTION ZONE','133m — 266m',-135,'#e0a34a');
-addZoneSign('UNDERGROUND TUNNEL','266m — 399m',-268,'#69a8c8');
-addZoneSign('CARGO YARD','399m — 532m',-401,'#d39a55');
-addZoneSign('FINAL SURVIVAL','532m — 665m',-534,'#d46b76');
-
-// Finish arch.
-const finish=new THREE.Group();box(.38,4,.5,gold,-3.7,2,0,finish);box(.38,4,.5,gold,3.7,2,0,finish);box(7.7,.38,.5,coral,0,3.85,0,finish);for(let i=0;i<7;i++)box(1,.08,.55,i%2?white:dark,-3+i,3.85,.02,finish);placeOnRoute(finish,665);scene.add(finish);
-
-// The new environments begin after the original opening; scenery stays outside the running lanes.
-function addCourseFrame(z,material=side,roofY=4.05){
-  const g=new THREE.Group();box(.34,4,.42,material,-5.15,2,0,g);box(.34,4,.42,material,5.15,2,0,g);box(10.6,.34,.48,material,0,roofY,0,g);placeOnRoute(g,3.5-z);scene.add(g);
-}
-for(let z=-148;z>=-256;z-=27){addCourseFrame(z,gold,4.25);routeBox(.18,2.4,.18,coral,3.5-(z-5),-5.75,1.2);routeBox(.18,2.4,.18,coral,3.5-(z-5),5.75,1.2)}
-for(let z=-274;z>=-394;z-=20)addCourseFrame(z,purple,4.15);
-for(let z=-410;z>=-526;z-=38){routeBox(3.2,3.4,12,side,3.5-z,-6.45,1.7);routeBox(3.2,3.4,12,side,3.5-(z-17),6.45,1.7)}
-for(let z=-548;z>=-650;z-=27){addCourseFrame(z,dark,4.35);routeBox(.5,2.8,1.2,coral,3.5-(z-7),-5.85,1.4);routeBox(.5,2.8,1.2,coral,3.5-(z-7),5.85,1.4)}
-// Obstacles: gates, bumpers and a rotating sweeper.
-const obstacles=[];
-for(const [z,x,w,h,d,color] of [[-11,0,2.4,1.25,1.1,coral],[-18,-2.3,1.3,1.6,1.1,purple],[-35,1.8,1.5,1.3,1.1,cyan],[-43,-1.8,1.5,1.5,1.1,coral],[-64,0,2.3,1.25,1.1,purple],[-84,2.1,1.2,1.5,1.1,cyan],[-103,-2.1,1.5,1.4,1.1,coral],[-119,2.2,1.4,1.5,1.1,purple]]){const o=routeBox(w,h,d,color,3.5-z,x,h/2);obstacles.push({mesh:o,x:o.position.x,z:o.position.z,w,d,h,type:'block'})}
-// Low clearance gate: it physically blocks a standing runner; ground-dive to slide under.
-const gate=routeBox(8,.34,.55,coral,3.5-(-29),0,1.34);
-obstacles.push({mesh:gate,x:gate.position.x,z:gate.position.z,w:8,d:.55,h:1.51,clearance:1.08,type:'overhead'});
-const gatePostL=routeBox(.22,1.5,.65,side,3.5-(-29),-4.05,.75);
-const gatePostR=routeBox(.22,1.5,.65,side,3.5-(-29),4.05,.75);
-// Progressive extension hazards: 8 per section, with clear recovery gaps and lane alternatives.
-function addExtendedBlock(z,x,w=1.55,h=1.35,d=1.15,color=coral){const mesh=routeBox(w,h,d,color,3.5-z,x,h/2);obstacles.push({mesh,x:mesh.position.x,z:mesh.position.z,w,d,h,type:'block'})}
-function addExtendedOverhead(z,clearance=1.08){const mesh=routeBox(8,.34,.55,coral,3.5-z,0,1.34);obstacles.push({mesh,x:mesh.position.x,z:mesh.position.z,w:8,d:.55,h:1.51,clearance,type:'overhead'})}
-function addMovingBlock(z,baseX,amplitude=2.1,phase=0,style='load'){
-  const mesh=new THREE.Group();let w=1.8,h=1.55,d=1.25,rotor=null;
-  if(style==='crane'){
-    w=2.15;h=2.15;d=1.65;
-    cylinder(.045,.045,1.05,side,0,2.05,0,mesh);
-    box(1.75,1.35,1.45,gold,0,1.0,0,mesh);
-    box(1.95,.16,1.6,coral,0,1.78,0,mesh);
-    box(.18,.18,.18,white,-.78,.28,-.75,mesh);box(.18,.18,.18,white,.78,.28,-.75,mesh);
-  }else if(style==='fan'){
-    w=2.45;h=2.65;d=.9;
-    box(2.55,2.8,.5,dark,0,1.4,0,mesh);
-    box(2.15,2.35,.12,side,0,1.4,-.32,mesh);
-    rotor=new THREE.Group();rotor.position.set(0,1.4,-.48);
-    cylinder(.25,.25,.28,gold,0,0,0,rotor).rotation.x=Math.PI/2;
-    box(1.85,.16,.12,coral,0,0,0,rotor);box(.16,1.85,.12,coral,0,0,0,rotor);
-    box(1.25,.13,.12,white,0,0,0,rotor).rotation.z=Math.PI/4;
-    mesh.add(rotor);
-  }else if(style==='forklift'){
-    w=2.35;h=2.15;d=2.15;
-    box(1.95,.58,1.55,gold,0,.62,0,mesh);
-    box(.9,1.18,1.0,side,-.42,1.45,-.05,mesh);
-    box(1.05,.13,1.12,white,-.42,2.1,-.05,mesh);
-    for(const x of [-.78,.78])for(const zz of [-.55,.55]){const wheel=cylinder(.28,.28,.2,dark,x,.3,zz,mesh);wheel.rotation.z=Math.PI/2}
-    box(.16,.14,1.0,coral,-.28,.28,-1.18,mesh);box(.16,.14,1.0,coral,.28,.28,-1.18,mesh);
-  }else if(style==='crusher'){
-    w=2.2;h=2.55;d=1.55;
-    box(2.35,.32,1.7,dark,0,.2,0,mesh);
-    box(.32,2.25,.38,side,-.88,1.3,0,mesh);box(.32,2.25,.38,side,.88,1.3,0,mesh);
-    box(2.0,.42,1.4,coral,0,2.25,0,mesh);
-    box(1.65,.2,1.15,gold,0,1.92,-.02,mesh);
-  }else{
-    box(1.8,1.35,1.25,cyan,0,.8,0,mesh);box(1.95,.16,1.4,gold,0,1.55,0,mesh);
-  }
-  placeOnRoute(mesh,3.5-z,baseX);scene.add(mesh);
-  obstacles.push({mesh,x:mesh.position.x,baseX,amplitude,phase,frequency:1.05,w,d,h,z:mesh.position.z,type:'movingBlock',style,rotor});
-}
-// Construction zone (133–266m).
-addExtendedBlock(-151,-2.25);addExtendedOverhead(-166);addMovingBlock(-181,2.15,2,.4,'crane');addExtendedBlock(-197,2.2,1.5,1.45,1.15,purple);
-addExtendedBlock(-213,-2.2,1.5,1.35,1.15,cyan);addExtendedOverhead(-229);addMovingBlock(-245,-2.15,2,1.2,'crane');addExtendedBlock(-258,2.2,1.5,1.4,1.15,coral);
-// Underground tunnel (266–399m).
-addExtendedOverhead(-280);addMovingBlock(-296,2.2,2,2.1,'fan');addExtendedBlock(-312,-2.2,1.5,1.45,1.15,purple);addExtendedBlock(-328,2.2,1.5,1.35,1.15,cyan);
-addExtendedOverhead(-344,.98);addMovingBlock(-360,-2.2,2,2.8,'fan');addExtendedBlock(-378,-2.2,1.55,1.45,1.15,coral);addExtendedBlock(-392,2.2,1.5,1.35,1.15,purple);
-// Cargo yard (399–532m).
-addMovingBlock(-414,0,2.75,.3,'forklift');addExtendedBlock(-430,-2.2,1.55,1.4,1.15,cyan);addExtendedOverhead(-446);addMovingBlock(-462,2.2,2,1.4,'forklift');
-addExtendedBlock(-478,2.2,1.5,1.4,1.15,coral);addExtendedBlock(-494,-2.2,1.5,1.45,1.15,purple);addExtendedOverhead(-510);addMovingBlock(-526,-2.2,2,2.4,'forklift');
-// Final survival zone (532–665m): paired hazards with short but fair recovery windows.
-addExtendedBlock(-548,2.2,1.5,1.4,1.15,coral);addMovingBlock(-562,-2.2,2,.8,'crusher');addExtendedOverhead(-578);addExtendedBlock(-594,-2.2,1.55,1.45,1.15,purple);
-addMovingBlock(-610,2.2,2,1.7,'crusher');addExtendedOverhead(-626,.98);addMovingBlock(-642,0,2.75,2.5,'crusher');addExtendedBlock(-656,2.2,1.5,1.4,1.15,coral);
-const spinner=new THREE.Group();placeOnRoute(spinner,3.5-(-47),0,1.45);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:spinner.position.x,z:spinner.position.z,w:7.4,d:.7,h:.8,type:'spinner'});
-// Red hazard beacons: visible from a distance and pulsed while the race is active.
-const hazardBeacons=[];
-obstacles.forEach((o,index)=>{
-  const rig=new THREE.Group();placeOnRoute(rig,3.5-o.z);
-  for(const x of [-4.05,4.05]){
-    const post=new THREE.Mesh(new THREE.CylinderGeometry(.055,.075,.95,8),side);post.position.set(x,.48,0);post.castShadow=true;rig.add(post);
-    const lamp=new THREE.Mesh(new THREE.SphereGeometry(.19,12,10),new THREE.MeshStandardMaterial({color:0xff2020,emissive:0xff0800,emissiveIntensity:1.8,roughness:.3}));
-    lamp.position.set(x,1.02,0);rig.add(lamp);
-  }
-  scene.add(rig);hazardBeacons.push({rig,lamps:rig.children.filter(child=>child.isMesh&&child.geometry.type==='SphereGeometry'),obstacle:o,index});
-});
-
-// The runner root and animated character pivot must exist before character loading,
-// controls, reset, camera follow, and storm effects can reference them.
-const player=new THREE.Group();
-player.name='RushArenaPlayer';
-player.position.copy(routePosition(0,0,.05));
-scene.add(player);
-const body=new THREE.Group();
-body.name='SoldierCharacterPivot';
-player.add(body);
-
-// Shared Rush Arena character roster. The chosen runner is loaded only after selection.
-const runnerAssets={soldier:'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb'};
-import { attachSoldierRunAnimation } from './soldier-run-retarget.js';
-let runnerMixer=null,runnerActions={},activeRunnerAction=null,runnerModelLoaded=false;
-let runnerLoadPromise=Promise.resolve(false),runnerLoadToken=0;
-function playRunnerAction(name,fade=.18){const next=runnerActions[name];if(!next||activeRunnerAction===next)return;if(activeRunnerAction){activeRunnerAction.fadeOut(fade)}next.reset().fadeIn(fade).play();activeRunnerAction=next;}
-async function loadRunnerCharacter(choice){
-  choice='soldier';
-  const token=++runnerLoadToken;
-  runnerModelLoaded=false;runnerMixer=null;runnerActions={};activeRunnerAction=null;body.clear();
-  const runnerUrl=runnerAssets[choice]||runnerAssets.soldier;
-  runnerLoadPromise=new Promise(async resolve=>{
-    try{
-      const {GLTFLoader}=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
-      const loader=new GLTFLoader();
-      loader.load(runnerUrl,async gltf=>{
-        if(token!==runnerLoadToken){resolve(false);return;}
-        const model=gltf.scene;model.updateMatrixWorld(true);
-        const bounds=new THREE.Box3().setFromObject(model),height=Math.max(.01,bounds.max.y-bounds.min.y);
-        model.scale.setScalar(1.85/height); // Human-scale Soldier, proportionate to the road and obstacles.
-         model.position.y=-bounds.min.y*model.scale.y;
-        model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
-        body.clear();body.add(model);runnerMixer=new THREE.AnimationMixer(model);runnerActions={};
-        for(const clip of gltf.animations||[]){
-          const key=clip.name.toLowerCase().replace(/[\\s_-]+/g,'');let slot=null;
-          if(key.includes('idle'))slot='idle';else if(key.includes('walk'))slot='walk';else if(key.includes('run'))slot='run';
-          if(slot&&!runnerActions[slot]){const action=runnerMixer.clipAction(clip);action.enabled=true;action.setEffectiveTimeScale(slot==='run'?1.15:1);action.setEffectiveWeight(1);action.setLoop(THREE.LoopRepeat,Infinity);runnerActions[slot]=action;}
-        }
-        if(choice!=='soldier'){
-       try{
-         const retargeted=await attachSoldierRunAnimation(model,runnerMixer,THREE);
-         runnerActions.run=retargeted.action;
-         console.info('Soldier sprint retargeted to choice:',retargeted.matched,'/',retargeted.total,'bones');
-       }catch(retargetError){
-         console.warn('Soldier sprint retarget unavailable; keeping the selected character run clip:',retargetError);
-       }
-     }
-     runnerModelLoaded=Object.keys(runnerActions).length>0;
-        if(runnerActions.idle)playRunnerAction('idle',0);else if(runnerActions.run)playRunnerAction('run',0);
-        console.info('Rush Arena runner loaded:',choice,gltf.animations.map(a=>a.name));
-        resolve(true);
-      },undefined,error=>{console.error('Runner model failed to load:',choice,error);resolve(false);});
-    }catch(error){console.error('Runner loader unavailable:',error);resolve(false);}
-  });
-  return runnerLoadPromise;
-}
-let running=false,finished=false,failed=false,paused=false,elapsed=0,vertical=0,grounded=true,checkpoint=0,respawnZ=3.5,moveX=0,moveZ=0,lastFrame=0,slideTimer=0,points=0,chox=0,swipeSteer=0,swipeSteerTimer=0;
-let rushSessionId=null,lastProgressReport=0,progressChain=Promise.resolve();
-const rewardedObstacles=new Set();
-const keys={};let jumpQueued=false,diveQueued=false;
-const ui={time:document.getElementById('time'),points:document.getElementById('points'),chox:document.getElementById('chox'),failed:document.getElementById('failed'),failedText:document.getElementById('failedText'),checkpoint:document.getElementById('checkpoint'),percent:document.getElementById('percent'),progress:document.getElementById('progress'),welcome:document.getElementById('welcome'),result:document.getElementById('result'),pause:document.getElementById('pause'),resultText:document.getElementById('resultText')};
-
-const zoneBadge=document.createElement('div');
-Object.assign(zoneBadge.style,{position:'fixed',top:'128px',left:'50%',transform:'translateX(-50%)',zIndex:'44',padding:'7px 13px',border:'1px solid rgba(255,255,255,.35)',borderRadius:'10px',background:'rgba(9,18,30,.78)',color:'#fff',font:'900 10px system-ui',letterSpacing:'.13em',textAlign:'center',whiteSpace:'nowrap',backdropFilter:'blur(8px)',pointerEvents:'none'});
-document.body.appendChild(zoneBadge);
-const zoneBanner=document.createElement('div');
-Object.assign(zoneBanner.style,{position:'fixed',top:'37%',left:'50%',transform:'translate(-50%,-50%) scale(.96)',zIndex:'48',padding:'18px 25px',minWidth:'min(320px,84vw)',border:'1px solid rgba(255,255,255,.45)',borderRadius:'18px',background:'linear-gradient(145deg,rgba(9,18,30,.94),rgba(27,43,58,.9))',boxShadow:'0 18px 55px rgba(0,0,0,.4)',color:'#fff',font:'1000 19px system-ui',letterSpacing:'.1em',textAlign:'center',opacity:'0',transition:'opacity .25s, transform .25s',pointerEvents:'none'});
-document.body.appendChild(zoneBanner);
-const courseZones=[
-  {start:0,end:133,name:'OPENING COURSE',sub:'0m — 133m',bg:0xa9c2d0,fog:0xa9c2d0,accent:'#9ec7d7'},
-  {start:133,end:266,name:'CONSTRUCTION ZONE',sub:'133m — 266m',bg:0x8b9aa0,fog:0x8b9aa0,accent:'#e0a34a'},
-  {start:266,end:399,name:'UNDERGROUND TUNNEL',sub:'266m — 399m',bg:0x34414e,fog:0x34414e,accent:'#69a8c8'},
-  {start:399,end:532,name:'CARGO YARD',sub:'399m — 532m',bg:0x7b8585,fog:0x7b8585,accent:'#d39a55'},
-  {start:532,end:665,name:'FINAL SURVIVAL',sub:'532m — 665m',bg:0x443a43,fog:0x443a43,accent:'#d46b76'}
-];
-let activeZone=-1,zoneBannerTimer=0;
-const zoneColors=courseZones.map(z=>({bg:new THREE.Color(z.bg),fog:new THREE.Color(z.fog)}));
-function updateCourseZone(dt){
-  const distance=THREE.MathUtils.clamp(routeCoordinates(player.position.x,player.position.z).distance,0,665);
-  let index=courseZones.findIndex((z,i)=>distance>=z.start&&(distance<z.end||(i===courseZones.length-1&&distance<=z.end)));
-  if(index<0)index=courseZones.length-1;
-  const zone=courseZones[index];
-  if(index!==activeZone){
-    activeZone=index;zoneBannerTimer=0;
-    zoneBadge.textContent=zone.name+'  •  '+zone.sub;
-    zoneBadge.style.borderColor=zone.accent;
-    // Keep the runner's view clear; zone changes must not interrupt the road.
-    zoneBanner.style.opacity='0';zoneBanner.style.transform='translate(-50%,-50%) scale(.96)';
-  }
-  // Blend sky and fog across each zone boundary instead of abruptly switching.
-  let blendIndex=-1;
-  for(let i=1;i<courseZones.length;i++){
-    const boundary=courseZones[i].start;
-    if(distance>=boundary-50&&distance<=boundary+50){blendIndex=i;break;}
-  }
-  if(blendIndex>0){
-    const boundary=courseZones[blendIndex].start;
-    const blend=THREE.MathUtils.smoothstep(distance,boundary-50,boundary+50);
-    scene.background.copy(zoneColors[blendIndex-1].bg).lerp(zoneColors[blendIndex].bg,blend);
-    scene.fog.color.copy(zoneColors[blendIndex-1].fog).lerp(zoneColors[blendIndex].fog,blend);
-  }else{
-    scene.background.copy(zoneColors[index].bg);
-    scene.fog.color.copy(zoneColors[index].fog);
-  }
-}
-
-function fmt(t){const s=Math.floor(t);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
-// Procedural horror soundscape: generated locally with Web Audio (no external audio files).
-let rushAudio=null,rushMaster=null,rushDrone=null,rushWind=null,rushAudioOn=true,lastFootstep=0,lastSweepSound=0;
-const soundButton=document.createElement('button');
-soundButton.type='button';soundButton.textContent='🔊 SOUND ON';
-soundButton.setAttribute('aria-label','Toggle game sound');
-Object.assign(soundButton.style,{position:'fixed',top:'12px',right:'12px',zIndex:'50',padding:'10px 13px',border:'1px solid rgba(255,255,255,.28)',borderRadius:'22px',background:'rgba(8,14,22,.78)',color:'#fff',font:'700 11px system-ui',letterSpacing:'.08em',backdropFilter:'blur(8px)'});
-document.body.appendChild(soundButton);
-function audioReady(){
-  if(!rushAudio){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;rushAudio=new AC();rushMaster=rushAudio.createGain();rushMaster.gain.value=rushAudioOn?.72:0;const comp=rushAudio.createDynamicsCompressor();comp.threshold.value=-22;comp.knee.value=18;comp.ratio.value=4;comp.attack.value=.012;comp.release.value=.24;rushMaster.connect(comp);comp.connect(rushAudio.destination)}
-  if(rushAudio.state==='suspended')rushAudio.resume();
-  return true;
-}
-function soundTone(freq,endFreq,duration,volume=.12,type='sine',delay=0){
-  if(!rushAudioOn||!audioReady())return;
-  const t=rushAudio.currentTime+delay,osc=rushAudio.createOscillator(),gain=rushAudio.createGain();
-  osc.type=type;osc.frequency.setValueAtTime(Math.max(20,freq),t);osc.frequency.exponentialRampToValueAtTime(Math.max(20,endFreq),t+duration);
-  gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(volume,t+.025);gain.gain.exponentialRampToValueAtTime(.0001,t+duration);
-  osc.connect(gain);gain.connect(rushMaster);osc.start(t);osc.stop(t+duration+.03);
-}
-function soundNoise(duration,volume=.1,filter=700,delay=0){
-  if(!rushAudioOn||!audioReady())return;
-  const t=rushAudio.currentTime+delay,n=Math.ceil(rushAudio.sampleRate*duration),buffer=rushAudio.createBuffer(1,n,rushAudio.sampleRate),data=buffer.getChannelData(0);
-  for(let i=0;i<n;i++)data[i]=(Math.random()*2-1)*(1-i/n);
-  const src=rushAudio.createBufferSource(),low=rushAudio.createBiquadFilter(),gain=rushAudio.createGain();
-  src.buffer=buffer;low.type='lowpass';low.frequency.value=filter;gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(volume,t+.025);gain.gain.exponentialRampToValueAtTime(.0001,t+duration);
-  src.connect(low);low.connect(gain);gain.connect(rushMaster);src.start(t);src.stop(t+duration+.02);
-}
-function startHorrorAmbience(){
-  if(!audioReady()||rushDrone)return;
-  const ctx=rushAudio,now=ctx.currentTime;
-  rushDrone=ctx.createGain();rushDrone.gain.value=.24;rushDrone.connect(rushMaster);
-  [43.65,46.2,65.4].forEach((hz,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type=i===2?'triangle':'sine';o.frequency.value=hz;g.gain.value=i===2?.12:.24;o.connect(g);g.connect(rushDrone);o.start()});
-  const lfo=ctx.createOscillator(),lfoGain=ctx.createGain();lfo.frequency.value=.12;lfoGain.gain.value=.09;lfo.connect(lfoGain);lfoGain.connect(rushDrone.gain);lfo.start();
-  const len=ctx.sampleRate*3,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
-  const wind=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),wg=ctx.createGain();wind.buffer=buf;wind.loop=true;filter.type='lowpass';filter.frequency.value=360;wg.gain.value=.035;wind.connect(filter);filter.connect(wg);wg.connect(rushMaster);wind.start();rushWind={wind,filter,wg};
-}
-function sfxStart(){startHorrorAmbience();soundTone(180,48,.9,.18,'sawtooth');soundTone(92,38,1.25,.2,'triangle',.12);soundNoise(.75,.11,500,.2)}
-function sfxJump(){soundNoise(.32,.13,1500);soundTone(125,390,.24,.09,'sine')}
-function sfxSlide(){soundNoise(.62,.16,1100);soundTone(90,42,.48,.08,'sawtooth')}
-function sfxImpact(){soundNoise(.42,.2,360);soundTone(72,28,.55,.2,'sawtooth')}
-function sfxFinish(){soundTone(220,55,.85,.16,'triangle');soundTone(165,330,.7,.1,'sine',.3);soundNoise(.8,.1,900,.45)}
-function sfxFall(){soundTone(260,32,.7,.17,'sawtooth');soundNoise(.5,.14,260,.12)}
-function sfxWarning(){soundTone(740,330,.24,.13,'square');soundTone(520,210,.34,.11,'sawtooth',.16);soundNoise(.2,.045,1200,.05)}
-const dangerBanner=document.createElement('div');
-dangerBanner.textContent='⚠ DANGER AHEAD';
-Object.assign(dangerBanner.style,{position:'fixed',top:'58px',left:'50%',transform:'translateX(-50%)',zIndex:'49',padding:'11px 18px',border:'1px solid rgba(255,70,55,.8)',borderRadius:'12px',background:'rgba(55,5,8,.88)',boxShadow:'0 0 24px rgba(255,20,20,.35)',color:'#fff',font:'900 13px system-ui',letterSpacing:'.12em',textAlign:'center',whiteSpace:'nowrap',opacity:'0',transition:'opacity .12s',pointerEvents:'none'});
-document.body.appendChild(dangerBanner);
-let warnedHazards=new Set(),cameraShake=0;
-function updateHazardWarnings(dt){
-  let nearest=null,nearestDistance=Infinity;
-  for(const beacon of hazardBeacons){
-    const distance=player.position.z-beacon.obstacle.z;
-    const ahead=distance>0&&distance<20;
-    const pulse=.65+Math.max(0,Math.sin(elapsed*8+beacon.index))*.75;
-    beacon.lamps.forEach(lamp=>{lamp.material.emissiveIntensity=ahead?2.8*pulse:1.15*pulse;lamp.scale.setScalar(ahead?1.12+.18*pulse:1)});
-    beacon.rig.visible=distance>-2&&distance<26;
-    if(ahead&&distance<nearestDistance){nearest=beacon;nearestDistance=distance}
-    if(ahead&&distance<17&&!warnedHazards.has(beacon.index)){warnedHazards.add(beacon.index);sfxWarning()}
-  }
-  if(nearest){
-    const action=nearest.obstacle.type==='overhead'?'SLIDE UNDER':nearest.obstacle.type==='spinner'?'DODGE THE SWEEPER':nearest.obstacle.type==='movingBlock'?(nearest.obstacle.style==='forklift'?'DODGE FORKLIFT':nearest.obstacle.style==='fan'?'AVOID ROTOR':nearest.obstacle.style==='crane'?'CLEAR CRANE LOAD':nearest.obstacle.style==='crusher'?'DODGE CRUSHER':'DODGE MOVING LOAD'):'JUMP THE BLOCK';
-    dangerBanner.textContent='⚠ '+action+' · '+Math.ceil(nearestDistance)+'m';
-    dangerBanner.style.opacity='1';
-  }else dangerBanner.style.opacity='0';
-  cameraShake=Math.max(0,cameraShake-dt*2.8);
-}
-
-soundButton.addEventListener('click',()=>{rushAudioOn=!rushAudioOn;soundButton.textContent=rushAudioOn?'🔊 SOUND ON':'🔇 SOUND OFF';if(audioReady()){rushMaster.gain.setTargetAtTime(rushAudioOn?.72:0,rushAudio.currentTime,.06);if(rushAudioOn&&running)startHorrorAmbience()}});
-
-function updateMovingHazards(dt){
-  for(const o of obstacles){if(o.type!=='movingBlock')continue;o.x=o.baseX+Math.sin(elapsed*o.frequency+o.phase)*o.amplitude;o.mesh.position.x=o.x;if(o.rotor)o.rotor.rotation.z+=dt*3.4;}
-}
-function failRun(message){
-  // Inspection mode must never interrupt the run with a game-over overlay.
-  if(obstacleInspectionMode)return;
-  if(failed||finished)return;
-  failed=true;running=false;paused=false;finished=false;
-  sfxFall();dangerBanner.style.opacity='0';
-  ui.failedText.textContent=message+' You collected '+points+' provisional Game Points. CHOX is only settled after a verified level completion.';
-  ui.failed.classList.remove('hidden');
-}
-async function reportRushProgress(distance){
-  if(!rushSessionId)return false;
-  progressChain=progressChain.catch(()=>false).then(async()=>{
-    try{
-      const {data,error}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'progress',session_id:rushSessionId,distance}});
-      if(error||!data?.ok){console.warn('Rush Arena progress checkpoint:',error?.message||data?.error);return false;}
-      return true;
-    }catch(error){console.warn('Rush Arena progress checkpoint failed:',error?.message||error);return false;}
-  });
-  return progressChain;
-}
-async function settleRushRun(){
-  const sessionId=rushSessionId;if(!sessionId)return;
-  await reportRushProgress(665);
-  const {data,error}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'finish',session_id:sessionId,elapsed_seconds:Math.floor(elapsed),obstacles_passed:rewardedObstacles.size,score:points}});
-  rushSessionId=null;
-  if(error||!data?.ok){ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Your finish is awaiting server verification: '+(error?.message||data?.error||'Please return to Level Select and try again.');return;}
-  chox=Number(data.chox_credited)||0;ui.chox.textContent=String(chox);
-  const pointsEarned=Number(data.points_credited)||0;
-  ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. You earned '+pointsEarned+' Game Points and '+chox+' CHOX.'+(data.first_completion?' CHOX first-completion reward!':' Replay completed — no additional CHOX.');
+async function verifyAdmin(){
+ const {data:{session},error}=await supabase.auth.getSession();
+ if(error||!session){$('bootStatus').textContent='Administrator sign-in required. Sign in, then reopen Level 1.';return false;}
+ const {error:adminError}=await supabase.rpc('get_chome_admin_overview');
+ if(adminError){$('bootStatus').textContent='Access denied. This road test is restricted to CHOME administrators.';return false;}
+ return true;
 }
 async function reset(){
-  audioReady();running=false;
-  if(!supabase){document.getElementById('bootStatus').textContent='CHOME account services could not connect. Check your internet connection, reload the page, and try again.';console.error('Supabase SDK unavailable:',supabaseLoadError);return;}
-  document.getElementById('bootStatus').textContent='Checking your CHOME account…';
-  const {data:authData,error:authError}=await supabase.auth.getSession();
-  if(authError||!authData?.session){document.getElementById('bootStatus').textContent='Please sign in to your CHOME player account before starting Rush Arena.';return;}
-  const {data:sessionData,error:sessionError}=await supabase.functions.invoke('rush-arena-progress',{body:{action:'start',level}});
-  if(sessionError||!sessionData?.ok){document.getElementById('bootStatus').textContent=sessionError?.message||sessionData?.error||'Could not start this level. Please try again.';return;}
-  rushSessionId=sessionData.session_id;lastProgressReport=0;progressChain=Promise.resolve();
-  if(rushAudioOn){sfxStart();startHorrorAmbience()}
-  activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent='OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.copy(routePosition(0,0,.05));vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);swipeSteer=0;swipeSteerTimer=0;ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');document.getElementById('rewardIntro').classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
+ running=false;$('bootStatus').textContent='Verifying administrator access…';
+ if(!await verifyAdmin())return;
+ startRun();
 }
-function respawn(){player.position.copy(routePosition(THREE.MathUtils.clamp(3.5-respawnZ,0,665),0,.05));vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
-function onTrack(x,z){const route=routeCoordinates(x,z);return Math.abs(route.lateral)<=4.85&&route.distance>=0&&route.distance<=LEVEL1_ROUTE_LENGTH}
-function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
-function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
 window.__rushStart=reset;
-async function beginRushRun(){
-  ui.welcome.classList.add('hidden');
-  const status=document.getElementById('bootStatus');
-  status.textContent='Preparing Soldier…';
-  const ready=runnerModelLoaded||await loadRunnerCharacter('soldier');
-  if(!ready){ui.welcome.classList.remove('hidden');status.textContent='Soldier could not load. Please try again.';return;}
-  status.textContent='Soldier ready. Review the briefing to begin.';
-  document.getElementById('rewardIntro').classList.remove('hidden');
-  try{audioReady();soundTone(523,784,.28,.1,'sine')}catch(e){}
-}
-async function launchSelectedLevel(){
-  const status=document.getElementById('bootStatus');
-  status.textContent='Loading Level 1 and preparing your Soldier…';
-  const ready=runnerModelLoaded||await loadRunnerCharacter('soldier');
-  if(!ready){status.textContent='Soldier could not load. Tap ENTER RUSH ARENA to retry.';return;}
-  await reset();
-}
-
-document.getElementById('startLevelOne').addEventListener('click',async()=>{
-  const status=document.getElementById('bootStatus');
-  if(!runnerModelLoaded){status.textContent='Finishing Soldier setup…';const ok=await runnerLoadPromise;if(!ok){document.getElementById('rewardIntro').classList.add('hidden');ui.welcome.classList.remove('hidden');status.textContent='Soldier could not load. Please try again.';return;}}
-  document.getElementById('rewardIntro').classList.add('hidden');reset();
+$('start').addEventListener('click',reset);$('again').addEventListener('click',reset);
+$('levelSelect').addEventListener('click',()=>location.href='levels.html');
+addEventListener('keydown',e=>{
+ if(['ArrowLeft','ArrowRight','KeyA','KeyD'].includes(e.code))e.preventDefault();
+ if(e.code==='ArrowLeft'||e.code==='KeyA')setLane(-3.15);
+ if(e.code==='ArrowRight'||e.code==='KeyD')setLane(3.15);
+ if(e.code==='Escape'&&running){paused=!paused;}
 });
-document.getElementById('again').addEventListener('click',reset);document.getElementById('levelSelect').addEventListener('click',()=>location.href='levels.html');document.getElementById('resume').addEventListener('click',()=>{paused=false;ui.pause.classList.add('hidden')});
-document.getElementById('restartFailed').addEventListener('click',reset);
-document.getElementById('continueRun').addEventListener('click',()=>{document.getElementById('continueNote').textContent='Ad-supported Continue is coming soon. Start again to play now.';});
-addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Space')jumpQueued=true;if(e.code==='ShiftLeft'||e.code==='ShiftRight')diveQueued=true;if(e.code==='Escape'&&running&&!finished){paused=!paused;ui.pause.classList.toggle('hidden',!paused)}});
-addEventListener('keyup',e=>{keys[e.code]=false});
-let swipeStart=null;
-renderer.domElement.addEventListener('pointerdown',e=>{
-  if(!mobileDevice||e.pointerType==='mouse'||!running||paused||finished)return;
-  swipeStart={id:e.pointerId,x:e.clientX,y:e.clientY};
+let touchStart=null;
+renderer.domElement.addEventListener('pointerdown',e=>{if(!running||paused)return;touchStart={x:e.clientX,y:e.clientY,id:e.pointerId};},{passive:true});
+addEventListener('pointerup',e=>{
+ if(!touchStart||touchStart.id!==e.pointerId)return;
+ const dx=e.clientX-touchStart.x,dy=e.clientY-touchStart.y;touchStart=null;
+ if(Math.max(Math.abs(dx),Math.abs(dy))<22||Math.abs(dx)<Math.abs(dy))return;
+ setLane(dx<0?-3.15:3.15);
 },{passive:true});
-window.addEventListener('pointerup',e=>{
-  if(!swipeStart||e.pointerId!==swipeStart.id)return;
-  const dx=e.clientX-swipeStart.x,dy=e.clientY-swipeStart.y;swipeStart=null;
-  const threshold=Math.max(28,Math.min(48,innerWidth*.055));
-  if(Math.max(Math.abs(dx),Math.abs(dy))<threshold||!running||paused||finished)return;
-  if(Math.abs(dx)>Math.abs(dy)){
-    swipeSteer=dx<0?-1:1;swipeSteerTimer=.32;
-  }else if(dy<0){jumpQueued=true;}else{diveQueued=true;}
-},{passive:true});
-window.addEventListener('pointercancel',()=>{swipeStart=null},{passive:true});
-
-// Camera follows from behind and eases toward the runner.
-camera.position.set(0,6,13);camera.lookAt(0,1,-2);
+addEventListener('pointercancel',()=>touchStart=null,{passive:true});
 const clock=new THREE.Clock();
-// Collision uses the runner's actual action state. A normal runner cannot pass
-// through a block; jumping clears it only after the feet rise above its top.
-// Ground-diving lowers the hitbox so the runner can pass beneath a low clearance gate.
-function moveRunner(dx,dz){
-  const currentRoute=routeCoordinates(player.position.x,player.position.z);
-  const nextLateral=THREE.MathUtils.clamp(currentRoute.lateral+dx,-4.05,4.05);
-  const nextDistance=THREE.MathUtils.clamp(currentRoute.distance-dz,0,665);
-  const nextFrame=frame(nextDistance,nextLateral),nextX=nextFrame.x,nextZ=nextFrame.z;
-  if(!obstacleInspectionMode){
-  const radius=.4,runnerHeight=slideTimer>0?.96:2.15;
-  for(const o of obstacles){
-    if(o.type==='spinner')continue;
-    const verticalBlocked=(o.type==='block'||o.type==='movingBlock')?player.position.y<o.h-.02:(o.type==='overhead'&&runnerHeight>o.clearance);
-    if(!verticalBlocked)continue;
-    const halfX=o.w/2+radius,halfZ=o.d/2+radius;
-    const worldDX=nextX-o.x,worldDZ=nextZ-o.z,cos=Math.cos(o.mesh.rotation.y||0),sin=Math.sin(o.mesh.rotation.y||0);
-    const localX=worldDX*cos-worldDZ*sin,localZ=worldDX*sin+worldDZ*cos;
-    if(Math.abs(localX)<halfX&&Math.abs(localZ)<halfZ){
-      failRun('You collided with an obstacle. Your run has ended.');
-      return false;
-    }
+function animate(){
+ requestAnimationFrame(animate);
+ const dt=Math.min(clock.getDelta(),.1);
+ if(running&&!paused&&!finished){
+  elapsed+=dt;distance=Math.min(TOTAL,distance+NORMAL_SPEED*dt);
+  const night=smooth(850,1050,distance);
+  scene.background.copy(daySky).lerp(nightSky,night);scene.fog.color.copy(daySky).lerp(nightSky,night);
+  hemi.intensity=THREE.MathUtils.lerp(1.65,.48,night);sun.intensity=THREE.MathUtils.lerp(2.1,.16,night);
+  lane=THREE.MathUtils.damp(lane,laneTarget,13,dt);
+  const f=frame(distance,lane);
+  player.position.set(f.x,f.y+.04,f.z);player.rotation.y=Math.atan2(-f.tx,-f.tz);
+  $('time').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');
+  $('distance').textContent=Math.floor(distance)+'m';
+  const pct=Math.floor(distance/TOTAL*100);
+  $('percent').textContent=pct+'%';$('progressText').textContent=pct+'%';$('progress').style.width=pct+'%';
+  if(distance>=TOTAL){
+   distance=TOTAL;running=false;finished=true;
+   $('resultText').textContent='You completed the full 3,000m Level 6 road route in '+$('time').textContent+'. This is a road-and-player test only; no rewards are issued.';
+   $('result').classList.remove('hidden');
   }
-  }
-  player.position.set(nextX,player.position.y,nextZ);
-  player.rotation.y=nextFrame.yaw;
-  return true;
+ }
+ const f=frame(distance,lane);
+ const target=new THREE.Vector3(f.x-f.tx*cameraDistance,player.position.y+cameraHeight,f.z-f.tz*cameraDistance);
+ camera.position.lerp(target,1-Math.pow(.001,dt));
+ camera.lookAt(player.position.x+f.tx*5,player.position.y+1.3,player.position.z+f.tz*5);
+ if(mixer)mixer.update(dt);
+ renderer.render(scene,camera);
 }
-function update(dt){
-  spinner.rotation.y+=dt*1.55;
-  hazardBeacons.forEach(b=>{b.rig.rotation.y=Math.sin(elapsed*2+b.index)*.08});
-  if(!running||paused||finished||failed)return;
-  elapsed+=dt;ui.time.textContent=fmt(elapsed);
-  if(elapsed-lastProgressReport>=5){lastProgressReport=elapsed;void reportRushProgress(THREE.MathUtils.clamp(routeCoordinates(player.position.x,player.position.z).distance,0,665));}
-  updateCourseZone(dt);
-  updateMovingHazards(dt);
-  updateHazardWarnings(dt);
-  if(slideTimer>0){slideTimer=Math.max(0,slideTimer-dt);if(slideTimer===0){body.scale.set(1,1,1);body.position.y=0;body.rotation.x=0}}
-  if(swipeSteerTimer>0){swipeSteerTimer=Math.max(0,swipeSteerTimer-dt);if(swipeSteerTimer===0)swipeSteer=0;}
-  const ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+swipeSteer;
-  const nx=THREE.MathUtils.clamp(ix,-1,1);
-  const AUTO_RUN_SPEED=7.0,STEER_SPEED=7.0;
-  const dx=nx*STEER_SPEED*dt,dz=-AUTO_RUN_SPEED*dt;
-  if(!moveRunner(dx,dz))return;
-  if(routeCoordinates(player.position.x,player.position.z).distance>=665)player.position.copy(routePosition(665,routeCoordinates(player.position.x,player.position.z).lateral,player.position.y));
-  // Reward each obstacle once, only after the runner has safely passed it.
-  obstacles.forEach((o,index)=>{
-    const runnerDistance=routeCoordinates(player.position.x,player.position.z).distance;
-    const obstacleDistance=routeCoordinates(o.mesh.position.x,o.mesh.position.z).distance;
-    if(!rewardedObstacles.has(index)&&runnerDistance>obstacleDistance+o.d/2+.5){
-      rewardedObstacles.add(index);points+=100;
-      ui.points.textContent=String(points);
-      soundTone(620,920,.16,.08,'sine');
-    }
-  });
-  if(jumpQueued){jump();jumpQueued=false}if(diveQueued){dive();diveQueued=false}
-  if(grounded&&!onTrack(player.position.x,player.position.z)){grounded=false;vertical=0}
-  if(!grounded){vertical-=19*dt;player.position.y+=vertical*dt;if(player.position.y<=.05&&onTrack(player.position.x,player.position.z)){player.position.y=.05;vertical=0;grounded=true;body.rotation.x=0;spawnWaterSplash(player.position.x,player.position.z,18)}if(player.position.y<-5){sfxFall();respawn()}}
-  // Resolve the rotating sweeper as a solid capsule in the track plane.
-  const beamX=Math.cos(spinner.rotation.y),beamZ=-Math.sin(spinner.rotation.y);
-  const relX=player.position.x-spinner.position.x,relZ=player.position.z-spinner.position.z;
-  const along=THREE.MathUtils.clamp(relX*beamX+relZ*beamZ,-3.7,3.7);
-  const nearX=spinner.position.x+along*beamX,nearZ=spinner.position.z+along*beamZ;
-  let pushX=player.position.x-nearX,pushZ=player.position.z-nearZ;
-  let pushLen=Math.hypot(pushX,pushZ);
-  const sweeperVerticalOverlap=player.position.y<1.62&&player.position.y+2.15>1.28;
-  if(!obstacleInspectionMode&&sweeperVerticalOverlap&&pushLen<.72){
-    if(performance.now()-lastSweepSound>1100){sfxImpact();lastSweepSound=performance.now()}
-    cameraShake=Math.max(cameraShake,.48);
-    failRun('The moving sweeper hit you. Your run has ended.');
-    return;
-  }
-  // Checkpoints store a safe respawn position.
-  const runnerDistance=routeCoordinates(player.position.x,player.position.z).distance;
-  checkpoints.forEach((z,i)=>{const checkpointDistance=3.5-z;if(checkpoint===i&&runnerDistance>checkpointDistance){checkpoint=i+1;respawnZ=z+2;ui.checkpoint.textContent=checkpoint+'/7'}});
-  if(routeCoordinates(player.position.x,player.position.z).distance>=661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
-  const pct=THREE.MathUtils.clamp(routeCoordinates(player.position.x,player.position.z).distance/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
-  const runnerFrame=frame(routeCoordinates(player.position.x,player.position.z).distance,routeCoordinates(player.position.x,player.position.z).lateral);const target=new THREE.Vector3(player.position.x-runnerFrame.tx*14.2,player.position.y+6.1,player.position.z-runnerFrame.tz*14.2);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x+runnerFrame.tx*4.2,player.position.y+1.25,player.position.z+runnerFrame.tz*4.2);
-  const moving=true; // Forward motion is automatic; the player controls steering, jump and dive.if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run?'run':(runnerActions.walk?'walk':'idle'));playRunnerAction(action);runnerMixer.update(dt);}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
-}
-let lastRenderAt=0,frameAccumulator=0;
-function animate(now=0){
-  requestAnimationFrame(animate);
-  const frameDelta=clock.getDelta();
-  if(document.hidden||!running||paused||finished){frameAccumulator=0;return}
-  frameAccumulator+=Math.min(frameDelta,.12);
-  const step=mobileDevice?1/30:1/60,frameInterval=step*1000;
-  if(now-lastRenderAt<frameInterval)return;
-  lastRenderAt=now;
-  // Fixed simulation steps prevent the runner and timer from falling into slow motion
-  // when a device briefly misses a render frame.
-  let steps=0;
-  while(frameAccumulator>=step&&steps<4){
-    update(step);updateStorm(step);updateWaterSplashes(step);
-    frameAccumulator-=step;steps++;
-  }
-  // Avoid a long catch-up spiral on severely overloaded devices.
-  if(steps===4&&frameAccumulator>step*2)frameAccumulator=step*2;
-  renderer.render(scene,camera);
-}
-renderer.render(scene,camera);
-animate();
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobileDevice?1.0:1.25));renderer.setSize(innerWidth,innerHeight)});
-// Start only after the renderer, inputs, camera and animation loop are initialized.
-if(window.__rushEnterRequested){window.__rushEnterRequested=false;beginRushRun();}
-else if(new URLSearchParams(location.search).has('level')){void launchSelectedLevel();}
+renderer.render(scene,camera);animate();
+addEventListener('resize',()=>{
+ camera.aspect=innerWidth/innerHeight;camera.fov=mobile?68:62;camera.updateProjectionMatrix();
+ renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1:1.25));renderer.setSize(innerWidth,innerHeight);
+});
 </script>
 </body>
 </html>
