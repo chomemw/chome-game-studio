@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>CHOME Rush Arena — Level 6 Town Run Preview</title>
+<style>
+:root{color-scheme:dark;--panel:#111c30dc;--line:#ffffff30;--muted:#c3cce0;--cyan:#76e6ed;--purple:#a995ff}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#9bc4d0;color:#fff;font-family:Inter,system-ui,sans-serif;touch-action:none}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}
+.hud{position:fixed;inset:0;pointer-events:none;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);display:flex;flex-direction:column;justify-content:space-between}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding-top:12px}.brand,.stat,.pill{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(12px);border-radius:13px;box-shadow:0 10px 30px #07132335}.brand{padding:10px 13px;font-size:11px;font-weight:1000;letter-spacing:.13em;white-space:nowrap}.brand span{color:#b8a8ff}.stats{display:flex;gap:6px}.stat{min-width:67px;padding:7px 9px;text-align:center}.stat small{display:block;font-size:8px;color:var(--muted);font-weight:900;letter-spacing:.12em}.stat b{display:block;font-size:17px;margin-top:2px}.pill{padding:9px 11px;font-size:9px;font-weight:950;letter-spacing:.1em;color:#d8ffff}
+.progress-wrap{position:absolute;top:83px;left:50%;transform:translateX(-50%);width:min(420px,55vw);padding:8px 11px;border:1px solid var(--line);border-radius:12px;background:#101b30bd}.progress-label{display:flex;justify-content:space-between;font-size:9px;font-weight:950;letter-spacing:.1em;margin-bottom:6px}.track{height:7px;border-radius:8px;background:#ffffff30;overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,#69e6dd,#b4ffad,#ffe18a)}
+.bottom{display:flex;justify-content:space-between;align-items:flex-end;padding:0 2px 16px}.hint{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:10px;line-height:1.55;color:#e4efff}
+.overlay{position:fixed;inset:0;display:grid;place-items:center;padding:18px;background:#081323a8;backdrop-filter:blur(9px);z-index:5}.dialog{width:min(480px,100%);padding:27px;border:1px solid #ffffff45;border-radius:23px;background:linear-gradient(145deg,#203653f5,#111b30f7);box-shadow:0 28px 80px #06112c99;text-align:center}.eyebrow{font-size:10px;letter-spacing:.22em;font-weight:1000;color:#9ff2ee}.dialog h1{font-size:clamp(34px,8vw,54px);line-height:.94;letter-spacing:-.07em;margin:13px 0}.dialog h1 span{color:#aa98ff}.dialog p{color:#cad7e9;font-size:13px;line-height:1.7;margin:12px auto 20px;max-width:390px}.primary{border:0;border-radius:12px;padding:14px 22px;background:linear-gradient(100deg,#8d70ff,#4f94e9);font-weight:1000;letter-spacing:.1em;color:#fff}.small{display:block;color:#aebbd5;font-size:10px;margin-top:12px}.hidden{display:none!important}
+@media(max-width:650px){.top{align-items:flex-start}.stats{gap:4px}.stat{min-width:51px;padding:7px 5px}.stat b{font-size:14px}.stat small{font-size:7px}.pill{display:none}.brand{font-size:9px;padding:9px 8px}.progress-wrap{top:78px;width:58vw}.hint{display:none}.bottom{padding-bottom:calc(12px + env(safe-area-inset-bottom))}}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div class="hud">
+ <div class="top"><div class="brand">CHOME <span>RUSH ARENA · LEVEL 6</span></div><div class="stats"><div class="stat"><small>TIME</small><b id="time">00:00</b></div><div class="stat"><small>DISTANCE</small><b id="distance">0m</b></div><div class="stat"><small>POINTS</small><b id="points">0</b></div></div><div class="pill">ADMIN TOWN TEST</div></div>
+ <div class="progress-wrap"><div class="progress-label"><span>TOWN ROUTE</span><span id="percent">0%</span></div><div class="track"><div class="fill" id="progress"></div></div></div>
+ <div class="bottom"><div class="hint">SWIPE LEFT / RIGHT · CHANGE LANES<br>SWIPE UP · JUMP · SWIPE DOWN · DIVE<br>Desktop: ← → / A D · SPACE · SHIFT</div></div>
+</div>
+<div class="overlay" id="welcome"><div class="dialog"><div class="eyebrow">CHOME GAME STUDIO · ADMIN TEST</div><h1>TOWN <span>RUN</span></h1><p>Run through a busy town, pass moving traffic, cross the bridge and negotiate roadworks. This is a continuous town route with no copied 0–133m section from earlier levels.</p><button class="primary" id="start">START LEVEL 6</button><span class="small" id="bootStatus">Checking administrator access…</span></div></div>
+<div class="overlay hidden" id="result"><div class="dialog"><div class="eyebrow">LEVEL 6 PREVIEW COMPLETE</div><h1>YOU <span>MADE IT!</span></h1><p id="resultText">You reached the end of the town route.</p><button class="primary" id="again">REPLAY LEVEL 6</button><button class="primary" id="levelSelect" style="margin-top:10px;background:linear-gradient(100deg,#53647c,#34465e)">LEVEL SELECT</button><span class="small">Admin preview only · No CHOX or player rewards are issued.</span></div></div>
+<div class="overlay hidden" id="failed"><div class="dialog"><div class="eyebrow">RUN INTERRUPTED</div><h1>WATCH <span>THE ROAD</span></h1><p id="failedText">A collision stopped your run.</p><button class="primary" id="restart">TRY AGAIN</button><span class="small">Barriers and moving traffic are solid hazards.</span></div></div>
+<div class="overlay hidden" id="pause"><div class="dialog"><div class="eyebrow">PAUSED</div><h1>TAKE A <span>BREATHER</span></h1><p>Your run is waiting.</p><button class="primary" id="resume">RESUME</button></div></div>
+<script>
+(() => {
+ const status=document.getElementById('bootStatus');
+ const start=document.getElementById('start');
+ start.addEventListener('click',()=>{if(typeof window.__rushStart==='function')window.__rushStart();else status.textContent=window.__rushBootError||'Preparing the town route…';});
+ window.addEventListener('error',e=>{window.__rushBootError='Startup error: '+(e.message||'script failed');status.textContent=window.__rushBootError;});
+ window.addEventListener('unhandledrejection',e=>{window.__rushBootError='Startup error: '+(e.reason?.message||String(e.reason||'resource failed'));status.textContent=window.__rushBootError;});
+})();
+</script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+let THREE;
+try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');}
+catch(e){THREE=await import('https://unpkg.com/three@0.160.0/build/three.module.js');}
+const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
+const $=id=>document.getElementById(id);
+const root=$('game');
+const TOTAL=1064; // Eight independently designed town zones; intentionally longer than 665m.
+const mobile=matchMedia('(max-width:900px), (pointer:coarse)').matches;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x9bc8d8);scene.fog=new THREE.Fog(0x9bc8d8,95,330);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,500);
+const renderer=new THREE.WebGLRenderer({antialias:!mobile,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1:1.35));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=!mobile;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;root.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xd9efff,0x52604e,1.65));
+const sun=new THREE.DirectionalLight(0xffedcf,2.1);sun.position.set(-38,65,24);sun.castShadow=true;sun.shadow.mapSize.set(mobile?512:1024,mobile?512:1024);sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=65;sun.shadow.camera.bottom=-210;scene.add(sun);
+const mat=(color,roughness=.82,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+const asphalt=mat(0x30363b,.92),asphaltEdge=mat(0x555d60,.9),concrete=mat(0xaaa99e,.95),white=mat(0xf3eee0,.65),yellow=mat(0xf2c84b,.62),grass=mat(0x647c57,.98),dark=mat(0x1e2529,.86),glass= new THREE.MeshStandardMaterial({color:0x9bc9d9,roughness:.2,metalness:.25}),orange=mat(0xf07828,.65),red=mat(0xd84338,.65),blue=mat(0x286c9a,.6),metal=mat(0x777e80,.45,.6);
+const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;};
+const cylinder=(r1,r2,h,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,12),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o;};
+// One mathematically continuous centerline. Curvature is smooth at every authored control point.
+const controls=[{d:0,x:0},{d:150,x:0},{d:280,x:10},{d:420,x:18},{d:560,x:18},{d:700,x:4},{d:850,x:-9},{d:970,x:-6},{d:1064,x:0}];
+function smooth(a,b,t){const q=THREE.MathUtils.clamp((t-a)/(b-a),0,1);return q*q*(3-2*q);}
+function centerX(d){let i=0;while(i<controls.length-2&&d>controls[i+1].d)i++;const a=controls[i],b=controls[i+1];return THREE.MathUtils.lerp(a.x,b.x,smooth(a.d,b.d,d));}
+function frame(d,lateral=0){const x=centerX(d),ahead=centerX(Math.min(TOTAL,d+1)),behind=centerX(Math.max(0,d-1));const dx=(ahead-behind)/Math.max(1,Math.min(TOTAL,d+1)-Math.max(0,d-1));const len=Math.hypot(dx,1),tx=dx/len,tz=-1/len,nx=1/len,nz=dx/len;return{x:x+nx*lateral,z:-d+nz*lateral,y:0,tx,tz,nx,nz,yaw:Math.atan2(tx,-tz)};}
+function place(mesh,d,lateral,y=0){const f=frame(d,lateral);mesh.position.set(f.x,y,f.z);mesh.rotation.y=f.yaw;return mesh;}
+// Build the complete road as one continuous ribbon mesh with dense samples and no section seams.
+const samples=TOTAL*2,verts=[],uv=[],indices=[];for(let i=0;i<=samples;i++){const d=TOTAL*i/samples,f=frame(d);for(const side of [-1,1]){verts.push(f.x+f.nx*5.3*side,0.02,f.z+f.nz*5.3*side);uv.push(side*.5+.5,d/18);}}
+for(let i=0;i<samples;i++){const a=i*2,b=a+1,c=a+2,d=a+3;indices.push(a,c,b,b,c,d);}
+const roadGeo=new THREE.BufferGeometry();roadGeo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));roadGeo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));roadGeo.setIndex(indices);roadGeo.computeVertexNormals();const road=new THREE.Mesh(roadGeo,asphalt);road.receiveShadow=true;scene.add(road);
+// Continuous shoulders, sidewalks and edge markings are generated from the same centerline.
+function ribbon(offset,width,y,material){const v=[],ix=[];for(let i=0;i<=samples;i++){const d=TOTAL*i/samples,f=frame(d);for(const s of [-1,1])v.push(f.x+f.nx*(offset+s*width/2),y,f.z+f.nz*(offset+s*width/2));}for(let i=0;i<samples;i++){let a=i*2;ix.push(a,a+2,a+1,a+1,a+2,a+3);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(ix);g.computeVertexNormals();const m=new THREE.Mesh(g,material);m.receiveShadow=true;scene.add(m);return m;}
+ribbon(-6.35,1.5,.0,concrete);ribbon(6.35,1.5,.0,concrete);
+for(const side of [-1,1]){const v=[],ix=[];for(let i=0;i<=samples;i++){const f=frame(TOTAL*i/samples);v.push(f.x+f.nx*side*4.85,.035,f.z+f.nz*side*4.85);v.push(f.x+f.nx*side*4.95,.035,f.z+f.nz*side*4.95);}for(let i=0;i<samples;i++){const a=i*2;ix.push(a,a+2,a+1,a+1,a+2,a+3);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(ix);g.computeVertexNormals();scene.add(new THREE.Mesh(g,white));}
+// Terrain plane under the entire route.
+const ground=box(900,.5,1500,grass,0,-1.1,-TOTAL/2);ground.receiveShadow=true;
+// Reusable street furniture.
+function streetLight(d,side){const f=frame(d,side*7.6),g=new THREE.Group();cylinder(.11,.15,5,metal,0,2.5,0,g);const arm=box(1.25,.1,.12,metal,side===1?-.52:.52,4.85,0,g);const lamp=box(.38,.16,.35,yellow,side===1?-1.05:1.05,4.72,0,g);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);}
+function tree(d,side,scale=1){const f=frame(d,side*10),g=new THREE.Group();cylinder(.22,.38,2.8,mat(0x70533a),0,1.4,0,g);for(let j=0;j<3;j++){const crown=new THREE.Mesh(new THREE.SphereGeometry(1.25-j*.18,10,8),mat(j%2?0x477047:0x5b8550));crown.position.set(0,2.9+j*.52,0);crown.scale.set(1,1.05,1);crown.castShadow=true;g.add(crown);}g.scale.setScalar(scale);g.position.set(f.x,0,f.z);scene.add(g);}
+function building(d,side,variant){const f=frame(d,side*(10+Math.random()*3)),g=new THREE.Group();const w=5+Math.random()*4,h=5+Math.random()*9,depth=6+Math.random()*5;const palette=[0xb8a28b,0xd0c4ad,0x8e9e9c,0xc58c62,0x9babb0,0xe0d6c2];const shell=box(w,h,depth,mat(palette[variant%palette.length]),0,h/2,0,g);const roof=box(w+.25,.35,depth+.25,mat(0x454c50),0,h+.16,0,g);for(let yy=1.6;yy<h-1;yy+=1.9)for(let xx=-w/2+1;xx<w/2-.4;xx+=1.55){const win=box(.8,.95,.07,glass,xx,yy,depth/2+.04,g);if(variant%3===0)box(.95,.12,.18,white,xx,yy-.58,depth/2+.09,g);}const door=box(1.05,2.1,.09,mat(0x493a2d),w*.23,1.05,depth/2+.06,g);const awning=box(w*.82,.22,.7,variant%2?red:blue,0,2.65,depth/2+.35,g);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);}
+function sign(d,side,label,color=blue){const f=frame(d,side*7.5),g=new THREE.Group();cylinder(.07,.09,2.5,metal,0,1.25,0,g);box(2.5,.85,.12,color,0,2.1,0,g);const canvas=document.createElement('canvas');canvas.width=512;canvas.height=160;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.font='bold 62px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,256,82);const tex=new THREE.CanvasTexture(canvas);const board=new THREE.Mesh(new THREE.PlaneGeometry(2.3,.72),new THREE.MeshBasicMaterial({map:tex,transparent:true}));board.position.set(0,2.1,.08);g.add(board);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);}
+for(let d=24;d<TOTAL-15;d+=24){streetLight(d,-1);streetLight(d,1);}
+for(let d=15;d<TOTAL;d+=43){if(d<150||d>940){tree(d,d%2?1:-1,.8+Math.random()*.3);}else{building(d,d%2?1:-1,Math.floor(d/43));if(d%86<44)building(d+12,d%2?-1:1,Math.floor(d/43)+2);}}
+sign(42,-1,'TOWN CENTRE');sign(300,1,'SLOW · TRAFFIC');sign(510,-1,'BRIDGE AHEAD',red);sign(780,1,'ROAD WORKS',orange);sign(1015,-1,'TOWN EXIT',blue);
+// Bridge deck is a continuous section of the same road ribbon; side rails follow its exact frame.
+const bridgeStart=520,bridgeEnd=730;for(let d=bridgeStart;d<=bridgeEnd;d+=4){for(const s of [-1,1]){const f=frame(d,s*5.25);const post=box(.22,1.35,.22,metal,f.x,.72,f.z);post.rotation.y=f.yaw;}}
+for(const side of [-1,1]){const pts=[];for(let d=bridgeStart;d<=bridgeEnd;d+=4){const f=frame(d,side*5.25);pts.push(new THREE.Vector3(f.x,1.35,f.z));}const curve=new THREE.CatmullRomCurve3(pts);const rail=new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(30,pts.length*2),.09,8,false),metal);scene.add(rail);}
+const water=mat(0x347f91,.28,.18);const river=box(100,.18,235,water,0,-.65,-625);river.position.x=centerX(625); // Water beneath the elevated bridge span.
+for(let d=530;d<725;d+=13){const f=frame(d);const support=box(.7,6,.7,concrete,f.x,-3.5,f.z);}
+// Lane-relative world transform and traffic vehicle meshes.
+const lanes=[-3.15,0,3.15];const obstacles=[],traffic=[];
+function plasticBarrier(d,lane=0,angle=0){const g=new THREE.Group();const body=box(2.35,.92,.8,orange,0,.58,0,g);body.rotation.y=angle;box(2.5,.18,.9,white,0,1.08,0,g).rotation.y=angle;for(let x=-.8;x<=.81;x+=.8){const stripe=box(.22,.68,.83,white,x,.59,.01,g);stripe.rotation.z=-.35;}const feet=box(2.7,.18,1.1,dark,0,.08,0,g);const f=frame(d,lane);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);obstacles.push({kind:'barrier',d,lane,width:2.3,top:1.2,mesh:g});}
+function cone(d,lane){const g=new THREE.Group();cylinder(.38,.42,.16,white,0,.08,0,g);const c=new THREE.Mesh(new THREE.ConeGeometry(.27,.82,12),orange);c.position.y=.55;c.castShadow=true;g.add(c);cylinder(.15,.18,.13,white,0,.56,0,g);const f=frame(d,lane);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);obstacles.push({kind:'cone',d,lane,width:.65,top:1,mesh:g});}
+function trafficCar(d,lane,color,speed){const g=new THREE.Group();const paint=mat(color,.38,.25);box(1.9,.72,4.1,paint,0,.78,0,g);box(1.55,.72,1.85,glass,0,1.42,-.15,g);box(1.8,.12,1.1,dark,0,1.95,-.1,g);for(const x of [-.98,.98])for(const z of [-1.35,1.35]){const w=cylinder(.36,.36,.2,dark,x,.38,z,g);w.rotation.z=Math.PI/2;}for(const x of [-.58,.58]){box(.28,.18,.05,white,x,.83,2.06,g);box(.3,.18,.05,red,x,.83,-2.06,g);}const f=frame(d,lane);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);traffic.push({mesh:g,d,lane,speed,baseLane:lane,phase:Math.random()*6.28,passed:false});}
+const barrierRows=[[188,[-3.15,0]],[365,[0,3.15]],[468,[-3.15,3.15]],[758,[-3.15,0]],[902,[0,3.15]],[990,[-3.15,3.15]]];
+for(const [d,blocked] of barrierRows){blocked.forEach(l=>plasticBarrier(d,l));for(const l of lanes)if(!blocked.includes(l)&&Math.random()>.4)cone(d-9,l);}
+plasticBarrier(805,-3.15);plasticBarrier(805,0);plasticBarrier(805,3.15,0); // full-width work zone: a deliberate route-around gap is placed just beyond it.
+for(const [d,l,c,s] of [[115,-3.15,0x2676a5,8],[245,3.15,0xb94e39,7],[330,0,0x7a8792,9],[430,-3.15,0xd4a32f,7],[570,3.15,0x287a59,8],[675,-3.15,0xb94e39,10],[845,3.15,0x4d6eaa,8],[950,0,0xb9bfc5,7]])trafficCar(d,l,c,s);
+// Moving traffic has its own lanes and speed; it travels toward the runner and can be passed on either side.
+const player=new THREE.Group();scene.add(player);const body=new THREE.Group();player.add(body);let mixer=null,runAction=null;
+const runnerLoader=new GLTFLoader();runnerLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',gltf=>{const model=gltf.scene;model.rotation.y=Math.PI;model.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(model),height=Math.max(.01,bounds.max.y-bounds.min.y);model.scale.setScalar(3.05/height);model.position.y=-bounds.min.y*model.scale.y;model.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});body.add(model);mixer=new THREE.AnimationMixer(model);const clip=gltf.animations.find(a=>/run/i.test(a.name))||gltf.animations[0];if(clip){runAction=mixer.clipAction(clip);runAction.play();}},undefined,e=>console.warn('Runner model did not load; using fallback runner.',e));
+function fallbackRunner(){const g=new THREE.Group();const torso=box(.68,1.05,.38,mat(0x344a70),0,1.45,0,g);const head=new THREE.Mesh(new THREE.SphereGeometry(.25,16,12),mat(0x9a6d4f));head.position.y=2.18;g.add(head);for(const x of [-.2,.2]){cylinder(.12,.15,.78,mat(0x202b38),x,.42,0,g);}body.add(g);}setTimeout(()=>{if(!body.children.length)fallbackRunner();},6500);
+let distance=0,lane=0,laneTarget=0,vertical=0,grounded=true,jumpTimer=0,diveTimer=0,elapsed=0,points=0,running=false,paused=false,finished=false,failed=false,swipe=null;
+const keys={};const startPos=frame(0,0);player.position.set(startPos.x,.04,startPos.z);camera.position.set(startPos.x,6,startPos.z+14);camera.lookAt(startPos.x,1,-3);
+function setLane(delta){laneTarget=THREE.MathUtils.clamp(laneTarget+delta,-3.15,3.15);laneTarget=Math.round(laneTarget/3.15)*3.15;}
+function jump(){if(running&&!paused&&grounded){vertical=9.3;grounded=false;jumpTimer=.72;diveTimer=0;}}
+function dive(){if(!running||paused)return;if(grounded)diveTimer=.78;else vertical=Math.min(vertical,-8);}
+function collide(){const px=player.position.x,pz=player.position.z;for(const o of obstacles){if(Math.abs(o.d-distance)<2.1&&Math.abs(laneTarget-o.lane)<(o.width/2+.55)){if(o.kind==='barrier'&&jumpTimer>.18)continue;if(o.kind==='cone'&&jumpTimer>.12)continue;return 'You hit a roadworks barrier or cone.';}}
+ for(const car of traffic){const gap=car.d-distance;if(Math.abs(gap)<3.05&&Math.abs(laneTarget-car.lane)<1.55){if(gap<0){car.passed=true;continue;}return 'A moving vehicle entered your running lane. Change lanes and overtake safely.';}}
+ return '';}
+function updateTraffic(dt){for(const car of traffic){car.d-=car.speed*dt;if(car.d<distance-14){car.d=distance+150+Math.random()*90;car.lane=lanes[Math.floor(Math.random()*lanes.length)];car.speed=6+Math.random()*4;}const f=frame(car.d,car.lane);car.mesh.position.set(f.x,0,f.z);car.mesh.rotation.y=f.yaw;}}
+function startRun(){distance=0;lane=0;laneTarget=0;vertical=0;grounded=true;jumpTimer=0;diveTimer=0;elapsed=0;points=0;running=true;paused=false;finished=false;failed=false;player.position.copy(new THREE.Vector3(frame(0,0).x,.04,frame(0,0).z));$('welcome').classList.add('hidden');$('result').classList.add('hidden');$('failed').classList.add('hidden');$('pause').classList.add('hidden');}
+async function verifyAdmin(){const {data:{session},error}=await supabase.auth.getSession();if(error||!session){$('bootStatus').textContent='Administrator sign-in required. Sign in, then reopen Level 6.';return false;}const {error:adminError}=await supabase.rpc('get_chome_admin_overview');if(adminError){$('bootStatus').textContent='Access denied. Level 6 is restricted to CHOME administrators.';return false;}return true;}
+async function reset(){running=false;$('bootStatus').textContent='Verifying administrator access…';if(!await verifyAdmin())return;startRun();}
+window.__rushStart=reset;
+$('start').addEventListener('click',reset);$('again').addEventListener('click',reset);$('restart').addEventListener('click',reset);$('levelSelect').addEventListener('click',()=>location.href='levels.html');$('resume').addEventListener('click',()=>{paused=false;$('pause').classList.add('hidden');});
+addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();if(e.code==='ArrowLeft'||e.code==='KeyA')setLane(-3.15);if(e.code==='ArrowRight'||e.code==='KeyD')setLane(3.15);if(e.code==='Space'||e.code==='ArrowUp')jump();if(e.code==='ShiftLeft'||e.code==='ShiftRight'||e.code==='ArrowDown')dive();if(e.code==='Escape'&&running&&!finished){paused=!paused;$('pause').classList.toggle('hidden',!paused);}});
+let touchStart=null;renderer.domElement.addEventListener('pointerdown',e=>{if(!running||paused)return;touchStart={x:e.clientX,y:e.clientY,id:e.pointerId};},{passive:true});addEventListener('pointerup',e=>{if(!touchStart||touchStart.id!==e.pointerId)return;const dx=e.clientX-touchStart.x,dy=e.clientY-touchStart.y;touchStart=null;if(Math.max(Math.abs(dx),Math.abs(dy))<22)return;if(Math.abs(dx)>Math.abs(dy))setLane(dx<0?-3.15:3.15);else if(dy<0)jump();else dive();},{passive:true});addEventListener('pointercancel',()=>touchStart=null,{passive:true});
+const clock=new THREE.Clock();let last=0;
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05);if(running&&!paused&&!finished&&!failed){elapsed+=dt;distance=Math.min(TOTAL,distance+9.4*dt);if(jumpTimer>0){jumpTimer=Math.max(0,jumpTimer-dt);player.position.y+=vertical*dt;vertical-=20*dt;if(player.position.y<=.04){player.position.y=.04;vertical=0;grounded=true;}}if(diveTimer>0)diveTimer=Math.max(0,diveTimer-dt);lane=THREE.MathUtils.damp(lane,laneTarget,13,dt);const f=frame(distance,lane);player.position.x=f.x;player.position.z=f.z;player.rotation.y=f.yaw;updateTraffic(dt);const hit=collide();if(hit){failed=true;running=false;$('failedText').textContent=hit;$('failed').classList.remove('hidden');}else{points+=Math.floor(dt*12);$('points').textContent=String(points);$('time').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');$('distance').textContent=Math.floor(distance)+'m';const pct=distance/TOTAL*100;$('progress').style.width=pct+'%';$('percent').textContent=Math.floor(pct)+'%';if(distance>=TOTAL){running=false;finished=true;$('resultText').textContent='You completed '+TOTAL+'m of continuous town road in '+$('time').textContent+'. This preview does not issue rewards.';$('result').classList.remove('hidden');}}
+ }
+ const f=frame(distance,lane);const target=new THREE.Vector3(f.x+f.tx*0,player.position.y+6.2,f.z+14.2);camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.x,player.position.y+1.3,player.position.z-5);if(mixer)mixer.update(dt);renderer.render(scene,camera);}
+renderer.render(scene,camera);animate();addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1:1.35));renderer.setSize(innerWidth,innerHeight);});
+</script>
+</body>
+</html>
