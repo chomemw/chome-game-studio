@@ -242,9 +242,7 @@ for(let i=0;i<24;i++){
 cloudInstances.instanceMatrix.needsUpdate=true;cloudInstances.frustumCulled=true;scene.add(cloudInstances);
 for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new THREE.Group();const top=cylinder(2.6,3.8,2.5,grass2,0,-1,0,island);top.rotation.y=Math.random();const cap=cylinder(2.65,2.65,.28,grass,0,.32,0,island);cap.position.y=.32;island.position.set(x,-2.2,z);scene.add(island)}
 
-// Floating course with three safe gaps that require a jump.
-const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,5);extensionRoadTexture.needsUpdate=true;
-const extensionPath=new THREE.MeshStandardMaterial({map:extensionRoadTexture,color:0xb4c0c9,roughness:.58,metalness:.12});
+// Level 1 course route and road foundation.
 // Level 1 now uses the same six-section town-road centerline and distance-frame
 // construction as Level 6, fitted to this level's 665m course length.
 const LEVEL1_ROUTE_LENGTH=665;
@@ -293,61 +291,81 @@ function isCourseGapDistance(){return false;}
 function routePosition(distance,lateral=0,y=0){const f=frame(distance,lateral);return new THREE.Vector3(f.x,y+f.y,f.z);}
 function placeOnRoute(object,distance,lateral=0,y=0){const f=frame(distance,lateral);object.position.set(f.x,y+f.y,f.z);object.rotation.y=f.yaw;return object;}
 function routeBox(w,h,d,material,distance,lateral=0,y=h/2,parent=scene){const object=box(w,h,d,material,0,0,0,parent);const f=frame(distance,lateral);object.position.set(f.x,y+f.y,f.z);object.rotation.y=f.yaw;return object;}
-// Level 6 road construction: one continuous 10.6m asphalt ribbon, continuous
-// concrete shoulders, edge lines and a broad terrain bed following the same frame.
-const roadSamples=LEVEL1_ROUTE_LENGTH*2;
-function makeRoadRibbon(width,yOffset,material,segments=roadSamples){
-  const positions=[],uvs=[],indices=[];
-  for(let i=0;i<=segments;i++){
-    const distance=LEVEL1_ROUTE_LENGTH*i/segments,f=frame(distance);
-    for(const sideSign of [-1,1]){
-      positions.push(f.x+f.nx*width*.5*sideSign,f.y+yOffset,f.z+f.nz*width*.5*sideSign);
-      uvs.push(sideSign*.5+.5,distance/18);
+// Level 6 road-construction system, transplanted as one continuous Level 1 road.
+// One asphalt mesh spans the full route; no separately-built road sections or joins.
+const samples=LEVEL1_ROUTE_LENGTH*2,verts=[],uv=[],indices=[];
+for(let i=0;i<=samples;i++){
+  const distance=LEVEL1_ROUTE_LENGTH*i/samples,f=frame(distance);
+  for(const sideSign of [-1,1]){
+    verts.push(f.x+f.nx*5.3*sideSign,f.y+.02,f.z+f.nz*5.3*sideSign);
+    uv.push(sideSign*.5+.5,distance/18);
+  }
+}
+for(let i=0;i<samples;i++){
+  const a=i*2,b=a+1,c=a+2,d=a+3;
+  indices.push(a,b,c,b,d,c);
+}
+const roadGeo=new THREE.BufferGeometry();
+roadGeo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+roadGeo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+roadGeo.setIndex(indices);roadGeo.computeVertexNormals();
+const road=new THREE.Mesh(roadGeo,path);road.receiveShadow=true;road.castShadow=false;scene.add(road);
+
+// Level 6 continuous shoulder ribbons, generated from the same centerline.
+function ribbon(offset,width,yOffset,material){
+  const vertices=[],indices=[];
+  for(let i=0;i<=samples;i++){
+    const distance=LEVEL1_ROUTE_LENGTH*i/samples,f=frame(distance);
+    for(const sign of [-1,1]){
+      vertices.push(
+        f.x+f.nx*(offset+sign*width/2),
+        f.y+yOffset,
+        f.z+f.nz*(offset+sign*width/2)
+      );
     }
   }
-  for(let i=0;i<segments;i++){
-    const a=i*2,b=a+1,c=a+2,d=a+3;
-    indices.push(a,b,c,b,d,c);
+  for(let i=0;i<samples;i++){
+    const a=i*2;
+    indices.push(a,a+1,a+2,a+1,a+3,a+2);
   }
   const geometry=new THREE.BufferGeometry();
-  geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
-  geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+  geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
   geometry.setIndex(indices);geometry.computeVertexNormals();
-  const mesh=new THREE.Mesh(geometry,material);mesh.receiveShadow=true;mesh.castShadow=false;scene.add(mesh);return mesh;
+  const mesh=new THREE.Mesh(geometry,material);mesh.receiveShadow=true;mesh.castShadow=false;scene.add(mesh);
+  return mesh;
 }
-makeRoadRibbon(10.6,.02,path);
-function makeRoadRibbonAt(offset,width,yOffset,material){
-  const positions=[],indices=[];
-  for(let i=0;i<=roadSamples;i++){
-    const f=frame(LEVEL1_ROUTE_LENGTH*i/roadSamples);
-    for(const sign of [-1,1])positions.push(f.x+f.nx*(offset+sign*width/2),f.y+yOffset,f.z+f.nz*(offset+sign*width/2));
-  }
-  for(let i=0;i<roadSamples;i++){const a=i*2;indices.push(a,a+1,a+2,a+1,a+3,a+2);}
-  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
-  const mesh=new THREE.Mesh(geometry,material);mesh.receiveShadow=true;scene.add(mesh);
-}
-makeRoadRibbonAt(-6.35,1.5,.0,side);makeRoadRibbonAt(6.35,1.5,.0,side);
-for(const edgeSide of [-1,1]){
-  const positions=[],indices=[];
-  for(let i=0;i<=roadSamples;i++){const f=frame(LEVEL1_ROUTE_LENGTH*i/roadSamples);positions.push(f.x+f.nx*edgeSide*4.85,f.y+.035,f.z+f.nz*edgeSide*4.85);positions.push(f.x+f.nx*edgeSide*4.95,f.y+.035,f.z+f.nz*edgeSide*4.95);}
-  for(let i=0;i<roadSamples;i++){const a=i*2;indices.push(a,a+2,a+1,a+1,a+2,a+3);}
-  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();scene.add(new THREE.Mesh(geometry,white));
-}
-const ground=box(520,.5,520,grass,0,-1.45,-165);ground.receiveShadow=true;
+ribbon(-6.35,1.5,.0,side);
+ribbon(6.35,1.5,.0,side);
 
-// Worn asphalt shoulders and repeated markings use instancing to reduce draw calls.
-function addBoxInstances(material,w,h,d,placements){
-  const mesh=new THREE.InstancedMesh(new THREE.BoxGeometry(w,h,d),material,placements.length);
-  const dummy=new THREE.Object3D();
-  placements.forEach((p,i)=>{dummy.position.set(p.x,p.y,p.z);dummy.rotation.y=p.ry||0;dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix)});
-  mesh.instanceMatrix.needsUpdate=true;mesh.frustumCulled=true;mesh.castShadow=false;mesh.receiveShadow=true;scene.add(mesh);return mesh;
+// Dashed lane separators use the exact Level 6 spacing and dimensions.
+for(let distance=12;distance<LEVEL1_ROUTE_LENGTH-8;distance+=14){
+  for(const lateral of [-1.575,1.575]){
+    const f=frame(distance,lateral);
+    const dash=box(.13,.035,5.2,white,f.x,f.y+.055,f.z);
+    dash.rotation.y=f.yaw;
+  }
 }
-const laneMarks=[];for(let distance=5;distance<LEVEL1_ROUTE_LENGTH-2;distance+=14){for(const lateral of [-1.575,1.575]){const f=frame(distance,lateral);laneMarks.push({x:f.x,y:f.y+.055,z:f.z,ry:f.yaw})}}
-addBoxInstances(white,.09,.018,.85,laneMarks);
-const laneMarkInstances=[];for(let distance=12;distance<LEVEL1_ROUTE_LENGTH-8;distance+=14){for(const lateral of [-1.575,1.575]){const f=frame(distance,lateral);laneMarkInstances.push({x:f.x,y:f.y+.055,z:f.z,ry:f.yaw})}}
-addBoxInstances(white,.13,.035,2.6,laneMarkInstances);
-const shoulderPosts=[];for(const lateral of [-7.25,7.25])for(let distance=8;distance<LEVEL1_ROUTE_LENGTH-8;distance+=24){const f=frame(distance,lateral);shoulderPosts.push({x:f.x,y:f.y+.05,z:f.z,ry:f.yaw})}
-addBoxInstances(side,.16,.24,.16,shoulderPosts);
+
+// Continuous edge lines follow every bend without separate road-section joins.
+for(const edgeSide of [-1,1]){
+  const vertices=[],indices=[];
+  for(let i=0;i<=samples;i++){
+    const f=frame(LEVEL1_ROUTE_LENGTH*i/samples);
+    vertices.push(f.x+f.nx*edgeSide*4.85,f.y+.035,f.z+f.nz*edgeSide*4.85);
+    vertices.push(f.x+f.nx*edgeSide*4.95,f.y+.035,f.z+f.nz*edgeSide*4.95);
+  }
+  for(let i=0;i<samples;i++){
+    const a=i*2;
+    indices.push(a,a+2,a+1,a+1,a+2,a+3);
+  }
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+  geometry.setIndex(indices);geometry.computeVertexNormals();
+  const line=new THREE.Mesh(geometry,white);line.receiveShadow=true;scene.add(line);
+}
+
+// Keep Level 1's original terrain footprint and scenery layout.
+const ground=box(520,.5,520,grass,0,-1.45,-165);ground.receiveShadow=true;
 
 // Checkpoint arches.
 const checkpoints=[-31,-59,-79,-190,-338,-471,-635];const checkpointMeshes=[];
