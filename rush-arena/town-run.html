@@ -208,8 +208,8 @@ const water=mat(0x347f91,.28,.18);const riverFrame=frame(625);const river=box(23
 for(let d=530;d<725;d+=13){const f=frame(d);const support=box(.7,6,.7,concrete,f.x,-3.5,f.z);}
 // Lane-relative world transform and traffic vehicle meshes.
 const lanes=[-3.15,0,3.15];const obstacles=[],traffic=[];
-function plasticBarrier(d,lane=0,angle=0){const g=new THREE.Group();const body=box(2.35,.92,.8,orange,0,.58,0,g);body.rotation.y=angle;box(2.5,.18,.9,white,0,1.08,0,g).rotation.y=angle;for(let x=-.8;x<=.81;x+=.8){const stripe=box(.22,.68,.83,white,x,.59,.01,g);stripe.rotation.z=-.35;}const feet=box(2.7,.18,1.1,dark,0,.08,0,g);const f=frame(d,lane);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);obstacles.push({kind:'barrier',d,lane,width:2.3,top:1.2,mesh:g});}
-function cone(d,lane){const g=new THREE.Group();cylinder(.38,.42,.16,white,0,.08,0,g);const c=new THREE.Mesh(new THREE.ConeGeometry(.27,.82,12),orange);c.position.y=.55;c.castShadow=true;g.add(c);cylinder(.15,.18,.13,white,0,.56,0,g);const f=frame(d,lane);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);obstacles.push({kind:'cone',d,lane,width:.65,top:1,mesh:g});}
+function plasticBarrier(d,lane=0,angle=0){const g=new THREE.Group();const body=box(2.35,.92,.8,orange,0,.58,0,g);body.rotation.y=angle;box(2.5,.18,.9,white,0,1.08,0,g).rotation.y=angle;for(let x=-.8;x<=.81;x+=.8){const stripe=box(.22,.68,.83,white,x,.59,.01,g);stripe.rotation.z=-.35;}const feet=box(2.7,.18,1.1,dark,0,.08,0,g);const f=frame(d,lane);g.position.set(f.x,f.y,f.z);g.rotation.y=f.yaw;scene.add(g);obstacles.push({kind:'barrier',d,lane,width:2.5,depth:1.1,top:1.2,mesh:g});}
+function cone(d,lane){const g=new THREE.Group();cylinder(.38,.42,.16,white,0,.08,0,g);const c=new THREE.Mesh(new THREE.ConeGeometry(.27,.82,12),orange);c.position.y=.55;c.castShadow=true;g.add(c);cylinder(.15,.18,.13,white,0,.56,0,g);const f=frame(d,lane);g.position.set(f.x,f.y,f.z);g.rotation.y=f.yaw;scene.add(g);obstacles.push({kind:'cone',d,lane,width:.65,depth:.65,top:1,mesh:g});}
 function trafficCar(d,lane,color,speed){
  const g=new THREE.Group();
  const f=frame(d,lane);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);
@@ -285,7 +285,17 @@ brakeButton.addEventListener('pointerdown',e=>{e.preventDefault();if(running&&!p
 function setLane(delta){laneTarget=THREE.MathUtils.clamp(laneTarget+delta,-3.15,3.15);laneTarget=Math.round(laneTarget/3.15)*3.15;}
 function jump(){if(running&&!paused&&grounded){soundEvent('jump');vertical=9.3;grounded=false;jumpTimer=.72;diveTimer=0;}}
 function dive(){if(!running||paused)return;soundEvent('dive');if(grounded)diveTimer=.78;else vertical=Math.min(vertical,-8);}
-function collide(){const px=player.position.x,pz=player.position.z;for(const o of obstacles){if(Math.abs(o.d-distance)<2.1&&Math.abs(lane-o.lane)<(o.width/2+.55)){if(o.kind==='barrier'&&jumpTimer>.18)continue;if(o.kind==='cone'&&jumpTimer>.12)continue;return 'You hit a roadworks barrier or cone.';}}
+function collide(){
+ const playerFoot=player.position.y-.04;
+ for(const o of obstacles){
+  const dx=player.position.x-o.mesh.position.x,dz=player.position.z-o.mesh.position.z;
+  const c=Math.cos(o.mesh.rotation.y),sn=Math.sin(o.mesh.rotation.y);
+  const localX=dx*c-dz*sn,localZ=dx*sn+dz*c;
+  const halfWidth=o.kind==='barrier'?1.35:.48,halfDepth=o.kind==='barrier'?.62:.48;
+  const touches=Math.abs(localX)<halfWidth+.48&&Math.abs(localZ)<halfDepth+.48;
+  const isAbove=playerFoot>o.mesh.position.y+o.top+.08;
+  if(touches&&!isAbove)return 'You hit a roadworks barrier or cone.';
+ }
  for(const car of traffic){const gap=car.d-distance;if(Math.abs(gap)<3.05&&Math.abs(lane-car.lane)<1.55){if(gap<0){car.passed=true;continue;}return 'A moving vehicle entered your running lane. Change lanes and overtake safely.';}}
  return '';}
 function updateTraffic(dt){for(const car of traffic){const previousGap=car.lastGap;car.d+=car.speed*dt;if(car.d<distance-14){car.d=distance+150+Math.random()*90;car.lane=lanes[Math.floor(Math.random()*lanes.length)];car.speed=7.5+Math.random()*11.5;car.passed=false;car.lastGap=car.d-distance;}else{const gap=car.d-distance;if(!car.passed&&((previousGap>=0&&gap<0)||(previousGap<=0&&gap>0))){if(Math.abs(lane-car.lane)<=4.8)soundEvent('overtake');car.passed=true;}car.lastGap=gap;}car.mesh.visible=car.d<TOTAL&&!finished;const f=frame(Math.min(car.d,TOTAL),car.lane);car.mesh.position.set(f.x,f.y,f.z);car.mesh.rotation.y=f.yaw;}}
