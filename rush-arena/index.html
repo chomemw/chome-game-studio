@@ -317,7 +317,6 @@ function makeRoadRibbon(width,yOffset,material,segments=roadSamples){
   const mesh=new THREE.Mesh(geometry,material);mesh.receiveShadow=true;mesh.castShadow=false;scene.add(mesh);return mesh;
 }
 makeRoadRibbon(10.6,.02,path);
-makeRoadRibbon(1.5,.0,side); // centered shoulder strip; mirrored below
 function makeRoadRibbonAt(offset,width,yOffset,material){
   const positions=[],indices=[];
   for(let i=0;i<=roadSamples;i++){
@@ -331,7 +330,7 @@ function makeRoadRibbonAt(offset,width,yOffset,material){
 makeRoadRibbonAt(-6.35,1.5,.0,side);makeRoadRibbonAt(6.35,1.5,.0,side);
 for(const edgeSide of [-1,1]){
   const positions=[],indices=[];
-  for(let i=0;i<=roadSamples;i++){const f=frame(LEVEL1_ROUTE_LENGTH*i/roadSamples);positions.push(f.x+f.nx*edgeSide*4.85,f.y+.035,f.z+f.nz*edgeSide*4.85);positions.push(f.x+f.nx*edgeSide*4.95,f.y+.035,f.z+f.nz*4.95);}
+  for(let i=0;i<=roadSamples;i++){const f=frame(LEVEL1_ROUTE_LENGTH*i/roadSamples);positions.push(f.x+f.nx*edgeSide*4.85,f.y+.035,f.z+f.nz*edgeSide*4.85);positions.push(f.x+f.nx*edgeSide*4.95,f.y+.035,f.z+f.nz*edgeSide*4.95);}
   for(let i=0;i<roadSamples;i++){const a=i*2;indices.push(a,a+2,a+1,a+1,a+2,a+3);}
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();scene.add(new THREE.Mesh(geometry,white));
 }
@@ -744,13 +743,16 @@ function moveRunner(dx,dz){
     const verticalBlocked=(o.type==='block'||o.type==='movingBlock')?player.position.y<o.h-.02:(o.type==='overhead'&&runnerHeight>o.clearance);
     if(!verticalBlocked)continue;
     const halfX=o.w/2+radius,halfZ=o.d/2+radius;
-    if(Math.abs(nextX-o.x)<halfX&&Math.abs(nextZ-o.z)<halfZ){
+    const worldDX=nextX-o.x,worldDZ=nextZ-o.z,cos=Math.cos(o.mesh.rotation.y||0),sin=Math.sin(o.mesh.rotation.y||0);
+    const localX=worldDX*cos-worldDZ*sin,localZ=worldDX*sin+worldDZ*cos;
+    if(Math.abs(localX)<halfX&&Math.abs(localZ)<halfZ){
       failRun('You collided with an obstacle. Your run has ended.');
       return false;
     }
   }
   }
   player.position.set(nextX,player.position.y,nextZ);
+  player.rotation.y=nextFrame.yaw;
   return true;
 }
 function update(dt){
