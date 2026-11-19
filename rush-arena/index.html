@@ -99,7 +99,22 @@
 <script type="module">
 // Load the 3D engine with a second CDN fallback. A failed first CDN must not
 // silently prevent the entire game module from starting.
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+// Load Supabase independently from the 3D engine. A temporary CDN failure
+// must not abort the entire page before the game can show its startup screen.
+let supabase = null;
+let supabaseLoadError = null;
+try {
+  let supabaseSdk;
+  try {
+    supabaseSdk = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+  } catch (primarySupabaseError) {
+    supabaseSdk = await import('https://esm.sh/@supabase/supabase-js@2');
+  }
+  supabase = supabaseSdk.createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
+} catch (supabaseError) {
+  supabaseLoadError = supabaseError;
+  console.error('CHOME account services could not load:', supabaseError);
+}
 let THREE;
 try {
   THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
@@ -117,7 +132,6 @@ try {
 }
 
 const root=document.getElementById('game');
-const supabase=createClient('https://zbumbbzvrjqjgroxzixg.supabase.co','sb_publishable_dCXdE2oXUIl_UCbvhJcJ4Q_vDIY5eCK');
 const level=Math.max(1,Math.min(250,Number(new URLSearchParams(location.search).get('level'))||1));
 // Temporary admin inspection mode: keep every obstacle visible but disable obstacle collisions so the full course can be viewed.
 const obstacleInspectionMode=true;
@@ -604,6 +618,7 @@ async function settleRushRun(){
 }
 async function reset(){
   audioReady();running=false;
+  if(!supabase){document.getElementById('bootStatus').textContent='CHOME account services could not connect. Check your internet connection, reload the page, and try again.';console.error('Supabase SDK unavailable:',supabaseLoadError);return;}
   document.getElementById('bootStatus').textContent='Checking your CHOME account…';
   const {data:authData,error:authError}=await supabase.auth.getSession();
   if(authError||!authData?.session){document.getElementById('bootStatus').textContent='Please sign in to your CHOME player account before starting Rush Arena.';return;}
