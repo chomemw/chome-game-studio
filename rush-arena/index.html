@@ -61,9 +61,7 @@ const asphalt=mat(0x30363b,.92),concrete=mat(0xaaa99e,.95),white=mat(0xf3eee0,.6
 const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);parent.add(o);return o;};
 // Exact Level 6 route points and road-height profile.
 const routePoints=[
- {d:0,x:0,z:0},{d:500,x:0,z:-500},{d:900,x:400,z:-500},
- {d:1400,x:400,z:-1000},{d:1900,x:-100,z:-1000},
- {d:2400,x:-100,z:-1500},{d:3000,x:500,z:-1500}
+ {d:0,x:0,z:0},{d:3000,x:0,z:-3000}
 ];
 function smooth(a,b,t){const q=THREE.MathUtils.clamp((t-a)/(b-a),0,1);return q*q*(3-2*q);}
 function routePoint(d){
@@ -72,8 +70,7 @@ function routePoint(d){
  return{x:THREE.MathUtils.lerp(a.x,b.x,t),z:THREE.MathUtils.lerp(a.z,b.z,t)};
 }
 function roadHeight(d){
- const hill=(a,b,h)=>h*smooth(a,a+45,d)*(1-smooth(b-45,b,d));
- return hill(250,470,7)+hill(1080,1320,10)+hill(1660,1880,6)+hill(2180,2380,8);
+ return 0;
 }
 function frame(d,lateral=0){
  d=THREE.MathUtils.clamp(d,0,TOTAL);
