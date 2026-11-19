@@ -110,76 +110,45 @@ const lanes=[-3.15,0,3.15];const obstacles=[],traffic=[];
 function plasticBarrier(d,lane=0,angle=0){const g=new THREE.Group();const body=box(2.35,.92,.8,orange,0,.58,0,g);body.rotation.y=angle;box(2.5,.18,.9,white,0,1.08,0,g).rotation.y=angle;for(let x=-.8;x<=.81;x+=.8){const stripe=box(.22,.68,.83,white,x,.59,.01,g);stripe.rotation.z=-.35;}const feet=box(2.7,.18,1.1,dark,0,.08,0,g);const f=frame(d,lane);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);obstacles.push({kind:'barrier',d,lane,width:2.3,top:1.2,mesh:g});}
 function cone(d,lane){const g=new THREE.Group();cylinder(.38,.42,.16,white,0,.08,0,g);const c=new THREE.Mesh(new THREE.ConeGeometry(.27,.82,12),orange);c.position.y=.55;c.castShadow=true;g.add(c);cylinder(.15,.18,.13,white,0,.56,0,g);const f=frame(d,lane);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);obstacles.push({kind:'cone',d,lane,width:.65,top:1,mesh:g});}
 function trafficCar(d,lane,color,speed){
- const g=new THREE.Group(),paint=new THREE.MeshStandardMaterial({color,roughness:.3,metalness:.42}),trim=mat(0x171d22,.48,.25),chrome=mat(0xb9c2c6,.24,.82),rubber=mat(0x111416,.9),rim=mat(0x89949a,.28,.78);
- const lamp=new THREE.MeshStandardMaterial({color:0xfff1c5,emissive:0xffd88a,emissiveIntensity:1.15,roughness:.22});
- const tail=new THREE.MeshStandardMaterial({color:0xc81720,emissive:0x9e0710,emissiveIntensity:.65,roughness:.3});
- const glassMat=new THREE.MeshStandardMaterial({color:0x263e4c,roughness:.16,metalness:.3});
- const windowMat=new THREE.MeshStandardMaterial({color:0x8db4c2,roughness:.16,metalness:.22,transparent:true,opacity:.88});
- const detail=(w,h,dep,m,x,y,z,rx=0,ry=0,rz=0)=>{const o=box(w,h,dep,m,x,y,z,g);o.rotation.set(rx,ry,rz);return o;};
- // Low chassis and sculpted-looking body made from separate bonnet, cabin and rear deck volumes.
- detail(1.92,.34,3.9,trim,0,.53,0);
- detail(1.96,.58,2.48,paint,0,.83,.68);
- detail(1.92,.52,1.05,paint,0,.81,-1.48);
- detail(1.98,.56,1.18,paint,0,.82,-.02);
- // Rounded roofline impression: narrow roof, raised cabin and dark panoramic glass band.
- detail(1.58,.12,1.9,paint,0,1.78,-.12);
- detail(1.62,.12,1.72,trim,0,1.65,-.12);
- // Front and rear windshields are sloped, rather than upright flat blocks.
- detail(1.48,.66,.075,windowMat,0,1.36,.78,-.28);
- detail(1.45,.61,.075,glassMat,0,1.35,-1.02,.28);
- // Side glass panels, pillars and beltline trim.
- for(const side of [-1,1]){
-  detail(.065,.78,1.62,trim,side*.79,1.32,-.1);
-  detail(.055,.48,.69,windowMat,side*.824,1.39,.38,0,side*.06,0);
-  detail(.055,.48,.68,windowMat,side*.824,1.39,-.47,0,side*.06,0);
-  detail(.045,.09,1.62,trim,side*.84,1.02,-.1);
-  // Wing mirrors and door handles.
-  const mirror=box(.22,.15,.27,paint,side*1.02,1.38,.72,g);mirror.rotation.y=side*.16;
-  detail(.08,.07,.18,chrome,side*.99,1.08,-.25);
-  // Four realistic rubber tyres with metallic alloy-style hubs.
-  for(const z of [-1.27,1.27]){
-   const tire=cylinder(.37,.37,.24,rubber,side*.99,.42,z,g);tire.rotation.z=Math.PI/2;
-   const hub=cylinder(.225,.225,.255,rim,side*1.0,.42,z,g);hub.rotation.z=Math.PI/2;
-   const center=cylinder(.075,.075,.27,chrome,side*1.005,.42,z,g);center.rotation.z=Math.PI/2;
-   for(let k=0;k<5;k++){const ang=k*Math.PI*2/5;const spoke=box(.045,.27,.035,chrome,side*1.01,.42+Math.sin(ang)*.115,z+Math.cos(ang)*.115,g);spoke.rotation.x=ang;}
-  }
-  // Subtle wheel arch lips sit above the tyres.
-  const arch=new THREE.Mesh(new THREE.TorusGeometry(.405,.045,7,20,Math.PI),paint);arch.position.set(side*.985,.43,1.27);arch.rotation.set(Math.PI/2,0,side===1?Math.PI:0);g.add(arch);
-  const rearArch=new THREE.Mesh(new THREE.TorusGeometry(.405,.045,7,20,Math.PI),paint);rearArch.position.set(side*.985,.43,-1.27);rearArch.rotation.set(Math.PI/2,0,side===1?Math.PI:0);g.add(rearArch);
- }
- // Front grille, chrome surround and lower air intake.
- detail(1.12,.24,.075,trim,0,.72,1.94);
- detail(.72,.07,.035,chrome,0,.73,1.985);
- for(let i=-3;i<=3;i++)detail(.025,.13,.025,chrome,i*.105,.73,2.01);
- detail(1.82,.16,.16,chrome,0,.48,1.99);
- detail(1.82,.15,.16,trim,0,.46,-1.99);
- // Clear headlamps and red rear lamps, with small amber indicators.
- for(const x of [-.69,.69]){
-  detail(.42,.19,.08,lamp,x,1.02,1.91,-.08);
-  detail(.39,.2,.08,tail,x,1.01,-1.96);
-  detail(.12,.13,.07,orange,x*1.25,.99,1.91);
-  detail(.12,.13,.07,orange,x*1.25,.99,-1.96);
- }
- // Door shut lines, handles, mirrors and registration plates.
- for(const side of [-1,1]){
-  detail(.025,.48,.025,trim,side*.966,.83,.35);
-  detail(.025,.48,.025,trim,side*.966,.83,-.72);
- }
- detail(.72,.12,.035,white,0,.72,2.045);
- detail(.72,.12,.035,white,0,.72,-2.045);
- // A few body style variations: occasional taller family car/van silhouette.
- if(Math.random()<.22){
-  const roof=box(1.62,.12,1.95,paint,0,2.03,-.1,g);
-  detail(1.55,.35,.06,windowMat,0,1.91,.78,-.12);
-  detail(1.55,.35,.06,glassMat,0,1.91,-1.02,.12);
- }
+ const g=new THREE.Group();
  const f=frame(d,lane);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);
- traffic.push({mesh:g,d,lane,speed,baseLane:lane,phase:Math.random()*6.28,passed:false});
+ const item={mesh:g,d,lane,speed,baseLane:lane,phase:Math.random()*6.28,passed:false,paintColor:color};
+ traffic.push(item);
 }
 const barrierRows=[[188,[-3.15,0]],[365,[0,3.15]],[468,[-3.15,3.15]],[758,[-3.15,0]],[902,[0,3.15]],[990,[-3.15,3.15]],[1115,[0,3.15]],[1285,[-3.15,0]],[1435,[-3.15,3.15]]];
 for(const [d,blocked] of barrierRows){blocked.forEach(l=>plasticBarrier(d,l));for(const l of lanes)if(!blocked.includes(l)&&Math.random()>.4)cone(d-9,l);}
 plasticBarrier(805,-3.15);plasticBarrier(805,0); // Keep the right lane open through this work zone so the player has a fair, visible route.
 for(const [d,l,c,s] of [[65,-3.15,0x2676a5,3.5],[135,3.15,0xb94e39,4],[205,0,0x7a8792,3.2],[275,-3.15,0xd4a32f,4.4],[345,3.15,0x287a59,3.6],[415,0,0xb94e39,4.2],[485,-3.15,0x4d6eaa,3.4],[555,3.15,0xb9bfc5,4.5],[625,0,0x2676a5,3.7],[695,-3.15,0xb94e39,4.1],[765,3.15,0x7a8792,3.3],[835,0,0xd4a32f,4.3],[905,-3.15,0x287a59,3.5],[975,3.15,0xb94e39,4],[1060,-3.15,0x2676a5,3.6],[1145,3.15,0xd4a32f,4.1],[1225,0,0xb94e39,3.5],[1305,-3.15,0x287a59,4.2],[1375,3.15,0x7a8792,3.4],[1460,-3.15,0x2676a5,4]])trafficCar(d,l,c,s);
+// Real, licensed CC0 traffic vehicles. Load once, then clone lightweight scene instances.
+const trafficModelLoader=new GLTFLoader();
+const trafficModelUrls=[
+ 'https://cdn.3dassets.dev/assets/32488/v1/model.glb', // grand touring coupe
+ 'https://cdn.3dassets.dev/assets/32490/v1/model.glb', // four-door saloon
+ 'https://cdn.3dassets.dev/assets/32487/v1/model.glb'  // city car
+];
+const trafficModels=[];
+trafficModelUrls.forEach((url,index)=>{
+ trafficModelLoader.load(url,gltf=>{
+  const template=gltf.scene;
+  template.updateMatrixWorld(true);
+  const bounds=new THREE.Box3().setFromObject(template);
+  const size=bounds.getSize(new THREE.Vector3());
+  const scale=Math.min(2.05/Math.max(.01,size.x),4.55/Math.max(.01,size.z));
+  template.scale.setScalar(scale);
+  template.position.y-=bounds.min.y*scale;
+  template.traverse(node=>{
+   if(node.isMesh){node.castShadow=true;node.receiveShadow=true;}
+  });
+  trafficModels[index]=template;
+  traffic.forEach((item,i)=>{
+   if(i%trafficModelUrls.length!==index)return;
+   const model=template.clone(true);
+   item.mesh.clear();
+   item.mesh.add(model);
+   item.modelLoaded=true;
+  });
+ },undefined,error=>console.warn('Town Run traffic model failed to load:',url,error));
+});
 // Town traffic moves in the same direction at a lower speed, so the runner can overtake it.
 const player=new THREE.Group();scene.add(player);const body=new THREE.Group();player.add(body);let mixer=null,runAction=null;
 const runnerLoader=new GLTFLoader();runnerLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',gltf=>{const model=gltf.scene;model.rotation.y=0; // Face forward down the road.
