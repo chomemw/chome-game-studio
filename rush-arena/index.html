@@ -108,7 +108,7 @@ for(const side of [-1,1]){
  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(ix);g.computeVertexNormals();scene.add(new THREE.Mesh(g,white));
 }
 // Level 6 terrain bed only; no buildings, traffic, walkers, barriers or obstacles.
-const ground=box(1600,.5,2300,grass,200,-1.1,-750);ground.receiveShadow=true;
+const ground=box(1600,.5,3600,grass,200,-1.1,-1500);ground.receiveShadow=true;
 // Original Level 1 obstacle set, positioned on the unchanged Level 6 route.
 // Distances retain the old Level 1 obstacle sequence, proportionally spread over 3,000m.
 const obstacleScale=TOTAL/665;
