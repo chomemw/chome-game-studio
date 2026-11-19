@@ -204,7 +204,7 @@ finishStructure.rotation.y=finishFrame.yaw;scene.add(finishStructure);
 // Bridge deck is a continuous section of the same road ribbon; side rails follow its exact frame.
 const bridgeStart=520,bridgeEnd=730;for(let d=bridgeStart;d<=bridgeEnd;d+=4){for(const s of [-1,1]){const f=frame(d,s*5.25);const post=box(.22,1.35,.22,metal,f.x,.72,f.z);post.rotation.y=f.yaw;}}
 for(const side of [-1,1]){const pts=[];for(let d=bridgeStart;d<=bridgeEnd;d+=4){const f=frame(d,side*5.25);pts.push(new THREE.Vector3(f.x,1.35,f.z));}const curve=new THREE.CatmullRomCurve3(pts);const rail=new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(30,pts.length*2),.09,8,false),metal);scene.add(rail);}
-const water=mat(0x347f91,.28,.18);const river=box(100,.18,235,water,0,-.65,-625);river.position.x=centerX(625); // Water beneath the elevated bridge span.
+const water=mat(0x347f91,.28,.18);const riverFrame=frame(625);const river=box(235,.18,100,water,riverFrame.x,riverFrame.y-.65,riverFrame.z);river.rotation.y=riverFrame.yaw; // River crosses beneath the eastbound bridge.
 for(let d=530;d<725;d+=13){const f=frame(d);const support=box(.7,6,.7,concrete,f.x,-3.5,f.z);}
 // Lane-relative world transform and traffic vehicle meshes.
 const lanes=[-3.15,0,3.15];const obstacles=[],traffic=[];
