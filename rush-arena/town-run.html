@@ -82,10 +82,21 @@ const ground=box(900,.5,TOTAL+400,grass,0,-1.1,-TOTAL/2);ground.receiveShadow=tr
 const streetLampMat=new THREE.MeshStandardMaterial({color:0xffdf91,emissive:0xffb84a,emissiveIntensity:0});
 function streetLight(d,side){const f=frame(d,side*7.6),g=new THREE.Group();cylinder(.11,.15,5,metal,0,2.5,0,g);const arm=box(1.25,.1,.12,metal,side===1?-.52:.52,4.85,0,g);const lamp=box(.38,.16,.35,streetLampMat,side===1?-1.05:1.05,4.72,0,g);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);}
 function tree(d,side,scale=1){const f=frame(d,side*10),g=new THREE.Group();cylinder(.22,.38,2.8,mat(0x70533a),0,1.4,0,g);for(let j=0;j<3;j++){const crown=new THREE.Mesh(new THREE.SphereGeometry(1.25-j*.18,10,8),mat(j%2?0x477047:0x5b8550));crown.position.set(0,2.9+j*.52,0);crown.scale.set(1,1.05,1);crown.castShadow=true;g.add(crown);}g.scale.setScalar(scale);g.position.set(f.x,0,f.z);scene.add(g);}
-function building(d,side,variant){const f=frame(d,side*(10+Math.random()*3)),g=new THREE.Group();const w=5+Math.random()*4,h=5+Math.random()*9,depth=6+Math.random()*5;const palette=[0xb8a28b,0xd0c4ad,0x8e9e9c,0xc58c62,0x9babb0,0xe0d6c2];const shell=box(w,h,depth,mat(palette[variant%palette.length]),0,h/2,0,g);const roof=box(w+.25,.35,depth+.25,mat(0x454c50),0,h+.16,0,g);for(let yy=1.6;yy<h-1;yy+=1.9)for(let xx=-w/2+1;xx<w/2-.4;xx+=1.55){const win=box(.8,.95,.07,glass,xx,yy,depth/2+.04,g);if(variant%3===0)box(.95,.12,.18,white,xx,yy-.58,depth/2+.09,g);}const door=box(1.05,2.1,.09,mat(0x493a2d),w*.23,1.05,depth/2+.06,g);const awning=box(w*.82,.22,.7,variant%2?red:blue,0,2.65,depth/2+.35,g);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);}
+function building(d,side,variant,offset=12){const f=frame(d,side*(offset+Math.random()*2)),g=new THREE.Group();const w=5+Math.random()*4,h=5+Math.random()*9,depth=6+Math.random()*5;const palette=[0xb8a28b,0xd0c4ad,0x8e9e9c,0xc58c62,0x9babb0,0xe0d6c2];const shell=box(w,h,depth,mat(palette[variant%palette.length]),0,h/2,0,g);const roof=box(w+.25,.35,depth+.25,mat(0x454c50),0,h+.16,0,g);for(let yy=1.6;yy<h-1;yy+=1.9)for(let xx=-w/2+1;xx<w/2-.4;xx+=1.55){const win=box(.8,.95,.07,glass,xx,yy,depth/2+.04,g);if(variant%3===0)box(.95,.12,.18,white,xx,yy-.58,depth/2+.09,g);}const door=box(1.05,2.1,.09,mat(0x493a2d),w*.23,1.05,depth/2+.06,g);const awning=box(w*.82,.22,.7,variant%2?red:blue,0,2.65,depth/2+.35,g);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);}
 function sign(d,side,label,color=blue){const f=frame(d,side*7.5),g=new THREE.Group();cylinder(.07,.09,2.5,metal,0,1.25,0,g);box(2.5,.85,.12,color,0,2.1,0,g);const canvas=document.createElement('canvas');canvas.width=512;canvas.height=160;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.font='bold 62px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,256,82);const tex=new THREE.CanvasTexture(canvas);const board=new THREE.Mesh(new THREE.PlaneGeometry(2.3,.72),new THREE.MeshBasicMaterial({map:tex,transparent:true}));board.position.set(0,2.1,.08);g.add(board);g.position.set(f.x,0,f.z);g.rotation.y=f.yaw;scene.add(g);}
 for(let d=24;d<TOTAL-15;d+=24){streetLight(d,-1);streetLight(d,1);}
-for(let d=15;d<TOTAL;d+=43){if(d<150||d>940){tree(d,d%2?1:-1,.8+Math.random()*.3);}else{building(d,d%2?1:-1,Math.floor(d/43));if(d%86<44)building(d+12,d%2?-1:1,Math.floor(d/43)+2);}}
+// Build a broad town fabric on both sides of the road, not a thin roadside strip.
+// Staggered building rows create depth; green pockets and trees break up the blocks.
+for(let d=105;d<TOTAL-45;d+=58){
+ for(const side of [-1,1]){
+  building(d+(side===1?0:12),side,Math.floor(d/58),12);
+  building(d+23+(side===1?10:0),side,Math.floor(d/58)+2,27);
+  building(d+42+(side===1?0:9),side,Math.floor(d/58)+4,43);
+  if(d%116===0){tree(d+30,side*1,1.05);tree(d+48,side*1,.9);}
+ }
+}
+// Outer green verges and occasional homes keep the outskirts from ending abruptly.
+for(let d=20;d<TOTAL-20;d+=72){for(const side of [-1,1]){tree(d,side,.9);if(d<120||d>TOTAL-140)building(d+18,side,Math.floor(d/72),15);}}
 sign(42,-1,'TOWN CENTRE');sign(300,1,'SLOW · TRAFFIC');sign(510,-1,'BRIDGE AHEAD',red);sign(780,1,'ROAD WORKS',orange);sign(1015,-1,'NIGHT DISTRICT',blue);sign(1190,1,'MARKET STREET',orange);sign(1390,-1,'TOWN OUTSKIRTS',blue);
 // Warm street lighting marks the night district; lights fade in as daylight disappears.
 const nightLights=[];for(const d of [1040,1130,1220,1310,1400,1480]){const f=frame(d);const glow=new THREE.PointLight(0xffc879,0,38,2);glow.position.set(f.x,6.5,f.z);scene.add(glow);nightLights.push(glow);}
