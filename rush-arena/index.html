@@ -444,9 +444,9 @@ async function loadRunnerCharacter(choice){
       const loader=new GLTFLoader();
       loader.load(runnerUrl,async gltf=>{
         if(token!==runnerLoadToken){resolve(false);return;}
-        const model=gltf.scene;model.rotation.y=Math.PI;model.updateMatrixWorld(true);
+        const model=gltf.scene;model.updateMatrixWorld(true);
         const bounds=new THREE.Box3().setFromObject(model),height=Math.max(.01,bounds.max.y-bounds.min.y);
-        model.scale.setScalar(3.2/height); // Clearly larger full-body gameplay runner.
+        model.scale.setScalar(1.85/height); // Human-scale Soldier, proportionate to the road and obstacles.
          model.position.y=-bounds.min.y*model.scale.y;
         model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;node.frustumCulled=true;}});
         body.clear();body.add(model);runnerMixer=new THREE.AnimationMixer(model);runnerActions={};
@@ -726,9 +726,9 @@ function update(dt){
   if(slideTimer>0){slideTimer=Math.max(0,slideTimer-dt);if(slideTimer===0){body.scale.set(1,1,1);body.position.y=0;body.rotation.x=0}}
   if(swipeSteerTimer>0){swipeSteerTimer=Math.max(0,swipeSteerTimer-dt);if(swipeSteerTimer===0)swipeSteer=0;}
   const ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+swipeSteer;
-  const iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0);
-  const len=Math.hypot(ix,iz);const nx=len>1?ix/len:ix,nz=len>1?iz/len:iz;
-  const speed=7.0,dx=nx*speed*dt,dz=(-Math.max(0,-nz)+Math.max(0,nz)*.52)*speed*dt;
+  const nx=THREE.MathUtils.clamp(ix,-1,1);
+  const AUTO_RUN_SPEED=7.0,STEER_SPEED=7.0;
+  const dx=nx*STEER_SPEED*dt,dz=-AUTO_RUN_SPEED*dt;
   if(!moveRunner(dx,dz))return;
   if(routeCoordinates(player.position.x,player.position.z).distance>=665)player.position.copy(routePosition(665,routeCoordinates(player.position.x,player.position.z).lateral,player.position.y));
   // Reward each obstacle once, only after the runner has safely passed it.
@@ -764,7 +764,7 @@ function update(dt){
   if(routeCoordinates(player.position.x,player.position.z).distance>=661.5){sfxFinish();finished=true;running=false;ui.resultText.textContent='Finish time: '+fmt(elapsed)+'. Verifying your course and rewards…';ui.result.classList.remove('hidden');void settleRushRun();}
   const pct=THREE.MathUtils.clamp(routeCoordinates(player.position.x,player.position.z).distance/665*100,0,100);ui.progress.style.width=pct+'%';ui.percent.textContent=Math.round(pct)+'%';
   const runnerFrame=frame(routeCoordinates(player.position.x,player.position.z).distance,routeCoordinates(player.position.x,player.position.z).lateral);const target=new THREE.Vector3(player.position.x-runnerFrame.tx*14.2,player.position.y+6.1,player.position.z-runnerFrame.tz*14.2);camera.position.lerp(target,1-Math.pow(.001,dt));if(cameraShake>0){camera.position.x+=(Math.random()-.5)*cameraShake;camera.position.y+=(Math.random()-.5)*cameraShake*.55}camera.lookAt(player.position.x+runnerFrame.tx*4.2,player.position.y+1.25,player.position.z+runnerFrame.tz*4.2);
-  const moving=Math.abs(nx)+Math.abs(nz)>.08;if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run?'run':(runnerActions.walk?'walk':'idle'));playRunnerAction(action);runnerMixer.update(dt);}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
+  const moving=true; // Forward motion is automatic; the player controls steering, jump and dive.if(moving&&grounded&&slideTimer<=0&&elapsed-lastFootstep>.38){soundTone(74,42,.075,.045,'triangle');spawnWaterSplash(player.position.x,player.position.z,8);lastFootstep=elapsed}const desired=slideTimer>0?(runnerActions.slide?'slide':'walk'):(!grounded?(runnerActions.jump?'jump':'run'):(moving?'run':'idle'));if(runnerModelLoaded){const action=runnerActions[desired]?(desired==='jump'||desired==='slide'?(runnerActions.run?'run':desired):desired):(runnerActions.run?'run':(runnerActions.walk?'walk':'idle'));playRunnerAction(action);runnerMixer.update(dt);}body.position.y=slideTimer>0?-.34:(moving&&grounded?Math.abs(Math.sin(elapsed*13))*.035:0);body.rotation.y=THREE.MathUtils.lerp(body.rotation.y,nx*.22,.12);if(grounded&&body.rotation.x<0)body.rotation.x*=.9;
 }
 let lastRenderAt=0,frameAccumulator=0;
 function animate(now=0){
