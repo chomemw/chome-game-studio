@@ -231,13 +231,46 @@ for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new 
 // Floating course with three safe gaps that require a jump.
 const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,5);extensionRoadTexture.needsUpdate=true;
 const extensionPath=new THREE.MeshStandardMaterial({map:extensionRoadTexture,color:0xb4c0c9,roughness:.58,metalness:.12});
-const floorSegments=[[0,0,10],[0,-15,20],[0,-38,22],[0,-62,22],[0,-84,20],[0,-113,40],[0,-399,556]];
-for(const [x,z,len] of floorSegments){
-  // Grass is the lower foundation; it must sit beneath the asphalt, not over it.
-  box(28,.22,len+.5,grass,x,-1.12,z);
-  box(9,.8,len,len>200?extensionPath:path,x,-.48,z);
-  box(9.35,.34,len+.25,side,x,-.99,z);
+// Level 1 uses the Level 6 distance/frame road-construction pattern.
+// Its own route remains straight and 665m long, preserving all existing
+// obstacle, checkpoint, prop and player world positions.
+const LEVEL1_ROUTE_LENGTH=668;
+function routePoint(distance){
+  const d=THREE.MathUtils.clamp(distance,0,LEVEL1_ROUTE_LENGTH);
+  return {x:0,z:3.5-d};
 }
+function frame(distance,lateral=0){
+  const p=routePoint(distance),ahead=routePoint(Math.min(LEVEL1_ROUTE_LENGTH,distance+1)),behind=routePoint(Math.max(0,distance-1));
+  const dx=ahead.x-behind.x,dz=ahead.z-behind.z,len=Math.hypot(dx,dz)||1;
+  const tx=dx/len,tz=dz/len,nx=-tz,nz=tx;
+  return {x:p.x+nx*lateral,z:p.z+nz*lateral,y:0,tx,tz,nx,nz,yaw:Math.atan2(tx,-tz)};
+}
+function makeRoadRibbon(width,y,material,segments=LEVEL1_ROUTE_LENGTH*2){
+  const positions=[],uvs=[],indices=[];
+  for(let i=0;i<=segments;i++){
+    const distance=LEVEL1_ROUTE_LENGTH*i/segments,f=frame(distance);
+    for(const sideSign of [-1,1]){
+      positions.push(f.x+f.nx*width*.5*sideSign,y,f.z+f.nz*width*.5*sideSign);
+      uvs.push(sideSign*.5+.5,distance/18);
+    }
+  }
+  for(let i=0;i<segments;i++){
+    const a=i*2,b=a+1,c=a+2,d=a+3;
+    indices.push(a,b,c,b,d,c);
+  }
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+  geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+  geometry.setIndex(indices);geometry.computeVertexNormals();
+  const mesh=new THREE.Mesh(geometry,material);
+  mesh.receiveShadow=true;mesh.castShadow=false;scene.add(mesh);
+  return mesh;
+}
+// Continuous lower foundation, edge bed and asphalt ribbon replace the old
+// seven overlapping box segments, eliminating visible road-connection seams.
+makeRoadRibbon(28,-1.12,grass);
+makeRoadRibbon(9.35,-.99,side);
+makeRoadRibbon(9,-.48,path,LEVEL1_ROUTE_LENGTH*2);
 
 // Worn asphalt shoulders and repeated markings use instancing to reduce draw calls.
 function addBoxInstances(material,w,h,d,placements){
