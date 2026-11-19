@@ -112,6 +112,130 @@ for(const side of [-1,1]){
 }
 // Level 6 terrain bed only; no buildings, traffic, walkers, barriers or obstacles.
 const ground=box(1600,.5,2300,grass,200,-1.1,-750);ground.receiveShadow=true;
+// Original Level 1 obstacle set, positioned on the unchanged Level 6 route.
+// Distances retain the old Level 1 obstacle sequence, proportionally spread over 3,000m.
+const obstacleScale=TOTAL/665;
+const obstacleMats={
+ coral:mat(0xe66b61,.68),purple:mat(0x8b70e8,.62),cyan:mat(0x48c7d0,.58),
+ gold:mat(0xe6b65c,.62),dark:mat(0x303b49,.82),steel:mat(0x738596,.72),
+ white:mat(0xf4eee0,.55)
+};
+function obstacleBox(w,h,d,material,x,y,z,parent){
+ return box(w,h,d,material,x,y,z,parent||scene);
+}
+function obstacleCylinder(radiusTop,radiusBottom,height,material,x,y,z,parent){
+ const mesh=new THREE.Mesh(new THREE.CylinderGeometry(radiusTop,radiusBottom,height,12),material);
+ mesh.position.set(x,y,z);(parent||scene).add(mesh);return mesh;
+}
+function placeObstacle(object,oldDistance,lateral=0,y=0){
+ const f=frame(THREE.MathUtils.clamp(oldDistance*obstacleScale,0,TOTAL),lateral);
+ object.position.set(f.x,f.y+y,f.z);object.rotation.y=f.yaw;scene.add(object);return object;
+}
+const originalObstacles=[];
+function addOriginalBlock(oldDistance,lateral,w=1.55,h=1.4,d=1.15,material=obstacleMats.coral){
+ const f=frame(oldDistance*obstacleScale,lateral);
+ const mesh=obstacleBox(w,h,d,material,f.x,f.y+h/2,f.z);mesh.rotation.y=f.yaw;
+ originalObstacles.push(mesh);return mesh;
+}
+function addOriginalGate(oldDistance,clearance=1.08){
+ const f=frame(oldDistance*obstacleScale,0);
+ const gate=new THREE.Group();
+ obstacleBox(8,.34,.55,obstacleMats.coral,0,1.34,0,gate);
+ obstacleBox(.22,1.5,.65,obstacleMats.steel,-4.05,.75,0,gate);
+ obstacleBox(.22,1.5,.65,obstacleMats.steel,4.05,.75,0,gate);
+ gate.position.set(f.x,f.y,f.z);gate.rotation.y=f.yaw;scene.add(gate);
+ originalObstacles.push(gate);return gate;
+}
+const movingOriginalObstacles=[];
+function addOriginalMoving(oldDistance,lateral,amplitude=2.1,phase=0,style='load'){
+ const mesh=new THREE.Group();let width=1.8,depth=1.25,rotor=null;
+ if(style==='crane'){
+  obstacleCylinder(.045,.045,1.05,obstacleMats.steel,0,2.05,0,mesh);
+  obstacleBox(1.75,1.35,1.45,obstacleMats.gold,0,1,0,mesh);
+  obstacleBox(1.95,.16,1.6,obstacleMats.coral,0,1.78,0,mesh);
+  obstacleBox(.18,.18,.18,obstacleMats.white,-.78,.28,-.75,mesh);
+  obstacleBox(.18,.18,.18,obstacleMats.white,.78,.28,-.75,mesh);
+  width=2.15;depth=1.65;
+ }else if(style==='fan'){
+  obstacleBox(2.55,2.8,.5,obstacleMats.dark,0,1.4,0,mesh);
+  obstacleBox(2.15,2.35,.12,obstacleMats.steel,0,1.4,-.32,mesh);
+  rotor=new THREE.Group();rotor.position.set(0,1.4,-.48);
+  obstacleCylinder(.25,.25,.28,obstacleMats.gold,0,0,0,rotor).rotation.x=Math.PI/2;
+  obstacleBox(1.85,.16,.12,obstacleMats.coral,0,0,0,rotor);
+  obstacleBox(.16,1.85,.12,obstacleMats.coral,0,0,0,rotor);
+  obstacleBox(1.25,.13,.12,obstacleMats.white,0,0,0,rotor).rotation.z=Math.PI/4;
+  mesh.add(rotor);width=2.45;depth=.9;
+ }else if(style==='forklift'){
+  obstacleBox(1.95,.58,1.55,obstacleMats.gold,0,.62,0,mesh);
+  obstacleBox(.9,1.18,1,obstacleMats.steel,-.42,1.45,-.05,mesh);
+  obstacleBox(1.05,.13,1.12,obstacleMats.white,-.42,2.1,-.05,mesh);
+  for(const x of [-.78,.78])for(const z of [-.55,.55]){
+   const wheel=obstacleCylinder(.28,.28,.2,obstacleMats.dark,x,.3,z,mesh);wheel.rotation.z=Math.PI/2;
+  }
+  obstacleBox(.16,.14,1,obstacleMats.coral,-.28,.28,-1.18,mesh);
+  obstacleBox(.16,.14,1,obstacleMats.coral,.28,.28,-1.18,mesh);
+  width=2.35;depth=2.15;
+ }else if(style==='crusher'){
+  obstacleBox(2.35,.32,1.7,obstacleMats.dark,0,.2,0,mesh);
+  obstacleBox(.32,2.25,.38,obstacleMats.steel,-.88,1.3,0,mesh);
+  obstacleBox(.32,2.25,.38,obstacleMats.steel,.88,1.3,0,mesh);
+  obstacleBox(2,.42,1.4,obstacleMats.coral,0,2.25,0,mesh);
+  obstacleBox(1.65,.2,1.15,obstacleMats.gold,0,1.92,-.02,mesh);
+  width=2.2;depth=1.55;
+ }else{
+  obstacleBox(1.8,1.35,1.25,obstacleMats.cyan,0,.8,0,mesh);
+  obstacleBox(1.95,.16,1.4,obstacleMats.gold,0,1.55,0,mesh);
+ }
+ const f=frame(oldDistance*obstacleScale,lateral);
+ mesh.position.set(f.x,f.y,f.z);mesh.rotation.y=f.yaw;scene.add(mesh);
+ movingOriginalObstacles.push({mesh,baseLateral:lateral,amplitude,phase,frequency:1.05,oldDistance,rotor});
+ originalObstacles.push(mesh);
+}
+function addOriginalSweeper(oldDistance){
+ const mesh=new THREE.Group();obstacleCylinder(.45,.45,1.5,obstacleMats.gold,0,0,0,mesh);
+ const beam=obstacleBox(7.4,.34,.48,obstacleMats.coral,0,0,0,mesh);beam.rotation.y=.12;
+ for(const x of [-3.45,3.45]){
+  const end=new THREE.Mesh(new THREE.SphereGeometry(.42,16,12),obstacleMats.gold);
+  end.position.set(x,0,0);mesh.add(end);
+ }
+ const f=frame(oldDistance*obstacleScale,0);mesh.position.set(f.x,f.y+1.45,f.z);mesh.rotation.y=f.yaw;
+ scene.add(mesh);originalObstacles.push(mesh);return mesh;
+}
+// Original opening bumpers and blocks.
+for(const [d,x,w,h,depth,color] of [
+ [14.5,0,2.4,1.25,1.1,obstacleMats.coral],[21.5,-2.3,1.3,1.6,1.1,obstacleMats.purple],
+ [38.5,1.8,1.5,1.3,1.1,obstacleMats.cyan],[46.5,-1.8,1.5,1.5,1.1,obstacleMats.coral],
+ [67.5,0,2.3,1.25,1.1,obstacleMats.purple],[87.5,2.1,1.2,1.5,1.1,obstacleMats.cyan],
+ [106.5,-2.1,1.5,1.4,1.1,obstacleMats.coral],[122.5,2.2,1.4,1.5,1.1,obstacleMats.purple]
+])addOriginalBlock(d,x,w,h,depth,color);
+addOriginalGate(32.5);
+addOriginalSweeper(50.5);
+// Original construction-zone, tunnel, cargo-yard and final-survival obstacle sequence.
+const originalHazardPlan=[
+ ['block',154.5,-2.25],['gate',169.5,0],['crane',184.5,2.15],['block',200.5,2.2,1.5,1.45,1.15,obstacleMats.purple],
+ ['block',216.5,-2.2,1.5,1.35,1.15,obstacleMats.cyan],['gate',232.5,0],['crane',248.5,-2.15],['block',261.5,2.2,1.5,1.4,1.15,obstacleMats.coral],
+ ['gate',283.5,0],['fan',299.5,2.2],['block',315.5,-2.2,1.5,1.45,1.15,obstacleMats.purple],['block',331.5,2.2,1.5,1.35,1.15,obstacleMats.cyan],
+ ['gate',347.5,0],['fan',363.5,-2.2],['block',381.5,-2.2,1.55,1.45,1.15,obstacleMats.coral],['block',395.5,2.2,1.5,1.35,1.15,obstacleMats.purple],
+ ['forklift',417.5,0],['block',433.5,-2.2,1.55,1.4,1.15,obstacleMats.cyan],['gate',449.5,0],['forklift',465.5,2.2],
+ ['block',481.5,2.2,1.5,1.4,1.15,obstacleMats.coral],['block',497.5,-2.2,1.5,1.45,1.15,obstacleMats.purple],['gate',513.5,0],['forklift',529.5,-2.2],
+ ['block',551.5,2.2,1.5,1.4,1.15,obstacleMats.coral],['crusher',565.5,-2.2],['gate',581.5,0],['block',597.5,-2.2,1.55,1.45,1.15,obstacleMats.purple],
+ ['crusher',613.5,2.2],['gate',629.5,0],['crusher',645.5,0],['block',659.5,2.2,1.5,1.4,1.15,obstacleMats.coral]
+];
+for(const item of originalHazardPlan){
+ const [type,d,x,w,h,depth,color]=item;
+ if(type==='gate')addOriginalGate(d,d===629.5?.98:1.08);
+ else if(type==='block')addOriginalBlock(d,x,w||1.55,h||1.4,depth||1.15,color||obstacleMats.coral);
+ else addOriginalMoving(d,x,type==='forklift'?2.75:2,type==='crane'?.4:type==='fan'?2.1:type==='crusher'?1.7:.3,type);
+}
+function updateOriginalObstacles(dt,elapsedSeconds){
+ for(const o of movingOriginalObstacles){
+  const f=frame(o.oldDistance*obstacleScale,o.baseLateral+Math.sin(elapsedSeconds*o.frequency+o.phase)*o.amplitude);
+  o.mesh.position.set(f.x,f.y,f.z);o.mesh.rotation.y=f.yaw;
+  if(o.rotor)o.rotor.rotation.z+=dt*3.4;
+ }
+}
+const originalSweeper=originalObstacles.find(o=>o.type==='Group'&&o.position.y>1);
+
 // Player: same Soldier GLB, scale, native forward direction and run animation as Level 6.
 const player=new THREE.Group();scene.add(player);const body=new THREE.Group();player.add(body);let mixer=null;
 const runnerLoader=new GLTFLoader();
