@@ -245,37 +245,68 @@ for(let i=0;i<12;i++){const x=(Math.random()-.5)*72,z=-i*10-12;const island=new 
 // Floating course with three safe gaps that require a jump.
 const extensionRoadTexture=roadTexture.clone();extensionRoadTexture.repeat.set(1,5);extensionRoadTexture.needsUpdate=true;
 const extensionPath=new THREE.MeshStandardMaterial({map:extensionRoadTexture,color:0xb4c0c9,roughness:.58,metalness:.12});
-// Level 1 uses the Level 6 distance/frame road-construction pattern.
-// Its own route remains straight and 665m long, preserving all existing
-// obstacle, checkpoint, prop and player world positions.
-const LEVEL1_ROUTE_LENGTH=668;
+// Level 1 now uses the same six-section town-road centerline and distance-frame
+// construction as Level 6, fitted to this level's 665m course length.
+const LEVEL1_ROUTE_LENGTH=665;
+const LEVEL6_ROUTE_SCALE=LEVEL1_ROUTE_LENGTH/3000;
+const routePoints=[
+  {d:0,x:0,z:0},
+  {d:500*LEVEL6_ROUTE_SCALE,x:0,z:-500*LEVEL6_ROUTE_SCALE},
+  {d:900*LEVEL6_ROUTE_SCALE,x:400*LEVEL6_ROUTE_SCALE,z:-500*LEVEL6_ROUTE_SCALE},
+  {d:1400*LEVEL6_ROUTE_SCALE,x:400*LEVEL6_ROUTE_SCALE,z:-1000*LEVEL6_ROUTE_SCALE},
+  {d:1900*LEVEL6_ROUTE_SCALE,x:-100*LEVEL6_ROUTE_SCALE,z:-1000*LEVEL6_ROUTE_SCALE},
+  {d:2400*LEVEL6_ROUTE_SCALE,x:-100*LEVEL6_ROUTE_SCALE,z:-1500*LEVEL6_ROUTE_SCALE},
+  {d:3000*LEVEL6_ROUTE_SCALE,x:500*LEVEL6_ROUTE_SCALE,z:-1500*LEVEL6_ROUTE_SCALE}
+];
 function routePoint(distance){
   const d=THREE.MathUtils.clamp(distance,0,LEVEL1_ROUTE_LENGTH);
-  return {x:0,z:3.5-d};
+  let i=0;while(i<routePoints.length-2&&d>routePoints[i+1].d)i++;
+  const a=routePoints[i],b=routePoints[i+1],t=THREE.MathUtils.clamp((d-a.d)/(b.d-a.d),0,1);
+  return {x:THREE.MathUtils.lerp(a.x,b.x,t),z:THREE.MathUtils.lerp(a.z,b.z,t)};
+}
+function roadHeight(distance){
+  const smooth=(a,b,t)=>{const q=THREE.MathUtils.clamp((t-a)/(b-a),0,1);return q*q*(3-2*q);};
+  const d=distance;
+  const hill=(a,b,h)=>h*smooth(a,a+10,d)*(1-smooth(b-10,b,d));
+  return hill(55,104,1.55)+hill(239,292,2.2)+hill(368,417,1.3)+hill(482,528,1.75);
 }
 function frame(distance,lateral=0){
-  const p=routePoint(distance),ahead=routePoint(Math.min(LEVEL1_ROUTE_LENGTH,distance+1)),behind=routePoint(Math.max(0,distance-1));
+  const d=THREE.MathUtils.clamp(distance,0,LEVEL1_ROUTE_LENGTH);
+  const p=routePoint(d),ahead=routePoint(Math.min(LEVEL1_ROUTE_LENGTH,d+1)),behind=routePoint(Math.max(0,d-1));
   const dx=ahead.x-behind.x,dz=ahead.z-behind.z,len=Math.hypot(dx,dz)||1;
-  const tx=dx/len,tz=dz/len,nx=-tz,nz=tx;
-  return {x:p.x+nx*lateral,z:p.z+nz*lateral,y:0,tx,tz,nx,nz,yaw:Math.atan2(tx,-tz)};
+  const tx=dx/len,tz=dz/len,nx=-tz,nz=tx,y=roadHeight(d);
+  return {x:p.x+nx*lateral,z:p.z+nz*lateral,y,tx,tz,nx,nz,yaw:Math.atan2(tx,-tz)};
 }
-function routeCoordinates(x,z){const d=THREE.MathUtils.clamp(3.5-z,0,LEVEL1_ROUTE_LENGTH),f=frame(d);return {distance:d,lateral:(x-f.x)*f.nx+(z-f.z)*f.nz};}
-function isCourseGapDistance(distance){return (distance>28.5&&distance<30.5)||(distance>52.5&&distance<54.5)||(distance>76.5&&distance<77.5);}
+function routeCoordinates(x,z){
+  let best={distance:0,lateral:0,distSq:Infinity};
+  for(let i=0;i<routePoints.length-1;i++){
+    const a=routePoints[i],b=routePoints[i+1],vx=b.x-a.x,vz=b.z-a.z,lenSq=vx*vx+vz*vz;
+    const t=THREE.MathUtils.clamp(((x-a.x)*vx+(z-a.z)*vz)/lenSq,0,1);
+    const px=a.x+vx*t,pz=a.z+vz*t,ex=x-px,ez=z-pz,distSq=ex*ex+ez*ez;
+    if(distSq<best.distSq){
+      const length=Math.sqrt(lenSq),tx=vx/length,tz=vz/length,nx=-tz,nz=tx;
+      best={distance:a.d+(b.d-a.d)*t,lateral:ex*nx+ez*nz,distSq};
+    }
+  }
+  return {distance:best.distance,lateral:best.lateral};
+}
+function isCourseGapDistance(){return false;}
 function routePosition(distance,lateral=0,y=0){const f=frame(distance,lateral);return new THREE.Vector3(f.x,y+f.y,f.z);}
 function placeOnRoute(object,distance,lateral=0,y=0){const f=frame(distance,lateral);object.position.set(f.x,y+f.y,f.z);object.rotation.y=f.yaw;return object;}
 function routeBox(w,h,d,material,distance,lateral=0,y=h/2,parent=scene){const object=box(w,h,d,material,0,0,0,parent);const f=frame(distance,lateral);object.position.set(f.x,y+f.y,f.z);object.rotation.y=f.yaw;return object;}
-function makeRoadRibbon(width,y,material,segments=LEVEL1_ROUTE_LENGTH*2){
+// Level 6 road construction: one continuous 10.6m asphalt ribbon, continuous
+// concrete shoulders, edge lines and a broad terrain bed following the same frame.
+const roadSamples=LEVEL1_ROUTE_LENGTH*2;
+function makeRoadRibbon(width,yOffset,material,segments=roadSamples){
   const positions=[],uvs=[],indices=[];
   for(let i=0;i<=segments;i++){
     const distance=LEVEL1_ROUTE_LENGTH*i/segments,f=frame(distance);
     for(const sideSign of [-1,1]){
-      positions.push(f.x+f.nx*width*.5*sideSign,y,f.z+f.nz*width*.5*sideSign);
+      positions.push(f.x+f.nx*width*.5*sideSign,f.y+yOffset,f.z+f.nz*width*.5*sideSign);
       uvs.push(sideSign*.5+.5,distance/18);
     }
   }
   for(let i=0;i<segments;i++){
-    const distance=LEVEL1_ROUTE_LENGTH*(i+.5)/segments;
-    if(isCourseGapDistance(distance))continue;
     const a=i*2,b=a+1,c=a+2,d=a+3;
     indices.push(a,b,c,b,d,c);
   }
@@ -283,15 +314,28 @@ function makeRoadRibbon(width,y,material,segments=LEVEL1_ROUTE_LENGTH*2){
   geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
   geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
   geometry.setIndex(indices);geometry.computeVertexNormals();
-  const mesh=new THREE.Mesh(geometry,material);
-  mesh.receiveShadow=true;mesh.castShadow=false;scene.add(mesh);
-  return mesh;
+  const mesh=new THREE.Mesh(geometry,material);mesh.receiveShadow=true;mesh.castShadow=false;scene.add(mesh);return mesh;
 }
-// Continuous lower foundation, edge bed and asphalt ribbon replace the old
-// seven overlapping box segments, eliminating visible road-connection seams.
-makeRoadRibbon(28,-1.12,grass);
-makeRoadRibbon(9.35,-.99,side);
-makeRoadRibbon(9,-.48,path,LEVEL1_ROUTE_LENGTH*2);
+makeRoadRibbon(10.6,.02,path);
+makeRoadRibbon(1.5,.0,side); // centered shoulder strip; mirrored below
+function makeRoadRibbonAt(offset,width,yOffset,material){
+  const positions=[],indices=[];
+  for(let i=0;i<=roadSamples;i++){
+    const f=frame(LEVEL1_ROUTE_LENGTH*i/roadSamples);
+    for(const sign of [-1,1])positions.push(f.x+f.nx*(offset+sign*width/2),f.y+yOffset,f.z+f.nz*(offset+sign*width/2));
+  }
+  for(let i=0;i<roadSamples;i++){const a=i*2;indices.push(a,a+1,a+2,a+1,a+3,a+2);}
+  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
+  const mesh=new THREE.Mesh(geometry,material);mesh.receiveShadow=true;scene.add(mesh);
+}
+makeRoadRibbonAt(-6.35,1.5,.0,side);makeRoadRibbonAt(6.35,1.5,.0,side);
+for(const edgeSide of [-1,1]){
+  const positions=[],indices=[];
+  for(let i=0;i<=roadSamples;i++){const f=frame(LEVEL1_ROUTE_LENGTH*i/roadSamples);positions.push(f.x+f.nx*edgeSide*4.85,f.y+.035,f.z+f.nz*edgeSide*4.85);positions.push(f.x+f.nx*edgeSide*4.95,f.y+.035,f.z+f.nz*4.95);}
+  for(let i=0;i<roadSamples;i++){const a=i*2;indices.push(a,a+2,a+1,a+1,a+2,a+3);}
+  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();scene.add(new THREE.Mesh(geometry,white));
+}
+const ground=box(520,.5,520,grass,0,-1.45,-165);ground.receiveShadow=true;
 
 // Worn asphalt shoulders and repeated markings use instancing to reduce draw calls.
 function addBoxInstances(material,w,h,d,placements){
@@ -300,17 +344,12 @@ function addBoxInstances(material,w,h,d,placements){
   placements.forEach((p,i)=>{dummy.position.set(p.x,p.y,p.z);dummy.rotation.y=p.ry||0;dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix)});
   mesh.instanceMatrix.needsUpdate=true;mesh.frustumCulled=true;mesh.castShadow=false;mesh.receiveShadow=true;scene.add(mesh);return mesh;
 }
-const laneMarks=[];for(let distance=5;distance<LEVEL1_ROUTE_LENGTH-2;distance+=4){if(isCourseGapDistance(distance))continue;for(const lateral of [-1.5,1.5]){const f=frame(distance,lateral);laneMarks.push({x:f.x,y:.035,z:f.z,ry:f.yaw})}}
+const laneMarks=[];for(let distance=5;distance<LEVEL1_ROUTE_LENGTH-2;distance+=14){for(const lateral of [-1.575,1.575]){const f=frame(distance,lateral);laneMarks.push({x:f.x,y:f.y+.055,z:f.z,ry:f.yaw})}}
 addBoxInstances(white,.09,.018,.85,laneMarks);
-for(const lateral of [-4.52,4.52]){
-  for(const [start,end] of [[0,134],[134,665]]){const mid=(start+end)/2,length=end-start;const rail=routeBox(.12,.12,length,side,mid,lateral,.18);rail.material=side;const trim=routeBox(.12,.12,length,gold,mid,lateral,.34);}
-  const posts=[],caps=[];for(let distance=3;distance<LEVEL1_ROUTE_LENGTH-2;distance+=6){if(isCourseGapDistance(distance))continue;const f=frame(distance,lateral);posts.push({x:f.x,y:.54,z:f.z,ry:f.yaw});caps.push({x:f.x,y:.85,z:f.z,ry:f.yaw})}
-  addBoxInstances(side,.18,.52,.16,posts);addBoxInstances(white,.2,.08,.2,caps);
-}
-const shoulderMarks=[];for(let distance=4;distance<LEVEL1_ROUTE_LENGTH-2;distance+=8){if(isCourseGapDistance(distance))continue;for(const lateral of [-4.1,4.1]){const f=frame(distance,lateral);shoulderMarks.push({x:f.x,y:.035,z:f.z,ry:f.yaw})}}
-addBoxInstances(white,.22,.025,1.5,shoulderMarks);
-// Gaps: remove small sections of path with dark clouds beneath.
-for(const z of [-26,-50,-73.5]){for(let i=0;i<7;i++)sphere(.8,white,(i-3)*1.25,-3.4,z+(Math.random()-.5)*1.8)}
+const laneMarkInstances=[];for(let distance=12;distance<LEVEL1_ROUTE_LENGTH-8;distance+=14){for(const lateral of [-1.575,1.575]){const f=frame(distance,lateral);laneMarkInstances.push({x:f.x,y:f.y+.055,z:f.z,ry:f.yaw})}}
+addBoxInstances(white,.13,.035,2.6,laneMarkInstances);
+const shoulderPosts=[];for(const lateral of [-7.25,7.25])for(let distance=8;distance<LEVEL1_ROUTE_LENGTH-8;distance+=24){const f=frame(distance,lateral);shoulderPosts.push({x:f.x,y:f.y+.05,z:f.z,ry:f.yaw})}
+addBoxInstances(side,.16,.24,.16,shoulderPosts);
 
 // Checkpoint arches.
 const checkpoints=[-31,-59,-79,-190,-338,-471,-635];const checkpointMeshes=[];
@@ -404,7 +443,7 @@ addExtendedBlock(-478,2.2,1.5,1.4,1.15,coral);addExtendedBlock(-494,-2.2,1.5,1.4
 // Final survival zone (532–665m): paired hazards with short but fair recovery windows.
 addExtendedBlock(-548,2.2,1.5,1.4,1.15,coral);addMovingBlock(-562,-2.2,2,.8,'crusher');addExtendedOverhead(-578);addExtendedBlock(-594,-2.2,1.55,1.45,1.15,purple);
 addMovingBlock(-610,2.2,2,1.7,'crusher');addExtendedOverhead(-626,.98);addMovingBlock(-642,0,2.75,2.5,'crusher');addExtendedBlock(-656,2.2,1.5,1.4,1.15,coral);
-const spinner=new THREE.Group();placeOnRoute(spinner,3.5-(-47),0,1.45);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:0,z:-47,w:7.4,d:.7,h:.8,type:'spinner'});
+const spinner=new THREE.Group();placeOnRoute(spinner,3.5-(-47),0,1.45);cylinder(.45,.45,1.5,gold,0,0,0,spinner);const beam=box(7.4,.34,.48,coral,0,0,0,spinner);beam.rotation.y=.12;for(const x of [-3.45,3.45])sphere(.42,gold,x,0,0,spinner);scene.add(spinner);obstacles.push({mesh:spinner,x:spinner.position.x,z:spinner.position.z,w:7.4,d:.7,h:.8,type:'spinner'});
 // Red hazard beacons: visible from a distance and pulsed while the race is active.
 const hazardBeacons=[];
 obstacles.forEach((o,index)=>{
@@ -639,7 +678,7 @@ async function reset(){
   activeZone=-1;zoneBannerTimer=0;zoneBanner.style.opacity='0';zoneBadge.textContent='OPENING COURSE  •  0m — 133m';scene.background.setHex(courseZones[0].bg);scene.fog.color.setHex(courseZones[0].fog);warnedHazards.clear();rewardedObstacles.clear();points=0;chox=0;ui.points.textContent='0';ui.chox.textContent='0';failed=false;ui.failed.classList.add('hidden');cameraShake=0;dangerBanner.style.opacity='0';player.position.copy(routePosition(0,0,.05));vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);elapsed=0;checkpoint=0;respawnZ=3.5;finished=false;running=true;paused=false;body.rotation.set(0,0,0);swipeSteer=0;swipeSteerTimer=0;ui.checkpoint.textContent='0/7';ui.time.textContent='00:00';ui.progress.style.width='0%';ui.percent.textContent='0%';ui.welcome.classList.add('hidden');document.getElementById('rewardIntro').classList.add('hidden');ui.result.classList.add('hidden');ui.pause.classList.add('hidden');
 }
 function respawn(){player.position.copy(routePosition(THREE.MathUtils.clamp(3.5-respawnZ,0,665),0,.05));vertical=0;grounded=true;slideTimer=0;body.scale.set(1,1,1);body.position.set(0,0,0);body.rotation.set(0,0,0)}
-function onTrack(x,z){const route=routeCoordinates(x,z),d=route.distance;const insideRoad=Math.abs(route.lateral)<=4.05;const safeSurface=d<=28.5||(d>=30.5&&d<=52.5)||(d>=54.5&&d<=76.5)||(d>=77.5&&d<=665);return insideRoad&&safeSurface}
+function onTrack(x,z){const route=routeCoordinates(x,z);return Math.abs(route.lateral)<=4.85&&route.distance>=0&&route.distance<=LEVEL1_ROUTE_LENGTH}
 function jump(){if(running&&!paused&&grounded){sfxJump();slideTimer=0;body.scale.y=1;vertical=9.2;grounded=false}}
 function dive(){if(!running||paused)return;if(grounded){sfxSlide();slideTimer=.78;body.scale.y=.48;body.position.y=-.48;return}vertical=Math.min(vertical,-9);body.rotation.x=-.55}
 window.__rushStart=reset;
